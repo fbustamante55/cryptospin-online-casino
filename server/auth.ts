@@ -101,13 +101,17 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
+      console.log("Registration request received:", req.body);
+      
       // Validate request body using Zod schema
       const validatedData = registrationSchema.parse(req.body);
+      console.log("Validation passed:", validatedData);
       
       // Validate reCAPTCHA if token is provided
       if (validatedData.recaptchaToken) {
         const isValidRecaptcha = await validateRecaptcha(validatedData.recaptchaToken);
         if (!isValidRecaptcha) {
+          console.log("reCAPTCHA validation failed");
           return res.status(400).json({ message: "Invalid reCAPTCHA. Please try again." });
         }
       }
@@ -115,16 +119,19 @@ export function setupAuth(app: Express) {
       // Check if username already exists
       const existingUsername = await storage.getUserByUsername(validatedData.username);
       if (existingUsername) {
+        console.log("Username already exists:", validatedData.username);
         return res.status(400).json({ message: "Username already exists" });
       }
       
       // Check if email already exists
       const existingEmail = await storage.getUserByEmail(validatedData.email);
       if (existingEmail) {
+        console.log("Email already exists:", validatedData.email);
         return res.status(400).json({ message: "Email already exists" });
       }
 
       // Create user with hashed password
+      console.log("Creating new user...");
       const user = await storage.createUser({
         username: validatedData.username,
         email: validatedData.email,
@@ -132,17 +139,24 @@ export function setupAuth(app: Express) {
         phoneNumber: validatedData.phoneNumber,
         country: validatedData.country,
       });
+      console.log("User created successfully:", user.id);
 
       // Log user in after registration
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          console.error("Error logging in after registration:", err);
+          return next(err);
+        }
         
         // Return user without sensitive info
         const { password, ...safeUser } = user;
+        console.log("Registration complete, returning user");
         return res.status(201).json(safeUser);
       });
     } catch (error) {
+      console.error("Registration error:", error);
       if (error instanceof ZodError) {
+        console.log("Zod validation error:", error.errors);
         return res.status(400).json({ 
           message: "Validation error", 
           errors: error.errors 
