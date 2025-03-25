@@ -208,6 +208,46 @@ export class MemStorage implements IStorage {
       .filter((history) => history.userId === userId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
+  
+  // KYC document methods
+  async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
+    const id = this.currentKycDocumentId++;
+    const now = new Date();
+    
+    const kycDocument: KycDocument = {
+      ...document,
+      id,
+      verificationStatus: 'pending',
+      rejectionReason: null,
+      createdAt: now,
+      updatedAt: null
+    };
+    
+    this.kycDocuments.set(id, kycDocument);
+    return kycDocument;
+  }
+  
+  async getKycDocuments(userId: number): Promise<KycDocument[]> {
+    return Array.from(this.kycDocuments.values())
+      .filter((doc) => doc.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+  
+  async updateKycDocumentStatus(id: number, status: string, rejectionReason?: string): Promise<KycDocument | undefined> {
+    const document = this.kycDocuments.get(id);
+    if (!document) return undefined;
+    
+    const now = new Date();
+    const updatedDocument = { 
+      ...document, 
+      verificationStatus: status, 
+      rejectionReason: status === 'rejected' ? (rejectionReason || null) : null,
+      updatedAt: now
+    };
+    
+    this.kycDocuments.set(id, updatedDocument);
+    return updatedDocument;
+  }
 }
 
 export const storage = new MemStorage();
