@@ -38,7 +38,10 @@ import {
   UserMinus,
   UserPlus,
   Save,
-  X
+  X,
+  Bell,
+  Settings,
+  BarChart3
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +52,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { AdminLogin } from "@/components/admin/admin-login";
+import { NotificationSender } from "@/components/admin/notification-sender";
+import { GameSettings } from "@/components/admin/game-settings";
+import { AnalyticsDashboard } from "@/components/admin/analytics-dashboard";
 import { formatNumber } from "@/lib/game-utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -504,10 +510,14 @@ export default function AdminDashboardPage() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-5 gap-2">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
             <TabsTrigger value="dashboard" className="flex items-center">
               <BarChart2 className="h-4 w-4 mr-2" />
               Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center">
               <Users className="h-4 w-4 mr-2" />
@@ -524,6 +534,14 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="games" className="flex items-center">
               <Joystick className="h-4 w-4 mr-2" />
               Games
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center">
+              <Bell className="h-4 w-4 mr-2" />
+              Notify
             </TabsTrigger>
           </TabsList>
 
