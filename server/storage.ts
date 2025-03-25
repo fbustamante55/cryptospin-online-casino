@@ -145,6 +145,8 @@ export class MemStorage implements IStorage {
       googleId: null,
       facebookId: null,
       profileImage: null,
+      btcAddress: null,
+      ethAddress: null,
       resetToken: null,
       resetTokenExpiry: null,
       lastLogin: now,

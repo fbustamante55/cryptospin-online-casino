@@ -21,6 +21,8 @@ export const users = pgTable("users", {
   googleId: text("google_id").unique(),
   facebookId: text("facebook_id").unique(),
   profileImage: text("profile_image"),
+  btcAddress: text("btc_address"),
+  ethAddress: text("eth_address"),
   resetToken: text("reset_token"),
   resetTokenExpiry: timestamp("reset_token_expiry"),
   lastLogin: timestamp("last_login"),
@@ -46,6 +48,7 @@ export const transactions = pgTable("transactions", {
   amount: integer("amount").notNull(),
   type: text("type").notNull(), // deposit, withdraw, bet, win
   gameType: text("game_type"), // slots, dice, crash
+  gameData: jsonb("game_data"), // Additional data for transactions
   createdAt: timestamp("created_at").notNull().defaultNow()
 });
 
@@ -122,6 +125,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).pick({
   amount: true,
   type: true,
   gameType: true,
+  gameData: true,
 });
 
 export const insertGameHistorySchema = createInsertSchema(gameHistory).pick({
