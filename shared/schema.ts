@@ -65,12 +65,17 @@ export const sportsEvents = pgTable("sports_events", {
   id: serial("id").primaryKey(),
   sportType: text("sport_type").notNull(), // mma, mlb, nfl, tennis, soccer, hockey
   eventName: text("event_name").notNull(),
+  competition: text("competition").notNull(), // League, tournament, etc.
   teamA: text("team_a").notNull(),
   teamB: text("team_b").notNull(),
   startTime: timestamp("start_time").notNull(),
   status: text("status").notNull().default("upcoming"), // upcoming, live, completed, cancelled
   results: jsonb("results"), // Store match results
   odds: jsonb("odds").notNull(), // Store odds for different bet types
+  liveScore: jsonb("live_score"), // For live events: current score, time remaining, etc.
+  liveStats: jsonb("live_stats"), // Additional live statistics
+  featured: boolean("featured").default(false), // Featured events shown prominently
+  markets: jsonb("markets"), // Available betting markets (moneyline, spread, props, etc.)
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
 });
@@ -132,11 +137,16 @@ export const insertGameHistorySchema = createInsertSchema(gameHistory).pick({
 export const insertSportsEventSchema = createInsertSchema(sportsEvents).pick({
   sportType: true,
   eventName: true,
+  competition: true,
   teamA: true,
   teamB: true,
   startTime: true,
   status: true,
   odds: true,
+  liveScore: true,
+  liveStats: true,
+  featured: true,
+  markets: true
 });
 
 export const insertSportsBetSchema = createInsertSchema(sportsBets).pick({
