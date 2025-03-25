@@ -168,13 +168,17 @@ export default function SportsBettingPage() {
     
     try {
       // In a real app, this would be an API call
-      // const response = await apiRequest("POST", "/api/place-bets", {
-      //   bets: Array.from(betSlips.values()).map(slip => ({
-      //     eventId: slip.eventId,
-      //     selection: slip.selection,
-      //     odds: slip.odds,
-      //     amount
-      //   }))
+      // const response = await apiRequest({
+      //   method: "POST",
+      //   url: "/api/place-bets",
+      //   data: {
+      //     bets: Array.from(betSlips.values()).map(slip => ({
+      //       eventId: slip.eventId,
+      //       selection: slip.selection,
+      //       odds: slip.odds,
+      //       amount
+      //     }))
+      //   }
       // });
       
       toast({
