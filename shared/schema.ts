@@ -64,7 +64,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const registrationSchema = insertUserSchema.extend({
   confirmPassword: z.string(),
-  recaptchaToken: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
@@ -112,7 +111,6 @@ export type GameHistory = typeof gameHistory.$inferSelect;
 export const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  recaptchaToken: z.string().optional(),
   rememberMe: z.boolean().optional().default(false)
 });
 

@@ -74,30 +74,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Helper function to validate reCAPTCHA token
-  async function validateRecaptcha(token: string): Promise<boolean> {
-    // Skip validation if no API key is available
-    if (!process.env.RECAPTCHA_SECRET_KEY) {
-      console.warn('RECAPTCHA_SECRET_KEY not set. Skipping reCAPTCHA validation.');
-      return true;
-    }
-    
-    try {
-      const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
-      });
-      
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error('reCAPTCHA validation error:', error);
-      return false;
-    }
-  }
+  // CAPTCHA validation has been removed
 
   app.post("/api/register", async (req, res, next) => {
     try {
@@ -112,15 +89,6 @@ export function setupAuth(app: Express) {
       
       const validatedData = registrationSchema.parse(req.body);
       console.log("Validation passed:", validatedData);
-      
-      // Validate reCAPTCHA if token is provided
-      if (validatedData.recaptchaToken) {
-        const isValidRecaptcha = await validateRecaptcha(validatedData.recaptchaToken);
-        if (!isValidRecaptcha) {
-          console.log("reCAPTCHA validation failed");
-          return res.status(400).json({ message: "Invalid reCAPTCHA. Please try again." });
-        }
-      }
       
       // Check if username already exists
       const existingUsername = await storage.getUserByUsername(validatedData.username);
@@ -176,14 +144,6 @@ export function setupAuth(app: Express) {
     try {
       // Validate request body
       const validatedData = loginSchema.parse(req.body);
-      
-      // Validate reCAPTCHA if token is provided
-      if (validatedData.recaptchaToken) {
-        const isValidRecaptcha = await validateRecaptcha(validatedData.recaptchaToken);
-        if (!isValidRecaptcha) {
-          return res.status(400).json({ message: "Invalid reCAPTCHA. Please try again." });
-        }
-      }
       
       // First check if user exists by email
       const user = await storage.getUserByEmail(validatedData.email);
