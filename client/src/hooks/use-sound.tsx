@@ -96,11 +96,55 @@ export function useSoundManager() {
   // Global sound settings
   const [masterVolume, setMasterVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
+  const audioCache = useRef<Map<string, HTMLAudioElement>>(new Map());
 
   // Toggle mute
   const toggleMute = useCallback(() => {
     setIsMuted(prev => !prev);
   }, []);
+
+  // Set volume for all sounds
+  const setVolume = useCallback((volume: number) => {
+    const newVolume = Math.max(0, Math.min(1, volume));
+    setMasterVolume(newVolume);
+    
+    // Update volume for all cached audio elements
+    audioCache.current.forEach(audio => {
+      audio.volume = isMuted ? 0 : newVolume;
+    });
+  }, [isMuted]);
+
+  // Play a sound with the current volume settings
+  const playSound = useCallback((src: string, options: { volume?: number; loop?: boolean } = {}) => {
+    if (!src) return;
+    
+    try {
+      let audio: HTMLAudioElement;
+      
+      // Check if audio is already cached
+      if (audioCache.current.has(src)) {
+        audio = audioCache.current.get(src)!;
+        audio.currentTime = 0; // Reset to beginning
+      } else {
+        // Create and cache new audio
+        audio = new Audio(src);
+        audio.preload = 'auto';
+        audioCache.current.set(src, audio);
+      }
+      
+      // Apply current settings
+      const effectiveVolume = isMuted ? 0 : (options.volume !== undefined ? options.volume * masterVolume : masterVolume);
+      audio.volume = effectiveVolume;
+      audio.loop = options.loop || false;
+      
+      // Play the sound
+      audio.play().catch(error => {
+        console.error("Error playing audio:", error);
+      });
+    } catch (error) {
+      console.error("Error setting up audio:", error);
+    }
+  }, [masterVolume, isMuted]);
 
   return {
     masterVolume,
@@ -108,6 +152,8 @@ export function useSoundManager() {
     isMuted,
     setIsMuted,
     toggleMute,
+    setVolume,
+    playSound,
     effectiveVolume: isMuted ? 0 : masterVolume
   };
 }
