@@ -796,78 +796,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
-
-  // Ban a user - admin only
-  app.post("/api/admin/users/:id/ban", isAdmin, async (req, res) => {
+  
+  // Update user (edit user info) - admin only
+  app.patch("/api/admin/users/:id", isAdmin, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
+      const userData = req.body;
+      
       if (isNaN(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
       }
       
-      const banSchema = z.object({
-        reason: z.string().min(1).max(500),
-      });
-      
-      const { reason } = banSchema.parse(req.body);
-      
-      const user = await storage.getUser(userId);
-      if (!user) {
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Don't allow banning another admin
-      if (user.isAdmin) {
-        return res.status(403).json({ message: "Cannot ban an admin user" });
+      // Update user balance if changed
+      if (userData.balance !== undefined && userData.balance !== existingUser.balance) {
+        await storage.updateUserBalance(userId, userData.balance - existingUser.balance);
       }
       
-      const bannedUser = await storage.banUser(userId, reason);
-      if (!bannedUser) {
-        return res.status(500).json({ message: "Failed to ban user" });
+      // Update other user properties
+      const updatedUser = await storage.updateUserProfile(userId, userData);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user" });
       }
       
       // Remove sensitive data
-      const { password, ...safeUser } = bannedUser;
-      res.status(200).json({ message: "User banned successfully", user: safeUser });
+      const { password, ...safeUser } = updatedUser;
+      res.status(200).json(safeUser);
     } catch (error) {
-      console.error("Error banning user:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid ban data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to ban user" });
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
     }
   });
 
-  // Unban a user - admin only
-  app.post("/api/admin/users/:id/unban", isAdmin, async (req, res) => {
+  // Ban a user - admin only
+  app.post("/api/admin/users/ban", isAdmin, async (req, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
+      const banSchema = z.object({
+        userId: z.number(),
+        reason: z.string().min(1).max(500).optional(),
+      });
+      
+      const { userId, reason } = banSchema.parse(req.body);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
       }
       
-      const user = await storage.getUser(userId);
+      const user = await storage.banUser(userId, reason || 'Violated platform rules');
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      if (!user.isBanned) {
-        return res.status(400).json({ message: "User is not banned" });
+      // Remove sensitive data
+      const { password, ...safeUser } = user;
+      res.status(200).json(safeUser);
+    } catch (error) {
+      console.error("Error banning user:", error);
+      res.status(500).json({ message: "Failed to ban user" });
+    }
+  });
+  
+  // Unban a user - admin only
+  app.post("/api/admin/users/unban", isAdmin, async (req, res) => {
+    try {
+      const unbanSchema = z.object({
+        userId: z.number()
+      });
+      
+      const { userId } = unbanSchema.parse(req.body);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
       }
       
-      const unbannedUser = await storage.unbanUser(userId);
-      if (!unbannedUser) {
-        return res.status(500).json({ message: "Failed to unban user" });
+      const user = await storage.unbanUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
       
       // Remove sensitive data
-      const { password, ...safeUser } = unbannedUser;
-      res.status(200).json({ message: "User unbanned successfully", user: safeUser });
+      const { password, ...safeUser } = user;
+      res.status(200).json(safeUser);
     } catch (error) {
       console.error("Error unbanning user:", error);
       res.status(500).json({ message: "Failed to unban user" });
     }
   });
+  
+  // Toggle admin status - admin only
+  app.post("/api/admin/users/toggle-admin", isAdmin, async (req, res) => {
+    try {
+      const adminSchema = z.object({
+        userId: z.number(),
+        makeAdmin: z.boolean()
+      });
+      
+      const { userId, makeAdmin } = adminSchema.parse(req.body);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const user = await storage.setUserAdminStatus(userId, makeAdmin);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = user;
+      res.status(200).json(safeUser);
+    } catch (error) {
+      console.error("Error updating admin status:", error);
+      res.status(500).json({ message: "Failed to update admin status" });
+    }
+  });
+  
+  // Toggle verification status - admin only
+  app.post("/api/admin/users/toggle-verification", isAdmin, async (req, res) => {
+    try {
+      const verifySchema = z.object({
+        userId: z.number(),
+        verify: z.boolean()
+      });
+      
+      const { userId, verify } = verifySchema.parse(req.body);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      let user;
+      if (verify) {
+        user = await storage.verifyUser(userId);
+      } else {
+        // Use updateUserProfile to remove verification
+        const existingUser = await storage.getUser(userId);
+        if (!existingUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        user = await storage.updateUserProfile(userId, { ...existingUser, isVerified: false });
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = user;
+      res.status(200).json(safeUser);
+    } catch (error) {
+      console.error("Error updating verification status:", error);
+      res.status(500).json({ message: "Failed to update verification status" });
+    }
+  });
+
+  // Este endpoint ya está implementado arriba (línea ~864)
+  // Usamos el endpoint /api/admin/users/unban en su lugar
+  // para evitar duplicados
 
   // Reset a user's password - admin only
   app.post("/api/admin/users/:id/reset-password", isAdmin, async (req, res) => {
@@ -1013,7 +1102,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update KYC document status - admin only
+  // Approve KYC document - admin only
+  app.post("/api/admin/kyc/approve", isAdmin, async (req, res) => {
+    try {
+      const schema = z.object({
+        documentId: z.number()
+      });
+      
+      const { documentId } = schema.parse(req.body);
+      
+      const updatedDoc = await storage.updateKycDocumentStatus(documentId, "approved");
+      if (!updatedDoc) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Also verify the user
+      if (updatedDoc.userId) {
+        await storage.verifyUser(updatedDoc.userId);
+      }
+      
+      res.status(200).json({ 
+        message: "Document approved successfully", 
+        document: updatedDoc 
+      });
+    } catch (error) {
+      console.error("Error approving KYC document:", error);
+      res.status(500).json({ message: "Failed to approve document" });
+    }
+  });
+  
+  // Reject KYC document - admin only
+  app.post("/api/admin/kyc/reject", isAdmin, async (req, res) => {
+    try {
+      const schema = z.object({
+        documentId: z.number(),
+        rejectionReason: z.string().min(1).max(500)
+      });
+      
+      const { documentId, rejectionReason } = schema.parse(req.body);
+      
+      const updatedDoc = await storage.updateKycDocumentStatus(documentId, "rejected", rejectionReason);
+      if (!updatedDoc) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      res.status(200).json({ 
+        message: "Document rejected successfully", 
+        document: updatedDoc 
+      });
+    } catch (error) {
+      console.error("Error rejecting KYC document:", error);
+      res.status(500).json({ message: "Failed to reject document" });
+    }
+  });
+  
+  // Update KYC document status - admin only (legacy)
   app.post("/api/admin/kyc-documents/:id/status", isAdmin, async (req, res) => {
     try {
       const docId = parseInt(req.params.id);
