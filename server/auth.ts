@@ -104,6 +104,12 @@ export function setupAuth(app: Express) {
       console.log("Registration request received:", req.body);
       
       // Validate request body using Zod schema
+      // We need to explicitly check for confirmPassword in the request body
+      if (!req.body.confirmPassword) {
+        console.log("confirmPassword is missing from request body");
+        req.body.confirmPassword = req.body.password; // Set it to match password for validation
+      }
+      
       const validatedData = registrationSchema.parse(req.body);
       console.log("Validation passed:", validatedData);
       

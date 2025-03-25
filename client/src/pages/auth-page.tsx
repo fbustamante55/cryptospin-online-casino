@@ -114,10 +114,10 @@ export default function AuthPage() {
 
   const onRegisterSubmit = (data: RegisterFormData) => {
     console.log("Register form data:", data);
-    // Make sure to extract confirmPassword as it's not part of the User model
-    const { confirmPassword, ...userData } = data;
-    console.log("Sending register data to mutation:", userData);
-    registerMutation.mutate(userData);
+    // We need to send the confirmPassword for validation
+    // DO NOT remove it from the data
+    console.log("Sending register data to mutation:", data);
+    registerMutation.mutate(data);
   };
 
   const onPasswordResetRequest = async (data: PasswordResetRequestFormData) => {
