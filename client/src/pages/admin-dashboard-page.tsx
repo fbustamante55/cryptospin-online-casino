@@ -1,49 +1,50 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
-import { formatNumber } from "@/lib/game-utils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ProtectedRoute } from "@/lib/protected-route";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import { 
+  User, 
+  Users, 
+  CircleDollarSign, 
+  FileText, 
+  Joystick, 
+  BarChart2, 
+  AlertCircle, 
+  CheckCircle,
+  ArrowDown,
+  ArrowUp,
+  Search,
+  Ban,
+  UserCheck,
+  ShieldCheck
+} from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { AdminLogin } from "@/components/admin/admin-login";
+import { formatNumber } from "@/lib/game-utils";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 
-// Define interface for dashboard stats
+// Dashboard Stats Interface
 interface DashboardStats {
   users: {
     total: number;
@@ -91,7 +92,7 @@ interface DashboardStats {
   };
 }
 
-// Define interface for user
+// User Interface
 interface User {
   id: number;
   username: string;
@@ -105,7 +106,7 @@ interface User {
   lastLogin: string;
 }
 
-// Define interface for transaction
+// Transaction Interface
 interface Transaction {
   id: number;
   userId: number;
@@ -116,7 +117,7 @@ interface Transaction {
   createdAt: string;
 }
 
-// Define interface for KYC document
+// KYC Document Interface
 interface KYCDocument {
   id: number;
   userId: number;
@@ -128,7 +129,7 @@ interface KYCDocument {
   verifiedAt?: string;
 }
 
-// Define interface for game history
+// Game History Interface
 interface GameHistory {
   id: number;
   userId: number;
@@ -140,690 +141,683 @@ interface GameHistory {
   createdAt: string;
 }
 
+// Color constants
+const COLORS = {
+  primary: "#00FFAA",
+  secondary: "#0088FE",
+  tertiary: "#FF8042",
+  success: "#00C49F",
+  warning: "#FFBB28",
+  danger: "#FF5A5A",
+  background: "#1A2634",
+  backgroundAlt: "#0F1923",
+  text: "#FFFFFF",
+  textMuted: "#CBD5E1",
+  border: "#334155"
+};
+
+// Dummy data for charts until we fetch real data
+const PIE_COLORS = [COLORS.primary, COLORS.secondary, COLORS.warning, COLORS.danger];
+
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
-  const [, navigate] = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [userSearch, setUserSearch] = useState("");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [kycDocuments, setKycDocuments] = useState<KYCDocument[]>([]);
+  const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
+
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [newPassword, setNewPassword] = useState("");
-  const [banReason, setBanReason] = useState("");
-  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
-  const [banUserOpen, setBanUserOpen] = useState(false);
-  const [unbanUserOpen, setUnbanUserOpen] = useState(false);
-  const [makeAdminOpen, setMakeAdminOpen] = useState(false);
-  const [removeAdminOpen, setRemoveAdminOpen] = useState(false);
+  const { user } = useAuth();
 
-  // Queries for admin dashboard data
-  const dashboardQuery = useQuery<DashboardStats>({
-    queryKey: ['/api/admin/dashboard'],
-    enabled: !!user?.isAdmin,
-  });
-
-  const usersQuery = useQuery<User[]>({
-    queryKey: ['/api/admin/users'],
-    enabled: !!user?.isAdmin,
-  });
-
-  const transactionsQuery = useQuery<Transaction[]>({
-    queryKey: ['/api/admin/transactions'],
-    enabled: !!user?.isAdmin,
-  });
-
-  const gameHistoryQuery = useQuery<GameHistory[]>({
-    queryKey: ['/api/admin/game-history'],
-    enabled: !!user?.isAdmin,
-  });
-
-  const kycDocumentsQuery = useQuery<KYCDocument[]>({
-    queryKey: ['/api/admin/kyc-documents'],
-    enabled: !!user?.isAdmin,
-  });
-
-  // Redirect if not admin
+  // Check if user is already admin
   useEffect(() => {
-    if (user && !user.isAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "You do not have permission to access the admin panel",
-        variant: "destructive",
-      });
-      navigate("/");
+    if (user && user.isAdmin) {
+      setIsAdmin(true);
+      fetchAdminData();
+    } else {
+      setIsLoading(false);
     }
-  }, [user, navigate, toast]);
+  }, [user]);
 
-  const handleResetPassword = async () => {
-    if (!selectedUser) return;
-    
+  const fetchAdminData = async () => {
+    setIsLoading(true);
     try {
-      await apiRequest(
-        'POST',
-        `/api/admin/users/${selectedUser.id}/reset-password`, 
-        { newPassword }
-      );
-      
-      toast({
-        title: "Password Reset",
-        description: `Password for ${selectedUser.username} has been reset successfully`,
-      });
-      
-      setResetPasswordOpen(false);
+      // Fetch dashboard stats
+      const stats = await apiRequest<DashboardStats>('/api/admin/stats');
+      setDashboardStats(stats);
+
+      // Fetch users
+      const usersData = await apiRequest<User[]>('/api/admin/users');
+      setUsers(usersData);
+      setFilteredUsers(usersData);
+
+      // Fetch transactions
+      const transactionsData = await apiRequest<Transaction[]>('/api/admin/transactions');
+      setTransactions(transactionsData);
+
+      // Fetch KYC documents
+      const kycData = await apiRequest<KYCDocument[]>('/api/admin/kyc');
+      setKycDocuments(kycData);
+
+      // Fetch game history
+      const historyData = await apiRequest<GameHistory[]>('/api/admin/game-history');
+      setGameHistory(historyData);
     } catch (error) {
+      console.error('Error fetching admin data:', error);
       toast({
-        title: "Error",
-        description: "Failed to reset password",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load admin data',
+        variant: 'destructive'
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleBanUser = async () => {
-    if (!selectedUser) return;
+  const handleAdminLoginSuccess = () => {
+    setIsAdmin(true);
+    fetchAdminData();
+  };
+
+  const handleUserSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value.toLowerCase();
+    setUserSearch(searchTerm);
     
+    if (!searchTerm.trim()) {
+      setFilteredUsers(users);
+      return;
+    }
+    
+    const filtered = users.filter(user => 
+      user.username.toLowerCase().includes(searchTerm) || 
+      user.email.toLowerCase().includes(searchTerm)
+    );
+    setFilteredUsers(filtered);
+  };
+
+  const handleBanUser = async (userId: number, isBanned: boolean) => {
     try {
-      await apiRequest(
-        'POST',
-        `/api/admin/users/${selectedUser.id}/ban`,
-        { reason: banReason }
-      );
-      
-      usersQuery.refetch();
-      
-      toast({
-        title: "User Banned",
-        description: `${selectedUser.username} has been banned successfully`,
-      });
-      
-      setBanUserOpen(false);
+      if (isBanned) {
+        await apiRequest<{success: boolean}>('/api/admin/users/unban', {
+          method: 'POST',
+          data: { userId }
+        });
+        toast({
+          title: 'Success',
+          description: 'User has been unbanned',
+          variant: 'default'
+        });
+      } else {
+        const reason = prompt('Enter reason for banning:');
+        if (reason) {
+          await apiRequest<{success: boolean}>('/api/admin/users/ban', {
+            method: 'POST',
+            data: { userId, reason }
+          });
+          toast({
+            title: 'Success',
+            description: 'User has been banned',
+            variant: 'default'
+          });
+        }
+      }
+      // Refresh user list
+      fetchAdminData();
     } catch (error) {
+      console.error('Error updating user ban status:', error);
       toast({
-        title: "Error",
-        description: "Failed to ban user",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update user ban status',
+        variant: 'destructive'
       });
     }
   };
 
-  const handleUnbanUser = async () => {
-    if (!selectedUser) return;
-    
+  const handleVerifyKYC = async (documentId: number, approve: boolean) => {
     try {
-      await apiRequest(
-        'POST',
-        `/api/admin/users/${selectedUser.id}/unban`
-      );
+      const endpoint = approve ? '/api/admin/kyc/approve' : '/api/admin/kyc/reject';
+      const data: any = { documentId };
       
-      usersQuery.refetch();
+      if (!approve) {
+        const reason = prompt('Enter reason for rejection:');
+        if (!reason) return;
+        data.rejectionReason = reason;
+      }
       
-      toast({
-        title: "User Unbanned",
-        description: `${selectedUser.username} has been unbanned successfully`,
+      await apiRequest(endpoint, {
+        method: 'POST',
+        data
       });
       
-      setUnbanUserOpen(false);
-    } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to unban user",
-        variant: "destructive",
+        title: 'Success',
+        description: `Document ${approve ? 'approved' : 'rejected'} successfully`,
+        variant: 'default'
+      });
+      
+      // Refresh KYC documents
+      fetchAdminData();
+    } catch (error) {
+      console.error('Error updating KYC status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update KYC status',
+        variant: 'destructive'
       });
     }
-  };
-
-  const handleMakeAdmin = async () => {
-    if (!selectedUser) return;
-    
-    try {
-      await apiRequest(
-        'POST',
-        `/api/admin/users/${selectedUser.id}/make-admin`
-      );
-      
-      usersQuery.refetch();
-      
-      toast({
-        title: "Admin Rights Granted",
-        description: `${selectedUser.username} has been made an admin successfully`,
-      });
-      
-      setMakeAdminOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to make user an admin",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRemoveAdmin = async () => {
-    if (!selectedUser) return;
-    
-    try {
-      await apiRequest(
-        'POST',
-        `/api/admin/users/${selectedUser.id}/remove-admin`
-      );
-      
-      usersQuery.refetch();
-      
-      toast({
-        title: "Admin Rights Removed",
-        description: `Admin rights for ${selectedUser.username} have been removed successfully`,
-      });
-      
-      setRemoveAdminOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove admin rights",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-
-  const getChartData = () => {
-    if (!dashboardQuery.data) return [];
-    
-    const stats = dashboardQuery.data;
-    
-    return [
-      {
-        name: 'Slots',
-        bets: stats.gameHistory.slots.totalBets,
-        wins: stats.gameHistory.slots.totalWins,
-      },
-      {
-        name: 'Dice',
-        bets: stats.gameHistory.dice.totalBets,
-        wins: stats.gameHistory.dice.totalWins,
-      },
-      {
-        name: 'Crash',
-        bets: stats.gameHistory.crash.totalBets,
-        wins: stats.gameHistory.crash.totalWins,
-      },
-    ];
   };
 
   const getUserStatusBadge = (user: User) => {
     if (user.isBanned) {
       return <Badge variant="destructive">Banned</Badge>;
+    } else if (user.isAdmin) {
+      return <Badge className="bg-[#7C3AED] hover:bg-[#6D28D9]">Admin</Badge>;
+    } else if (user.isVerified) {
+      return <Badge variant="default" className="bg-[#00C49F] hover:bg-[#00A080]">Verified</Badge>;
+    } else {
+      return <Badge variant="outline">Unverified</Badge>;
     }
-    if (user.isAdmin) {
-      return <Badge variant="default">Admin</Badge>;
-    }
-    if (user.isVerified) {
-      return <Badge variant="outline">Verified</Badge>;
-    }
-    return <Badge variant="secondary">Standard</Badge>;
   };
 
-  return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        {/* Dashboard Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="p-4">
-            <h3 className="text-lg font-medium">Total Users</h3>
-            <p className="text-3xl font-bold">
-              {dashboardQuery.data ? dashboardQuery.data.users.total : '-'}
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <h3 className="text-lg font-medium">House Profit</h3>
-            <p className="text-3xl font-bold text-green-600">
-              {dashboardQuery.data ? `$${formatNumber(dashboardQuery.data.transactions.houseProfit)}` : '-'}
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <h3 className="text-lg font-medium">Total Bets</h3>
-            <p className="text-3xl font-bold">
-              {dashboardQuery.data ? `$${formatNumber(dashboardQuery.data.transactions.totalBets)}` : '-'}
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <h3 className="text-lg font-medium">Pending KYC</h3>
-            <p className="text-3xl font-bold">
-              {dashboardQuery.data ? dashboardQuery.data.kyc.pending : '-'}
-            </p>
-          </Card>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#0F1923]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00FFAA]"></div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0F1923]">
+        <div className="w-full max-w-md">
+          <AdminLogin onLoginSuccess={handleAdminLoginSuccess} />
         </div>
-        
-        {/* Game Stats Chart */}
-        {dashboardQuery.data && (
-          <Card className="p-4 mb-6">
-            <h3 className="text-lg font-medium mb-4">Game Performance</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={getChartData()} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <RechartsTooltip />
-                <Legend />
-                <Bar dataKey="bets" name="Total Bets" fill="#8884d8" />
-                <Bar dataKey="wins" name="Total Wins" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
-        
-        {/* Tabs for Different Admin Functions */}
-        <Tabs defaultValue="users">
-          <TabsList className="mb-4">
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="gameHistory">Game History</TabsTrigger>
-            <TabsTrigger value="kyc">KYC Documents</TabsTrigger>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0F1923] text-white">
+      <div className="container mx-auto p-4">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold mb-2 flex items-center">
+            <ShieldCheck className="h-8 w-8 mr-2 text-[#00FFAA]" />
+            CryptoSpin Admin Dashboard
+          </h1>
+          <p className="text-gray-400">Manage your casino platform</p>
+        </header>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid grid-cols-5 gap-2">
+            <TabsTrigger value="dashboard" className="flex items-center">
+              <BarChart2 className="h-4 w-4 mr-2" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center">
+              <Users className="h-4 w-4 mr-2" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="flex items-center">
+              <CircleDollarSign className="h-4 w-4 mr-2" />
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger value="kyc" className="flex items-center">
+              <FileText className="h-4 w-4 mr-2" />
+              KYC
+            </TabsTrigger>
+            <TabsTrigger value="games" className="flex items-center">
+              <Joystick className="h-4 w-4 mr-2" />
+              Games
+            </TabsTrigger>
           </TabsList>
-          
-          {/* Users Tab */}
-          <TabsContent value="users">
-            <Card className="p-4">
-              <h3 className="text-lg font-medium mb-4">User Management</h3>
-              {usersQuery.isLoading ? (
-                <p>Loading users...</p>
-              ) : usersQuery.error ? (
-                <p className="text-red-500">Error loading users</p>
-              ) : (
-                <Table>
-                  <TableCaption>List of all users</TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Username</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Balance</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {usersQuery.data?.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.id}</TableCell>
-                        <TableCell>{user.username}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>${formatNumber(user.balance)}</TableCell>
-                        <TableCell>{getUserStatusBadge(user)}</TableCell>
-                        <TableCell>{formatDate(user.createdAt)}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-2">
-                            {/* Reset Password Dialog */}
-                            <Dialog open={resetPasswordOpen && selectedUser?.id === user.id} onOpenChange={setResetPasswordOpen}>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => setSelectedUser(user)}
-                                >
-                                  Reset PW
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Reset Password</DialogTitle>
-                                  <DialogDescription>
-                                    Set a new password for {selectedUser?.username}
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="py-4">
-                                  <Label htmlFor="new-password">New Password</Label>
-                                  <Input 
-                                    id="new-password" 
-                                    type="text" 
-                                    value={newPassword} 
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                  />
-                                </div>
-                                <DialogFooter>
-                                  <Button variant="outline" onClick={() => setResetPasswordOpen(false)}>Cancel</Button>
-                                  <Button onClick={handleResetPassword}>Reset Password</Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                            
-                            {/* Ban User Dialog */}
-                            {!user.isBanned && (
-                              <Dialog open={banUserOpen && selectedUser?.id === user.id} onOpenChange={setBanUserOpen}>
-                                <DialogTrigger asChild>
-                                  <Button 
-                                    variant="destructive" 
-                                    size="sm"
-                                    disabled={user.isAdmin} // Can't ban admins
-                                    onClick={() => setSelectedUser(user)}
-                                  >
-                                    Ban
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Ban User</DialogTitle>
-                                    <DialogDescription>
-                                      Ban user {selectedUser?.username}. This will prevent them from accessing the platform.
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <div className="py-4">
-                                    <Label htmlFor="ban-reason">Ban Reason</Label>
-                                    <Input 
-                                      id="ban-reason" 
-                                      value={banReason} 
-                                      onChange={(e) => setBanReason(e.target.value)}
-                                    />
-                                  </div>
-                                  <DialogFooter>
-                                    <Button variant="outline" onClick={() => setBanUserOpen(false)}>Cancel</Button>
-                                    <Button variant="destructive" onClick={handleBanUser}>Ban User</Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
-                            )}
-                            
-                            {/* Unban User Dialog */}
-                            {user.isBanned && (
-                              <AlertDialog open={unbanUserOpen && selectedUser?.id === user.id} onOpenChange={setUnbanUserOpen}>
-                                <AlertDialogTrigger asChild>
-                                  <Button 
-                                    variant="default" 
-                                    size="sm"
-                                    onClick={() => setSelectedUser(user)}
-                                  >
-                                    Unban
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Unban User</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to unban {selectedUser?.username}?
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={() => setUnbanUserOpen(false)}>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleUnbanUser}>Unban User</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            )}
-                            
-                            {/* Make Admin Dialog */}
-                            {!user.isAdmin && (
-                              <AlertDialog open={makeAdminOpen && selectedUser?.id === user.id} onOpenChange={setMakeAdminOpen}>
-                                <AlertDialogTrigger asChild>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => setSelectedUser(user)}
-                                  >
-                                    Make Admin
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Make Admin</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to give admin privileges to {selectedUser?.username}?
-                                      This will grant them full access to the admin panel.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={() => setMakeAdminOpen(false)}>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleMakeAdmin}>Make Admin</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            )}
-                            
-                            {/* Remove Admin Dialog */}
-                            {user.isAdmin && user.id !== (window as any).currentUser?.id && (
-                              <AlertDialog open={removeAdminOpen && selectedUser?.id === user.id} onOpenChange={setRemoveAdminOpen}>
-                                <AlertDialogTrigger asChild>
-                                  <Button 
-                                    variant="destructive" 
-                                    size="sm"
-                                    onClick={() => setSelectedUser(user)}
-                                  >
-                                    Remove Admin
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Remove Admin Rights</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to remove admin privileges from {selectedUser?.username}?
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={() => setRemoveAdminOpen(false)}>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleRemoveAdmin}>Remove Admin</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Card>
-          </TabsContent>
-          
-          {/* Transactions Tab */}
-          <TabsContent value="transactions">
-            <Card className="p-4">
-              <h3 className="text-lg font-medium mb-4">Transaction History</h3>
-              {transactionsQuery.isLoading ? (
-                <p>Loading transactions...</p>
-              ) : transactionsQuery.error ? (
-                <p className="text-red-500">Error loading transactions</p>
-              ) : (
-                <Table>
-                  <TableCaption>List of all transactions</TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>User ID</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactionsQuery.data?.map((transaction) => (
-                      <TableRow key={transaction.id}>
-                        <TableCell>{transaction.id}</TableCell>
-                        <TableCell>{transaction.userId}</TableCell>
-                        <TableCell className="capitalize">{transaction.type}</TableCell>
-                        <TableCell className={transaction.type === 'deposit' || transaction.type === 'win' ? 'text-green-600' : 'text-red-600'}>
-                          ${formatNumber(Math.abs(transaction.amount))}
-                        </TableCell>
-                        <TableCell>{transaction.status}</TableCell>
-                        <TableCell>{transaction.description || '-'}</TableCell>
-                        <TableCell>{formatDate(transaction.createdAt)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Card>
-          </TabsContent>
-          
-          {/* Game History Tab */}
-          <TabsContent value="gameHistory">
-            <Card className="p-4">
-              <h3 className="text-lg font-medium mb-4">Game History</h3>
-              {gameHistoryQuery.isLoading ? (
-                <p>Loading game history...</p>
-              ) : gameHistoryQuery.error ? (
-                <p className="text-red-500">Error loading game history</p>
-              ) : (
-                <Table>
-                  <TableCaption>List of all games played</TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>User ID</TableHead>
-                      <TableHead>Game</TableHead>
-                      <TableHead>Bet</TableHead>
-                      <TableHead>Result</TableHead>
-                      <TableHead>Win Amount</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {gameHistoryQuery.data?.map((game) => (
-                      <TableRow key={game.id}>
-                        <TableCell>{game.id}</TableCell>
-                        <TableCell>{game.userId}</TableCell>
-                        <TableCell className="capitalize">{game.gameType}</TableCell>
-                        <TableCell>${formatNumber(game.bet)}</TableCell>
-                        <TableCell>{game.result}</TableCell>
-                        <TableCell className={game.win ? 'text-green-600' : 'text-red-600'}>
-                          {game.win ? `$${formatNumber(game.winAmount)}` : '$0'}
-                        </TableCell>
-                        <TableCell>{formatDate(game.createdAt)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Card>
-          </TabsContent>
-          
-          {/* KYC Documents Tab */}
-          <TabsContent value="kyc">
-            <Card className="p-4">
-              <h3 className="text-lg font-medium mb-4">KYC Documents</h3>
-              {kycDocumentsQuery.isLoading ? (
-                <p>Loading KYC documents...</p>
-              ) : kycDocumentsQuery.error ? (
-                <p className="text-red-500">Error loading KYC documents</p>
-              ) : (
-                <Table>
-                  <TableCaption>List of all KYC documents</TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>User ID</TableHead>
-                      <TableHead>Document Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Uploaded</TableHead>
-                      <TableHead>Verified</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {kycDocumentsQuery.data?.map((doc) => (
-                      <TableRow key={doc.id}>
-                        <TableCell>{doc.id}</TableCell>
-                        <TableCell>{doc.userId}</TableCell>
-                        <TableCell>{doc.documentType}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              doc.verificationStatus === 'approved' ? 'default' :
-                              doc.verificationStatus === 'rejected' ? 'destructive' : 'secondary'
-                            }
+
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-4">
+            {dashboardStats && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-400">Total Users</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{dashboardStats.users.total}</div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {dashboardStats.users.verified} verified users
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-400">Total Bets</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{formatNumber(dashboardStats.transactions.totalBets)} USDT</div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Across {dashboardStats.gameHistory.total} games
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-400">House Profit</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{formatNumber(dashboardStats.transactions.houseProfit)} USDT</div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {((dashboardStats.transactions.houseProfit / dashboardStats.transactions.totalBets) * 100).toFixed(1)}% of total bets
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-400">KYC Pending</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{dashboardStats.kyc.pending}</div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {dashboardStats.kyc.approved} approved, {dashboardStats.kyc.rejected} rejected
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader>
+                      <CardTitle>Game Performance</CardTitle>
+                      <CardDescription>Bets and wins by game type</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart
+                          data={[
+                            {
+                              name: 'Slots',
+                              bets: dashboardStats.gameHistory.slots.totalBets,
+                              wins: dashboardStats.gameHistory.slots.totalWins,
+                            },
+                            {
+                              name: 'Dice',
+                              bets: dashboardStats.gameHistory.dice.totalBets,
+                              wins: dashboardStats.gameHistory.dice.totalWins,
+                            },
+                            {
+                              name: 'Crash',
+                              bets: dashboardStats.gameHistory.crash.totalBets,
+                              wins: dashboardStats.gameHistory.crash.totalWins,
+                            },
+                            {
+                              name: 'Sports',
+                              bets: dashboardStats.gameHistory.sports.totalBets,
+                              wins: dashboardStats.gameHistory.sports.totalWon,
+                            },
+                          ]}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke={COLORS.border} />
+                          <XAxis dataKey="name" stroke={COLORS.textMuted} />
+                          <YAxis stroke={COLORS.textMuted} />
+                          <Tooltip 
+                            contentStyle={{ backgroundColor: COLORS.backgroundAlt, borderColor: COLORS.border }}
+                            labelStyle={{ color: COLORS.text }}
+                          />
+                          <Legend />
+                          <Bar dataKey="bets" fill={COLORS.secondary} name="Total Bets" />
+                          <Bar dataKey="wins" fill={COLORS.primary} name="Total Wins" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader>
+                      <CardTitle>Transaction Overview</CardTitle>
+                      <CardDescription>Balance flow on the platform</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'Deposits', value: dashboardStats.transactions.totalDeposits },
+                              { name: 'Withdrawals', value: dashboardStats.transactions.totalWithdrawals },
+                              { name: 'Bets', value: dashboardStats.transactions.totalBets },
+                              { name: 'Wins', value: dashboardStats.transactions.totalWins },
+                            ]}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            labelLine={false}
                           >
-                            {doc.verificationStatus}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatDate(doc.uploadedAt)}</TableCell>
-                        <TableCell>{doc.verifiedAt ? formatDate(doc.verifiedAt) : '-'}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            {doc.verificationStatus === 'pending' && (
-                              <>
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  onClick={async () => {
-                                    try {
-                                      await apiRequest(
-                                        'POST',
-                                        `/api/admin/kyc-documents/${doc.id}/status`,
-                                        { status: 'approved' }
-                                      );
-                                      kycDocumentsQuery.refetch();
-                                      toast({
-                                        title: "Document Approved",
-                                        description: "KYC document has been approved successfully",
-                                      });
-                                    } catch (error) {
-                                      toast({
-                                        title: "Error",
-                                        description: "Failed to approve document",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Approve
-                                </Button>
-                                
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={async () => {
-                                    try {
-                                      await apiRequest(
-                                        'POST',
-                                        `/api/admin/kyc-documents/${doc.id}/status`,
-                                        { 
-                                          status: 'rejected',
-                                          rejectionReason: 'Document invalid or unclear. Please upload a clearer image.'
-                                        }
-                                      );
-                                      kycDocumentsQuery.refetch();
-                                      toast({
-                                        title: "Document Rejected",
-                                        description: "KYC document has been rejected",
-                                      });
-                                    } catch (error) {
-                                      toast({
-                                        title: "Error",
-                                        description: "Failed to reject document",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                >
-                                  Reject
-                                </Button>
-                              </>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                window.open(doc.documentPath, '_blank');
-                              }}
-                            >
-                              View
-                            </Button>
-                          </div>
-                        </TableCell>
+                            {[0, 1, 2, 3].map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value) => [`${formatNumber(value as number)} USDT`]}
+                            contentStyle={{ backgroundColor: COLORS.backgroundAlt, borderColor: COLORS.border, color: COLORS.text }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-4">
+            <Card className="bg-[#1A2634] border-gray-800">
+              <CardHeader>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>Manage all registered users</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 relative">
+                  <Input
+                    placeholder="Search by username or email..."
+                    value={userSearch}
+                    onChange={handleUserSearch}
+                    className="bg-[#0F1923] border-gray-800 pl-10"
+                  />
+                  <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+                </div>
+                <div className="rounded-md border border-gray-800">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-[#1A2634]/60 border-gray-800">
+                        <TableHead className="w-[80px]">#</TableHead>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead className="text-right">Balance</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-gray-400">
+                            No users found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredUsers.map((user) => (
+                          <TableRow key={user.id} className="hover:bg-[#1A2634]/60 border-gray-800">
+                            <TableCell>{user.id}</TableCell>
+                            <TableCell>{user.username}</TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell className="text-right">{formatNumber(user.balance)} USDT</TableCell>
+                            <TableCell>{getUserStatusBadge(user)}</TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleBanUser(user.id, user.isBanned)}
+                                className={user.isBanned ? "bg-green-600/20 text-green-400 hover:bg-green-600/30 hover:text-green-300" : "bg-red-600/20 text-red-400 hover:bg-red-600/30 hover:text-red-300"}
+                              >
+                                {user.isBanned ? (
+                                  <>
+                                    <UserCheck className="h-4 w-4 mr-1" />
+                                    Unban
+                                  </>
+                                ) : (
+                                  <>
+                                    <Ban className="h-4 w-4 mr-1" />
+                                    Ban
+                                  </>
+                                )}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Transactions Tab */}
+          <TabsContent value="transactions" className="space-y-4">
+            <Card className="bg-[#1A2634] border-gray-800">
+              <CardHeader>
+                <CardTitle>Transaction History</CardTitle>
+                <CardDescription>All platform transactions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border border-gray-800">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-[#1A2634]/60 border-gray-800">
+                        <TableHead className="w-[80px]">#</TableHead>
+                        <TableHead>User ID</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transactions.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-gray-400">
+                            No transactions found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        transactions.map((tx) => (
+                          <TableRow key={tx.id} className="hover:bg-[#1A2634]/60 border-gray-800">
+                            <TableCell>{tx.id}</TableCell>
+                            <TableCell>{tx.userId}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="outline" 
+                                className={
+                                  tx.type === 'deposit' ? 'border-green-500 text-green-400' :
+                                  tx.type === 'withdrawal' ? 'border-red-500 text-red-400' :
+                                  tx.type === 'bet' ? 'border-yellow-500 text-yellow-400' :
+                                  tx.type === 'win' ? 'border-blue-500 text-blue-400' :
+                                  ''
+                                }
+                              >
+                                {tx.type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className={
+                                tx.type === 'deposit' || tx.type === 'win' ? 'text-green-400' :
+                                tx.type === 'withdrawal' || tx.type === 'bet' ? 'text-red-400' :
+                                ''
+                              }>
+                                {tx.type === 'deposit' || tx.type === 'win' ? '+' : '-'}
+                                {formatNumber(tx.amount)} USDT
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={tx.status === 'completed' ? 'default' : 
+                                       tx.status === 'pending' ? 'outline' : 'destructive'}
+                                className={
+                                  tx.status === 'completed' ? 'bg-green-600 hover:bg-green-700' :
+                                  tx.status === 'pending' ? 'border-yellow-500 text-yellow-400' :
+                                  ''
+                                }
+                              >
+                                {tx.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(tx.createdAt).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* KYC Tab */}
+          <TabsContent value="kyc" className="space-y-4">
+            <Card className="bg-[#1A2634] border-gray-800">
+              <CardHeader>
+                <CardTitle>KYC Documents</CardTitle>
+                <CardDescription>Manage user verification documents</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border border-gray-800">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-[#1A2634]/60 border-gray-800">
+                        <TableHead className="w-[80px]">#</TableHead>
+                        <TableHead>User ID</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Uploaded At</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {kycDocuments.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-gray-400">
+                            No KYC documents found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        kycDocuments.map((doc) => (
+                          <TableRow key={doc.id} className="hover:bg-[#1A2634]/60 border-gray-800">
+                            <TableCell>{doc.id}</TableCell>
+                            <TableCell>{doc.userId}</TableCell>
+                            <TableCell>{doc.documentType}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={
+                                  doc.verificationStatus === 'pending' ? 'outline' :
+                                  doc.verificationStatus === 'approved' ? 'default' :
+                                  'destructive'
+                                }
+                                className={
+                                  doc.verificationStatus === 'pending' ? 'border-yellow-500 text-yellow-400' :
+                                  doc.verificationStatus === 'approved' ? 'bg-green-600 hover:bg-green-700' :
+                                  ''
+                                }
+                              >
+                                {doc.verificationStatus}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(doc.uploadedAt).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {doc.verificationStatus === 'pending' && (
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleVerifyKYC(doc.id, true)}
+                                    className="bg-green-600/20 text-green-400 hover:bg-green-600/30 hover:text-green-300"
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleVerifyKYC(doc.id, false)}
+                                    className="bg-red-600/20 text-red-400 hover:bg-red-600/30 hover:text-red-300"
+                                  >
+                                    <AlertCircle className="h-4 w-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Games Tab */}
+          <TabsContent value="games" className="space-y-4">
+            <Card className="bg-[#1A2634] border-gray-800">
+              <CardHeader>
+                <CardTitle>Game History</CardTitle>
+                <CardDescription>All game results</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border border-gray-800">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-[#1A2634]/60 border-gray-800">
+                        <TableHead className="w-[80px]">#</TableHead>
+                        <TableHead>User ID</TableHead>
+                        <TableHead>Game</TableHead>
+                        <TableHead className="text-right">Bet</TableHead>
+                        <TableHead>Result</TableHead>
+                        <TableHead className="text-right">Win Amount</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {gameHistory.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8 text-gray-400">
+                            No game history found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        gameHistory.map((game) => (
+                          <TableRow key={game.id} className="hover:bg-[#1A2634]/60 border-gray-800">
+                            <TableCell>{game.id}</TableCell>
+                            <TableCell>{game.userId}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {game.gameType}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">{formatNumber(game.bet)} USDT</TableCell>
+                            <TableCell>{game.result}</TableCell>
+                            <TableCell className="text-right">
+                              <span className={game.win ? 'text-green-400' : 'text-red-400'}>
+                                {game.win ? '+' : '-'}{formatNumber(game.winAmount)} USDT
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(game.createdAt).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+      </div>
     </div>
   );
 }
