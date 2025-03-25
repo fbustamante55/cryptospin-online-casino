@@ -12,6 +12,8 @@ import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
+import { useSound, useSoundManager } from "@/hooks/use-sound";
+import { VolumeControl } from "@/components/ui/volume-control";
 
 type BetType = 
   | 'number' // Pleno (single number)
@@ -77,9 +79,22 @@ const betOptions: BetOption[] = [
   { type: 'highLow', label: 'Pasa/Falta (1-18, 19-36)', value: 'highLow', odds: 1, description: 'Apuesta a números altos o bajos (18 números)' },
 ];
 
+// Ball physics type for animation
+interface BallPhysics {
+  position: number; // Position around wheel in degrees
+  speed: number; // Angular velocity in degrees per second
+  acceleration: number; // Deceleration rate in degrees per second
+  bounceCount: number;
+  finalPosition?: number; // Final resting position
+}
+
 export function RouletteGame() {
   const auth = useAuth();
   const wheelRef = useRef<HTMLDivElement>(null);
+  const ballRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+  
+  // State variables
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentBetType, setCurrentBetType] = useState<BetType>('number');
   const [currentBetValue, setCurrentBetValue] = useState<string | number>(0);
@@ -89,6 +104,31 @@ export function RouletteGame() {
   const [showBets, setShowBets] = useState(false);
   const [history, setHistory] = useState<RouletteResult[]>([]);
   const [selectedBetOption, setSelectedBetOption] = useState<BetOption>(betOptions[0]);
+  
+  // Ball animation physics
+  const [ball, setBall] = useState<BallPhysics | null>(null);
+  
+  // Sound management
+  const [volume, setVolume] = useState<number>(0.5);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  
+  // Sound effects
+  const wheelSpinSound = useSound('/sounds/roulette-spin.mp3', { volume: volume * 0.7, loop: true });
+  const ballDropSound = useSound('/sounds/roulette-ball.mp3', { volume: volume });
+  const winSound = useSound('/sounds/roulette-win.mp3', { volume: volume });
+  
+  // Update sound volumes when master volume changes
+  useEffect(() => {
+    if (isMuted) {
+      wheelSpinSound.setVolume(0);
+      ballDropSound.setVolume(0);
+      winSound.setVolume(0);
+    } else {
+      wheelSpinSound.setVolume(volume * 0.7);
+      ballDropSound.setVolume(volume);
+      winSound.setVolume(volume);
+    }
+  }, [volume, isMuted]);
 
   // Get user data for balance
   const { user } = auth || {};
@@ -122,30 +162,164 @@ export function RouletteGame() {
     },
   });
 
-  // Spin the wheel animation
+  // Advanced wheel and ball animation with realistic physics
   const spinWheel = (winningNumber: number) => {
-    if (!wheelRef.current) return;
+    if (!wheelRef.current || !ballRef.current) return;
     
     setIsSpinning(true);
+    wheelSpinSound.play();
     
     // Find the winning number's position in the wheel array
     const winningIndex = wheelNumbers.indexOf(winningNumber);
     
     // Calculate the full rotations plus the position of the winning number
-    const totalRotation = 5 * 360 + (winningIndex * (360 / wheelNumbers.length));
+    // Wheel rotates counterclockwise in real life
+    const totalRotation = -8 * 360 - (winningIndex * (360 / wheelNumbers.length));
     
-    wheelRef.current.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    // Start wheel animation
+    wheelRef.current.style.transition = 'transform 8s cubic-bezier(0.2, 0.1, 0.1, 1)';
     wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
     
-    setTimeout(() => {
-      setIsSpinning(false);
+    // Ball physics parameters
+    const initialBallParams: BallPhysics = {
+      position: Math.random() * 360, // Random starting position
+      speed: 1200, // Start fast
+      acceleration: -120, // Deceleration rate
+      bounceCount: 0
+    };
+    
+    setBall(initialBallParams);
+    
+    // Animate ball at 60fps
+    let lastTime = performance.now();
+    let animationFrameId: number;
+    
+    // The winning position should be opposite the wheel's final position for the number
+    const targetBallPosition = ((winningIndex * (360 / wheelNumbers.length)) + 180) % 360;
+    
+    const animateBall = (time: number) => {
+      if (!ballRef.current) return;
       
-      // Reset wheel position after spin (without animation)
+      const deltaTime = (time - lastTime) / 1000; // Convert to seconds
+      lastTime = time;
+      
+      setBall(prevBall => {
+        if (!prevBall) return null;
+        
+        let newPosition = prevBall.position + prevBall.speed * deltaTime;
+        newPosition = newPosition % 360; // Keep within 0-360
+        
+        // Apply deceleration
+        let newSpeed = prevBall.speed + prevBall.acceleration * deltaTime;
+        
+        // Handle bouncing effect when ball slows down
+        let newBounceCount = prevBall.bounceCount;
+        
+        // When speed gets very low, start bouncing and gradually settle
+        if (newSpeed < 120 && newSpeed > 0) {
+          // Add small random bounces
+          if (Math.random() < 0.05 && prevBall.bounceCount < 5) {
+            newSpeed += Math.random() * 50;
+            newBounceCount++;
+            // Play ball drop sound on bounces
+            ballDropSound.play();
+          }
+        }
+        
+        // Final settling to the correct position
+        if (newSpeed < 20) {
+          // Start aligning to the final position
+          const distanceToTarget = (targetBallPosition - newPosition + 360) % 360;
+          
+          if (distanceToTarget < 5 || distanceToTarget > 355) {
+            // We're very close to target, stop completely
+            newSpeed = 0;
+            newPosition = targetBallPosition;
+            
+            // Stop wheel sound when ball stops
+            setTimeout(() => {
+              wheelSpinSound.stop();
+              setIsSpinning(false);
+              
+              // Play win sound if player won
+              if (result && result.totalWin > 0) {
+                winSound.play();
+              }
+            }, 500);
+            
+            return {
+              ...prevBall,
+              position: newPosition,
+              speed: newSpeed,
+              bounceCount: newBounceCount,
+              finalPosition: newPosition
+            };
+          } else {
+            // Adjust speed slightly to approach target
+            if (distanceToTarget < 180) {
+              // Move clockwise
+              newSpeed = Math.max(10, newSpeed);
+            } else {
+              // Move counterclockwise
+              newSpeed = Math.min(-10, newSpeed);
+            }
+          }
+        }
+        
+        // If speed gets too slow, stop completely
+        if (Math.abs(newSpeed) < 0.1) {
+          newSpeed = 0;
+          newPosition = targetBallPosition;
+          
+          // Stop wheel sound when ball stops
+          setTimeout(() => {
+            wheelSpinSound.stop();
+            setIsSpinning(false);
+            
+            // Play win sound if player won
+            if (result && result.totalWin > 0) {
+              winSound.play();
+            }
+          }, 500);
+        }
+        
+        // Update ball position visually
+        if (ballRef.current) {
+          ballRef.current.style.transform = `rotate(${newPosition}deg) translateY(-120px)`;
+        }
+        
+        return {
+          position: newPosition,
+          speed: newSpeed,
+          acceleration: prevBall.acceleration,
+          bounceCount: newBounceCount,
+          finalPosition: newSpeed === 0 ? newPosition : undefined
+        };
+      });
+      
+      // Continue animation if still moving
+      if (ball && ball.speed !== 0) {
+        animationFrameId = requestAnimationFrame(animateBall);
+      }
+    };
+    
+    // Start the ball animation
+    animationFrameId = requestAnimationFrame(animateBall);
+    
+    // Reset wheel position after spin is complete
+    setTimeout(() => {
       if (wheelRef.current) {
         wheelRef.current.style.transition = 'none';
         wheelRef.current.style.transform = 'rotate(0deg)';
       }
-    }, 5000);
+    }, 9000);
+    
+    // Cleanup function to cancel animation if component unmounts during animation
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   };
 
   // Handle bet type selection
@@ -518,6 +692,16 @@ export function RouletteGame() {
 
   return (
     <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">Ruleta Europea</h1>
+        <VolumeControl
+          volume={volume}
+          isMuted={isMuted}
+          onVolumeChange={setVolume}
+          onMuteToggle={() => setIsMuted(!isMuted)}
+        />
+      </div>
+      
       <Tabs defaultValue="game" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="game">Juego</TabsTrigger>
@@ -533,15 +717,30 @@ export function RouletteGame() {
             <Card>
               <CardHeader>
                 <CardTitle>Ruleta</CardTitle>
-                <CardDescription>La bola se detendrá en un número entre 0 y 36</CardDescription>
+                <CardDescription>La bola se detendrá en un número entre 0 y 36. En cada partida el crupier lanza una bola sobre la ruleta en movimiento.</CardDescription>
               </CardHeader>
               
               <CardContent className="relative flex flex-col items-center">
-                {/* Roulette wheel representation */}
-                <div className="relative w-64 h-64 rounded-full border-8 border-yellow-700 overflow-hidden mb-8">
+                {/* 3D-looking roulette table surface */}
+                <div 
+                  ref={tableRef}
+                  className="relative w-80 h-80 rounded-full bg-gradient-to-b from-green-900 to-green-700 border-8 border-yellow-800 overflow-hidden shadow-xl mb-8"
+                  style={{
+                    boxShadow: 'inset 0 0 50px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.3)',
+                    perspective: '1000px'
+                  }}
+                >
+                  {/* Outer wheel rim - stationary */}
+                  <div className="absolute inset-2 rounded-full border-4 border-yellow-600 bg-gradient-to-b from-yellow-700 to-yellow-900"></div>
+                  
+                  {/* Inner wheel with numbers - this rotates */}
                   <div 
                     ref={wheelRef} 
-                    className="absolute inset-0 transition-transform"
+                    className="absolute inset-10 rounded-full transition-transform duration-1000 bg-gradient-to-r from-yellow-800 to-yellow-700"
+                    style={{
+                      boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)',
+                      transformStyle: 'preserve-3d'
+                    }}
                   >
                     {wheelNumbers.map((num, index) => {
                       const angle = (index * (360 / wheelNumbers.length));
@@ -551,14 +750,16 @@ export function RouletteGame() {
                           className={`absolute top-0 left-0 right-0 bottom-0 ${getNumberColor(num)}`}
                           style={{
                             clipPath: `polygon(50% 50%, 50% 0%, ${50 + Math.cos((angle + 360/wheelNumbers.length) * Math.PI/180) * 50}% ${50 - Math.sin((angle + 360/wheelNumbers.length) * Math.PI/180) * 50}%, ${50 + Math.cos(angle * Math.PI/180) * 50}% ${50 - Math.sin(angle * Math.PI/180) * 50}%)`,
+                            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)',
                           }}
                         >
                           <div 
-                            className="absolute text-center text-xs font-bold"
+                            className="absolute text-center text-xs font-bold text-white"
                             style={{
                               top: '10%',
                               left: '50%',
                               transform: `translateX(-50%) rotate(${-angle}deg)`,
+                              textShadow: '0 1px 2px rgba(0,0,0,0.8)'
                             }}
                           >
                             {num}
@@ -566,16 +767,42 @@ export function RouletteGame() {
                         </div>
                       );
                     })}
+                    
+                    {/* Center hub of wheel */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 border border-yellow-800" 
+                      style={{
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                      }}>
+                    </div>
                   </div>
                   
-                  {/* Ball indicator */}
-                  {result && !isSpinning && (
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-gray-300 shadow-lg z-10 flex items-center justify-center">
-                      <span className={`text-xs font-bold ${result.color === 'green' ? 'text-green-600' : result.color === 'red' ? 'text-red-600' : 'text-black'}`}>
-                        {result.number}
-                      </span>
-                    </div>
-                  )}
+                  {/* Ball */}
+                  <div 
+                    ref={ballRef}
+                    className="absolute top-1/2 left-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 z-10"
+                    style={{
+                      transform: 'translateX(-50%) translateY(-120px)',
+                      transition: 'none',
+                      boxShadow: '0 2px 3px rgba(0,0,0,0.3)'
+                    }}
+                  ></div>
+                  
+                  {/* Wheel ticks/dividers - visual enhancement */}
+                  <div className="absolute inset-4 rounded-full pointer-events-none">
+                    {wheelNumbers.map((_, index) => {
+                      const angle = (index * (360 / wheelNumbers.length));
+                      return (
+                        <div 
+                          key={`tick-${index}`}
+                          className="absolute top-1/2 left-1/2 w-0.5 h-8 bg-yellow-800"
+                          style={{
+                            transform: `translate(-50%, 0) rotate(${angle}deg)`,
+                            transformOrigin: 'top'
+                          }}
+                        ></div>
+                      );
+                    })}
+                  </div>
                 </div>
                 
                 {/* Result display */}
