@@ -36,18 +36,25 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   const onSubmit = async (data: AdminLoginFormData) => {
     setIsSubmitting(true);
     try {
-      const response = await apiRequest("/api/setup-admin", {
+      const response = await fetch("/api/setup-admin", {
         method: "POST",
-        data
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
       });
       
-      if (response && response.message === "Admin setup successful!") {
+      const result = await response.json();
+      
+      if (response.ok && result.message === "Admin setup successful!") {
         toast({
           title: "Admin access granted",
           description: "You now have administrator privileges.",
           variant: "default"
         });
         onLoginSuccess();
+      } else {
+        throw new Error(result.message || "Authentication failed");
       }
     } catch (error) {
       console.error("Admin login error:", error);

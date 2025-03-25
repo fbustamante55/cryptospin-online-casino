@@ -189,25 +189,40 @@ export default function AdminDashboardPage() {
     setIsLoading(true);
     try {
       // Fetch dashboard stats
-      const stats = await apiRequest('/api/admin/dashboard');
-      setDashboardStats(stats);
+      const statsResponse = await fetch('/api/admin/dashboard');
+      if (statsResponse.ok) {
+        const stats = await statsResponse.json();
+        setDashboardStats(stats);
+      }
 
       // Fetch users
-      const usersData = await apiRequest('/api/admin/users');
-      setUsers(usersData);
-      setFilteredUsers(usersData);
+      const usersResponse = await fetch('/api/admin/users');
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        setUsers(usersData);
+        setFilteredUsers(usersData);
+      }
 
       // Fetch transactions
-      const transactionsData = await apiRequest('/api/admin/transactions');
-      setTransactions(transactionsData);
+      const transactionsResponse = await fetch('/api/admin/transactions');
+      if (transactionsResponse.ok) {
+        const transactionsData = await transactionsResponse.json();
+        setTransactions(transactionsData);
+      }
 
       // Fetch KYC documents
-      const kycData = await apiRequest('/api/admin/kyc-documents');
-      setKycDocuments(kycData);
+      const kycResponse = await fetch('/api/admin/kyc-documents');
+      if (kycResponse.ok) {
+        const kycData = await kycResponse.json();
+        setKycDocuments(kycData);
+      }
 
       // Fetch game history
-      const historyData = await apiRequest('/api/admin/game-history');
-      setGameHistory(historyData);
+      const historyResponse = await fetch('/api/admin/game-history');
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json();
+        setGameHistory(historyData);
+      }
     } catch (error) {
       console.error('Error fetching admin data:', error);
       toast({
@@ -244,27 +259,43 @@ export default function AdminDashboardPage() {
   const handleBanUser = async (userId: number, isBanned: boolean) => {
     try {
       if (isBanned) {
-        await apiRequest<{success: boolean}>('/api/admin/users/unban', {
+        const response = await fetch('/api/admin/users/unban', {
           method: 'POST',
-          data: { userId }
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId })
         });
-        toast({
-          title: 'Success',
-          description: 'User has been unbanned',
-          variant: 'default'
-        });
+        
+        if (response.ok) {
+          toast({
+            title: 'Success',
+            description: 'User has been unbanned',
+            variant: 'default'
+          });
+        } else {
+          throw new Error('Failed to unban user');
+        }
       } else {
         const reason = prompt('Enter reason for banning:');
         if (reason) {
-          await apiRequest<{success: boolean}>('/api/admin/users/ban', {
+          const response = await fetch('/api/admin/users/ban', {
             method: 'POST',
-            data: { userId, reason }
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ userId, reason })
           });
-          toast({
-            title: 'Success',
-            description: 'User has been banned',
-            variant: 'default'
-          });
+          
+          if (response.ok) {
+            toast({
+              title: 'Success',
+              description: 'User has been banned',
+              variant: 'default'
+            });
+          } else {
+            throw new Error('Failed to ban user');
+          }
         }
       }
       // Refresh user list
@@ -282,27 +313,34 @@ export default function AdminDashboardPage() {
   const handleVerifyKYC = async (documentId: number, approve: boolean) => {
     try {
       const endpoint = approve ? '/api/admin/kyc/approve' : '/api/admin/kyc/reject';
-      const data: any = { documentId };
+      const requestData: any = { documentId };
       
       if (!approve) {
         const reason = prompt('Enter reason for rejection:');
         if (!reason) return;
-        data.rejectionReason = reason;
+        requestData.rejectionReason = reason;
       }
       
-      await apiRequest<{success: boolean}>(endpoint, {
+      const response = await fetch(endpoint, {
         method: 'POST',
-        data
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
       });
       
-      toast({
-        title: 'Success',
-        description: `Document ${approve ? 'approved' : 'rejected'} successfully`,
-        variant: 'default'
-      });
-      
-      // Refresh KYC documents
-      fetchAdminData();
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: `Document ${approve ? 'approved' : 'rejected'} successfully`,
+          variant: 'default'
+        });
+        
+        // Refresh KYC documents
+        fetchAdminData();
+      } else {
+        throw new Error(`Failed to ${approve ? 'approve' : 'reject'} document`);
+      }
     } catch (error) {
       console.error('Error updating KYC status:', error);
       toast({
