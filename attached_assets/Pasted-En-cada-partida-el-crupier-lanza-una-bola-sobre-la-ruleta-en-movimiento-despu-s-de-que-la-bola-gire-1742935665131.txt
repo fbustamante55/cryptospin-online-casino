@@ -1,0 +1,28 @@
+En cada partida el crupier lanza una bola sobre la ruleta en movimiento, después de que la bola gire varias vueltas caerá sobre una de las casillas de la ruleta. El objetivo del juego es predecir en que casilla caerá la bola.
+
+El crupier anuncia el inicio de una nueva partida diciendo “hagan juego”, en ese momento las apuestas para la siguiente partida quedan abiertas, los jugadores podrán realizar sus apuestas sobre el tapete hasta que el crupier cierre las apuestas diciendo “no va más”. Después de cerrar las apuestas, el crupier lanzará la bola, cuando la bola se detenga en alguna de las casillas, el crupier anunciará el numero ganador y las apuestas ganadoras, seguidamente procederá a retirar las apuestas perdedoras y a pagar las apuestas ganadoras.
+
+La siguiente tabla muestra las apuestas que se pueden hacer, a cuantos números se está jugando con cada apuesta y cuál es el premio en caso de acierto.
+
+Apuesta	Se juega a	Premio	Ejemplo en la imagen (ficha)
+Rojo/Negro	Se apuesta al color del número ganador, si será rojo o negro. Con esta apuesta se está jugando a 18 números ya que en la ruleta hay 18 números rojos y 18 números negros.	1 x 1	1
+Par/Impar	Se apuesta a si el número donde cae la bola será par o impar. Con esta apuesta se está jugando a 18 números, bien a los 18 números pares o los 18 números impares que están en la ruleta.	1 x 1	2
+Pasa/Falta	Se trata de apostar si el número estará comprendido entre los números del 1 al 18 (falta) o entre los números del 19 al 36 (pasa). Por tanto, con esta apuesta se está jugando a 18 números.	1 x 1	3
+Docena	Se trata de apostar en que docena estará el número ganador. El tapete se divide en 3 docenas, cada una de ellas abarca 12 números, por tanto al apostar por una docena se juega a 12 números.	2 x 1	4
+Columna	Se trata de apostar en que columna estará el número ganador. El tapete se divide en 3 columnas, cada una de ellas alberga 12 números. Por tanto, al apostar por una columna se juega a 12 números.	2 x 1	5
+Dos docenas	Se trata de apostar con una sola apuesta a dos docenas, esta apuesta solo se puede hacer para dos docenas contiguas, es decir, se puede apostar a las docenas 1 y 2, o a las docenas 2 y 3. Al apostar a 2 docenas se juega a 24 números.	0,5 x 1	6
+Dos columnas	Se trata de apostar con una sola apuesta a dos columnas, esta apuesta solo se puede realizar para dos columnas contiguas. Por tanto, con la apuesta de dos columnas se podrá apostar a las columnas 1 y 2 o a las columnas 2 y 3. Se juega a 24 números.	0,5 x 1	7
+Seisena	Se trata de apostar a 6 números con una sola apuesta. Los 6 números sobre los que se realiza este tipo de apuesta se encuentran en dos filas contiguas.	5 x 1	8
+Cuadro	Se trata de apostar a 4 números con una sola apuesta. Esta apuesta se realiza sobre 4 números que forman un cuadrado en el tapete.	8 x 1	9
+Transversal	Se trata de apostar a 3 números con una sola apuesta, con la apuesta se apuesta a los 3 números de una fila. Existen dos variaciones de esta apuesta, la apuesta transversal para apostar a los 3 números 0, 1 y 2 y la apuesta transversal para apostar a los 3 números 0, 2 y 3.	11 x 1	10, 11, 12
+Caballo	Se trata de apostar a 2 números con una sola apuesta, los 2 números deberán están contiguos en el tapete de manera horizontal o vertical.	17 x 1	13, 14
+Pleno	Se trata de apostar a un solo número.	35 x 1	15
+La siguiente imagen muestra los diferentes tipos de apuestas sobre el tapete identificando cada apuesta con el número de ficha que figura en la tabla superior.
+
+Apuestas ruleta
+En la imagen se muestran las apuestas explicadas en la tabla
+La columna “Premio” de la tabla de apuestas indica cuál es el pago de la apuesta en caso de resultar ganadora. Además de lo que paga el crupier por la apuesta ganadora, el jugador recupera la apuesta inicial.
+
+El premio de cada una de las apuestas está relacionado con las posibilidades de acierto, a menor probabilidad de acierto mayor premio.
+
+En el juego de Ruleta Americana de doble cero existe además otro tipo de apuesta por la presencia del doble cero (‘00’), en el artículo de ruleta americana de doble cero se explica en detalle.
