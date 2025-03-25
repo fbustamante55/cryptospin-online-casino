@@ -101,8 +101,11 @@ export function CrashGame() {
   
   const bustMutation = useMutation({
     mutationFn: async (params: { bet: number; crashPoint: number }) => {
-      const res = await apiRequest("POST", "/api/games/crash/bust", params);
-      return res.json();
+      return apiRequest({
+        method: "POST", 
+        url: "/api/games/crash/bust", 
+        data: params
+      });
     }
   });
   
