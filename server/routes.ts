@@ -27,6 +27,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
 
+  // Special admin setup route
+  app.post("/api/setup-admin", async (req, res) => {
+    try {
+      const adminSetupSchema = z.object({
+        username: z.string(),
+        password: z.string(),
+      });
+      
+      const { username, password } = adminSetupSchema.parse(req.body);
+      
+      // Check if the credentials match our predefined admin credentials
+      if (username === "BUSTAXADMINDEUZ" && password === "Todopoderoso99@") {
+        // Find the user by username
+        const user = await storage.getUserByUsername(username);
+        
+        if (!user) {
+          return res.status(404).json({ message: "Admin user not found. Please register with this username first." });
+        }
+        
+        // Make the user an admin
+        const updatedUser = await storage.setUserAdminStatus(user.id, true);
+        
+        if (!updatedUser) {
+          return res.status(500).json({ message: "Failed to update admin status" });
+        }
+        
+        // Remove sensitive data
+        const { password, ...safeUser } = updatedUser;
+        return res.status(200).json({ 
+          message: "Admin setup successful!", 
+          user: safeUser 
+        });
+      }
+      
+      // Invalid credentials
+      return res.status(403).json({ message: "Invalid admin credentials" });
+    } catch (error) {
+      console.error("Error in admin setup:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to set up admin" });
+    }
+  });
+
   // Wallet-related routes
   
   // Deposit funds
