@@ -1,0 +1,77 @@
+Client (client/)
+Add profile image upload: users should be able to upload and update their avatar, which appears in the dashboard, leaderboard, and game lobbies.
+
+Enhance the user dashboard to show bet history, crypto balance, NFT inventory, unlocked rewards, and mission progress.
+
+Add a notification system for game-related events: bet confirmations, wins/losses, rewards claimed, and system announcements. Include real-time delivery with dismiss and "mark as read" functionality.
+
+Add buttons for Support, FAQ, and a new section called Vault: the Vault is a secure internal balance management system where users can deposit crypto separately for safekeeping.
+
+Improve GUI/UI of key games:
+
+Blackjack: visually responsive layout, animated card dealing, chip stack visuals.
+
+Baccarat: add dealer interaction UI, betting zones, history tracker.
+
+Crash: smoother graph animations, real-time multiplayer indicators, countdown timers.
+
+Roulette: rotating 3D wheel animation, chip drag-and-drop, color themes.
+
+Add full support for all international languages (auto-detect browser language, allow manual selection, i18n with JSON or i18next).
+
+Include a dark/light mode toggle and ensure full responsive/mobile-first design.
+
+🔐 Authentication & Profile Management
+Include email/password + social login (Google, Facebook) + wallet login (MetaMask, WalletConnect).
+
+Require 2FA for withdrawals and high-stake actions.
+
+KYC document upload with real-time status tracking.
+
+Profile section should include: editable personal info, avatar upload, 2FA setup, crypto address manager, and transaction/export history.
+
+💬 Admin Panel
+Admins must be able to view, search, ban/unban users, reset passwords, and view complete transaction/bet logs.
+
+Add a global notification sender: Admins can compose and send platform-wide messages or targeted notifications (e.g. “Your withdrawal is delayed” or “Welcome bonus claimed!”).
+
+Allow editing of RTP, house edge, limits, symbol frequencies, crash curve, and dice odds.
+
+Integrate real-time analytics dashboard (user growth, volume, top winners).
+
+Add admin FAQ editor, system settings config, and internal moderation logs.
+
+🪙 Crypto & Vault
+Enable deposits and withdrawals in BTC, ETH, USDT, BNB, SOL, DOGE, TRX, ADA.
+
+Users can transfer funds from Wallet to Vault (internal savings system). Vault balances cannot be used in games unless manually withdrawn.
+
+Track Vault movement history. Add a "Lock Vault" feature to pause fund access (anti-addiction feature).
+
+Allow admins to manually unlock Vaults in case of support requests.
+
+📡 Server (server/) & API
+REST/GraphQL API with rate limits and full JWT role-based auth.
+
+Add WebSockets for live bets, games, and push notifications.
+
+Secure endpoints with XSS, CSRF, and validation layers.
+
+Log events and errors using Winston or similar.
+
+Add scalable architecture support: Dockerized services, horizontal scaling with load balancer ready.
+
+🌍 Shared / Global Features
+Refactor shared code, add strict typing with TypeScript, and document everything using JSDoc/TypeDoc.
+
+Setup CI/CD pipelines (GitHub Actions, Vercel/Render), automated test suites, and deployment to cloud.
+
+Monitoring with Grafana/Prometheus, optional Sentry for error tracking.
+
+Optimize all assets (especially in /attached_assets/), implement lazy loading, preload fonts.
+
+Tailwind customization in tailwind.config.ts to reflect CryptoSpin branding.
+
+Add sitemap.xml, robots.txt, dynamic SEO meta tags, and OpenGraph/Twitter cards.
+
+Ensure everything is modular, secure, well-documented, and designed for mobile + desktop. The platform must be production-grade, scalable, provably fair, and optimized for long-term success in the iGaming + crypto space.
