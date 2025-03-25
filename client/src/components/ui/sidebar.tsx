@@ -38,7 +38,7 @@ export function Sidebar({ className }: SidebarProps) {
     <div className={cn("hidden md:flex flex-col w-64 bg-[#1A2634] border-r border-gray-800", className)}>
       <div className="p-4 border-b border-gray-800">
         <h1 className="font-heading font-bold text-2xl text-white tracking-wider">
-          <span className="text-[#00FFAA]">Crypto</span>Play
+          <span className="text-[#00FFAA]">Crypto</span>Spin
         </h1>
       </div>
       

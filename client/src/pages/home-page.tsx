@@ -59,7 +59,7 @@ export default function HomePage() {
                 </svg>
               </button>
               <h1 className="font-heading font-bold text-xl text-white tracking-wider ml-3">
-                <span className="text-[#00FFAA]">Crypto</span>Play
+                <span className="text-[#00FFAA]">Crypto</span>Spin
               </h1>
             </div>
             
@@ -107,7 +107,7 @@ export default function HomePage() {
             {/* Hero Banner */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A2634] to-[#0F1923] mb-8">
               <div className="relative z-10 p-6 md:p-8">
-                <h2 className="font-heading text-xl md:text-3xl font-bold text-white mb-2">Welcome to <span className="text-[#00FFAA]">CryptoPlay</span></h2>
+                <h2 className="font-heading text-xl md:text-3xl font-bold text-white mb-2">Welcome to <span className="text-[#00FFAA]">CryptoSpin</span></h2>
                 <p className="text-gray-300 max-w-lg mb-4">Experience the thrill of crypto casino gaming with our selection of exciting games. Play responsibly!</p>
                 <div className="flex flex-wrap gap-3">
                   <Link href="/slots">
