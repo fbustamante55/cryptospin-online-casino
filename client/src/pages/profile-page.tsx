@@ -126,7 +126,11 @@ export default function ProfilePage() {
   const submitPhoneNumber = async (phoneNumber: string) => {
     setIsSubmittingPhone(true);
     try {
-      await apiRequest("POST", "/api/send-phone-verification", { phoneNumber });
+      await apiRequest({
+        method: "POST",
+        url: "/api/send-phone-verification",
+        data: { phoneNumber }
+      });
       setPhoneVerificationSent(true);
       toast({
         title: "Verification code sent",
@@ -151,9 +155,13 @@ export default function ProfilePage() {
     
     setIsVerifyingPhone(true);
     try {
-      await apiRequest("POST", "/api/verify-phone", { 
-        phoneNumber: data.phoneNumber,
-        code: data.verificationCode
+      await apiRequest({
+        method: "POST",
+        url: "/api/verify-phone",
+        data: { 
+          phoneNumber: data.phoneNumber,
+          code: data.verificationCode
+        }
       });
       
       toast({
@@ -182,7 +190,11 @@ export default function ProfilePage() {
   const updateProfile = async (data: ProfileUpdateFormData) => {
     setIsSubmittingProfile(true);
     try {
-      await apiRequest("PATCH", "/api/user/profile", data);
+      await apiRequest({
+        method: "PATCH",
+        url: "/api/user/profile",
+        data
+      });
       
       toast({
         title: "Profile updated",
@@ -205,9 +217,13 @@ export default function ProfilePage() {
   const changePassword = async (data: PasswordChangeFormData) => {
     setIsChangingPassword(true);
     try {
-      await apiRequest("POST", "/api/user/change-password", {
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/change-password",
+        data: {
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+        }
       });
       
       toast({
@@ -232,7 +248,11 @@ export default function ProfilePage() {
   const addWalletAddress = async (data: WalletAddressFormData) => {
     setIsAddingWallet(true);
     try {
-      await apiRequest("POST", "/api/user/wallet", data);
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/wallet",
+        data
+      });
       
       toast({
         title: "Wallet address added",
@@ -260,9 +280,13 @@ export default function ProfilePage() {
     setIsUploadingKYC(true);
     try {
       // In a real app, this would upload the KYC documents
-      await apiRequest("POST", "/api/user/kyc", {
-        documentType: "id",
-        status: "pending",
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/kyc",
+        data: {
+          documentType: "id",
+          status: "pending",
+        }
       });
       
       toast({
@@ -287,7 +311,11 @@ export default function ProfilePage() {
 
   const setup2FA = async (code: string) => {
     try {
-      await apiRequest("POST", "/api/user/2fa/enable", { code });
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/2fa/enable",
+        data: { code }
+      });
       
       toast({
         title: "2FA enabled",
@@ -309,7 +337,11 @@ export default function ProfilePage() {
 
   const disable2FA = async (code: string) => {
     try {
-      await apiRequest("POST", "/api/user/2fa/disable", { code });
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/2fa/disable",
+        data: { code }
+      });
       
       toast({
         title: "2FA disabled",
