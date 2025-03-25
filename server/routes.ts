@@ -642,6 +642,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User wallet address management endpoints
+  
+  // Get user wallet addresses
+  app.get("/api/user/wallet-addresses", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        btcAddress: user.btcAddress || "",
+        ethAddress: user.ethAddress || ""
+      });
+    } catch (error) {
+      console.error("Error fetching wallet addresses:", error);
+      res.status(500).json({ message: "Failed to fetch wallet addresses" });
+    }
+  });
+  
+  // Update user wallet addresses
+  app.patch("/api/user/wallet-addresses", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const walletSchema = z.object({
+      btcAddress: z.string().min(1).optional(),
+      ethAddress: z.string().min(1).optional()
+    });
+    
+    try {
+      const { btcAddress, ethAddress } = walletSchema.parse(req.body);
+      
+      // Create update object with only provided values
+      const updates: Record<string, string> = {};
+      if (btcAddress !== undefined) updates.btcAddress = btcAddress;
+      if (ethAddress !== undefined) updates.ethAddress = ethAddress;
+      
+      // Update user profile
+      const updatedUser = await storage.updateUserProfile(req.user.id, updates);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update wallet addresses" });
+      }
+      
+      res.json({
+        btcAddress: updatedUser.btcAddress || "",
+        ethAddress: updatedUser.ethAddress || ""
+      });
+    } catch (error) {
+      console.error("Error updating wallet addresses:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid wallet address data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update wallet addresses" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

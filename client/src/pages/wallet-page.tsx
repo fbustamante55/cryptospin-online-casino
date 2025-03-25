@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,8 +20,14 @@ import {
   Gift,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Save
 } from "lucide-react";
+
+interface WalletAddresses {
+  btcAddress: string;
+  ethAddress: string;
+}
 
 export default function WalletPage() {
   const { user } = useAuth();
@@ -35,6 +41,44 @@ export default function WalletPage() {
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });
+
+  // Fetch user's saved wallet addresses
+  const { data: walletAddresses } = useQuery<WalletAddresses>({
+    queryKey: ["/api/user/wallet-addresses"],
+  });
+
+  // Save wallet address mutation
+  const saveWalletAddressMutation = useMutation({
+    mutationFn: async (data: { btcAddress?: string; ethAddress?: string }) => {
+      const response = await apiRequest("PATCH", "/api/user/wallet-addresses", data);
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/wallet-addresses'] });
+      toast({
+        title: "Wallet addresses updated",
+        description: "Your cryptocurrency addresses have been saved for future use."
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update wallet addresses",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Effect to set withdrawal address from saved addresses when currency changes
+  useEffect(() => {
+    if (walletAddresses) {
+      if (withdrawalCurrency === "BTC" && walletAddresses.btcAddress) {
+        setWithdrawalAddress(walletAddresses.btcAddress);
+      } else if (withdrawalCurrency === "ETH" && walletAddresses.ethAddress) {
+        setWithdrawalAddress(walletAddresses.ethAddress);
+      }
+    }
+  }, [withdrawalCurrency, walletAddresses]);
 
   // Deposit funds mutation
   const depositMutation = useMutation({
@@ -111,6 +155,25 @@ export default function WalletPage() {
       address: withdrawalAddress, 
       currency: withdrawalCurrency 
     });
+  };
+  
+  // Save current wallet address
+  const handleSaveWalletAddress = () => {
+    if (!withdrawalAddress || withdrawalAddress.length < 10) {
+      toast({
+        title: "Invalid address",
+        description: "Please enter a valid cryptocurrency address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create update payload based on selected currency
+    const updateData = withdrawalCurrency === "BTC" 
+      ? { btcAddress: withdrawalAddress }
+      : { ethAddress: withdrawalAddress };
+      
+    saveWalletAddressMutation.mutate(updateData);
   };
 
   return (
