@@ -36,7 +36,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   const onSubmit = async (data: AdminLoginFormData) => {
     setIsSubmitting(true);
     try {
-      const response = await apiRequest<{message: string, user: any}>("/api/setup-admin", {
+      const response = await apiRequest("/api/setup-admin", {
         method: "POST",
         data
       });

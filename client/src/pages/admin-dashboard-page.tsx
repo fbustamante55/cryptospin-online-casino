@@ -189,24 +189,24 @@ export default function AdminDashboardPage() {
     setIsLoading(true);
     try {
       // Fetch dashboard stats
-      const stats = await apiRequest<DashboardStats>('/api/admin/stats');
+      const stats = await apiRequest('/api/admin/dashboard');
       setDashboardStats(stats);
 
       // Fetch users
-      const usersData = await apiRequest<User[]>('/api/admin/users');
+      const usersData = await apiRequest('/api/admin/users');
       setUsers(usersData);
       setFilteredUsers(usersData);
 
       // Fetch transactions
-      const transactionsData = await apiRequest<Transaction[]>('/api/admin/transactions');
+      const transactionsData = await apiRequest('/api/admin/transactions');
       setTransactions(transactionsData);
 
       // Fetch KYC documents
-      const kycData = await apiRequest<KYCDocument[]>('/api/admin/kyc');
+      const kycData = await apiRequest('/api/admin/kyc-documents');
       setKycDocuments(kycData);
 
       // Fetch game history
-      const historyData = await apiRequest<GameHistory[]>('/api/admin/game-history');
+      const historyData = await apiRequest('/api/admin/game-history');
       setGameHistory(historyData);
     } catch (error) {
       console.error('Error fetching admin data:', error);
@@ -290,7 +290,7 @@ export default function AdminDashboardPage() {
         data.rejectionReason = reason;
       }
       
-      await apiRequest(endpoint, {
+      await apiRequest<{success: boolean}>(endpoint, {
         method: 'POST',
         data
       });
