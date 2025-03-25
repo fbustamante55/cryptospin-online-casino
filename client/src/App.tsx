@@ -27,8 +27,12 @@ function Router() {
       <ProtectedRoute path="/wallet" component={WalletPage} />
       <ProtectedRoute path="/history" component={HistoryPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
-      <Route path="/auth">{AuthPage()}</Route>
-      <Route>{NotFound()}</Route>
+      <Route path="/auth">
+        <AuthPage />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }
