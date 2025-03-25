@@ -48,8 +48,11 @@ export function CrashGame() {
   
   const betMutation = useMutation({
     mutationFn: async (params: { bet: number; autoCashout?: number }) => {
-      const res = await apiRequest("POST", "/api/games/crash/bet", params);
-      return res.json() as Promise<CrashBetResult>;
+      return apiRequest<CrashBetResult>({
+        method: "POST", 
+        url: "/api/games/crash/bet", 
+        data: params
+      });
     },
     onSuccess: (result) => {
       queryClient.setQueryData(["/api/user"], (oldData: any) => ({
@@ -78,8 +81,11 @@ export function CrashGame() {
   
   const cashoutMutation = useMutation({
     mutationFn: async (params: { bet: number; crashPoint: number; cashoutPoint: number }) => {
-      const res = await apiRequest("POST", "/api/games/crash/cashout", params);
-      return res.json() as Promise<CrashCashoutResult>;
+      return apiRequest<CrashCashoutResult>({
+        method: "POST", 
+        url: "/api/games/crash/cashout", 
+        data: params
+      });
     },
     onSuccess: (result) => {
       queryClient.setQueryData(["/api/user"], (oldData: any) => ({

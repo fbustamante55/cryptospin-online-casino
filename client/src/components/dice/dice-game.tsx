@@ -34,8 +34,11 @@ export function DiceGame() {
   
   const playDiceMutation = useMutation({
     mutationFn: async (params: { bet: number; target: number; isOver: boolean }) => {
-      const res = await apiRequest("POST", "/api/games/dice", params);
-      return res.json() as Promise<DiceResult>;
+      return apiRequest<DiceResult>({
+        method: "POST", 
+        url: "/api/games/dice", 
+        data: params
+      });
     },
     onSuccess: (result) => {
       queryClient.setQueryData(["/api/user"], (oldData: any) => ({
