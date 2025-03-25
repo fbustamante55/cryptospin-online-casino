@@ -1,0 +1,130 @@
+🔧 Ultimate Prompt: Construcción completa de CryptoSpin – Cripto Casino 2025
+
+Build a highly scalable, modular full-stack web application for a next-generation crypto casino named CryptoSpin, using modern technologies (React.js with TailwindCSS for frontend, Node.js with Express.js for backend, and MongoDB or PostgreSQL as the database). The platform must support traditional and blockchain-integrated casino games, crypto wallet connectivity, advanced financial logic, and modern UI/UX inspired by the provided /assets/ui/ design references.
+
+🛡 Authentication & User Management
+Create a complete authentication system under /auth with email/password login, social login (Google/Facebook OAuth), wallet-based login via MetaMask and WalletConnect, and optional 2FA setup.
+
+Users can register with minimal info (email + wallet), but must complete full KYC (ID document upload, phone number, address, country) before accessing withdrawal features.
+
+Implement JWT-based session handling and role-based access control (user, admin, affiliate, moderator).
+
+👤 Profile Section (/profile)
+Allow users to update profile info (email, username, address), change password, manage withdrawal addresses for BTC, ETH, USDT, DOGE, BNB, ADA, TRX, SOL, etc.
+
+Upload and track KYC status (Pending, Verified, Rejected).
+
+Enable/disable 2FA using QR code (TOTP) and store backup keys.
+
+Display personal statistics, achievements, NFTs, and recent login history.
+
+🌐 Homepage (/)
+Add language selector (i18n-ready with translation files support).
+
+Display market prices of top cryptos (real API or mock data).
+
+Show featured games, bonuses, and CTA for registration/login.
+
+Add a visible Support section linking to live chat or ticket system.
+
+🎰 Casino Games Section
+Implement Slots, Blackjack, Crash, Dice, Plinko, and placeholder for Live Casino (e.g., Evolution).
+
+Use animated, vibrant symbols, smooth transitions, and responsive themes (Vegas, Cyberpunk, Egypt, etc.).
+
+Mechanics include: multiple paylines, cascading reels (avalanche), free spins, multipliers, jackpots, wilds, and near-miss animations.
+
+Add "Demo Mode" to play without real funds.
+
+🏈 Sports Betting Section
+Allow users to bet on MMA, NFL, MLB, Tennis, Soccer, and Hockey.
+
+Display odds (mock or API), place bets with bet slip, manage live or pending bets.
+
+Enable single and combo bets, live scores, and result settlement.
+
+💰 Crypto & Tokenization
+Integrate wallet support: MetaMask, WalletConnect, Phantom.
+
+Allow deposits and withdrawals in top cryptos (BTC, ETH, USDT, etc.) with processor integration (e.g., CoinsPaid, Mercuryo).
+
+Implement in-app currency conversion (crypto → USDT → in-game balance).
+
+Create and manage a native platform token ($CSPIN) for rewards, discounts, access perks, and staking.
+
+Add staking module where users lock $CSPIN for VIP benefits or exclusive game access.
+
+Enable in-platform token exchange (DEX-style module) for crypto swapping.
+
+🧠 AI & Personalization
+Add AI recommendation engine: suggest games based on user preferences, play history, and risk behavior.
+
+Implement AI-powered support chatbot for 24/7 automated responses.
+
+Analyze user behavior for responsible gambling alerts (excessive losses, session duration, risk pattern).
+
+🎮 Gamification & Social Features
+Add loyalty system with levels, XP, and bonus boosts.
+
+Create daily/weekly missions, challenge streaks, and a seasonal Battle Pass.
+
+Add global and per-game leaderboards.
+
+Implement user-to-user tipping, global and in-game chat, and emoji reactions.
+
+Public player profiles with avatars, NFTs, win rate, and badges.
+
+🛍 NFT Integration
+Offer NFTs as rewards or unlockables: skins, avatars, game themes, access badges.
+
+Include inventory section in /profile.
+
+Enable trading of NFTs within user marketplace.
+
+📊 Admin & CMS Dashboard
+Admin panel to manage: users, KYC, deposits/withdrawals, bonuses, support tickets, and CMS content.
+
+Affiliate dashboard: track referrals, commissions, clicks, earnings.
+
+Control panel to launch events, adjust RTP, create bonuses (free spins, deposit matches).
+
+📈 Transparency & Analytics
+Build “Provably Fair” system: seed management, hash verification tools.
+
+Show real-time stats: total wins, user count, recent winners, volume by crypto.
+
+Export user and transaction data in CSV or PDF for audit.
+
+📦 Infra & DevOps
+Use Docker or microservice-ready structure to separate modules: auth, games, wallet, support, CMS.
+
+Prepare for horizontal scaling (Kubernetes-ready optional).
+
+Add unit/integration tests, CI/CD pipeline setup, and performance monitoring tools.
+
+📜 Compliance & Risk
+Add geoblocking for restricted regions based on IP detection.
+
+Display crypto legality info depending on user's country.
+
+Implement regulatory alert system (e.g., if jurisdiction laws change).
+
+Add tax reporting simulation: export statement of wins/losses.
+
+Create a secure dispute system for user-initiated transaction issues.
+
+💬 Blog & SEO
+Build blog section for publishing crypto and casino-related content.
+
+Add SEO meta tags, sitemap, and schema.org microdata.
+
+Enable admin blog post creation, tags, categories, and post scheduling.
+
+🧪 A/B Testing & API
+Add built-in A/B testing module to try UI variants or promotions.
+
+Provide public API and SDK to integrate games or external services.
+
+Add developer docs with OAuth tokens and usage rate limiting.
+
+Ensure everything is responsive, mobile-friendly, accessible (a11y), with proper component-based architecture and security best practices. Document all modules, backend routes, and deployment instructions clearly. The app should be production-ready, modular for updates, and prepared for live scaling in a real iGaming/crypto environment.
