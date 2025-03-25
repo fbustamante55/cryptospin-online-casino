@@ -40,7 +40,7 @@ export function setupAuth(app: Express) {
     store: storage.sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours by default
     }
   };
 
@@ -179,6 +179,15 @@ export function setupAuth(app: Express) {
       
       // Update last login
       await storage.updateUserProfile(user.id, { lastLogin: new Date() });
+      
+      // Set session cookie expiration based on rememberMe
+      if (validatedData.rememberMe) {
+        // Extend session to 30 days if "Remember Me" is checked
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      } else {
+        // Use default of 24 hours
+        req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
+      }
       
       // Log user in
       req.login(user, (err) => {
