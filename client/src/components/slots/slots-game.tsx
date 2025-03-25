@@ -43,8 +43,11 @@ export function SlotsGame() {
 
   const playSlotsMutation = useMutation({
     mutationFn: async (betAmount: number) => {
-      const res = await apiRequest("POST", "/api/games/slots", { bet: betAmount });
-      return res.json() as Promise<SlotResult>;
+      return apiRequest<SlotResult>({
+        method: "POST", 
+        url: "/api/games/slots", 
+        data: { bet: betAmount }
+      });
     },
     onSuccess: (result) => {
       queryClient.setQueryData(["/api/user"], (oldData: any) => ({
