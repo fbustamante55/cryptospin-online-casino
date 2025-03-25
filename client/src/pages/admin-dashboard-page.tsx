@@ -167,6 +167,8 @@ export default function AdminDashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [userSearch, setUserSearch] = useState("");
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [showEditUserDialog, setShowEditUserDialog] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [kycDocuments, setKycDocuments] = useState<KYCDocument[]>([]);
   const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
@@ -351,6 +353,105 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setShowEditUserDialog(true);
+  };
+
+  const handleUpdateUser = async (userData: Partial<User>) => {
+    if (!editingUser) return;
+    
+    try {
+      const response = await fetch(`/api/admin/users/${editingUser.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+      
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: 'User information updated successfully',
+          variant: 'default'
+        });
+        
+        setShowEditUserDialog(false);
+        fetchAdminData();
+      } else {
+        throw new Error('Failed to update user information');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update user information',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleToggleAdminStatus = async (userId: number, isCurrentlyAdmin: boolean) => {
+    try {
+      const response = await fetch('/api/admin/users/toggle-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, makeAdmin: !isCurrentlyAdmin })
+      });
+      
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: `User ${isCurrentlyAdmin ? 'removed from' : 'added to'} administrators`,
+          variant: 'default'
+        });
+        fetchAdminData();
+      } else {
+        throw new Error('Failed to update admin status');
+      }
+    } catch (error) {
+      console.error('Error updating admin status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update admin status',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleVerifyUser = async (userId: number, isCurrentlyVerified: boolean) => {
+    try {
+      const response = await fetch('/api/admin/users/toggle-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, verify: !isCurrentlyVerified })
+      });
+      
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: `User ${isCurrentlyVerified ? 'un-verified' : 'verified'} successfully`,
+          variant: 'default'
+        });
+        fetchAdminData();
+      } else {
+        throw new Error('Failed to update verification status');
+      }
+    } catch (error) {
+      console.error('Error updating verification status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update verification status',
+        variant: 'destructive'
+      });
+    }
+  };
+  
   const getUserStatusBadge = (user: User) => {
     if (user.isBanned) {
       return <Badge variant="destructive">Banned</Badge>;
