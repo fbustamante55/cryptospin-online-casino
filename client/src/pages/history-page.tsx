@@ -203,8 +203,8 @@ export default function HistoryPage() {
                                 <tr key={game.id} className="border-b border-gray-800 last:border-0 hover:bg-[#0F1923]/50">
                                   <td className="py-3 px-4">
                                     <div className="flex items-center">
-                                      {game.gameType === 'slots' && <Slot className="h-4 w-4 mr-1.5 text-[#00FFAA]" />}
-                                      {game.gameType === 'dice' && <Dice className="h-4 w-4 mr-1.5 text-[#FF3E8F]" />}
+                                      {game.gameType === 'slots' && <Gamepad className="h-4 w-4 mr-1.5 text-[#00FFAA]" />}
+                                      {game.gameType === 'dice' && <Dices className="h-4 w-4 mr-1.5 text-[#FF3E8F]" />}
                                       {game.gameType === 'crash' && <TrendingUp className="h-4 w-4 mr-1.5 text-[#F9C846]" />}
                                       <span className="capitalize">{game.gameType}</span>
                                     </div>
