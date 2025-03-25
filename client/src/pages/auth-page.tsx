@@ -13,6 +13,7 @@ import { countries } from "countries-list";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -222,7 +223,23 @@ export default function AuthPage() {
                       )}
                     />
                     
-                    <div className="flex justify-end">
+                    <div className="flex justify-between items-center">
+                      <FormField
+                        control={loginForm.control}
+                        name="rememberMe"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="data-[state=checked]:bg-[#00FFAA] data-[state=checked]:border-[#00FFAA]"
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">Remember me</FormLabel>
+                          </FormItem>
+                        )}
+                      />
                       <Button 
                         type="button" 
                         variant="link" 
