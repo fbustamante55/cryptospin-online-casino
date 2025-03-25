@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,13 +31,23 @@ import {
   Search,
   Ban,
   UserCheck,
-  ShieldCheck
+  ShieldCheck,
+  Edit,
+  Shield,
+  ShieldOff,
+  UserMinus,
+  UserPlus,
+  Save,
+  X
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { AdminLogin } from "@/components/admin/admin-login";
 import { formatNumber } from "@/lib/game-utils";
 import { useToast } from "@/hooks/use-toast";
@@ -701,24 +711,62 @@ export default function AdminDashboardPage() {
                             <TableCell className="text-right">{formatNumber(user.balance)} USDT</TableCell>
                             <TableCell>{getUserStatusBadge(user)}</TableCell>
                             <TableCell className="text-right">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleBanUser(user.id, user.isBanned)}
-                                className={user.isBanned ? "bg-green-600/20 text-green-400 hover:bg-green-600/30 hover:text-green-300" : "bg-red-600/20 text-red-400 hover:bg-red-600/30 hover:text-red-300"}
-                              >
-                                {user.isBanned ? (
-                                  <>
-                                    <UserCheck className="h-4 w-4 mr-1" />
-                                    Unban
-                                  </>
-                                ) : (
-                                  <>
-                                    <Ban className="h-4 w-4 mr-1" />
-                                    Ban
-                                  </>
-                                )}
-                              </Button>
+                              <div className="flex space-x-2 justify-end">
+                                {/* Edit User Button */}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditUser(user)}
+                                  className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 hover:text-blue-300"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                
+                                {/* Toggle Admin Status Button */}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleToggleAdminStatus(user.id, user.isAdmin)}
+                                  className={user.isAdmin ? "bg-purple-600/20 text-purple-400 hover:bg-purple-600/30 hover:text-purple-300" : "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30 hover:text-indigo-300"}
+                                  title={user.isAdmin ? "Remove admin privileges" : "Make admin"}
+                                >
+                                  {user.isAdmin ? (
+                                    <ShieldOff className="h-4 w-4" />
+                                  ) : (
+                                    <Shield className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                
+                                {/* Toggle Verification Status Button */}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleVerifyUser(user.id, user.isVerified)}
+                                  className={user.isVerified ? "bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 hover:text-emerald-300" : "bg-teal-600/20 text-teal-400 hover:bg-teal-600/30 hover:text-teal-300"}
+                                  title={user.isVerified ? "Remove verification" : "Verify user"}
+                                >
+                                  {user.isVerified ? (
+                                    <UserMinus className="h-4 w-4" />
+                                  ) : (
+                                    <UserPlus className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                
+                                {/* Ban/Unban Button */}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleBanUser(user.id, user.isBanned)}
+                                  className={user.isBanned ? "bg-green-600/20 text-green-400 hover:bg-green-600/30 hover:text-green-300" : "bg-red-600/20 text-red-400 hover:bg-red-600/30 hover:text-red-300"}
+                                  title={user.isBanned ? "Unban user" : "Ban user"}
+                                >
+                                  {user.isBanned ? (
+                                    <UserCheck className="h-4 w-4" />
+                                  ) : (
+                                    <Ban className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))
@@ -957,6 +1005,123 @@ export default function AdminDashboardPage() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Edit User Dialog */}
+      <Dialog open={showEditUserDialog} onOpenChange={setShowEditUserDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Edit User</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Make changes to user account information
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingUser && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input 
+                    id="username" 
+                    defaultValue={editingUser.username} 
+                    onChange={(e) => setEditingUser({...editingUser, username: e.target.value})}
+                    className="bg-[#0F1923] border-gray-700"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email" 
+                    defaultValue={editingUser.email} 
+                    onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                    className="bg-[#0F1923] border-gray-700"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="balance">Balance (USDT)</Label>
+                <Input 
+                  id="balance" 
+                  type="number"
+                  defaultValue={editingUser.balance.toString()} 
+                  onChange={(e) => setEditingUser({...editingUser, balance: parseFloat(e.target.value)})}
+                  className="bg-[#0F1923] border-gray-700"
+                />
+                <p className="text-xs text-gray-400">
+                  Be careful when adjusting user balance
+                </p>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    id="isVerified" 
+                    checked={editingUser.isVerified} 
+                    onChange={(e) => setEditingUser({...editingUser, isVerified: e.target.checked})}
+                    className="rounded-sm"
+                  />
+                  <Label htmlFor="isVerified">Verified</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    id="isAdmin" 
+                    checked={editingUser.isAdmin} 
+                    onChange={(e) => setEditingUser({...editingUser, isAdmin: e.target.checked})}
+                    className="rounded-sm"
+                  />
+                  <Label htmlFor="isAdmin">Admin</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    id="isBanned" 
+                    checked={editingUser.isBanned} 
+                    onChange={(e) => setEditingUser({...editingUser, isBanned: e.target.checked})}
+                    className="rounded-sm"
+                  />
+                  <Label htmlFor="isBanned">Banned</Label>
+                </div>
+              </div>
+              
+              {editingUser.isBanned && (
+                <div className="space-y-2">
+                  <Label htmlFor="banReason">Ban Reason</Label>
+                  <Input 
+                    id="banReason" 
+                    defaultValue={editingUser.banReason || ""} 
+                    onChange={(e) => setEditingUser({...editingUser, banReason: e.target.value})}
+                    className="bg-[#0F1923] border-gray-700"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowEditUserDialog(false)}
+              className="bg-transparent border-gray-700 hover:bg-gray-800"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => handleUpdateUser(editingUser as User)}
+              className="bg-[#00FFAA] hover:bg-[#00cc88] text-black"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
