@@ -2,7 +2,8 @@ import { users, type User, type InsertUser, transactions, type Transaction, type
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
-const MemoryStore = createMemoryStore(session);
+// Create the memory store and assign the return type
+const MemoryStore = createMemoryStore(session) as ReturnType<typeof createMemoryStore>;
 
 // Storage interface for CRUD operations
 export interface IStorage {
