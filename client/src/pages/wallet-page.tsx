@@ -50,8 +50,11 @@ export default function WalletPage() {
   // Save wallet address mutation
   const saveWalletAddressMutation = useMutation({
     mutationFn: async (data: { btcAddress?: string; ethAddress?: string }) => {
-      const response = await apiRequest("PATCH", "/api/user/wallet-addresses", data);
-      return await response.json();
+      return await apiRequest({
+        method: "PATCH", 
+        url: "/api/user/wallet-addresses", 
+        data
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/user/wallet-addresses'] });
@@ -83,11 +86,14 @@ export default function WalletPage() {
   // Deposit funds mutation
   const depositMutation = useMutation({
     mutationFn: async (amount: number) => {
-      const response = await apiRequest("POST", "/api/wallet/deposit", { 
-        amount, 
-        method: 'crypto' 
+      return await apiRequest({
+        method: "POST", 
+        url: "/api/wallet/deposit", 
+        data: { 
+          amount, 
+          method: 'crypto' 
+        }
       });
-      return await response.json();
     },
     onSuccess: () => {
       // Invalidate queries to reload data
@@ -111,8 +117,11 @@ export default function WalletPage() {
   // Withdraw funds mutation
   const withdrawMutation = useMutation({
     mutationFn: async (data: { amount: number, address: string, currency: string }) => {
-      const response = await apiRequest("POST", "/api/wallet/withdraw", data);
-      return await response.json();
+      return await apiRequest({
+        method: "POST", 
+        url: "/api/wallet/withdraw", 
+        data
+      });
     },
     onSuccess: () => {
       // Invalidate queries to reload data
