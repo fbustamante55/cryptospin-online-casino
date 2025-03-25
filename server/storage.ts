@@ -255,7 +255,8 @@ export class MemStorage implements IStorage {
       ...insertTransaction, 
       id, 
       createdAt: now,
-      gameType: insertTransaction.gameType || null 
+      gameType: insertTransaction.gameType || null,
+      gameData: insertTransaction.gameData || null
     };
     this.transactions.set(id, transaction);
     return transaction;

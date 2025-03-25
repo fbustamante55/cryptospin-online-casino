@@ -34,8 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: amount,
         type: "deposit",
         gameType: null,
-        gameData: JSON.stringify({ method }),
-        createdAt: new Date(),
+        gameData: { method }
       });
       
       // Update user balance
@@ -79,8 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: -amount, // Negative amount for withdrawal
         type: "withdraw",
         gameType: null,
-        gameData: JSON.stringify({ address, currency }),
-        createdAt: new Date(),
+        gameData: { address, currency }
       });
       
       // Update user balance
@@ -491,7 +489,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         odds,
         betType,
         betOn: selection, // Using "betOn" instead of "selection" to match schema
-        marketId: marketId || null,
         potentialWin: Math.floor(stake * odds),
         status: 'pending'
       });
