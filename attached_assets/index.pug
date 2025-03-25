@@ -1,0 +1,65 @@
+form
+  input#start(type="radio", name="start", required)
+  label#label-start(for="start") START
+
+  input#stand(type="radio")
+  label#label-stand(for="stand") STAND
+
+  input#hit-e(type="radio")
+  label.label-hit(for="hit-e") HIT
+
+  input#hit-d(type="radio")
+  label.label-hit(for="hit-d") HIT
+
+  input#hit-c(type="radio")
+  label.label-hit(for="hit-c") HIT
+
+  #stage_container
+    .stage
+      .stage__body.stage__body--dealer
+        .stage__labels.stage__labels--dealer
+          h2.stage__labels--main DEALER'S HAND
+          .stage__labels--total.dealer-total <span class="sm">DEALER'S</span> TOTAL
+        .cards
+          .card--da.card--a.card
+            .card__face
+          .card--db.card--b.card 
+            .card__face
+          .card--dc.card--c.card 
+            .card__face
+          .card--dd.card--d.card 
+            .card__face
+          .card--de.card--e.card
+            .card__face
+      .stage__body.stage__body--player
+        .stage__labels.stage__labels--player
+          h2.stage__labels--main YOUR HAND
+          .stage__labels--total.user-total <span class="sm">YOUR</span> TOTAL
+        .cards
+          .card--ua.card--a.card
+            .card__face
+          .card--ub.card--b.card 
+            .card__face
+          .card--uc.card--c.card 
+            .card__face
+          .card--ud.card--d.card 
+            .card__face
+          .card--ue.card--e.card
+            .card__face
+
+    #player_bust.message
+      .message__interior 
+        p.message__label You bust
+    #dealer_bust.message
+      .message__interior 
+        p.message__label Dealer busts
+    #game_result.message
+      .message__interior 
+        p.message__label You Win
+      .message__interior 
+        p.message__label Push
+      .message__interior 
+        p.message__label Dealer Wins
+
+#warning 
+  p Please visit this page in a <a href="https://caniuse.com/?search=%40property">browser that supports the @property rule</a>.
