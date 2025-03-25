@@ -477,6 +477,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Roulette game routes
+  
+  // Generate a random roulette spin result (0-36)
+  function generateRouletteResult(): number {
+    return Math.floor(Math.random() * 37);
+  }
+
+  // Check if a roulette bet is valid and determine if it's a winner
+  function checkRouletteBet(bet: any, winningNumber: number): { win: boolean; payout: number } {
+    // Validate bet has required fields
+    if (!bet || !bet.type || !bet.numbers || !bet.odds || !bet.amount) {
+      return { win: false, payout: 0 };
+    }
+    
+    // Check if the winning number is in the bet numbers
+    const win = bet.numbers.includes(winningNumber);
+    
+    // Calculate payout based on bet amount and odds
+    const payout = win ? bet.amount + (bet.amount * bet.odds) : 0;
+    
+    return { win, payout };
+  }
+
+  // Place a bet in roulette
+  app.post("/api/games/roulette/bet", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const betSchema = z.object({
+      bet: z.object({
+        id: z.string(),
+        type: z.string(),
+        numbers: z.array(z.number()),
+        odds: z.number(),
+        amount: z.number().min(5).max(10000)
+      })
+    });
+
+    try {
+      const { bet } = betSchema.parse(req.body);
+      
+      // Check if user has enough balance
+      if (req.user.balance < bet.amount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error placing roulette bet:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+    }
+  });
+
+  // Spin the roulette wheel
+  app.post("/api/games/roulette/spin", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const spinSchema = z.object({
+      bets: z.array(
+        z.object({
+          id: z.string(),
+          type: z.string(),
+          numbers: z.array(z.number()),
+          odds: z.number(),
+          amount: z.number().min(5).max(10000)
+        })
+      )
+    });
+
+    try {
+      const { bets } = spinSchema.parse(req.body);
+      
+      // Check if user has enough balance for all bets
+      const totalBet = bets.reduce((sum, bet) => sum + bet.amount, 0);
+      if (req.user.balance < totalBet) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+      
+      // Generate the winning number
+      const winningNumber = generateRouletteResult();
+      
+      // Color of the winning number
+      const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+      const color = RED_NUMBERS.includes(winningNumber) 
+        ? 'red' 
+        : winningNumber === 0 
+          ? 'green' 
+          : 'black';
+      
+      // Process bets to find winners and calculate payouts
+      let totalWin = 0;
+      const winningBets = [];
+      
+      for (const bet of bets) {
+        const { win, payout } = checkRouletteBet(bet, winningNumber);
+        
+        if (win) {
+          totalWin += payout;
+          winningBets.push({...bet, payout});
+        }
+      }
+      
+      // Update user balance: deduct all bets and add winnings
+      const balanceChange = totalWin - totalBet;
+      const updatedUser = await storage.updateUserBalance(req.user.id, balanceChange);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update balance" });
+      }
+      
+      // Record transactions
+      await storage.createTransaction({
+        userId: req.user.id,
+        amount: -totalBet,
+        type: "bet",
+        gameType: "roulette"
+      });
+      
+      if (totalWin > 0) {
+        await storage.createTransaction({
+          userId: req.user.id,
+          amount: totalWin,
+          type: "win",
+          gameType: "roulette"
+        });
+      }
+      
+      // Record game history
+      await storage.createGameHistory({
+        userId: req.user.id,
+        gameType: "roulette",
+        bet: totalBet,
+        outcome: JSON.stringify({ winningNumber, color, bets }),
+        multiplier: totalWin > 0 ? totalWin / totalBet : 0,
+        win: totalWin > 0,
+        winAmount: totalWin
+      });
+      
+      res.json({
+        number: winningNumber,
+        color,
+        winningBets,
+        totalWin,
+        balance: updatedUser.balance
+      });
+    } catch (error) {
+      console.error("Error in roulette spin:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+    }
+  });
+
   // Sports betting routes
   
   // Get all upcoming sports events with filters

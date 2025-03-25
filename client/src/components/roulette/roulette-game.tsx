@@ -138,7 +138,7 @@ export function RouletteGame() {
     // Play sound
     playSound('/sounds/chip_place.mp3');
     
-    // In a real implementation, you might want to call the API here
+    // We're not calling the API for individual bets yet - we'll do that on spin
     // placeBetMutation.mutate({ bet });
   }, [playSound]);
   
@@ -161,64 +161,9 @@ export function RouletteGame() {
     // Play spin sound
     playSound('/sounds/roulette_spin.mp3');
     
-    // In a real implementation, submit bets to the server
-    // For now, we'll simulate with local logic
-    try {
-      // Normally we'd call the API here
-      // spinMutation.mutate();
-      
-      // This is simulating server response
-      const winningNumber = Math.floor(Math.random() * 37);
-      
-      // Determine winning bets
-      const winningBets = placedBets.filter(bet => 
-        bet.numbers.includes(winningNumber)
-      );
-      
-      // Calculate winnings
-      const totalWin = winningBets.reduce((sum, bet) => 
-        sum + bet.amount + (bet.amount * bet.odds), 0
-      );
-      
-      // Create result
-      const result: RouletteResult = {
-        number: winningNumber,
-        color: RED_NUMBERS.includes(winningNumber) 
-          ? 'red' 
-          : winningNumber === 0 
-            ? 'green' 
-            : 'black',
-        winningBets,
-        totalWin,
-        balance: (userData?.balance || 0) + totalWin
-      };
-      
-      // Add to history
-      const newHistoryItem: HistoryItem = {
-        number: winningNumber,
-        color: RED_NUMBERS.includes(winningNumber) 
-          ? 'red' 
-          : winningNumber === 0 
-            ? 'green' 
-            : 'black',
-        timestamp: new Date().toISOString(),
-      };
-      
-      setGameHistory(prev => [newHistoryItem, ...prev].slice(0, 10));
-      
-      // Set the result (to be shown after animation)
-      setLastResult(result);
-      
-    } catch (error) {
-      console.error("Error in spin simulation:", error);
-      setIsSpinning(false);
-      toast({
-        title: "Error",
-        description: "Something went wrong during the spin",
-        variant: "destructive",
-      });
-    }
-  }, [isSpinning, placedBets, playSound, userData?.balance, toast]);
+    // Submit all bets to the server
+    spinMutation.mutate();
+  }, [isSpinning, placedBets.length, playSound, spinMutation]);
   
   // Handle spin completion (called by the wheel component)
   const handleSpinComplete = (winningNumber: number) => {
