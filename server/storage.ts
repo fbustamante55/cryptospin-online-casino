@@ -35,7 +35,7 @@ export interface IStorage {
   updateKycDocumentStatus(id: number, status: string, rejectionReason?: string): Promise<KycDocument | undefined>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: ReturnType<typeof createMemoryStore>;
 }
 
 export class MemStorage implements IStorage {
@@ -43,7 +43,7 @@ export class MemStorage implements IStorage {
   private transactions: Map<number, Transaction>;
   private gameHistories: Map<number, GameHistory>;
   private kycDocuments: Map<number, KycDocument>;
-  public sessionStore: session.SessionStore;
+  public sessionStore: ReturnType<typeof createMemoryStore>;
   private currentUserId: number;
   private currentTransactionId: number;
   private currentGameHistoryId: number;
@@ -183,7 +183,12 @@ export class MemStorage implements IStorage {
   async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
     const id = this.currentTransactionId++;
     const now = new Date();
-    const transaction: Transaction = { ...insertTransaction, id, createdAt: now };
+    const transaction: Transaction = { 
+      ...insertTransaction, 
+      id, 
+      createdAt: now,
+      gameType: insertTransaction.gameType || null 
+    };
     this.transactions.set(id, transaction);
     return transaction;
   }
@@ -198,7 +203,12 @@ export class MemStorage implements IStorage {
   async createGameHistory(insertGameHistory: InsertGameHistory): Promise<GameHistory> {
     const id = this.currentGameHistoryId++;
     const now = new Date();
-    const history: GameHistory = { ...insertGameHistory, id, createdAt: now };
+    const history: GameHistory = { 
+      ...insertGameHistory, 
+      id, 
+      createdAt: now,
+      multiplier: insertGameHistory.multiplier || null
+    };
     this.gameHistories.set(id, history);
     return history;
   }
@@ -220,7 +230,9 @@ export class MemStorage implements IStorage {
       verificationStatus: 'pending',
       rejectionReason: null,
       createdAt: now,
-      updatedAt: null
+      updatedAt: null,
+      // Ensure metadata is always present
+      metadata: document.metadata || {}
     };
     
     this.kycDocuments.set(id, kycDocument);
