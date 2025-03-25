@@ -72,6 +72,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Insufficient balance" });
       }
       
+      // Check if user is verified (KYC completed)
+      if (!req.user.isVerified) {
+        return res.status(403).json({ message: "KYC verification required before withdrawals" });
+      }
+      
       // Create withdrawal transaction
       const transaction = await storage.createTransaction({
         userId: req.user.id,
