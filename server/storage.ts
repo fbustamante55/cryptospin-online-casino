@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument } from "@shared/schema";
+import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument, sportsEvents, type SportsEvent, type InsertSportsEvent, sportsBets, type SportsBet, type InsertSportsBet } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -20,6 +20,9 @@ export interface IStorage {
   updateResetToken(id: number, token: string | null, expiry: Date | null): Promise<User | undefined>;
   verifyPhone(id: number): Promise<User | undefined>;
   verifyUser(id: number): Promise<User | undefined>;
+  enableTwoFactor(id: number, secret: string): Promise<User | undefined>;
+  disableTwoFactor(id: number): Promise<User | undefined>;
+  updateLanguage(id: number, language: string): Promise<User | undefined>;
   
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
@@ -34,6 +37,16 @@ export interface IStorage {
   getKycDocuments(userId: number): Promise<KycDocument[]>;
   updateKycDocumentStatus(id: number, status: string, rejectionReason?: string): Promise<KycDocument | undefined>;
   
+  // Sports betting operations
+  createSportsEvent(event: InsertSportsEvent): Promise<SportsEvent>;
+  getSportsEvents(sportType?: string, status?: string): Promise<SportsEvent[]>;
+  getSportsEvent(id: number): Promise<SportsEvent | undefined>;
+  updateSportsEventStatus(id: number, status: string, results?: any): Promise<SportsEvent | undefined>;
+  
+  createSportsBet(bet: InsertSportsBet): Promise<SportsBet>;
+  getUserSportsBets(userId: number): Promise<SportsBet[]>;
+  settleSportsBet(id: number, status: string, settledAmount: number): Promise<SportsBet | undefined>;
+  
   // Session store
   sessionStore: ReturnType<typeof createMemoryStore>;
 }
@@ -43,21 +56,29 @@ export class MemStorage implements IStorage {
   private transactions: Map<number, Transaction>;
   private gameHistories: Map<number, GameHistory>;
   private kycDocuments: Map<number, KycDocument>;
+  private sportsEvents: Map<number, SportsEvent>;
+  private sportsBets: Map<number, SportsBet>;
   public sessionStore: ReturnType<typeof createMemoryStore>;
   private currentUserId: number;
   private currentTransactionId: number;
   private currentGameHistoryId: number;
   private currentKycDocumentId: number;
+  private currentSportsEventId: number;
+  private currentSportsBetId: number;
 
   constructor() {
     this.users = new Map();
     this.transactions = new Map();
     this.gameHistories = new Map();
     this.kycDocuments = new Map();
+    this.sportsEvents = new Map();
+    this.sportsBets = new Map();
     this.currentUserId = 1;
     this.currentTransactionId = 1;
     this.currentGameHistoryId = 1;
     this.currentKycDocumentId = 1;
+    this.currentSportsEventId = 1;
+    this.currentSportsBetId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
