@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Wallet, 
@@ -35,62 +35,64 @@ export default function WalletPage() {
     queryKey: ["/api/transactions"],
   });
 
-  // Deposit mutation
+  // Deposit funds mutation
   const depositMutation = useMutation({
     mutationFn: async (amount: number) => {
-      const res = await fetch('/api/wallet/deposit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ amount, method: 'crypto' })
+      const response = await apiRequest("POST", "/api/wallet/deposit", { 
+        amount, 
+        method: 'crypto' 
       });
-      
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Error processing deposit');
-      }
-      
-      return res.json();
+      return await response.json();
     },
     onSuccess: () => {
       // Invalidate queries to reload data
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      
+      toast({
+        title: "Deposit successful",
+        description: `${depositAmount} credits have been added to your account.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Deposit failed",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   });
   
-  // Withdrawal mutation
+  // Withdraw funds mutation
   const withdrawMutation = useMutation({
-    mutationFn: async ({ amount, address, currency }: { amount: number, address: string, currency: string }) => {
-      const res = await fetch('/api/wallet/withdraw', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ amount, address, currency })
-      });
-      
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Error processing withdrawal');
-      }
-      
-      return res.json();
+    mutationFn: async (data: { amount: number, address: string, currency: string }) => {
+      const response = await apiRequest("POST", "/api/wallet/withdraw", data);
+      return await response.json();
     },
     onSuccess: () => {
       // Invalidate queries to reload data
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      
+      toast({
+        title: "Withdrawal request submitted",
+        description: `${withdrawalAmount} credits will be sent to your ${withdrawalCurrency} wallet.`,
+      });
+      
+      // Reset withdrawal address after successful withdrawal
+      setWithdrawalAddress("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Withdrawal failed",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   });
   
   const handleDeposit = () => {
     depositMutation.mutate(depositAmount);
-    toast({
-      title: "Processing deposit",
-      description: `Adding ${depositAmount} credits to your account.`,
-    });
   };
   
   const handleWithdraw = () => {
@@ -107,11 +109,6 @@ export default function WalletPage() {
       amount: withdrawalAmount, 
       address: withdrawalAddress, 
       currency: withdrawalCurrency 
-    });
-    
-    toast({
-      title: "Processing withdrawal",
-      description: `Withdrawing ${withdrawalAmount} credits as ${withdrawalCurrency}.`,
     });
   };
 

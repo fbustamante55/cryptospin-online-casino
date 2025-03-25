@@ -42,6 +42,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Navigate to home page after successful login
+      window.location.href = "/";
+      
       toast({
         title: "Welcome back!",
         description: `You've successfully logged in as ${user.username}.`,
@@ -63,6 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Navigate to home page after successful registration
+      window.location.href = "/";
+      
       toast({
         title: "Registration successful!",
         description: `Your account has been created with 5,000 credits.`,
