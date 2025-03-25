@@ -40,7 +40,7 @@ interface UserData {
 export function RouletteGame() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { playSound, setVolume } = useSoundManager();
+  const soundManager = useSoundManager();
   const isMobile = useIsMobile();
   const { user } = useAuth() || {};
   
@@ -112,9 +112,9 @@ export function RouletteGame() {
       
       // Play sound based on win/loss
       if (result.totalWin > 0) {
-        playSound('/sounds/roulette_win.mp3');
+        soundManager.playSound('/sounds/roulette_win.mp3');
       } else {
-        playSound('/sounds/roulette_lose.mp3');
+        soundManager.playSound('/sounds/roulette_lose.mp3');
       }
       
       // Update user data (balance)
@@ -136,11 +136,11 @@ export function RouletteGame() {
     setPlacedBets(prev => [...prev, bet]);
     
     // Play sound
-    playSound('/sounds/chip_place.mp3');
+    soundManager.playSound('/sounds/chip_place.mp3');
     
     // We're not calling the API for individual bets yet - we'll do that on spin
     // placeBetMutation.mutate({ bet });
-  }, [playSound]);
+  }, [soundManager]);
   
   // Handle removing a bet
   const handleRemoveBet = useCallback((bet: RouletteBet) => {
@@ -148,8 +148,8 @@ export function RouletteGame() {
     setPlacedBets(prev => prev.filter(b => b.id !== bet.id));
     
     // Play sound
-    playSound('/sounds/chip_remove.mp3');
-  }, [playSound]);
+    soundManager.playSound('/sounds/chip_remove.mp3');
+  }, [soundManager]);
   
   // Start spinning the wheel
   const handleSpin = useCallback(() => {
@@ -159,11 +159,11 @@ export function RouletteGame() {
     setShowResult(false);
     
     // Play spin sound
-    playSound('/sounds/roulette_spin.mp3');
+    soundManager.playSound('/sounds/roulette_spin.mp3');
     
     // Submit all bets to the server
     spinMutation.mutate();
-  }, [isSpinning, placedBets.length, playSound, spinMutation]);
+  }, [isSpinning, placedBets.length, soundManager, spinMutation]);
   
   // Handle spin completion (called by the wheel component)
   const handleSpinComplete = (winningNumber: number) => {
@@ -179,8 +179,74 @@ export function RouletteGame() {
   // Clear all bets
   const handleClearBets = () => {
     setPlacedBets([]);
-    playSound('/sounds/chip_remove.mp3');
+    soundManager.playSound('/sounds/chip_remove.mp3');
   };
+  
+  // For now, simulate a spin with local logic since we don't have audio files yet
+  const handleSimulateSpin = useCallback(() => {
+    if (isSpinning || placedBets.length === 0) return;
+    
+    setIsSpinning(true);
+    setShowResult(false);
+    
+    // Play spin sound
+    soundManager.playSound('/sounds/roulette_spin.mp3');
+    
+    // Simulate server response
+    setTimeout(() => {
+      // Generate a random winning number
+      const winningNumber = Math.floor(Math.random() * 37);
+      
+      // Determine winning bets
+      const winningBets = placedBets.filter(bet => 
+        bet.numbers.includes(winningNumber)
+      );
+      
+      // Calculate winnings
+      const totalWin = winningBets.reduce((sum, bet) => 
+        sum + bet.amount * bet.odds, 0
+      );
+      
+      // Create result
+      const result: RouletteResult = {
+        number: winningNumber,
+        color: RED_NUMBERS.includes(winningNumber) 
+          ? 'red' 
+          : winningNumber === 0 
+            ? 'green' 
+            : 'black',
+        winningBets,
+        totalWin,
+        balance: (userData?.balance || 0) + totalWin
+      };
+      
+      // Add to history
+      const newHistoryItem: HistoryItem = {
+        number: winningNumber,
+        color: RED_NUMBERS.includes(winningNumber) 
+          ? 'red' 
+          : winningNumber === 0 
+            ? 'green' 
+            : 'black',
+        timestamp: new Date().toISOString(),
+      };
+      
+      setGameHistory(prev => [newHistoryItem, ...prev].slice(0, 10));
+      
+      // Play appropriate sound
+      if (totalWin > 0) {
+        soundManager.playSound('/sounds/roulette_win.mp3');
+      } else {
+        soundManager.playSound('/sounds/roulette_lose.mp3');
+      }
+      
+      // Set the result and show it
+      setLastResult(result);
+      handleSpinComplete(winningNumber);
+      
+    }, 5500); // Simulate server delay + wheel spin time
+    
+  }, [isSpinning, placedBets, soundManager, userData?.balance]);
   
   return (
     <div className="w-full max-w-screen-xl mx-auto p-4 space-y-6">
@@ -247,7 +313,7 @@ export function RouletteGame() {
           <BettingBoard
             onPlaceBet={handlePlaceBet}
             onRemoveBet={handleRemoveBet}
-            onSpin={handleSpin}
+            onSpin={handleSimulateSpin} // Using simulation for now
             chips={chips}
             selectedChip={selectedChip}
             onChipSelect={setSelectedChip}
