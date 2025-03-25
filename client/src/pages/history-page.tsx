@@ -59,7 +59,7 @@ export default function HistoryPage() {
                 </svg>
               </button>
               <h1 className="font-heading font-bold text-xl text-white tracking-wider ml-3">
-                <span className="text-[#00FFAA]">Crypto</span>Play
+                <span className="text-[#00FFAA]">Crypto</span>Spin
               </h1>
             </div>
             

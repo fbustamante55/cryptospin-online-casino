@@ -443,7 +443,7 @@ export default function AuthPage() {
       <div className="hidden md:flex w-1/2 bg-[#0F1923] flex-col items-center justify-center p-8">
         <div className="max-w-md text-center">
           <h1 className="text-4xl font-bold mb-4">
-            <span className="text-[#00FFAA]">Crypto</span>Play
+            <span className="text-[#00FFAA]">Crypto</span>Spin
           </h1>
           <p className="text-gray-300 mb-6">Experience the thrill of online casino gaming with our cutting-edge platform. Play slots, dice, and crash games with your virtual currency.</p>
           
