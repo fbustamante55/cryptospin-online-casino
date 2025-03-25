@@ -112,7 +112,8 @@ export type GameHistory = typeof gameHistory.$inferSelect;
 export const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  recaptchaToken: z.string()
+  recaptchaToken: z.string(),
+  rememberMe: z.boolean().optional().default(false)
 });
 
 export const passwordResetRequestSchema = z.object({
