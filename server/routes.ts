@@ -9,6 +9,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
 
+  // Wallet-related routes
+  
+  // Deposit funds
+  app.post("/api/wallet/deposit", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const depositSchema = z.object({
+      amount: z.number().min(10).max(100000),
+      method: z.string().min(1),
+    });
+    
+    try {
+      const { amount, method } = depositSchema.parse(req.body);
+      
+      // Create deposit transaction
+      const transaction = await storage.createTransaction({
+        userId: req.user.id,
+        amount: amount,
+        type: "deposit",
+        gameType: null,
+        gameData: JSON.stringify({ method }),
+        createdAt: new Date(),
+      });
+      
+      // Update user balance
+      const updatedUser = await storage.updateUserBalance(req.user.id, req.user.balance + amount);
+      
+      res.status(200).json({
+        message: "Deposit successful",
+        transaction,
+        balance: updatedUser?.balance
+      });
+    } catch (error) {
+      console.error("Deposit error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid deposit data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error processing deposit" });
+    }
+  });
+  
+  // Withdraw funds
+  app.post("/api/wallet/withdraw", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const withdrawSchema = z.object({
+      amount: z.number().min(10).max(100000),
+      address: z.string().min(10),
+      currency: z.string().min(1),
+    });
+    
+    try {
+      const { amount, address, currency } = withdrawSchema.parse(req.body);
+      
+      // Check if user has enough balance
+      if (req.user.balance < amount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+      
+      // Create withdrawal transaction
+      const transaction = await storage.createTransaction({
+        userId: req.user.id,
+        amount: -amount, // Negative amount for withdrawal
+        type: "withdraw",
+        gameType: null,
+        gameData: JSON.stringify({ address, currency }),
+        createdAt: new Date(),
+      });
+      
+      // Update user balance
+      const updatedUser = await storage.updateUserBalance(req.user.id, req.user.balance - amount);
+      
+      res.status(200).json({
+        message: "Withdrawal request submitted",
+        transaction,
+        balance: updatedUser?.balance
+      });
+    } catch (error) {
+      console.error("Withdrawal error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid withdrawal data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error processing withdrawal" });
+    }
+  });
+
   // Game-related routes
   
   // Get user transactions

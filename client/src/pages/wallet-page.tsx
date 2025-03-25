@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Wallet, 
   Plus, 
@@ -22,17 +24,95 @@ import {
 
 export default function WalletPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [depositAmount, setDepositAmount] = useState<number>(100);
+  const [withdrawalAmount, setWithdrawalAmount] = useState<number>(100);
+  const [withdrawalAddress, setWithdrawalAddress] = useState<string>("");
+  const [withdrawalCurrency, setWithdrawalCurrency] = useState<string>("BTC");
 
   // Fetch transaction history
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });
 
-  // This is a virtual casino with only virtual currency
-  // The deposit button just simulates adding funds for demonstration
+  // Deposit mutation
+  const depositMutation = useMutation({
+    mutationFn: async (amount: number) => {
+      const res = await fetch('/api/wallet/deposit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ amount, method: 'crypto' })
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error processing deposit');
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to reload data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+    }
+  });
+  
+  // Withdrawal mutation
+  const withdrawMutation = useMutation({
+    mutationFn: async ({ amount, address, currency }: { amount: number, address: string, currency: string }) => {
+      const res = await fetch('/api/wallet/withdraw', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ amount, address, currency })
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error processing withdrawal');
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to reload data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+    }
+  });
+  
   const handleDeposit = () => {
-    alert(`This is a demo application with virtual currency only. In a real implementation, this would process a payment of ${depositAmount} credits.`);
+    depositMutation.mutate(depositAmount);
+    toast({
+      title: "Processing deposit",
+      description: `Adding ${depositAmount} credits to your account.`,
+    });
+  };
+  
+  const handleWithdraw = () => {
+    if (!withdrawalAddress || withdrawalAddress.length < 10) {
+      toast({
+        title: "Invalid withdrawal address",
+        description: "Please enter a valid cryptocurrency address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    withdrawMutation.mutate({ 
+      amount: withdrawalAmount, 
+      address: withdrawalAddress, 
+      currency: withdrawalCurrency 
+    });
+    
+    toast({
+      title: "Processing withdrawal",
+      description: `Withdrawing ${withdrawalAmount} credits as ${withdrawalCurrency}.`,
+    });
   };
 
   return (
@@ -210,8 +290,9 @@ export default function WalletPage() {
                       <Button 
                         className="w-full py-2.5 bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
                         onClick={handleDeposit}
+                        disabled={depositMutation.isPending}
                       >
-                        Deposit Now
+                        {depositMutation.isPending ? 'Processing...' : 'Deposit Now'}
                       </Button>
                       
                       <div className="mt-2 text-xs text-gray-400 text-center">
@@ -240,6 +321,111 @@ export default function WalletPage() {
                           <div className="flex items-center">
                             <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1" />
                             <span>Practice games</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Withdrawal Section */}
+            <div id="withdrawal-section" className="mb-8">
+              <Card className="bg-[#1A2634] border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-lg font-heading flex items-center">
+                    <ArrowUpRight className="h-5 w-5 mr-2 text-[#FF3E8F]" />
+                    Withdraw Funds
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-400 mb-1">Amount</label>
+                        <div className="flex">
+                          <Input 
+                            type="number" 
+                            value={withdrawalAmount}
+                            onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
+                            className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-400 mb-1">Cryptocurrency</label>
+                        <div className="flex">
+                          <select
+                            value={withdrawalCurrency}
+                            onChange={(e) => setWithdrawalCurrency(e.target.value)}
+                            className="w-full bg-[#0F1923] border border-gray-800 rounded-md p-2 text-white focus:border-[#00FFAA] focus:outline-none"
+                          >
+                            <option value="BTC">Bitcoin (BTC)</option>
+                            <option value="ETH">Ethereum (ETH)</option>
+                            <option value="LTC">Litecoin (LTC)</option>
+                            <option value="DOGE">Dogecoin (DOGE)</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-400 mb-1">Wallet Address</label>
+                        <div className="flex">
+                          <Input 
+                            type="text" 
+                            value={withdrawalAddress}
+                            onChange={(e) => setWithdrawalAddress(e.target.value)}
+                            placeholder={`Enter your ${withdrawalCurrency} address`}
+                            className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
+                          />
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        className="w-full py-2.5 bg-gradient-to-r from-[#FF3E8F] to-[#FF3E8F]/80 hover:from-[#FF5AA0] hover:to-[#FF3E8F] text-white font-medium"
+                        onClick={handleWithdraw}
+                        disabled={withdrawMutation.isPending || user?.balance === 0 || user?.balance < withdrawalAmount}
+                      >
+                        {withdrawMutation.isPending ? 'Processing...' : 'Withdraw Now'}
+                      </Button>
+                      
+                      <div className="mt-2 text-xs text-gray-400 text-center">
+                        Minimum withdrawal: 100 credits
+                      </div>
+                    </div>
+                    
+                    <div className="hidden md:block">
+                      <div className="text-sm text-gray-300 mb-3">
+                        <CheckCircle className="h-4 w-4 inline-block mr-1 text-[#00FFAA]" />
+                        <span className="font-medium">Withdrawal Information</span>
+                      </div>
+                      <div className="bg-[#0F1923] p-4 rounded-lg border border-gray-800">
+                        <p className="text-sm text-gray-300 mb-3">
+                          Please make sure to enter the correct wallet address. All withdrawals are processed within 24 hours.
+                        </p>
+                        <div className="space-y-2 text-xs text-gray-400">
+                          <div className="flex items-start">
+                            <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1 mt-0.5" />
+                            <div>
+                              <span className="block font-medium">Bitcoin (BTC)</span>
+                              <span>Min: 0.001 BTC (≈ 100 credits)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start">
+                            <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1 mt-0.5" />
+                            <div>
+                              <span className="block font-medium">Ethereum (ETH)</span>
+                              <span>Min: 0.01 ETH (≈ 100 credits)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start">
+                            <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1 mt-0.5" />
+                            <div>
+                              <span className="block font-medium">Other Cryptocurrencies</span>
+                              <span>Min: Equivalent to 100 credits</span>
+                            </div>
                           </div>
                         </div>
                       </div>
