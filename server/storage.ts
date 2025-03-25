@@ -127,10 +127,19 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
-      email: insertUser.email || '', // Ensure email is always set
+      username: insertUser.username,
+      email: insertUser.email || '', 
+      password: insertUser.password,
       phoneNumber: insertUser.phoneNumber || null,
       phoneVerified: false,
       country: insertUser.country || null,
+      address: null,
+      city: null,
+      state: null,
+      zipCode: null,
+      twoFactorEnabled: false,
+      twoFactorSecret: null,
+      language: "en",
       balance: 5000, // Initial balance for new users
       googleId: null,
       facebookId: null,
@@ -196,6 +205,41 @@ export class MemStorage implements IStorage {
     if (!user) return undefined;
     
     const updatedUser = { ...user, isVerified: true };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async enableTwoFactor(id: number, secret: string): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user, 
+      twoFactorEnabled: true,
+      twoFactorSecret: secret
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async disableTwoFactor(id: number): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user, 
+      twoFactorEnabled: false,
+      twoFactorSecret: null
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateLanguage(id: number, language: string): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, language };
     this.users.set(id, updatedUser);
     return updatedUser;
   }
@@ -280,6 +324,98 @@ export class MemStorage implements IStorage {
     
     this.kycDocuments.set(id, updatedDocument);
     return updatedDocument;
+  }
+  
+  // Sports event methods
+  async createSportsEvent(event: InsertSportsEvent): Promise<SportsEvent> {
+    const id = this.currentSportsEventId++;
+    const now = new Date();
+    
+    const sportsEvent: SportsEvent = {
+      ...event,
+      id,
+      status: event.status || 'upcoming',
+      results: null,
+      createdAt: now,
+      updatedAt: null
+    };
+    
+    this.sportsEvents.set(id, sportsEvent);
+    return sportsEvent;
+  }
+  
+  async getSportsEvents(sportType?: string, status?: string): Promise<SportsEvent[]> {
+    let events = Array.from(this.sportsEvents.values());
+    
+    if (sportType) {
+      events = events.filter(event => event.sportType === sportType);
+    }
+    
+    if (status) {
+      events = events.filter(event => event.status === status);
+    }
+    
+    return events.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+  }
+  
+  async getSportsEvent(id: number): Promise<SportsEvent | undefined> {
+    return this.sportsEvents.get(id);
+  }
+  
+  async updateSportsEventStatus(id: number, status: string, results?: any): Promise<SportsEvent | undefined> {
+    const event = this.sportsEvents.get(id);
+    if (!event) return undefined;
+    
+    const now = new Date();
+    const updatedEvent = {
+      ...event,
+      status,
+      results: results || event.results,
+      updatedAt: now
+    };
+    
+    this.sportsEvents.set(id, updatedEvent);
+    return updatedEvent;
+  }
+  
+  // Sports bet methods
+  async createSportsBet(bet: InsertSportsBet): Promise<SportsBet> {
+    const id = this.currentSportsBetId++;
+    const now = new Date();
+    
+    const sportsBet: SportsBet = {
+      ...bet,
+      id,
+      status: bet.status || 'pending',
+      settledAmount: null,
+      createdAt: now,
+      settledAt: null
+    };
+    
+    this.sportsBets.set(id, sportsBet);
+    return sportsBet;
+  }
+  
+  async getUserSportsBets(userId: number): Promise<SportsBet[]> {
+    return Array.from(this.sportsBets.values())
+      .filter(bet => bet.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+  
+  async settleSportsBet(id: number, status: string, settledAmount: number): Promise<SportsBet | undefined> {
+    const bet = this.sportsBets.get(id);
+    if (!bet) return undefined;
+    
+    const now = new Date();
+    const updatedBet = {
+      ...bet,
+      status,
+      settledAmount,
+      settledAt: now
+    };
+    
+    this.sportsBets.set(id, updatedBet);
+    return updatedBet;
   }
 }
 
