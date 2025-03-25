@@ -18,6 +18,7 @@ import {
   Clock,
   CreditCard,
   Gift,
+  AlertCircle,
   CheckCircle,
   XCircle
 } from "lucide-react";
@@ -380,13 +381,31 @@ export default function WalletPage() {
                         </div>
                       </div>
                       
-                      <Button 
-                        className="w-full py-2.5 bg-gradient-to-r from-[#FF3E8F] to-[#FF3E8F]/80 hover:from-[#FF5AA0] hover:to-[#FF3E8F] text-white font-medium"
-                        onClick={handleWithdraw}
-                        disabled={withdrawMutation.isPending || user?.balance === 0 || user?.balance < withdrawalAmount}
-                      >
-                        {withdrawMutation.isPending ? 'Processing...' : 'Withdraw Now'}
-                      </Button>
+                      {user?.isVerified ? (
+                        <Button 
+                          className="w-full py-2.5 bg-gradient-to-r from-[#FF3E8F] to-[#FF3E8F]/80 hover:from-[#FF5AA0] hover:to-[#FF3E8F] text-white font-medium"
+                          onClick={handleWithdraw}
+                          disabled={withdrawMutation.isPending || user?.balance === 0 || user?.balance < withdrawalAmount}
+                        >
+                          {withdrawMutation.isPending ? 'Processing...' : 'Withdraw Now'}
+                        </Button>
+                      ) : (
+                        <div className="space-y-2">
+                          <Button 
+                            className="w-full py-2.5 bg-gray-700 text-white font-medium cursor-not-allowed"
+                            disabled={true}
+                          >
+                            Withdrawal Locked
+                          </Button>
+                          <div className="px-3 py-2 bg-amber-900/30 border border-amber-700/30 rounded-md flex items-start">
+                            <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 mr-2 flex-shrink-0" />
+                            <div className="text-xs text-amber-200">
+                              <span className="font-medium block">KYC Verification Required</span>
+                              <span className="text-amber-300/80">Please complete identity verification in your <a href="/profile" className="text-amber-200 underline">Profile Settings</a> to unlock withdrawals.</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       
                       <div className="mt-2 text-xs text-gray-400 text-center">
                         Minimum withdrawal: 100 credits

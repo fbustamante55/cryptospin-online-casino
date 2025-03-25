@@ -34,6 +34,14 @@ export function MobileNav() {
           <span className="text-xs mt-1">Games</span>
         </Link>
         
+        <Link href="/sports" className={cn(
+          "flex flex-col items-center py-3 px-4",
+          isActive("/sports") ? "text-[#00FFAA]" : "text-gray-400"
+        )}>
+          <Trophy className="h-5 w-5" />
+          <span className="text-xs mt-1">Sports</span>
+        </Link>
+        
         <Link href="/wallet" className={cn(
           "flex flex-col items-center py-3 px-4",
           isActive("/wallet") ? "text-[#00FFAA]" : "text-gray-400"
