@@ -36,7 +36,11 @@ export function LanguageSwitcher() {
       setIsChangingLanguage(true);
       
       // Call API to update language preference
-      await apiRequest("POST", "/api/update-language", { language: languageCode });
+      await apiRequest({
+        method: "POST",
+        url: "/api/update-language",
+        data: { language: languageCode }
+      });
       
       toast({
         title: "Language updated",
