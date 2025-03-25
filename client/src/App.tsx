@@ -16,6 +16,7 @@ import CrashPage from "@/pages/crash-page";
 import WalletPage from "@/pages/wallet-page";
 import HistoryPage from "@/pages/history-page";
 import ProfilePage from "@/pages/profile-page";
+import SportsBettingPage from "@/pages/sports-betting-page";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <ProtectedRoute path="/slots" component={SlotsPage} />
       <ProtectedRoute path="/dice" component={DicePage} />
       <ProtectedRoute path="/crash" component={CrashPage} />
+      <ProtectedRoute path="/sports" component={SportsBettingPage} />
       <ProtectedRoute path="/wallet" component={WalletPage} />
       <ProtectedRoute path="/history" component={HistoryPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />

@@ -9,7 +9,8 @@ import {
   Wallet,
   Clock,
   User,
-  Settings
+  Settings,
+  Trophy
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,6 +28,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Slots", path: "/slots", icon: <Gamepad className="h-5 w-5" /> },
     { name: "Dice", path: "/dice", icon: <Dices className="h-5 w-5" /> },
     { name: "Crash", path: "/crash", icon: <TrendingUp className="h-5 w-5" /> },
+    { name: "Sports", path: "/sports", icon: <Trophy className="h-5 w-5" /> },
     { name: "Wallet", path: "/wallet", icon: <Wallet className="h-5 w-5" /> },
     { name: "History", path: "/history", icon: <Clock className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },

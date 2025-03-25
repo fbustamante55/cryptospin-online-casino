@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Link } from "wouter";
-import { Home, Gamepad, Wallet, User } from "lucide-react";
+import { Home, Gamepad, Wallet, User, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MobileNav() {
@@ -9,6 +9,7 @@ export function MobileNav() {
   const isActive = (path: string) => {
     if (path === "/" && location === "/") return true;
     if (path === "/games" && ["/slots", "/dice", "/crash"].includes(location)) return true;
+    if (path === "/sports" && location === "/sports") return true;
     if (path === "/wallet" && ["/wallet", "/history"].includes(location)) return true;
     if (path === "/profile" && location === "/profile") return true;
     return false;
