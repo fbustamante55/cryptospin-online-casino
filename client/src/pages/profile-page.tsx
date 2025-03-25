@@ -29,7 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, CheckCircle, AlertCircle, Mail, Phone, Shield, User, Lock } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Mail, Phone, Shield, User, Lock, Upload } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const phoneVerificationFormSchema = phoneVerificationSchema;
@@ -44,6 +44,10 @@ export default function ProfilePage() {
   const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
   const [phoneVerificationSent, setPhoneVerificationSent] = useState(false);
   const [showEmailVerificationDialog, setShowEmailVerificationDialog] = useState(false);
+  const [showSetup2FADialog, setShowSetup2FADialog] = useState(false);
+  const [showDisable2FADialog, setShowDisable2FADialog] = useState(false);
+  const [showKYCDialog, setShowKYCDialog] = useState(false);
+  const [isUploadingKYC, setIsUploadingKYC] = useState(false);
 
   const phoneVerificationForm = useForm<PhoneVerificationFormData>({
     resolver: zodResolver(phoneVerificationFormSchema),
@@ -299,6 +303,57 @@ export default function ProfilePage() {
                         />
                       </div>
                     </div>
+                    
+                    <Separator className="my-6 bg-gray-800" />
+                    
+                    <div className="space-y-4">
+                      <h3 className="text-base font-medium text-white">Residential Address</h3>
+                      <p className="text-sm text-gray-400">Required for KYC verification and withdrawals</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <FormLabel>Address</FormLabel>
+                          <Input 
+                            placeholder="Enter your street address" 
+                            className="bg-[#0F1923] border-gray-800"
+                            defaultValue={user.address || ""}
+                            name="address"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <FormLabel>City</FormLabel>
+                          <Input 
+                            placeholder="Enter your city" 
+                            className="bg-[#0F1923] border-gray-800"
+                            defaultValue={user.city || ""}
+                            name="city"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <FormLabel>State/Province</FormLabel>
+                          <Input 
+                            placeholder="Enter your state or province" 
+                            className="bg-[#0F1923] border-gray-800"
+                            defaultValue={user.state || ""}
+                            name="state"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <FormLabel>Zip/Postal Code</FormLabel>
+                          <Input 
+                            placeholder="Enter your zip/postal code" 
+                            className="bg-[#0F1923] border-gray-800"
+                            defaultValue={user.zipCode || ""}
+                            name="zipCode"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
                 
@@ -354,20 +409,39 @@ export default function ProfilePage() {
                       <p className="text-sm text-gray-400">Add an extra layer of security to your account</p>
                       
                       <div className="mt-4">
-                        <Alert className="bg-[#0F1923] border-gray-800">
-                          <AlertCircle className="h-4 w-4 text-[#00FFAA]" />
-                          <AlertTitle>Not Enabled</AlertTitle>
-                          <AlertDescription>
-                            Two-factor authentication is not enabled yet. Enable it to add an extra layer of security to your account.
-                          </AlertDescription>
-                        </Alert>
+                        {user.twoFactorEnabled ? (
+                          <Alert className="bg-[#0F1923] border-gray-800">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <AlertTitle>Enabled</AlertTitle>
+                            <AlertDescription>
+                              Two-factor authentication is enabled on your account. You'll need to enter a verification code when signing in.
+                            </AlertDescription>
+                          </Alert>
+                        ) : (
+                          <Alert className="bg-[#0F1923] border-gray-800">
+                            <AlertCircle className="h-4 w-4 text-[#00FFAA]" />
+                            <AlertTitle>Not Enabled</AlertTitle>
+                            <AlertDescription>
+                              Two-factor authentication is not enabled yet. Enable it to add an extra layer of security to your account.
+                            </AlertDescription>
+                          </Alert>
+                        )}
                         
-                        <Button 
-                          className="mt-4 bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
-                          disabled
-                        >
-                          Enable 2FA
-                        </Button>
+                        {user.twoFactorEnabled ? (
+                          <Button 
+                            className="mt-4 bg-[#1A2634] border border-red-500 text-red-500 hover:bg-red-500/10"
+                            onClick={() => setShowDisable2FADialog(true)}
+                          >
+                            Disable 2FA
+                          </Button>
+                        ) : (
+                          <Button 
+                            className="mt-4 bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                            onClick={() => setShowSetup2FADialog(true)}
+                          >
+                            Enable 2FA
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -481,7 +555,7 @@ export default function ProfilePage() {
                               <div>
                                 <h3 className="text-base font-medium text-white">Identity Verification (KYC)</h3>
                                 <p className="text-sm text-gray-400 mt-1">
-                                  Complete identity verification to unlock all platform features.
+                                  Complete identity verification to unlock withdrawals and other features.
                                 </p>
                               </div>
                             </div>
@@ -490,7 +564,7 @@ export default function ProfilePage() {
                                 variant="outline" 
                                 size="sm" 
                                 className="border-yellow-500 text-yellow-500 hover:text-yellow-400 hover:border-yellow-400"
-                                disabled
+                                onClick={() => setShowKYCDialog(true)}
                               >
                                 Start KYC
                               </Button>
@@ -646,6 +720,206 @@ export default function ProfilePage() {
               className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
             >
               Send Verification Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 2FA Setup Dialog */}
+      <Dialog open={showSetup2FADialog} onOpenChange={setShowSetup2FADialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Set Up Two-Factor Authentication</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Protect your account with an additional layer of security.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <p className="text-sm text-gray-300">
+              Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+            </p>
+            
+            <div className="flex justify-center bg-white p-4 rounded-md">
+              {/* QR code placeholder */}
+              <div className="w-40 h-40 bg-gray-200 flex items-center justify-center text-gray-800">
+                QR Code Placeholder
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <p className="text-sm text-gray-300">Or enter this code manually:</p>
+              <div className="bg-[#0F1923] border border-gray-800 rounded-md p-3">
+                <p className="font-mono text-sm text-center">ABCD EFGH IJKL MNOP</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 mt-4">
+              <FormLabel>Verification Code</FormLabel>
+              <Input
+                placeholder="Enter 6-digit code"
+                className="bg-[#0F1923] border-gray-800"
+              />
+              <p className="text-xs text-gray-500">
+                Enter the 6-digit code from your authenticator app to verify
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter className="space-y-2 sm:space-y-0">
+            <Button 
+              variant="outline"
+              className="border-gray-700"
+              onClick={() => setShowSetup2FADialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+            >
+              Verify & Enable
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 2FA Disable Dialog */}
+      <Dialog open={showDisable2FADialog} onOpenChange={setShowDisable2FADialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Disable Two-Factor Authentication</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Warning: This will reduce your account security
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Security Risk</AlertTitle>
+              <AlertDescription>
+                Disabling 2FA will make your account more vulnerable to unauthorized access.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-2 mt-4">
+              <FormLabel>Password</FormLabel>
+              <Input
+                type="password"
+                placeholder="Enter your password"
+                className="bg-[#0F1923] border-gray-800"
+              />
+              <p className="text-xs text-gray-500">
+                Enter your password to confirm this action
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter className="space-y-2 sm:space-y-0">
+            <Button 
+              variant="outline"
+              className="border-gray-700"
+              onClick={() => setShowDisable2FADialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+            >
+              Disable 2FA
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* KYC Verification Dialog */}
+      <Dialog open={showKYCDialog} onOpenChange={setShowKYCDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Identity Verification (KYC)</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Complete the KYC process to unlock withdrawals and other features.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-6">
+            <Alert className="bg-[#0F1923] border-gray-800">
+              <AlertCircle className="h-4 w-4 text-[#00FFAA]" />
+              <AlertTitle>Why we need this</AlertTitle>
+              <AlertDescription>
+                KYC verification is required to comply with regulations and to protect against fraud and money laundering.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-4">
+              <h3 className="text-base font-medium text-white">Required Documents</h3>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-white">Government-Issued ID</h4>
+                  <p className="text-xs text-gray-400">Upload a passport, driver's license, or national ID card</p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                    <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="p-2 rounded-full bg-[#0F1923]">
+                          <Upload className="h-5 w-5 text-[#00FFAA]" />
+                        </div>
+                        <p className="text-sm font-medium">Front Side</p>
+                        <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                      </div>
+                    </div>
+                    
+                    <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="p-2 rounded-full bg-[#0F1923]">
+                          <Upload className="h-5 w-5 text-[#00FFAA]" />
+                        </div>
+                        <p className="text-sm font-medium">Back Side</p>
+                        <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-white">Proof of Address</h4>
+                  <p className="text-xs text-gray-400">Upload a utility bill, bank statement, or official document with your name and address (issued within the last 3 months)</p>
+                  
+                  <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors mt-2">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="p-2 rounded-full bg-[#0F1923]">
+                        <Upload className="h-5 w-5 text-[#00FFAA]" />
+                      </div>
+                      <p className="text-sm font-medium">Proof of Address</p>
+                      <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="space-y-2 sm:space-y-0">
+            <Button 
+              variant="outline"
+              className="border-gray-700"
+              onClick={() => setShowKYCDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+              disabled={isUploadingKYC}
+            >
+              {isUploadingKYC ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                "Submit Documents"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

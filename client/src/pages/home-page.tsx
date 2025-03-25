@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
 import { GameCard } from "@/components/ui/game-card";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 import { Search, Plus, Coins, Bell } from "lucide-react";
@@ -94,6 +95,8 @@ export default function HomePage() {
                 </button>
                 <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-[#FF3E8F] text-xs flex items-center justify-center">3</span>
               </div>
+              
+              <LanguageSwitcher />
             </div>
           </div>
         </header>
