@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
 import { phoneVerificationSchema } from "@shared/schema";
@@ -8,6 +8,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -366,9 +368,11 @@ export default function ProfilePage() {
               <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
                 <div className="relative">
                   <Avatar className="h-24 w-24 rounded-xl border-4 border-[#00FFAA]/10">
-                    <AvatarImage src={user?.profileImage} />
+                    {user?.profileImage ? (
+                      <AvatarImage src={user.profileImage} />
+                    ) : null}
                     <AvatarFallback className="bg-[#0F1923] text-[#00FFAA]">
-                      {user?.username?.substring(0, 2).toUpperCase()}
+                      {user?.username ? user.username.substring(0, 2).toUpperCase() : "CS"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-2 -right-2 bg-[#00FFAA] rounded-full p-1.5">
@@ -804,14 +808,51 @@ export default function ProfilePage() {
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="+1 (555) 123-4567" 
-                            className="bg-[#0F1923] border-gray-800" 
-                            {...field}
+                          <Controller
+                            name="phoneNumber"
+                            control={phoneVerificationForm.control}
+                            render={({ field }) => (
+                              <PhoneInput
+                                country={'us'}
+                                value={field.value}
+                                onChange={(value) => {
+                                  console.log("Phone input value:", value);
+                                  field.onChange(value);
+                                }}
+                                inputStyle={{
+                                  width: '100%',
+                                  backgroundColor: '#0F1923',
+                                  color: 'white',
+                                  border: '1px solid #2c364a',
+                                  borderRadius: '0.375rem',
+                                  padding: '0.5rem 0.75rem 0.5rem 3rem',
+                                  height: '2.5rem'
+                                }}
+                                dropdownStyle={{
+                                  backgroundColor: '#1A2634',
+                                  color: 'white',
+                                  border: '1px solid #2c364a'
+                                }}
+                                buttonStyle={{
+                                  backgroundColor: '#0F1923',
+                                  border: '1px solid #2c364a',
+                                  borderRight: 'none'
+                                }}
+                                enableSearch={true}
+                                searchPlaceholder="Search countries..."
+                                searchClass="bg-[#0F1923] text-white border-gray-800"
+                                countryCodeEditable={false}
+                                containerClass="phone-input-container"
+                                inputClass="phone-input-control"
+                                specialLabel=""
+                                disableDropdown={false}
+                                preferredCountries={['us', 'ca', 'gb', 'au']}
+                              />
+                            )}
                           />
                         </FormControl>
                         <FormDescription className="text-gray-500">
-                          Enter your phone number with country code
+                          Select your country and enter your phone number
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

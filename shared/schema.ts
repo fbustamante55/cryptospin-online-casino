@@ -205,8 +205,9 @@ export const passwordResetSchema = z.object({
 });
 
 export const phoneVerificationSchema = z.object({
-  phoneNumber: z.string().min(8, "Please enter a valid phone number"),
-  verificationCode: z.string().length(6, "Verification code must be 6 digits")
+  phoneNumber: z.string().min(6, "Please enter a valid international phone number")
+    .refine(value => /^\+?[0-9\s\-()]+$/.test(value), "Phone number can only contain digits, spaces, and characters +()-"),
+  verificationCode: z.string().length(6, "Verification code must be 6 digits").optional()
 });
 
 export const profileUpdateSchema = z.object({
