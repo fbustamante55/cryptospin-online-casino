@@ -29,6 +29,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Crash", path: "/crash", icon: <TrendingUp className="h-5 w-5" /> },
     { name: "Wallet", path: "/wallet", icon: <Wallet className="h-5 w-5" /> },
     { name: "History", path: "/history", icon: <Clock className="h-5 w-5" /> },
+    { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
 
   return (

@@ -41,7 +41,7 @@ export function MobileNav() {
           <span className="text-xs mt-1">Wallet</span>
         </Link>
         
-        <Link href="/history" className={cn(
+        <Link href="/profile" className={cn(
           "flex flex-col items-center py-3 px-4",
           isActive("/profile") ? "text-[#00FFAA]" : "text-gray-400"
         )}>

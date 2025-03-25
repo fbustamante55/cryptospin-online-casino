@@ -15,6 +15,7 @@ import DicePage from "@/pages/dice-page";
 import CrashPage from "@/pages/crash-page";
 import WalletPage from "@/pages/wallet-page";
 import HistoryPage from "@/pages/history-page";
+import ProfilePage from "@/pages/profile-page";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/crash" component={CrashPage} />
       <ProtectedRoute path="/wallet" component={WalletPage} />
       <ProtectedRoute path="/history" component={HistoryPage} />
+      <ProtectedRoute path="/profile" component={ProfilePage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
