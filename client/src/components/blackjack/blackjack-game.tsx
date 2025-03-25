@@ -8,7 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Minus, Plus, Play, Maximize, RotateCcw, HandStop, Plus as PlusIcon, HelpCircle } from 'lucide-react';
+import { Minus, Plus, Play, Maximize, RotateCcw, Hand, Plus as PlusIcon, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Types for card and game state

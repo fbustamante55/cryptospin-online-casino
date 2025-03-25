@@ -161,9 +161,8 @@ export function AnalyticsDashboard() {
     setIsLoading(true);
     try {
       const response = await apiRequest<AnalyticsData>({
-        url: "/api/admin/analytics",
-        method: "GET",
-        params: { timeframe }
+        url: `/api/admin/analytics?timeframe=${timeframe}`,
+        method: "GET"
       });
       
       setAnalyticsData(response);

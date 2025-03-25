@@ -1021,6 +1021,21 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           </TabsContent>
+          
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <GameSettings />
+          </TabsContent>
+          
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-4">
+            <NotificationSender />
+          </TabsContent>
+          
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+          </TabsContent>
         </Tabs>
       </div>
       
