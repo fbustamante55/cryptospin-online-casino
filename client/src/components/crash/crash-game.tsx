@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Maximize } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'wouter';
 
 interface CrashBetResult {
   success: boolean;
