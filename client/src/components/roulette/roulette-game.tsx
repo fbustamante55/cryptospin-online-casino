@@ -102,12 +102,11 @@ export function RouletteGame() {
   // Place bet mutation
   const placeBetMutation = useMutation({
     mutationFn: async (data: { bets: Bet[], totalAmount: number }) => {
-      const response = await apiRequest({
+      return apiRequest<RouletteResult>({
         url: '/api/games/roulette',
         method: 'POST',
         data,
       });
-      return response as RouletteResult;
     },
     onSuccess: (data) => {
       setResult(data);

@@ -121,7 +121,11 @@ export default function AuthPage() {
 
   const onPasswordResetRequest = async (data: PasswordResetRequestFormData) => {
     try {
-      await apiRequest("POST", "/api/password-reset/request", data);
+      await apiRequest({
+        method: "POST", 
+        url: "/api/password-reset/request", 
+        data
+      });
       toast({
         title: "Reset link sent",
         description: "If your email exists in our system, you'll receive a password reset link shortly.",
@@ -145,9 +149,13 @@ export default function AuthPage() {
       // Use the token from state if available, otherwise use the one from the form
       const tokenToUse = resetToken || data.token;
       
-      await apiRequest("POST", "/api/password-reset/confirm", {
-        ...data,
-        token: tokenToUse,
+      await apiRequest({
+        method: "POST", 
+        url: "/api/password-reset/confirm", 
+        data: {
+          ...data,
+          token: tokenToUse,
+        }
       });
       
       toast({
