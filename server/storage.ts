@@ -24,6 +24,15 @@ export interface IStorage {
   disableTwoFactor(id: number): Promise<User | undefined>;
   updateLanguage(id: number, language: string): Promise<User | undefined>;
   
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  setUserAdminStatus(id: number, isAdmin: boolean): Promise<User | undefined>;
+  banUser(id: number, reason: string): Promise<User | undefined>;
+  unbanUser(id: number): Promise<User | undefined>;
+  getAllTransactions(): Promise<Transaction[]>;
+  getAllGameHistory(): Promise<GameHistory[]>;
+  getAllKycDocuments(): Promise<KycDocument[]>;
+  
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getUserTransactions(userId: number): Promise<Transaction[]>;
@@ -151,6 +160,9 @@ export class MemStorage implements IStorage {
       resetTokenExpiry: null,
       lastLogin: now,
       isVerified: false,
+      isAdmin: false,
+      isBanned: false,
+      banReason: null,
       createdAt: now
     };
     
@@ -245,6 +257,62 @@ export class MemStorage implements IStorage {
     const updatedUser = { ...user, language };
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+
+  // Admin methods
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values())
+      .sort((a, b) => a.id - b.id);
+  }
+
+  async setUserAdminStatus(id: number, isAdmin: boolean): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, isAdmin };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async banUser(id: number, reason: string): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user, 
+      isBanned: true,
+      banReason: reason
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async unbanUser(id: number): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user, 
+      isBanned: false,
+      banReason: null
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async getAllTransactions(): Promise<Transaction[]> {
+    return Array.from(this.transactions.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getAllGameHistory(): Promise<GameHistory[]> {
+    return Array.from(this.gameHistories.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getAllKycDocuments(): Promise<KycDocument[]> {
+    return Array.from(this.kycDocuments.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   // Transaction methods

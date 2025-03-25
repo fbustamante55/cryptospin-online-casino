@@ -27,6 +27,9 @@ export const users = pgTable("users", {
   resetTokenExpiry: timestamp("reset_token_expiry"),
   lastLogin: timestamp("last_login"),
   isVerified: boolean("is_verified").default(false),
+  isAdmin: boolean("is_admin").default(false),
+  isBanned: boolean("is_banned").default(false),
+  banReason: text("ban_reason"),
   createdAt: timestamp("created_at").notNull().defaultNow()
 });
 

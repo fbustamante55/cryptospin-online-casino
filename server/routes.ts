@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
@@ -9,6 +9,19 @@ import {
   insertSportsBetSchema, 
   insertSportsEventSchema 
 } from "@shared/schema";
+
+// Middleware to check if user is admin
+function isAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ message: "Forbidden - Admin access required" });
+  }
+  
+  next();
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -698,6 +711,450 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid wallet address data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update wallet addresses" });
+    }
+  });
+
+  // Admin routes
+  // Get all users - admin only
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.status(200).json(users.map(user => {
+        // Remove sensitive data
+        const { password, ...safeUser } = user;
+        return safeUser;
+      }));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Get user by ID - admin only
+  app.get("/api/admin/users/:id", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = user;
+      res.status(200).json(safeUser);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Ban a user - admin only
+  app.post("/api/admin/users/:id/ban", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const banSchema = z.object({
+        reason: z.string().min(1).max(500),
+      });
+      
+      const { reason } = banSchema.parse(req.body);
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Don't allow banning another admin
+      if (user.isAdmin) {
+        return res.status(403).json({ message: "Cannot ban an admin user" });
+      }
+      
+      const bannedUser = await storage.banUser(userId, reason);
+      if (!bannedUser) {
+        return res.status(500).json({ message: "Failed to ban user" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = bannedUser;
+      res.status(200).json({ message: "User banned successfully", user: safeUser });
+    } catch (error) {
+      console.error("Error banning user:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid ban data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to ban user" });
+    }
+  });
+
+  // Unban a user - admin only
+  app.post("/api/admin/users/:id/unban", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!user.isBanned) {
+        return res.status(400).json({ message: "User is not banned" });
+      }
+      
+      const unbannedUser = await storage.unbanUser(userId);
+      if (!unbannedUser) {
+        return res.status(500).json({ message: "Failed to unban user" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = unbannedUser;
+      res.status(200).json({ message: "User unbanned successfully", user: safeUser });
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      res.status(500).json({ message: "Failed to unban user" });
+    }
+  });
+
+  // Reset a user's password - admin only
+  app.post("/api/admin/users/:id/reset-password", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const passwordSchema = z.object({
+        newPassword: z.string().min(6).max(100),
+      });
+      
+      const { newPassword } = passwordSchema.parse(req.body);
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // For simplicity, we'll use the provided password directly
+      // In a real app, we would hash it first
+      const updatedUser = await storage.updatePassword(userId, newPassword);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to reset password" });
+      }
+      
+      res.status(200).json({ 
+        message: "Password reset successfully"
+      });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid password data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  // Make a user an admin - admin only
+  app.post("/api/admin/users/:id/make-admin", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (user.isAdmin) {
+        return res.status(400).json({ message: "User is already an admin" });
+      }
+      
+      const updatedUser = await storage.setUserAdminStatus(userId, true);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update admin status" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = updatedUser;
+      res.status(200).json({ 
+        message: "User promoted to admin successfully", 
+        user: safeUser 
+      });
+    } catch (error) {
+      console.error("Error making user admin:", error);
+      res.status(500).json({ message: "Failed to update admin status" });
+    }
+  });
+
+  // Remove admin rights - admin only
+  app.post("/api/admin/users/:id/remove-admin", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Don't allow removing yourself as admin
+      if (req.user && userId === req.user.id) {
+        return res.status(403).json({ message: "Cannot remove your own admin rights" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!user.isAdmin) {
+        return res.status(400).json({ message: "User is not an admin" });
+      }
+      
+      const updatedUser = await storage.setUserAdminStatus(userId, false);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update admin status" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = updatedUser;
+      res.status(200).json({ 
+        message: "Admin rights removed successfully", 
+        user: safeUser 
+      });
+    } catch (error) {
+      console.error("Error removing admin status:", error);
+      res.status(500).json({ message: "Failed to update admin status" });
+    }
+  });
+
+  // Get all transactions - admin only
+  app.get("/api/admin/transactions", isAdmin, async (req, res) => {
+    try {
+      const transactions = await storage.getAllTransactions();
+      res.status(200).json(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Get all game history - admin only
+  app.get("/api/admin/game-history", isAdmin, async (req, res) => {
+    try {
+      const gameHistory = await storage.getAllGameHistory();
+      res.status(200).json(gameHistory);
+    } catch (error) {
+      console.error("Error fetching game history:", error);
+      res.status(500).json({ message: "Failed to fetch game history" });
+    }
+  });
+
+  // Get all KYC documents - admin only
+  app.get("/api/admin/kyc-documents", isAdmin, async (req, res) => {
+    try {
+      const kycDocuments = await storage.getAllKycDocuments();
+      res.status(200).json(kycDocuments);
+    } catch (error) {
+      console.error("Error fetching KYC documents:", error);
+      res.status(500).json({ message: "Failed to fetch KYC documents" });
+    }
+  });
+
+  // Update KYC document status - admin only
+  app.post("/api/admin/kyc-documents/:id/status", isAdmin, async (req, res) => {
+    try {
+      const docId = parseInt(req.params.id);
+      if (isNaN(docId)) {
+        return res.status(400).json({ message: "Invalid document ID" });
+      }
+      
+      const statusSchema = z.object({
+        status: z.enum(["pending", "approved", "rejected"]),
+        rejectionReason: z.string().optional(),
+      });
+      
+      const { status, rejectionReason } = statusSchema.parse(req.body);
+      
+      const updatedDoc = await storage.updateKycDocumentStatus(docId, status, rejectionReason);
+      if (!updatedDoc) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      res.status(200).json({ 
+        message: "Document status updated successfully", 
+        document: updatedDoc 
+      });
+    } catch (error) {
+      console.error("Error updating KYC document status:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid status data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update document status" });
+    }
+  });
+
+  // Admin dashboard statistics - admin only
+  app.get("/api/admin/dashboard", isAdmin, async (req, res) => {
+    try {
+      // Get counts
+      const users = await storage.getAllUsers();
+      const transactions = await storage.getAllTransactions();
+      const gameHistory = await storage.getAllGameHistory();
+      const kycDocuments = await storage.getAllKycDocuments();
+      
+      // Calculate revenue (all bets - all wins)
+      let totalBets = 0;
+      let totalWins = 0;
+      let totalDeposits = 0;
+      let totalWithdrawals = 0;
+      
+      transactions.forEach(tx => {
+        if (tx.type === 'bet') {
+          totalBets += Math.abs(tx.amount);
+        } else if (tx.type === 'win') {
+          totalWins += tx.amount;
+        } else if (tx.type === 'deposit') {
+          totalDeposits += tx.amount;
+        } else if (tx.type === 'withdraw') {
+          totalWithdrawals += Math.abs(tx.amount);
+        }
+      });
+      
+      // Game statistics
+      const gameStats = {
+        slots: {
+          totalGames: 0,
+          totalBets: 0,
+          totalWins: 0,
+        },
+        dice: {
+          totalGames: 0,
+          totalBets: 0,
+          totalWins: 0,
+        },
+        crash: {
+          totalGames: 0,
+          totalBets: 0,
+          totalWins: 0,
+        },
+        sports: {
+          totalBets: 0,
+          totalPending: 0,
+          totalWon: 0,
+          totalLost: 0,
+        }
+      };
+      
+      gameHistory.forEach(game => {
+        const gameType = game.gameType as 'slots' | 'dice' | 'crash';
+        
+        if (gameStats[gameType]) {
+          gameStats[gameType].totalGames++;
+          gameStats[gameType].totalBets += game.bet;
+          
+          if (game.win) {
+            gameStats[gameType].totalWins += game.winAmount;
+          }
+        }
+      });
+      
+      res.status(200).json({
+        users: {
+          total: users.length,
+          verified: users.filter(u => u.isVerified).length,
+          admins: users.filter(u => u.isAdmin).length,
+          banned: users.filter(u => u.isBanned).length,
+        },
+        transactions: {
+          total: transactions.length,
+          totalBets,
+          totalWins,
+          totalDeposits,
+          totalWithdrawals,
+          houseProfit: totalBets - totalWins,
+        },
+        gameHistory: {
+          total: gameHistory.length,
+          ...gameStats
+        },
+        kyc: {
+          total: kycDocuments.length,
+          pending: kycDocuments.filter(doc => doc.verificationStatus === 'pending').length,
+          approved: kycDocuments.filter(doc => doc.verificationStatus === 'approved').length,
+          rejected: kycDocuments.filter(doc => doc.verificationStatus === 'rejected').length,
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching admin dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard data" });
+    }
+  });
+
+  // Admin setup - create an admin user if none exists (this route is publicly accessible)
+  app.post("/api/admin/setup", async (req, res) => {
+    try {
+      // Check if any admin exists
+      const users = await storage.getAllUsers();
+      const adminExists = users.some(user => user.isAdmin);
+      
+      if (adminExists) {
+        return res.status(403).json({ message: "Admin already exists" });
+      }
+      
+      const setupSchema = z.object({
+        username: z.string().min(3).max(50),
+        email: z.string().email(),
+        password: z.string().min(6).max(100),
+      });
+      
+      const { username, email, password } = setupSchema.parse(req.body);
+      
+      // Create a new user with admin rights
+      // First, check if email or username already exists
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+      
+      const existingUsername = await storage.getUserByUsername(username);
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      // Create user
+      const user = await storage.createUser({
+        username,
+        email,
+        password,
+      });
+      
+      // Make user an admin
+      const adminUser = await storage.setUserAdminStatus(user.id, true);
+      
+      // Remove sensitive data
+      if (adminUser) {
+        const { password, ...safeUser } = adminUser;
+        return res.status(201).json({ 
+          message: "Admin user created successfully", 
+          user: safeUser 
+        });
+      } else {
+        return res.status(500).json({ message: "Failed to set admin status" });
+      }
+    } catch (error) {
+      console.error("Error setting up admin:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid setup data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to setup admin" });
     }
   });
 

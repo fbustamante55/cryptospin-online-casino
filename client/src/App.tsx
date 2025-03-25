@@ -18,6 +18,7 @@ import HistoryPage from "@/pages/history-page";
 import ProfilePage from "@/pages/profile-page";
 import SportsBettingPage from "@/pages/sports-betting-page";
 import TestPhoneInputPage from "@/pages/test-phone-input-page";
+import AdminDashboardPage from "@/pages/admin-dashboard-page";
 
 function Router() {
   return (
@@ -30,6 +31,7 @@ function Router() {
       <ProtectedRoute path="/wallet" component={WalletPage} />
       <ProtectedRoute path="/history" component={HistoryPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/admin" component={AdminDashboardPage} />
       <Route path="/test-phone-input">
         <TestPhoneInputPage />
       </Route>
