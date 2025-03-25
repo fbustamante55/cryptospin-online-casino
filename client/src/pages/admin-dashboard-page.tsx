@@ -52,8 +52,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { AdminLogin } from "@/components/admin/admin-login";
-import { NotificationSender } from "@/components/admin/notification-sender";
 import { GameSettings } from "@/components/admin/game-settings";
+import { NotificationSender } from "@/components/admin/notification-sender";
 import { AnalyticsDashboard } from "@/components/admin/analytics-dashboard";
 import { formatNumber } from "@/lib/game-utils";
 import { useToast } from "@/hooks/use-toast";
