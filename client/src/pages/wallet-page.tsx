@@ -18,10 +18,10 @@ import {
   Clock,
   CreditCard,
   Gift,
-  AlertCircle,
+  Save,
   CheckCircle,
-  XCircle,
-  Save
+  AlertCircle,
+  XCircle
 } from "lucide-react";
 
 interface WalletAddresses {
@@ -433,7 +433,7 @@ export default function WalletPage() {
                       
                       <div className="mb-4">
                         <label className="block text-sm text-gray-400 mb-1">Wallet Address</label>
-                        <div className="flex">
+                        <div className="flex space-x-2">
                           <Input 
                             type="text" 
                             value={withdrawalAddress}
@@ -441,7 +441,29 @@ export default function WalletPage() {
                             placeholder={`Enter your ${withdrawalCurrency} address`}
                             className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
                           />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="shrink-0 border-gray-800 hover:bg-[#0F1923] hover:text-[#00FFAA]"
+                            onClick={handleSaveWalletAddress}
+                            title="Save address for future use"
+                            disabled={saveWalletAddressMutation.isPending}
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
                         </div>
+                        {withdrawalCurrency === "BTC" && walletAddresses?.btcAddress && (
+                          <div className="text-xs text-[#00FFAA] mt-1 flex items-center">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            BTC address saved
+                          </div>
+                        )}
+                        {withdrawalCurrency === "ETH" && walletAddresses?.ethAddress && (
+                          <div className="text-xs text-[#00FFAA] mt-1 flex items-center">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            ETH address saved
+                          </div>
+                        )}
                       </div>
                       
                       {user?.isVerified ? (
