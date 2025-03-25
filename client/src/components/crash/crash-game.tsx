@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Maximize } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
@@ -28,6 +29,7 @@ export function CrashGame() {
   const { user } = useAuth();
   const [bet, setBet] = useState<number>(100);
   const [autoCashout, setAutoCashout] = useState<number>(2.00);
+  const [isAutoCashoutEnabled, setIsAutoCashoutEnabled] = useState<boolean>(false);
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(1.00);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isCrashed, setIsCrashed] = useState<boolean>(false);
@@ -120,10 +122,10 @@ export function CrashGame() {
   
   // Auto cashout effect
   useEffect(() => {
-    if (isPlaying && !cashedOut && currentMultiplier >= autoCashout) {
+    if (isPlaying && !cashedOut && isAutoCashoutEnabled && currentMultiplier >= autoCashout) {
       handleCashout();
     }
-  }, [currentMultiplier, isPlaying, cashedOut, autoCashout]);
+  }, [currentMultiplier, isPlaying, cashedOut, autoCashout, isAutoCashoutEnabled]);
   
   const startCrashAnimation = () => {
     const startTime = Date.now();
@@ -191,8 +193,12 @@ export function CrashGame() {
     // Reset UI
     setCurrentMultiplier(1.00);
     
-    // Place bet
-    betMutation.mutate({ bet, autoCashout });
+    // Place bet with auto cashout only if enabled
+    if (isAutoCashoutEnabled) {
+      betMutation.mutate({ bet, autoCashout });
+    } else {
+      betMutation.mutate({ bet });
+    }
   };
   
   const handleCashout = () => {
@@ -321,7 +327,23 @@ export function CrashGame() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Auto Cash Out</label>
+            <div className="flex flex-row items-center justify-between mb-1">
+              <label className="block text-sm text-gray-400">Auto Cash Out</label>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="auto-cashout" 
+                  checked={isAutoCashoutEnabled}
+                  onCheckedChange={(checked) => setIsAutoCashoutEnabled(checked === true)}
+                  disabled={!canBet || betMutation.isPending}
+                />
+                <label 
+                  htmlFor="auto-cashout" 
+                  className="text-xs text-gray-400 cursor-pointer"
+                >
+                  Enabled
+                </label>
+              </div>
+            </div>
             <Input
               type="text"
               value={`${autoCashout.toFixed(2)}x`}
@@ -332,7 +354,7 @@ export function CrashGame() {
                 }
               }}
               className="bg-[#0F1923] text-center border border-gray-800 py-2 w-full text-white rounded-lg focus:outline-none focus:border-[#00FFAA]"
-              disabled={!canBet || betMutation.isPending}
+              disabled={!canBet || betMutation.isPending || !isAutoCashoutEnabled}
             />
           </div>
         </div>
