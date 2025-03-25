@@ -3,7 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { insertTransactionSchema, insertGameHistorySchema } from "@shared/schema";
+import { 
+  insertTransactionSchema, 
+  insertGameHistorySchema, 
+  insertSportsBetSchema, 
+  insertSportsEventSchema 
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -408,6 +413,230 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+    }
+  });
+
+  // Sports betting routes
+  
+  // Get all upcoming sports events with filters
+  app.get("/api/sports/events", async (req, res) => {
+    try {
+      const sportType = req.query.sportType as string | undefined;
+      const status = req.query.status as string | undefined;
+      
+      const events = await storage.getSportsEvents(sportType, status);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching sports events:", error);
+      res.status(500).json({ message: "Failed to fetch sports events" });
+    }
+  });
+  
+  // Get a single sports event by ID
+  app.get("/api/sports/events/:id", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+      
+      const event = await storage.getSportsEvent(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching sports event:", error);
+      res.status(500).json({ message: "Failed to fetch sports event" });
+    }
+  });
+  
+  // Create a bet on a sports event
+  app.post("/api/sports/bets", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const betSchema = z.object({
+      eventId: z.number().int().positive(),
+      stake: z.number().min(10).max(10000),
+      odds: z.number().min(1.01),
+      betType: z.string().min(1),
+      selection: z.string().min(1),
+      marketId: z.string().optional()
+    });
+    
+    try {
+      const { eventId, stake, odds, betType, selection, marketId } = betSchema.parse(req.body);
+      
+      // Check if user has enough balance
+      if (req.user.balance < stake) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+      
+      // Check if event exists and is still open for betting
+      const event = await storage.getSportsEvent(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      if (event.status !== 'upcoming' && event.status !== 'live') {
+        return res.status(400).json({ message: "Event is not open for betting" });
+      }
+      
+      // Create the bet
+      const bet = await storage.createSportsBet({
+        userId: req.user.id,
+        eventId,
+        amount: stake, // Using "amount" instead of "stake" to match schema
+        odds,
+        betType,
+        betOn: selection, // Using "betOn" instead of "selection" to match schema
+        marketId: marketId || null,
+        potentialWin: Math.floor(stake * odds),
+        status: 'pending'
+      });
+      
+      // Update user balance (deduct stake)
+      const updatedUser = await storage.updateUserBalance(req.user.id, -stake);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update balance" });
+      }
+      
+      // Create transaction
+      await storage.createTransaction({
+        userId: req.user.id,
+        amount: -stake,
+        type: "bet",
+        gameType: "sports"
+      });
+      
+      res.status(201).json({
+        bet,
+        balance: updatedUser.balance
+      });
+    } catch (error) {
+      console.error("Error placing sports bet:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid bet data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to place bet" });
+    }
+  });
+  
+  // Get user bets
+  app.get("/api/sports/bets", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const bets = await storage.getUserSportsBets(req.user.id);
+      res.json(bets);
+    } catch (error) {
+      console.error("Error fetching user bets:", error);
+      res.status(500).json({ message: "Failed to fetch bets" });
+    }
+  });
+  
+  // Update live event data (admin only in real system)
+  app.patch("/api/sports/events/:id/live", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    // In a real system, you would check for admin privileges here
+    
+    const liveDataSchema = z.object({
+      liveScore: z.any(),
+      liveStats: z.any().optional()
+    });
+    
+    try {
+      const eventId = parseInt(req.params.id);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+      
+      const { liveScore, liveStats } = liveDataSchema.parse(req.body);
+      
+      const event = await storage.getSportsEvent(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      // Update live data
+      const updatedEvent = await storage.updateLiveEventData(eventId, liveScore, liveStats);
+      
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating live event data:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid live data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update live event data" });
+    }
+  });
+  
+  // Complete an event and settle bets (admin only in real system)
+  app.patch("/api/sports/events/:id/complete", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    // In a real system, you would check for admin privileges here
+    
+    const completeSchema = z.object({
+      results: z.any(),
+      winners: z.array(z.object({
+        betId: z.number().int().positive(),
+        settledAmount: z.number().min(0)
+      }))
+    });
+    
+    try {
+      const eventId = parseInt(req.params.id);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+      
+      const { results, winners } = completeSchema.parse(req.body);
+      
+      const event = await storage.getSportsEvent(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      // Update event status
+      const updatedEvent = await storage.updateSportsEventStatus(eventId, 'completed', results);
+      
+      // Settle all winning bets
+      for (const winner of winners) {
+        const bet = await storage.settleSportsBet(winner.betId, 'won', winner.settledAmount);
+        
+        if (bet) {
+          // Pay out winnings
+          await storage.updateUserBalance(bet.userId, winner.settledAmount);
+          
+          // Record transaction
+          await storage.createTransaction({
+            userId: bet.userId,
+            amount: winner.settledAmount,
+            type: "win",
+            gameType: "sports"
+          });
+        }
+      }
+      
+      // Get all pending bets for this event and mark them as lost
+      const userBets = await Promise.all((await storage.getUserSportsBets(req.user.id))
+        .filter(bet => bet.eventId === eventId && bet.status === 'pending')
+        .map(bet => storage.settleSportsBet(bet.id, 'lost', 0)));
+      
+      res.json({
+        event: updatedEvent,
+        settledBets: winners.length + userBets.length
+      });
+    } catch (error) {
+      console.error("Error completing sports event:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid completion data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to complete event" });
     }
   });
 

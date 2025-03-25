@@ -42,6 +42,7 @@ export interface IStorage {
   getSportsEvents(sportType?: string, status?: string): Promise<SportsEvent[]>;
   getSportsEvent(id: number): Promise<SportsEvent | undefined>;
   updateSportsEventStatus(id: number, status: string, results?: any): Promise<SportsEvent | undefined>;
+  updateLiveEventData(id: number, liveScore: any, liveStats?: any): Promise<SportsEvent | undefined>;
   
   createSportsBet(bet: InsertSportsBet): Promise<SportsBet>;
   getUserSportsBets(userId: number): Promise<SportsBet[]>;
@@ -336,6 +337,10 @@ export class MemStorage implements IStorage {
       id,
       status: event.status || 'upcoming',
       results: null,
+      liveScore: event.liveScore || null,
+      liveStats: event.liveStats || null,
+      featured: event.featured || false,
+      markets: event.markets || null,
       createdAt: now,
       updatedAt: null
     };
@@ -371,6 +376,22 @@ export class MemStorage implements IStorage {
       ...event,
       status,
       results: results || event.results,
+      updatedAt: now
+    };
+    
+    this.sportsEvents.set(id, updatedEvent);
+    return updatedEvent;
+  }
+  
+  async updateLiveEventData(id: number, liveScore: any, liveStats?: any): Promise<SportsEvent | undefined> {
+    const event = this.sportsEvents.get(id);
+    if (!event) return undefined;
+    
+    const now = new Date();
+    const updatedEvent = {
+      ...event,
+      liveScore,
+      liveStats: liveStats || event.liveStats,
       updatedAt: now
     };
     
