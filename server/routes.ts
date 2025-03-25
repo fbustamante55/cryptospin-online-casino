@@ -1346,6 +1346,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Play roulette game
+  app.post("/api/games/roulette", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const betSchema = z.object({
+      bets: z.array(
+        z.object({
+          type: z.enum([
+            'number', 'split', 'street', 'corner', 'sixline', 
+            'dozen', 'column', 'color', 'evenOdd', 'highLow'
+          ]),
+          value: z.union([z.string(), z.number()]),
+          amount: z.number().min(10).max(10000),
+          odds: z.number().min(1).max(35)
+        })
+      ),
+      totalAmount: z.number().min(10)
+    });
+
+    try {
+      const { bets, totalAmount } = betSchema.parse(req.body);
+      
+      // Check if user has enough balance
+      if (req.user.balance < totalAmount) {
+        return res.status(400).json({ message: "Saldo insuficiente" });
+      }
+
+      // Generate winning number (0-36)
+      const number = Math.floor(Math.random() * 37);
+      
+      // Determine color
+      let color: 'red' | 'black' | 'green';
+      const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+      
+      if (number === 0) {
+        color = 'green';
+      } else if (redNumbers.includes(number)) {
+        color = 'red';
+      } else {
+        color = 'black';
+      }
+
+      // Process each bet to check if it's a winner
+      let totalWin = 0;
+      const winningBets = [];
+      
+      for (const bet of bets) {
+        let win = false;
+        
+        // Check if the bet is a winner based on its type and the winning number
+        switch (bet.type) {
+          case 'number':
+            win = number === Number(bet.value);
+            break;
+            
+          case 'split': {
+            const numbers = String(bet.value).split(',').map(n => parseInt(n.trim()));
+            win = numbers.includes(number);
+            break;
+          }
+            
+          case 'street': {
+            const numbers = String(bet.value).split(',').map(n => parseInt(n.trim()));
+            win = numbers.includes(number);
+            break;
+          }
+            
+          case 'corner': {
+            const numbers = String(bet.value).split(',').map(n => parseInt(n.trim()));
+            win = numbers.includes(number);
+            break;
+          }
+            
+          case 'sixline': {
+            const numbers = String(bet.value).split(',').map(n => parseInt(n.trim()));
+            win = numbers.includes(number);
+            break;
+          }
+            
+          case 'dozen':
+            if (number === 0) {
+              win = false;
+            } else if (bet.value === 'first') {
+              win = number >= 1 && number <= 12;
+            } else if (bet.value === 'second') {
+              win = number >= 13 && number <= 24;
+            } else if (bet.value === 'third') {
+              win = number >= 25 && number <= 36;
+            }
+            break;
+            
+          case 'column':
+            if (number === 0) {
+              win = false;
+            } else {
+              const firstColumn = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34];
+              const secondColumn = [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35];
+              const thirdColumn = [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36];
+              
+              if (bet.value === 'first') {
+                win = firstColumn.includes(number);
+              } else if (bet.value === 'second') {
+                win = secondColumn.includes(number);
+              } else if (bet.value === 'third') {
+                win = thirdColumn.includes(number);
+              }
+            }
+            break;
+            
+          case 'color':
+            win = bet.value === color;
+            break;
+            
+          case 'evenOdd':
+            if (number === 0) {
+              win = false;
+            } else {
+              const isEven = number % 2 === 0;
+              win = (bet.value === 'even' && isEven) || (bet.value === 'odd' && !isEven);
+            }
+            break;
+            
+          case 'highLow':
+            if (number === 0) {
+              win = false;
+            } else {
+              win = (bet.value === 'low' && number >= 1 && number <= 18) || 
+                   (bet.value === 'high' && number >= 19 && number <= 36);
+            }
+            break;
+        }
+        
+        if (win) {
+          const winAmount = bet.amount * bet.odds;
+          totalWin += winAmount;
+          winningBets.push(bet);
+        }
+      }
+      
+      // Update user balance
+      // First deduct the total bet amount
+      let userBalanceChange = -totalAmount;
+      // Then add any winnings
+      userBalanceChange += totalWin;
+      
+      const updatedUser = await storage.updateUserBalance(req.user.id, userBalanceChange);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update balance" });
+      }
+
+      // Record transactions
+      // First the bet transaction
+      await storage.createTransaction({
+        userId: req.user.id,
+        amount: -totalAmount,
+        type: "bet",
+        gameType: "roulette"
+      });
+
+      // Then any win transaction
+      if (totalWin > 0) {
+        await storage.createTransaction({
+          userId: req.user.id,
+          amount: totalWin,
+          type: "win",
+          gameType: "roulette"
+        });
+      }
+
+      // Record game history
+      await storage.createGameHistory({
+        userId: req.user.id,
+        gameType: "roulette",
+        bet: totalAmount,
+        outcome: JSON.stringify({ number, color, winningBets }),
+        multiplier: totalWin > 0 ? totalWin / totalAmount : 0,
+        win: totalWin > 0,
+        winAmount: totalWin
+      });
+
+      res.json({
+        number,
+        color,
+        winningBets,
+        totalWin,
+        balance: updatedUser.balance
+      });
+    } catch (error) {
+      console.error("Roulette game error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

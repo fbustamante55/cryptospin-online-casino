@@ -96,19 +96,20 @@ export function RouletteGame() {
   // Fetch game history
   const { data: gameHistoryData } = useQuery({
     queryKey: ['/api/game-history'],
-    select: (data) => data.filter((game: any) => game.gameType === 'roulette'),
+    select: (data: any) => data.filter((game: any) => game.gameType === 'roulette'),
   });
 
   // Place bet mutation
   const placeBetMutation = useMutation({
-    mutationFn: (data: { bets: Bet[], totalAmount: number }) => {
-      return apiRequest<RouletteResult>({
+    mutationFn: async (data: { bets: Bet[], totalAmount: number }) => {
+      const response = await apiRequest({
         url: '/api/games/roulette',
         method: 'POST',
         data,
       });
+      return response as RouletteResult;
     },
-    onSuccess: (data: RouletteResult) => {
+    onSuccess: (data) => {
       setResult(data);
       setHistory(prev => [data, ...prev].slice(0, 10));
       spinWheel(data.number);
@@ -808,7 +809,12 @@ export function RouletteGame() {
                   </p>
                   <Button 
                     variant="outline" 
-                    onClick={() => document.querySelector('[data-value="game"]')?.click()}
+                    onClick={() => {
+                      const element = document.querySelector('[data-value="game"]');
+                      if (element instanceof HTMLElement) {
+                        element.click();
+                      }
+                    }}
                   >
                     Comenzar a jugar
                   </Button>
