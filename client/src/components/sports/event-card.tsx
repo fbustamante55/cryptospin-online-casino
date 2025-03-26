@@ -70,7 +70,8 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
         method: 'GET'
       });
     },
-    enabled: !!user,
+    // Para la demo no requiere usuario autenticado
+    enabled: true,
   });
   
   // Add to favorites - para la demo no requiere usuario
