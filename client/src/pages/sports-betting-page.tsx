@@ -393,49 +393,54 @@ export default function SportsBettingPage() {
               </Button>
             </div>
             
-            {/* Sports Categories */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">{t('sports.topSports')}</h2>
-                <div className="flex items-center">
-                  <ScrollArea className="w-64 whitespace-nowrap">
-                    <div className="flex space-x-2 p-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={`px-3 py-1 text-xs font-medium ${activeSport === 'all' ? 'bg-[#09b66d] text-white' : 'bg-[#192531] border-[#1c2b3a]'}`}
-                        onClick={() => setActiveSport('all')}
-                      >
-                        TODOS
-                      </Button>
-                      {sportsData?.map((sport) => {
-                        const isActive = activeSport === sport.key;
-                        const color = getSportColor(sport.group);
-                        return (
-                          <Button
-                            key={sport.key}
-                            variant="outline"
-                            size="sm"
-                            className={`px-3 py-1 text-xs font-medium ${isActive ? 'bg-[#09b66d] text-white' : 'bg-[#192531] border-[#1c2b3a]'}`}
-                            style={{
-                              borderLeft: isActive ? 'none' : `2px solid ${color}`
-                            }}
-                            onClick={() => {
-                              if (activeSport === sport.key) {
-                                setActiveSport('all');
-                              } else {
-                                setActiveSport(sport.key);
-                              }
-                            }}
-                          >
-                            {sport.title.toUpperCase()}
-                          </Button>
-                        );
-                      })}
+            {/* Sports Categories Title */}
+            <div className="mb-4">
+              <h2 className="text-xl font-bold">{t('sports.topSports')}</h2>
+            </div>
+            
+            {/* Sports Categories Scrollable Bar */}
+            <div className="mb-8 bg-[#0e1824] border border-[#1c2b3a] rounded-md overflow-hidden">
+              <ScrollArea className="w-full">
+                <div className="flex items-center p-1 gap-1">
+                  <div 
+                    className={`flex flex-col items-center py-2 px-3 cursor-pointer min-w-[65px] ${activeSport === 'all' ? 'text-[#09b66d]' : 'text-gray-400'}`}
+                    onClick={() => setActiveSport('all')}
+                  >
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-md bg-[#192531] mb-1 ${activeSport === 'all' ? 'border-b-2 border-[#09b66d]' : ''}`}>
+                      <Package className="w-4 h-4" />
                     </div>
-                  </ScrollArea>
+                    <span className="text-xs font-semibold">Todo</span>
+                    <span className="text-xs font-bold text-white">1546</span>
+                  </div>
+                  
+                  {sportsData?.map((sport) => {
+                    const isActive = activeSport === sport.key;
+                    const color = getSportColor(sport.group);
+                    // Número aleatorio para simular cantidad de eventos (en producción debería venir del API)
+                    const eventsCount = Math.floor(Math.random() * 100) + 1;
+                    
+                    return (
+                      <div 
+                        key={sport.key}
+                        className={`flex flex-col items-center py-2 px-3 cursor-pointer min-w-[65px] ${isActive ? 'text-[#09b66d]' : 'text-gray-400'}`}
+                        onClick={() => {
+                          if (activeSport === sport.key) {
+                            setActiveSport('all');
+                          } else {
+                            setActiveSport(sport.key);
+                          }
+                        }}
+                      >
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-md bg-[#192531] mb-1 ${isActive ? 'border-b-2 border-[#09b66d]' : ''}`}>
+                          <div className="w-4 h-4 bg-white/20 rounded-full"></div>
+                        </div>
+                        <span className="text-xs font-semibold">{sport.title}</span>
+                        <span className="text-xs font-bold text-white">{eventsCount}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              </ScrollArea>
             </div>
             
             {/* Upcoming Events Section */}
