@@ -440,9 +440,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p className="text-xs">
-                      {drawOdds.price > 0 
-                        ? `+${formatAmericanOdds(drawOdds.price)}: Ganarías $${drawOdds.price} por cada $100 apostados en empate` 
-                        : `-${formatAmericanOdds(drawOdds.price)}: Necesitas apostar $${Math.abs(drawOdds.price)} para ganar $100 en empate`}
+                      Cuota {formatAmericanOdds(drawOdds.price)}: Por cada $1 apostado ganarías ${formatAmericanOdds(drawOdds.price)} en empate
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -510,8 +508,8 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                       <TooltipContent side="top">
                         <p className="text-xs">
                           {point && point > 0 
-                            ? `${outcome.name} recibe ${point} puntos de ventaja (${formatAmericanOdds(outcome.price)})` 
-                            : `${outcome.name} da ${Math.abs(point || 0)} puntos (${formatAmericanOdds(outcome.price)})`}
+                            ? `${outcome.name} recibe ${point} puntos de ventaja. Cuota: ${formatAmericanOdds(outcome.price)}` 
+                            : `${outcome.name} da ${Math.abs(point || 0)} puntos. Cuota: ${formatAmericanOdds(outcome.price)}`}
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -560,7 +558,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                                   </span>
                                 </div>
                                 <div className="text-right mt-1">
-                                  <span className="text-gray-400">{formatAmericanOdds(outcome.price)}</span>
+                                  <span className="text-green-400">{formatAmericanOdds(outcome.price)}</span>
                                 </div>
                               </button>
                             ))}

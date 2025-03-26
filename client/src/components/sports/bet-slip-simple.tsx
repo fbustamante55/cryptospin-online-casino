@@ -209,7 +209,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                       {formatBetType(bet)}
                     </div>
                     
-                    <div className="text-sm font-bold">
+                    <div className="text-sm font-bold text-green-400">
                       {formatAmericanOdds(bet.odds)}
                     </div>
                   </div>
@@ -224,7 +224,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 {selections.length > 1 && (
                   <div className="flex items-center text-xs text-white/70">
                     <span>{t('sports.parlayOdds')}:</span>
-                    <span className="ml-1 font-bold">{formatAmericanOdds(calculateParlayOdds())}</span>
+                    <span className="ml-1 font-bold text-green-400">{formatAmericanOdds(calculateParlayOdds())}</span>
                   </div>
                 )}
               </div>
