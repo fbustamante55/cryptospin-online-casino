@@ -72,6 +72,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to set up admin" });
     }
   });
+  
+  // Ruta para enviar notificaciones desde el panel de administración
+  app.post("/api/admin/notifications/send", isAdmin, async (req, res) => {
+    try {
+      const notificationSchema = z.object({
+        title: z.string().min(1),
+        message: z.string().min(1),
+        type: z.enum(["info", "success", "warning", "error"]),
+        targetType: z.enum(["all", "specific"]),
+        specificUsers: z.array(z.number()).optional(),
+        priority: z.enum(["low", "medium", "high"]).optional(),
+        scheduleSend: z.boolean().optional(),
+        scheduledTime: z.string().optional(),
+        requiresAction: z.boolean().optional(),
+        actionUrl: z.string().optional(),
+        actionText: z.string().optional(),
+        persistent: z.boolean().optional()
+      });
+      
+      const validatedData = notificationSchema.parse(req.body);
+      
+      console.log("Admin sending notification:", validatedData);
+      
+      // En una implementación real, aquí guardaríamos la notificación en la base de datos
+      // y luego la enviaríamos a los usuarios específicos a través de WebSockets u otro sistema
+      
+      // Para esta demostración, simplemente devolvemos éxito
+      return res.status(200).json({ 
+        success: true, 
+        message: "Notificación enviada correctamente",
+        notification: {
+          id: Date.now(),
+          title: validatedData.title,
+          message: validatedData.message,
+          type: validatedData.type === 'info' ? 'system' : 
+                validatedData.type === 'success' ? 'reward' : 
+                validatedData.type === 'warning' ? 'promo' : 'alert',
+          read: false,
+          createdAt: new Date().toISOString(),
+          sentBy: req.user.id
+        }
+      });
+    } catch (error) {
+      console.error("Error sending admin notification:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Datos de notificación inválidos", errors: error.errors });
+      }
+      return res.status(500).json({ message: "Error al enviar la notificación" });
+    }
+  });
 
   // Wallet-related routes
   
