@@ -58,6 +58,28 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "RTP mejorado", path: "/crash", icon: <Zap className="h-4 w-4" /> },
   ];
   
+  // Elementos para la sección de deportes
+  const sportsItems = [
+    { name: "Eventos en Vivo", icon: <Tv className="h-4 w-4" />, badge: "24" },
+    { name: "Empezando Pronto", icon: <Clock className="h-4 w-4" /> },
+    { name: "Mis Apuestas", icon: <BarChart className="h-4 w-4" /> },
+  ];
+  
+  // Deportes populares
+  const popularSports = [
+    { name: "Fútbol", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Baloncesto", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Tenis", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "MMA", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Béisbol", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Hockey sobre hielo", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Tenis de Mesa", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Vóleibol", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "CS2", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Carreras", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: "Todos los Deportes", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+  ];
+  
   const footerItems = [
     { name: "Perfil", path: "/profile", icon: <User className="h-4 w-4" />, hasArrow: true },
     { name: "Promociones", path: "#", icon: <Gift className="h-4 w-4" />, hasArrow: true },
@@ -96,7 +118,10 @@ export function Sidebar({ className }: SidebarProps) {
             </button>
             <button 
               className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
-              onClick={() => setActiveTab('deportes')}
+              onClick={() => {
+                setActiveTab('deportes');
+                window.location.href = '/sports';
+              }}
             >
               DEPORTES
             </button>
@@ -106,67 +131,127 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* Sidebar content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Favorites section */}
-        <div className="py-2 border-b border-[#1c2b3a]">
-          {favoriteItems.map((item, index) => (
-            <Link 
-              key={index} 
-              href="#"
-              className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
-            >
-              <span className="text-gray-400">
-                {item.icon}
-              </span>
-              {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
-            </Link>
-          ))}
-        </div>
-
-        {/* Games section */}
-        <div>
-          {!sidebarCollapsed && (
-            <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-              Juegos
+        {activeTab === 'casino' ? (
+          <>
+            {/* Favorites section - Casino tab */}
+            <div className="py-2 border-b border-[#1c2b3a]">
+              {favoriteItems.map((item, index) => (
+                <Link 
+                  key={index} 
+                  href="#"
+                  className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+                >
+                  <span className="text-gray-400">
+                    {item.icon}
+                  </span>
+                  {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
+                </Link>
+              ))}
             </div>
-          )}
 
-          {gameItems.map((item, index) => (
-            <Link 
-              key={index} 
-              href={item.path || "#"}
-              className={cn(
-                "flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors",
-                item.path && isActive(item.path) ? "bg-[#192531]" : ""
+            {/* Games section - Casino tab */}
+            <div>
+              {!sidebarCollapsed && (
+                <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
+                  Juegos
+                </div>
               )}
-            >
-              <span className={cn(
-                "", 
-                item.path && isActive(item.path) ? "text-[#09b66d]" : "text-gray-400"
-              )}>
-                {item.icon}
-              </span>
-              {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
-            </Link>
-          ))}
-        </div>
 
-        {/* Providers section */}
-        <div className="border-t border-[#1c2b3a]">
-          {!sidebarCollapsed && (
-            <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-              Proveedores
+              {gameItems.map((item, index) => (
+                <Link 
+                  key={index} 
+                  href={item.path || "#"}
+                  className={cn(
+                    "flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors",
+                    item.path && isActive(item.path) ? "bg-[#192531]" : ""
+                  )}
+                >
+                  <span className={cn(
+                    "", 
+                    item.path && isActive(item.path) ? "text-[#09b66d]" : "text-gray-400"
+                  )}>
+                    {item.icon}
+                  </span>
+                  {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
+                </Link>
+              ))}
             </div>
-          )}
-          <Link 
-            href="#"
-            className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
-          >
-            <span className="text-gray-400">
-              <Zap className="h-4 w-4" />
-            </span>
-            {!sidebarCollapsed && <span className="ml-3">Proveedores</span>}
-          </Link>
-        </div>
+
+            {/* Providers section - Casino tab */}
+            <div className="border-t border-[#1c2b3a]">
+              {!sidebarCollapsed && (
+                <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
+                  Proveedores
+                </div>
+              )}
+              <Link 
+                href="#"
+                className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+              >
+                <span className="text-gray-400">
+                  <Zap className="h-4 w-4" />
+                </span>
+                {!sidebarCollapsed && <span className="ml-3">Proveedores</span>}
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Sports section */}
+            <div className="py-2">
+              {sportsItems.map((item, index) => (
+                <Link 
+                  key={index} 
+                  href="#"
+                  className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="text-gray-400">
+                      {item.icon}
+                    </span>
+                    {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
+                  </div>
+                  {!sidebarCollapsed && item.badge && (
+                    <span className="text-xs bg-[#f8c541] text-[#0e1824] font-bold px-1.5 py-0.5 rounded">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            {/* Mejores Deportes section */}
+            <div className="border-t border-[#1c2b3a]">
+              {!sidebarCollapsed && (
+                <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
+                  Mejores Deportes
+                </div>
+              )}
+              
+              {popularSports.map((item, index) => (
+                <Link 
+                  key={index} 
+                  href="#"
+                  className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="text-gray-400">
+                      {item.icon}
+                    </span>
+                    {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
+                  </div>
+                  {!sidebarCollapsed && item.hasArrow && (
+                    <span className="text-gray-400">
+                      <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 9L5 5L1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
         
         {/* Footer Items */}
         <div className="border-t border-[#1c2b3a]">
