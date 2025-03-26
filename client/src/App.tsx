@@ -23,6 +23,8 @@ import TournamentsPage from "@/pages/tournaments-page";
 import RewardsPage from "@/pages/rewards-page";
 import SupportPage from "@/pages/support-page";
 import RecentGamesPage from "@/pages/recent-games-page";
+import SlotsPage from "@/pages/slots-page";
+import KenoPage from "@/pages/keno-page";
 
 function Router() {
   return (
@@ -37,6 +39,9 @@ function Router() {
       <ProtectedRoute path="/admin" component={AdminDashboardPage} />
       <ProtectedRoute path="/sports" component={SportsBettingPage} />
       <ProtectedRoute path="/games" component={CasinoGamesPage} />
+      <ProtectedRoute path="/slots" component={SlotsPage} />
+      <ProtectedRoute path="/slots/:gameId" component={SlotsPage} />
+      <ProtectedRoute path="/keno" component={KenoPage} />
       <ProtectedRoute path="/tournaments" component={TournamentsPage} />
       <ProtectedRoute path="/rewards" component={RewardsPage} />
       <ProtectedRoute path="/support" component={SupportPage} />
