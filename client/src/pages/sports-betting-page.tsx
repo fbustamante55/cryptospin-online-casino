@@ -306,7 +306,7 @@ export default function SportsBettingPage() {
                 }}
               >
                 <CalendarDays className="h-4 w-4 mr-1 text-gray-400" />
-                {t('sports.upcoming')}
+                Próximos Eventos
               </Button>
               <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
                 {t('sports.tomorrow')}
@@ -348,7 +348,7 @@ export default function SportsBettingPage() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">
-                  {showLiveEvents ? t('sports.liveEvents') : t('sports.upcomingEvents')}
+                  {showLiveEvents ? t('sports.liveEvents') : "Próximos Eventos"}
                 </h2>
                 <Link href="#">
                   <span className="text-[#09b66d] text-sm font-medium flex items-center">
