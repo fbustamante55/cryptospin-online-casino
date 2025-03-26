@@ -105,7 +105,18 @@ export function Sidebar({ className }: SidebarProps) {
   
   // Elementos para la sección de deportes
   const sportsItems = [
-    { name: t('sidebar.liveEvents'), icon: <Tv className="h-4 w-4" />, badge: liveEventsCount.toString(), path: "/sports", onClick: () => handleSportsFilter('live') },
+    { 
+      name: t('sidebar.liveEvents'), 
+      icon: <Tv className="h-4 w-4" />, 
+      badge: liveEventsCount.toString(), 
+      path: "/sports", 
+      onClick: () => {
+        // Guardar filtro 'live' en localStorage
+        localStorage.setItem('sportsFilter', 'live');
+        // Navegar a la página de deportes con el filtro aplicado
+        setLocation('/sports?filter=live');
+      } 
+    },
     { name: "Próximos Eventos", icon: <Clock className="h-4 w-4" />, path: "/sports", onClick: () => handleSportsFilter('upcoming') },
     { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
   ];

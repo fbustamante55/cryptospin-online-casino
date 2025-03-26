@@ -1,6 +1,6 @@
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { useAuth } from "@/hooks/use-auth";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Search, Plus, Coins, Star, Clock, ChevronRight, Calendar, CalendarDays, Activity, Trophy, AlertTriangle, Package, Grid, ChevronDown, Settings, Gift, Bell } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,28 @@ export default function SportsBettingPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeSport, setActiveSport] = useState<string>("");
   const [betSelections, setBetSelections] = useState<BetSelection[]>([]);
-  const [showLiveEvents, setShowLiveEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'live');
-  const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'upcoming' || localStorage.getItem('sportsFilter') === null);
-  const [showFavorites, setShowFavorites] = useState<boolean>(localStorage.getItem('sportsFilter') === 'favorites');
-  const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'tomorrow');
+  
+  // Leer parámetros de URL para determinar filtros
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const filterParam = urlParams.get('filter');
+  
+  // Inicializar estados de filtros basados en localStorage y parámetros de URL
+  const [showLiveEvents, setShowLiveEvents] = useState<boolean>(
+    filterParam === 'live' || localStorage.getItem('sportsFilter') === 'live'
+  );
+  const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(
+    filterParam === 'upcoming' || 
+    localStorage.getItem('sportsFilter') === 'upcoming' || 
+    (localStorage.getItem('sportsFilter') === null && !filterParam)
+  );
+  const [showFavorites, setShowFavorites] = useState<boolean>(
+    filterParam === 'favorites' || localStorage.getItem('sportsFilter') === 'favorites'
+  );
+  const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(
+    filterParam === 'tomorrow' || localStorage.getItem('sportsFilter') === 'tomorrow'
+  );
+  
   const [activeTab, setActiveTab] = useState<string>("misBoletos");
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<string>(() => {
