@@ -534,73 +534,86 @@ export default function SportsBettingPage() {
               ))}
             </div>
             
-            {/* Quick Links */}
-            <div className="flex justify-center items-center flex-wrap gap-2 mb-4 py-1">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
-                onClick={() => {
-                  setShowFavorites(true);
-                  setShowLiveEvents(false);
-                  setShowUpcomingEvents(false);
-                  setShowTomorrowEvents(false);
-                  localStorage.setItem('sportsFilter', 'favorites');
-                }}
-              >
-                <Star className="h-4 w-4 mr-1 text-[#f8c541]" />
-                {t('sports.favorites')}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
-                onClick={() => {
-                  setShowLiveEvents(true);
-                  setShowFavorites(false);
-                  setShowUpcomingEvents(false);
-                  setShowTomorrowEvents(false);
-                  localStorage.setItem('sportsFilter', 'live');
-                }}
-              >
-                <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                {t('sports.live')}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
-                onClick={() => {
-                  setShowUpcomingEvents(true);
-                  setShowFavorites(false);
-                  setShowLiveEvents(false);
-                  setShowTomorrowEvents(false);
-                  localStorage.setItem('sportsFilter', 'upcoming');
-                }}
-              >
-                <CalendarDays className="h-4 w-4 mr-1 text-gray-400" />
-                Próximos
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
-                onClick={() => {
-                  setShowTomorrowEvents(true);
-                  setShowFavorites(false);
-                  setShowLiveEvents(false);
-                  setShowUpcomingEvents(false);
-                  localStorage.setItem('sportsFilter', 'tomorrow');
-                  
-                  // Debugging: Log eventos de mañana para verificar si existen
-                  console.log("Eventos para mañana:", 
-                    displayEvents?.filter(event => isEventTomorrow(event))
-                  );
-                }}
-              >
-                <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                {t('sports.tomorrow')}
-              </Button>
+            {/* Quick Links - Diseño actualizado con segmentos */}
+            <div className="px-4 mb-6 mt-1">
+              <div className="flex justify-stretch items-center rounded-lg overflow-hidden bg-[#0e1824] border border-[#1c2b3a] divide-x divide-[#1c2b3a]">
+                <button 
+                  className={`flex items-center justify-center flex-1 px-2 py-2.5 ${
+                    showFavorites 
+                      ? 'bg-[#09b66d] text-white' 
+                      : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
+                  } transition-all duration-200`}
+                  onClick={() => {
+                    setShowFavorites(true);
+                    setShowLiveEvents(false);
+                    setShowUpcomingEvents(false);
+                    setShowTomorrowEvents(false);
+                    localStorage.setItem('sportsFilter', 'favorites');
+                  }}
+                >
+                  <Star className={`h-4 w-4 mr-1.5 ${showFavorites ? 'text-white' : 'text-[#f8c541]'}`} />
+                  <span className="text-sm font-medium">{t('sports.favorites')}</span>
+                </button>
+                
+                <button 
+                  className={`flex items-center justify-center flex-1 px-2 py-2.5 ${
+                    showLiveEvents 
+                      ? 'bg-[#09b66d] text-white' 
+                      : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
+                  } transition-all duration-200`}
+                  onClick={() => {
+                    setShowLiveEvents(true);
+                    setShowFavorites(false);
+                    setShowUpcomingEvents(false);
+                    setShowTomorrowEvents(false);
+                    localStorage.setItem('sportsFilter', 'live');
+                  }}
+                >
+                  <div className={`flex items-center justify-center h-4 w-4 mr-1.5 ${showLiveEvents ? 'text-white' : 'text-red-500'}`}>
+                    <span className="relative flex h-2 w-2">
+                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${showLiveEvents ? 'bg-white/70' : 'bg-red-400'} opacity-75`}></span>
+                      <span className={`relative inline-flex rounded-full h-2 w-2 ${showLiveEvents ? 'bg-white' : 'bg-red-500'}`}></span>
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium">{t('sports.live')}</span>
+                </button>
+                
+                <button 
+                  className={`flex items-center justify-center flex-1 px-2 py-2.5 ${
+                    showUpcomingEvents 
+                      ? 'bg-[#09b66d] text-white' 
+                      : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
+                  } transition-all duration-200`}
+                  onClick={() => {
+                    setShowUpcomingEvents(true);
+                    setShowFavorites(false);
+                    setShowLiveEvents(false);
+                    setShowTomorrowEvents(false);
+                    localStorage.setItem('sportsFilter', 'upcoming');
+                  }}
+                >
+                  <CalendarDays className={`h-4 w-4 mr-1.5 ${showUpcomingEvents ? 'text-white' : 'text-gray-400'}`} />
+                  <span className="text-sm font-medium">Próximos</span>
+                </button>
+                
+                <button 
+                  className={`flex items-center justify-center flex-1 px-2 py-2.5 ${
+                    showTomorrowEvents 
+                      ? 'bg-[#09b66d] text-white' 
+                      : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
+                  } transition-all duration-200`}
+                  onClick={() => {
+                    setShowTomorrowEvents(true);
+                    setShowFavorites(false);
+                    setShowLiveEvents(false);
+                    setShowUpcomingEvents(false);
+                    localStorage.setItem('sportsFilter', 'tomorrow');
+                  }}
+                >
+                  <Calendar className={`h-4 w-4 mr-1.5 ${showTomorrowEvents ? 'text-white' : 'text-gray-400'}`} />
+                  <span className="text-sm font-medium">{t('sports.tomorrow')}</span>
+                </button>
+              </div>
             </div>
             
             {/* Sports Categories Title */}
