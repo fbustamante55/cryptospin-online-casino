@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Sidebar } from "@/components/ui/sidebar";
-import { MobileNav } from "@/components/ui/mobile-nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +8,6 @@ import { Transaction } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Wallet, 
   Plus, 
   Coins, 
   ArrowUpRight, 
@@ -186,39 +183,7 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#0F1923] text-white">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-[#0F1923] border-b border-gray-800 sticky top-0 z-10">
-          <div className="flex items-center justify-between h-16 px-4">
-            <div className="flex items-center md:hidden">
-              <button type="button" className="text-gray-400 hover:text-white focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <h1 className="font-heading font-bold text-xl text-white tracking-wider ml-3">
-                <span className="text-[#00FFAA]">Crypto</span>Spin
-              </h1>
-            </div>
-            
-            <div className="md:flex flex-1 px-4 justify-center">
-              <h1 className="text-xl font-heading font-bold">Wallet</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="px-3 py-1.5 rounded-full bg-[#1A2634] border border-gray-700 flex items-center">
-                <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
-                <span className="text-sm font-semibold">{user?.balance}</span>
-              </div>
-            </div>
-          </div>
-        </header>
-        
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+    <div className="p-4 md:p-6">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {/* Balance Card */}
