@@ -26,6 +26,11 @@ type LoginData = {
 export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  
+  // Intentar recuperar el usuario desde localStorage al iniciar
+  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+  const initialUser = storedUser ? JSON.parse(storedUser) : null;
+  
   const {
     data: user,
     error,
@@ -33,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<SelectUser | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    initialData: initialUser,
   });
 
   const loginMutation = useMutation({
@@ -45,6 +51,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Guardar información del usuario en localStorage
+      localStorage.setItem('user', JSON.stringify(user));
       
       // Navigate to home page after successful login
       window.location.href = "/";
@@ -76,6 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Registration successful, user:", user);
       queryClient.setQueryData(["/api/user"], user);
       
+      // Guardar información del usuario en localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+      
       // Navigate to home page after successful registration
       window.location.href = "/";
       
@@ -103,6 +115,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
+      
+      // Eliminar información del usuario del localStorage
+      localStorage.removeItem('user');
+      
       toast({
         title: "Logged out",
         description: "You've been successfully logged out.",

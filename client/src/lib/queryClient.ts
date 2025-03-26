@@ -22,6 +22,11 @@ export async function apiRequest<T = any>({
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
+  
+  if (res.status === 401) {
+    // Eliminar datos de sesión si hay un error de autenticación
+    localStorage.removeItem('user');
+  }
 
   await throwIfResNotOk(res);
   return await res.json() as T;
@@ -37,8 +42,13 @@ export const getQueryFn: <T>(options: {
       credentials: "include",
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    if (res.status === 401) {
+      // Eliminar datos de sesión si hay un error de autenticación
+      localStorage.removeItem('user');
+      
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
     }
 
     await throwIfResNotOk(res);
