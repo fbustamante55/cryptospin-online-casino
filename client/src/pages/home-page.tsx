@@ -3,7 +3,7 @@ import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { UserDropdown } from "@/components/ui/user-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
-import { Search, Plus, Coins, Bell } from "lucide-react";
+import { Search, Plus, Coins } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function HomePage() {
@@ -47,42 +47,43 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Header - Visible en móvil y desktop, similar a la imagen de referencia */}
-      <header className="bg-[#14183c] border-b border-[#1c2b3a] sticky top-0 z-10 block">
-        <div className="flex items-center justify-between h-14 px-4">
+      {/* Header - Only visible on desktop */}
+      <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10 hidden md:block">
+        <div className="flex items-center justify-between h-16 px-4">
           
-          <div className="flex items-center">
+          <div className="hidden md:flex flex-1 items-center px-4">
             <div className="flex items-center mr-6">
-              <h1 className="text-2xl font-bold text-[#f8c541] font-['Montserrat']">CRYPTOSPIN</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
+            </div>
+            <div className="max-w-md w-full">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
+                </div>
+                <input 
+                  type="text" 
+                  className="block w-full pl-10 pr-3 py-2 rounded-md bg-[#192531] border border-[#1c2b3a] text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#09b66d] focus:border-[#09b66d]" 
+                  placeholder={t('header.searchGames')}
+                />
+              </div>
             </div>
           </div>
           
           <div className="flex items-center space-x-3">
-            <div className="hidden md:flex items-center px-3 py-1.5 rounded-md bg-[#09b66d]/20 text-[#09b66d]">
-              <span className="flex items-center text-sm">
-                <span className="h-2 w-2 bg-[#09b66d] rounded-full mr-1.5"></span>
-                ONLINE
-              </span>
-            </div>
-            
-            <button className="flex items-center px-3 py-1.5 rounded-md bg-[#f8c541] hover:bg-[#f8c541]/90 text-[#14183c] font-medium text-sm transition-all duration-200">
+            <button className="flex items-center px-3 py-1.5 rounded-md bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium text-sm transition-all duration-200">
               <Plus className="h-4 w-4 mr-1.5" />
               <span>{t('buttons.deposit')}</span>
             </button>
             
-            <div className="px-3 py-1.5 rounded-md bg-[#1e2347] border border-[#2a305c] flex items-center">
+            <div className="px-3 py-1.5 rounded-md bg-[#192531] border border-[#1c2b3a] flex items-center">
               <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
-              <span className="text-sm font-semibold">{user?.balance || 0}</span>
+              <span className="text-sm font-semibold">{user?.balance}</span>
             </div>
             
-            <div className="flex items-center">
-              {/* Iconos de notificaciones y usuario con fondo circular */}
-              <div className="w-9 h-9 rounded-full bg-[#1e2347] border border-[#2a305c] flex items-center justify-center mr-2">
-                <Bell className="h-5 w-5 text-white/70" />
-              </div>
-              
-              <UserDropdown />
-            </div>
+            {/* User Dropdown Menu */}
+            <UserDropdown />
+            
+            <NotificationDropdown />
           </div>
         </div>
       </header>
