@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   AlertTriangle, Calendar, ChevronRight, Package, Tv, 
-  Timer, Zap, Trophy, TrendingUp, BarChart3, Heart, Star, 
+  Timer, Zap, Trophy, TrendingUp, BarChart3, BarChart2, Heart, Star, 
   Shield, Monitor, Video, Flame, Clock, Activity, Award
 } from 'lucide-react';
 import { BetSlip, BetSelection } from '@/components/sports/bet-slip-simple';
@@ -15,6 +15,7 @@ import { EventCard } from '@/components/sports/event-card';
 import { EventOdds, fetchOdds, fetchSports, formatAmericanOdds, getSportColor, formatEventDate } from '@/lib/sports-api';
 import { useTranslation } from 'react-i18next';
 import { AnimatedBackground } from '@/components/ui/animated-background';
+import { OddsWidget } from '@/components/sports/odds-widget';
 
 export default function LiveEventsPage() {
   const { t } = useTranslation();
@@ -292,6 +293,8 @@ export default function LiveEventsPage() {
         cornersAway: Math.floor(Math.random() * 8) + 2,
         yellowCardsHome: Math.floor(Math.random() * 3),
         yellowCardsAway: Math.floor(Math.random() * 3),
+        dangerousAttacksHome: Math.floor(Math.random() * 15) + 8,
+        dangerousAttacksAway: Math.floor(Math.random() * 15) + 8,
       };
     } else if (sportKey.includes('basketball')) {
       return {
@@ -414,6 +417,17 @@ export default function LiveEventsPage() {
                         <div className="flex justify-between w-full">
                           <span className="text-xs font-medium text-white">{featuredStats.possessionHome}%</span>
                           <span className="text-xs font-medium text-white">{featuredStats.possessionAway}%</span>
+                        </div>
+                        <div className="flex justify-between w-full mt-4 bg-[#0e1824] p-2 rounded-lg">
+                          <div className="flex items-center">
+                            <BarChart3 className="h-4 w-4 mr-1 text-[#09b66d]" />
+                            <span className="text-xs font-medium text-white">{featuredStats.dangerousAttacksHome}</span>
+                          </div>
+                          <span className="text-xs text-gray-400">Ataques Peligrosos</span>
+                          <div className="flex items-center">
+                            <span className="text-xs font-medium text-white">{featuredStats.dangerousAttacksAway}</span>
+                            <BarChart3 className="h-4 w-4 ml-1 text-[#09b66d]" />
+                          </div>
                         </div>
                       </div>
                       
@@ -598,6 +612,33 @@ export default function LiveEventsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+            
+            {/* Widget de Cuotas */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-white flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-2 text-[#09b66d]" />
+                  Cuotas en Vivo
+                </h3>
+                <Button variant="outline" size="sm" className="text-xs bg-[#192531] border-[#1c2b3a] hover:bg-[#1e2d3d]">
+                  Ver Todas las Cuotas
+                </Button>
+              </div>
+              <div className="bg-[#0e1824] border border-[#1c2b3a] rounded-md p-4">
+                <p className="text-sm text-gray-400 mb-4">
+                  Consulta las cuotas más actualizadas para los principales eventos deportivos. Actualización en tiempo real.
+                </p>
+                <OddsWidget 
+                  sportKey="soccer_epl" 
+                  bookmakerKeys="draftkings" 
+                  oddsFormat="decimal" 
+                  markets="h2h,spreads,totals" 
+                  marketNames="h2h:Ganador,spreads:Handicap,totals:Total" 
+                  height="450px"
+                  className="mt-2"
+                />
               </div>
             </div>
             
@@ -808,10 +849,10 @@ export default function LiveEventsPage() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold flex items-center">
-                  <Video className="h-5 w-5 mr-2 text-[#09b66d]" />
+                  <BarChart3 className="h-5 w-5 mr-2 text-[#09b66d]" />
                   {activeSport && activeSport !== 'all' ? 
                     sportsData?.find(s => s.key === activeSport)?.title || activeSport :
-                    "Todos los Eventos en Vivo"}
+                    "Estadísticas de Eventos en Vivo"}
                 </h2>
                 <Link href="/sports">
                   <span className="text-[#09b66d] text-sm font-medium flex items-center hover:underline">
@@ -1042,8 +1083,8 @@ export default function LiveEventsPage() {
                         <div className="space-y-4 mt-8">
                           <div className="flex items-center justify-between mb-2">
                             <h3 className="text-lg font-medium text-white flex items-center">
-                              <Award className="h-4 w-4 mr-2 text-[#09b66d]" />
-                              Más partidos en vivo
+                              <BarChart3 className="h-4 w-4 mr-2 text-[#09b66d]" />
+                              Más Estadísticas en Vivo
                             </h3>
                           </div>
                           
