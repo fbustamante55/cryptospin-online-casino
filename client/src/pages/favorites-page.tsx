@@ -19,7 +19,7 @@ export default function FavoritesPage() {
     queryKey: ['/api/favorites'],
     queryFn: async () => {
       if (!user) throw new Error("Unauthorized");
-      return apiRequest<Favorites[]>({
+      return apiRequest<Favorite[]>({
         url: '/api/favorites',
         method: 'GET'
       });
@@ -48,7 +48,7 @@ export default function FavoritesPage() {
     
     acc[gameType].push(favorite);
     return acc;
-  }, {} as Record<string, Favorites[]>) || {};
+  }, {} as Record<string, Favorite[]>) || {};
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -77,10 +77,10 @@ export default function FavoritesPage() {
                 {t(gameType)}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {favorites.map((favorite) => (
+                {favorites.map((favorite: Favorite) => (
                   <GameCard
                     key={favorite.id}
-                    title={favorite.gameName}
+                    title={favorite.gameTitle}
                     description={t(`${gameType}_description`)}
                     image={favorite.gameImage || ""}
                     gameType={gameType as "slots" | "dice" | "crash"}

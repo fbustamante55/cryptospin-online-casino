@@ -46,7 +46,7 @@ export function Sidebar({ className }: SidebarProps) {
   const isActive = (path: string) => location === path;
 
   const favoriteItems = [
-    { name: t('sidebar.favorites'), icon: <Star className="h-4 w-4" /> },
+    { name: t('sidebar.favorites'), path: "/favorites", icon: <Star className="h-4 w-4" /> },
     { name: t('sidebar.recent'), icon: <Clock className="h-4 w-4" /> },
     { name: t('sidebar.challenges'), icon: <Target className="h-4 w-4" /> },
     { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
@@ -145,10 +145,16 @@ export function Sidebar({ className }: SidebarProps) {
               {favoriteItems.map((item, index) => (
                 <Link 
                   key={index} 
-                  href="#"
-                  className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+                  href={item.path || "#"}
+                  className={cn(
+                    "flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors",
+                    item.path && isActive(item.path) ? "bg-[#192531]" : ""
+                  )}
                 >
-                  <span className="text-gray-400">
+                  <span className={cn(
+                    "", 
+                    item.path && isActive(item.path) ? "text-[#09b66d]" : "text-gray-400"
+                  )}>
                     {item.icon}
                   </span>
                   {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
