@@ -36,7 +36,10 @@ export function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState("casino");
+  // Determinar el tab activo basado en la URL actual
+  const [activeTab, setActiveTab] = useState(
+    location.includes('/sports') ? 'deportes' : 'casino'
+  );
 
   const isActive = (path: string) => location === path;
 

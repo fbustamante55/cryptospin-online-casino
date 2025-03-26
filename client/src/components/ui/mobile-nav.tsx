@@ -6,13 +6,17 @@ import { useState } from "react";
 
 export function MobileNav() {
   const [location] = useLocation();
-  const [activeTab, setActiveTab] = useState("casino");
+  // Determinar el tab activo basado en la URL actual
+  const [activeTab, setActiveTab] = useState(
+    location.includes('/sports') ? 'deportes' : 'casino'
+  );
   
   const isActive = (path: string) => {
     if (path === "/" && location === "/") return true;
     if (path === "/crash" && location === "/crash") return true;
     if (path === "/wallet" && ["/wallet", "/history"].includes(location)) return true;
     if (path === "/profile" && location === "/profile") return true;
+    if (path === "/sports" && location === "/sports") return true;
     return false;
   };
 
