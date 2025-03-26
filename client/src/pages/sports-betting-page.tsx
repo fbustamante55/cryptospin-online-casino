@@ -600,7 +600,9 @@ export default function SportsBettingPage() {
                       <Package className="w-4 h-4" />
                     </div>
                     <span className="text-xs font-semibold">Todo</span>
-                    <span className="text-xs font-bold text-white">1546</span>
+                    <span className="text-xs font-bold text-white">
+                      {displayEvents?.filter(event => isEventLive(event)).length || 0}
+                    </span>
                   </div>
                   
                   {/* Mostrar deportes filtrados según el filtro activo */}
@@ -609,8 +611,11 @@ export default function SportsBettingPage() {
                     : sportsData)?.map((sport) => {
                     const isActive = activeSport === sport.key;
                     const color = getSportColor(sport.group);
-                    // Número aleatorio para simular cantidad de eventos (en producción debería venir del API)
-                    const eventsCount = Math.floor(Math.random() * 100) + 1;
+                    
+                    // Contar eventos en vivo para este deporte
+                    const liveEventsCount = displayEvents?.filter(event => 
+                      event.sport_key === sport.key && isEventLive(event)
+                    )?.length || 0;
                     
                     return (
                       <div 
@@ -644,7 +649,7 @@ export default function SportsBettingPage() {
                           )}
                         </div>
                         <span className="text-xs font-semibold">{sport.title}</span>
-                        <span className="text-xs font-bold text-white">{eventsCount}</span>
+                        <span className="text-xs font-bold text-white">{liveEventsCount}</span>
                       </div>
                     );
                   })}
