@@ -97,10 +97,11 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     return selections.reduce((total, bet) => total * bet.odds, 1);
   };
   
-  // Calculate the potential win based on bet amount and odds
+  // Calculate the potential win based on bet amount and odds (sin incluir el monto apostado)
   const calculatePotentialWin = (amount: number, odds: number): number => {
     if (odds <= 0) return 0;
-    return amount * odds;
+    // Retornar solo la ganancia neta (sin incluir lo apostado)
+    return (amount * odds) - amount;
   };
   
   // Calcular el monto apostado real en criptomonedas cuando se usa fiat
@@ -403,7 +404,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   <div className="flex flex-col items-end">
                     <span className="text-sm font-bold text-[#09b66d]">
                       {getFiatSymbol(walletSettings.selectedFiat)}
-                      {(parseFloat(betAmount) * calculateParlayOdds()).toFixed(2)}
+                      {((parseFloat(betAmount) * calculateParlayOdds()) - parseFloat(betAmount)).toFixed(2)}
                     </span>
                     <span className="text-xs text-white/70">
                       {potentialWin.toFixed(4)} {selectedCurrency}
