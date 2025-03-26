@@ -325,20 +325,21 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 )}
               </div>
               
-              {/* Mostrar el equivalente en fiat cuando la opción está activada */}
+              {/* Mostrar el monto en dólares cuando la opción está activada */}
               {walletSettings.showFiatEquivalent && (
                 <div className="relative mb-2">
-                  <div className="bg-[#0e1824] border border-[#1c2b3a] rounded-md py-2 px-3 text-white/70 text-sm flex justify-between items-center">
-                    <span>Equivale a:</span>
-                    <span className="font-medium">
-                      {getFiatSymbol(walletSettings.selectedFiat)}
-                      {convertCryptoToFiat(
-                        parseFloat(betAmount) || 0, 
-                        selectedCurrency, 
-                        walletSettings.selectedFiat
-                      ).toFixed(2)} 
-                      {walletSettings.selectedFiat}
-                    </span>
+                  <Input 
+                    type="text" 
+                    readOnly
+                    value={`${getFiatSymbol(walletSettings.selectedFiat)}${convertCryptoToFiat(
+                      parseFloat(betAmount) || 0, 
+                      selectedCurrency, 
+                      walletSettings.selectedFiat
+                    ).toFixed(2)}`}
+                    className="bg-[#0e1824] border-[#1c2b3a] text-white/70 pr-16 cursor-default"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-white/70">
+                    {walletSettings.selectedFiat}
                   </div>
                 </div>
               )}
@@ -359,20 +360,19 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
               
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm">Ganancias potenciales</span>
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} {selectedCurrency}</span>
-                  {walletSettings.showFiatEquivalent && (
-                    <span className="text-xs text-white/70">
+                {walletSettings.showFiatEquivalent ? (
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm font-bold text-[#09b66d]">
                       {getFiatSymbol(walletSettings.selectedFiat)}
-                      {convertCryptoToFiat(
-                        potentialWin, 
-                        selectedCurrency, 
-                        walletSettings.selectedFiat
-                      ).toFixed(2)} 
-                      {walletSettings.selectedFiat}
+                      {convertCryptoToFiat(potentialWin, selectedCurrency, walletSettings.selectedFiat).toFixed(2)}
                     </span>
-                  )}
-                </div>
+                    <span className="text-xs text-white/70">
+                      {potentialWin.toFixed(2)} {selectedCurrency}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} {selectedCurrency}</span>
+                )}
               </div>
               
               <Button 
