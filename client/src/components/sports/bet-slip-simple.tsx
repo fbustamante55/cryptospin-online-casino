@@ -325,36 +325,24 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 )}
               </div>
               
-              {/* Mostrar el monto en dólares cuando la opción está activada */}
-              {walletSettings.showFiatEquivalent && (
-                <div className="relative mb-2">
-                  <Input 
-                    type="text" 
-                    readOnly
-                    value={`${getFiatSymbol(walletSettings.selectedFiat)}${convertCryptoToFiat(
-                      parseFloat(betAmount) || 0, 
-                      selectedCurrency, 
-                      walletSettings.selectedFiat
-                    ).toFixed(2)}`}
-                    className="bg-[#0e1824] border-[#1c2b3a] text-white/70 pr-16 cursor-default"
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-white/70">
-                    {walletSettings.selectedFiat}
-                  </div>
-                </div>
-              )}
+              {/* Eliminamos el campo de conversión a fiat */}
               
               <div className="relative mb-4">
+                {walletSettings.showFiatEquivalent && (
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm font-medium text-white/70">
+                    {getFiatSymbol(walletSettings.selectedFiat)}
+                  </div>
+                )}
                 <Input 
                   type="number" 
                   value={betAmount} 
                   onChange={(e) => setBetAmount(e.target.value)}
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white pr-16"
+                  className={`bg-[#0e1824] border-[#1c2b3a] text-white pr-16 ${walletSettings.showFiatEquivalent ? 'pl-6' : ''}`}
                   placeholder="1.00"
                   min="1.00"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-white/70">
-                  {selectedCurrency}
+                  {walletSettings.showFiatEquivalent ? walletSettings.selectedFiat : selectedCurrency}
                 </div>
               </div>
               
