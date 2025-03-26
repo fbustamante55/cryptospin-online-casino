@@ -251,13 +251,13 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
           onClick={toggleFavorite}
           disabled={!isLoaded || isPending || !user}
           className={cn(
-            "absolute top-2 right-2 z-10 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50",
-            "w-6 h-6 flex items-center justify-center"
+            "absolute top-2 right-3 z-10 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50",
+            "w-7 h-7 flex items-center justify-center"
           )}
         >
           <Star
             className={cn(
-              "h-3 w-3 transition-all",
+              "h-4 w-4 transition-all",
               isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
             )}
           />
@@ -293,7 +293,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
         </div>
         
         {/* Cuerpo principal del evento */}
-        <div className="p-3">
+        <div className="p-4">
           {/* Título del partido con diseño similar a la imagen de referencia */}
           <div className="flex flex-col mb-4">
             {/* Primera fila - equipo local y puntuación */}
