@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -23,8 +23,8 @@ export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Simular notificaciones para la demostración
+  
+  // Simulamos notificaciones iniciales para la demostración
   useEffect(() => {
     const mockNotifications: Notification[] = [
       {
@@ -55,6 +55,68 @@ export function NotificationDropdown() {
     
     setNotifications(mockNotifications);
   }, []);
+
+  // Simulamos la llegada de nuevas notificaciones periódicamente
+  useEffect(() => {
+    // Tipos de notificaciones que podemos recibir
+    const notificationTypes = ['system', 'promo', 'reward', 'alert'];
+    const notificationTitles = [
+      'Ganancia en Ruleta', 
+      'Oferta Especial', 
+      'Nuevos juegos disponibles', 
+      'Actualización del sistema',
+      'Verificación requerida',
+      'Bono de recarga',
+      'Torneo de slots'
+    ];
+    const notificationMessages = [
+      '¡Felicitaciones! Has ganado 250 fichas en la ruleta.',
+      'Obtén un 100% de bonificación en tu próximo depósito.',
+      'Hemos agregado 5 nuevos juegos de slots.',
+      'El sistema ha sido actualizado con nuevas funciones.',
+      'Para mejorar tu seguridad, verifica tu cuenta ahora.',
+      'Recibe un bono del 50% en tu próxima recarga.',
+      'Participa en nuestro torneo semanal de slots.'
+    ];
+
+    // Función para generar una notificación aleatoria
+    const generateRandomNotification = (): Notification => {
+      const randomType = notificationTypes[Math.floor(Math.random() * notificationTypes.length)] as 'system' | 'promo' | 'reward' | 'alert';
+      const randomTitleIndex = Math.floor(Math.random() * notificationTitles.length);
+      const randomMessageIndex = Math.floor(Math.random() * notificationMessages.length);
+      
+      return {
+        id: Date.now(),
+        title: notificationTitles[randomTitleIndex],
+        message: notificationMessages[randomMessageIndex],
+        read: false,
+        type: randomType,
+        createdAt: new Date().toISOString()
+      };
+    };
+
+    // Configuramos un temporizador para agregar notificaciones aleatorias
+    const notificationInterval = setInterval(() => {
+      // Hay un 30% de probabilidad de recibir una notificación
+      if (Math.random() < 0.3) {
+        const newNotification = generateRandomNotification();
+        
+        // Agregamos la notificación a la lista
+        setNotifications(prev => [newNotification, ...prev]);
+        
+        // Mostramos una alerta toast si el menú no está abierto
+        if (!isOpen) {
+          toast({
+            title: "Nueva notificación",
+            description: newNotification.title,
+            variant: "default"
+          });
+        }
+      }
+    }, 20000); // Cada 20 segundos verificamos
+
+    return () => clearInterval(notificationInterval);
+  }, [isOpen, toast]);
 
   // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
@@ -180,7 +242,7 @@ export function NotificationDropdown() {
     switch(type) {
       case 'system': return 'bg-blue-500';
       case 'promo': return 'bg-purple-500';
-      case 'reward': return 'bg-yellow-500';
+      case 'reward': return 'bg-[#09b66d]';
       case 'alert': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
@@ -189,16 +251,16 @@ export function NotificationDropdown() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button 
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-white focus:outline-none hover:bg-gray-700 transition-colors"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Notificaciones"
+        className="flex items-center justify-center"
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-5 w-5 text-white" />
       </button>
       
       {unreadCount > 0 && (
-        <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-[#FF3E8F] text-xs flex items-center justify-center">
-          {unreadCount}
+        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#09b66d] text-[10px] flex items-center justify-center text-white font-medium border border-[#0e1824]">
+          {unreadCount > 9 ? '9+' : unreadCount}
         </span>
       )}
       
@@ -209,13 +271,13 @@ export function NotificationDropdown() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg bg-[#1A2634] shadow-lg border border-gray-800 z-50"
+            className="absolute right-0 mt-4 w-80 max-h-[70vh] overflow-y-auto rounded-lg bg-[#0e1824] shadow-lg border border-[#1c2b3a] z-50"
           >
-            <div className="p-3 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-[#1A2634] z-10">
+            <div className="p-3 border-b border-[#1c2b3a] flex justify-between items-center sticky top-0 bg-[#0e1824] z-10">
               <h3 className="font-medium text-white">Notificaciones</h3>
               {unreadCount > 0 && (
                 <button 
-                  className="text-xs text-[#00FFAA] hover:text-[#33FFBB]"
+                  className="text-xs text-[#09b66d] hover:text-[#0fda85] transition-colors"
                   onClick={() => markAllAsReadMutation.mutate()}
                   disabled={markAllAsReadMutation.isPending}
                 >
@@ -224,14 +286,14 @@ export function NotificationDropdown() {
               )}
             </div>
             
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-[#1c2b3a]">
               {notifications.length > 0 ? (
                 notifications.map(notification => (
                   <div 
                     key={notification.id} 
                     className={cn(
-                      "p-4 hover:bg-[#0F1923] transition-colors", 
-                      !notification.read && "bg-[#0F1923]/50"
+                      "p-4 hover:bg-[#192531] transition-colors", 
+                      !notification.read && "bg-[#192531]/50"
                     )}
                   >
                     <div className="flex">
@@ -239,28 +301,30 @@ export function NotificationDropdown() {
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
                           <h4 className="font-medium text-white text-sm">{notification.title}</h4>
-                          <span className="text-xs text-gray-400 ml-2">
-                            {formatRelativeTime(notification.createdAt)}
-                          </span>
+                          <div className="flex items-center ml-2">
+                            <span className="text-xs text-gray-400 mr-2">
+                              {formatRelativeTime(notification.createdAt)}
+                            </span>
+                            <button 
+                              className="text-gray-400 hover:text-white"
+                              onClick={() => deleteNotificationMutation.mutate(notification.id)}
+                              disabled={deleteNotificationMutation.isPending}
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
                         </div>
                         <p className="text-gray-300 text-sm mt-1">{notification.message}</p>
                         <div className="flex justify-end mt-2 space-x-2">
                           {!notification.read && (
                             <button 
-                              className="text-xs text-[#00FFAA] hover:text-[#33FFBB]"
+                              className="text-xs text-[#09b66d] hover:text-[#0fda85] transition-colors"
                               onClick={() => markAsReadMutation.mutate(notification.id)}
                               disabled={markAsReadMutation.isPending}
                             >
                               Marcar como leída
                             </button>
                           )}
-                          <button 
-                            className="text-xs text-gray-400 hover:text-gray-300"
-                            onClick={() => deleteNotificationMutation.mutate(notification.id)}
-                            disabled={deleteNotificationMutation.isPending}
-                          >
-                            Eliminar
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -273,11 +337,10 @@ export function NotificationDropdown() {
               )}
             </div>
             
-            <div className="p-2 border-t border-gray-800 bg-[#1A2634] sticky bottom-0">
+            <div className="p-2 border-t border-[#1c2b3a] bg-[#0e1824] sticky bottom-0">
               <button 
-                className="w-full text-center text-xs text-[#00FFAA] p-2 hover:bg-[#0F1923] rounded transition-colors"
+                className="w-full text-center text-xs text-[#09b66d] p-2 hover:bg-[#192531] rounded transition-colors"
                 onClick={() => {
-                  // En una implementación real, aquí iría la navegación a una página de historial completo
                   toast({
                     title: "Información",
                     description: "El historial completo de notificaciones estará disponible pronto",

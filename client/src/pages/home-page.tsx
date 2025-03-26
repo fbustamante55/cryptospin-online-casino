@@ -1,12 +1,12 @@
 import { GameCard } from "@/components/ui/game-card";
-import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { UserDropdown } from "@/components/ui/user-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import { Search, Gift, Bell, ChevronDown, ChevronUp, Settings, Trophy, Dices, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
+import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -130,9 +130,9 @@ export default function HomePage() {
                 <Gift className="h-5 w-5" />
               </button>
               
-              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
-                <Bell className="h-5 w-5" />
-              </button>
+              <div className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/50 transition-all duration-200">
+                <NotificationDropdown />
+              </div>
               
               <div className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-1 py-1 cursor-pointer hover:border-[#09b66d]/50 transition-all duration-200">
                 <div className="flex items-center">
