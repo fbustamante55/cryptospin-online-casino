@@ -137,9 +137,9 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
   };
   
   return (
-    <Card className="bg-[#192531] border-[#1c2b3a] overflow-hidden">
+    <Card className="bg-[#121c2e] border-[#1a2e4a] overflow-hidden">
       <div className="w-full">
-        <div className="border-b border-[#1c2b3a] px-3 py-3">
+        <div className="border-b border-[#1a2e4a] px-3 py-3">
           <div className="flex items-center justify-between">
             <span className="text-base font-medium">
               <span className="flex items-center">
@@ -172,7 +172,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 {selections.map(bet => (
                   <div 
                     key={bet.id} 
-                    className="p-3 bg-[#0e1824] rounded-md relative"
+                    className="p-3 bg-[#1e2e4a] rounded-md relative"
                   >
                     <Button 
                       variant="ghost" 
@@ -220,7 +220,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
                     onClick={() => setBetAmount("10")}
                   >
                     10
@@ -228,7 +228,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
                     onClick={() => setBetAmount("25")}
                   >
                     25
@@ -236,7 +236,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
                     onClick={() => setBetAmount("50")}
                   >
                     50
@@ -244,7 +244,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
                     onClick={() => setBetAmount("100")}
                   >
                     100
@@ -252,7 +252,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
                     onClick={() => setBetAmount((user?.balance || 0).toString())}
                   >
                     Max
@@ -264,7 +264,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                     type="number" 
                     value={betAmount} 
                     onChange={(e) => setBetAmount(e.target.value)}
-                    className="bg-[#0e1824] border-[#1c2b3a] text-white pr-16"
+                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white pr-16"
                     placeholder="0"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-white/70">
@@ -292,7 +292,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
             </div>
           ) : (
             <div className="p-6 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
+              <div className="w-16 h-16 rounded-full bg-[#1e2e4a] flex items-center justify-center mb-3">
                 <Plus className="h-8 w-8 text-white/30" />
               </div>
               <h3 className="text-lg font-medium mb-1">{t('sports.betSlipEmpty')}</h3>

@@ -583,7 +583,7 @@ export default function SportsBettingPage() {
       </header>
       
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-2 md:p-4 pt-16 md:pt-4 overflow-x-hidden">
+      <main className="flex-1 overflow-y-auto p-2 md:p-4 pt-16 md:pt-4 overflow-x-hidden bg-[#0b1422]">
         <div className="w-full mx-auto flex flex-col md:flex-row gap-4">
           
           {/* Left column - Events and betting options */}
@@ -1105,10 +1105,10 @@ export default function SportsBettingPage() {
               {(eventsLoading || isLoadingFavorites) && (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
-                    <Card key={i} className="bg-[#192531] border-[#1c2b3a] p-4 animate-pulse h-28">
+                    <Card key={i} className="bg-[#121c2e] border-[#1a2e4a] p-4 animate-pulse h-28">
                       <div className="h-full flex flex-col justify-center items-center">
-                        <div className="w-8 h-8 rounded-full bg-[#1c2b3a] mb-2"></div>
-                        <div className="h-4 w-36 bg-[#1c2b3a] rounded"></div>
+                        <div className="w-8 h-8 rounded-full bg-[#1e2e4a] mb-2"></div>
+                        <div className="h-4 w-36 bg-[#1e2e4a] rounded"></div>
                       </div>
                     </Card>
                   ))}
@@ -1117,7 +1117,7 @@ export default function SportsBettingPage() {
               
               {/* Error state */}
               {eventsError && (
-                <Card className="bg-[#192531] border-[#1c2b3a] p-4">
+                <Card className="bg-[#121c2e] border-[#1a2e4a] p-4">
                   <div className="flex items-center justify-center space-x-2 text-[#e64d6b]">
                     <AlertTriangle className="h-5 w-5" />
                     <span>Error loading events. Please try again later.</span>
@@ -1129,7 +1129,7 @@ export default function SportsBettingPage() {
               {!eventsLoading && !isLoadingFavorites && !eventsError && (
                 <div className="space-y-4">
                   {filteredEvents.length === 0 ? (
-                    <Card className="bg-[#192531] border-[#1c2b3a] p-4">
+                    <Card className="bg-[#121c2e] border-[#1a2e4a] p-4">
                       <div className="flex flex-col items-center justify-center py-8">
                         <Calendar className="h-12 w-12 text-gray-500 mb-2" />
                         <h3 className="text-lg font-medium">No events found</h3>
@@ -1157,7 +1157,7 @@ export default function SportsBettingPage() {
           
           {/* Tablón de Apuestas - Panel lateral */}
           <div className="w-full md:w-80 lg:w-96 mt-4 md:mt-0">
-            <div className="bg-[#0e1824] border border-[#1c2b3a] rounded-lg overflow-hidden">
+            <div className="bg-[#121c2e] border border-[#1a2e4a] rounded-lg overflow-hidden">
               {/* Título del tablón de apuestas */}
               <div className="px-4 pt-4 pb-2">
                 <h2 className="text-lg font-bold">Tablón de Apuestas</h2>
@@ -1207,7 +1207,7 @@ export default function SportsBettingPage() {
                     <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#09b66d]"></div>
                   )}
                 </button>
-                <div className="absolute bottom-0 left-0 w-full h-px bg-[#1c2b3a]"></div>
+                <div className="absolute bottom-0 left-0 w-full h-px bg-[#1a2e4a]"></div>
               </div>
               
               {/* Contenido según la pestaña seleccionada */}
@@ -1226,7 +1226,7 @@ export default function SportsBettingPage() {
                     {userBets.length > 0 ? (
                       <div className="space-y-3">
                         {userBets.filter(bet => bet.status === 'pending').map((bet) => (
-                          <div key={bet.id} className="bg-[#182531] p-3 rounded-md">
+                          <div key={bet.id} className="bg-[#1e2e4a] p-3 rounded-md">
                             <div className="flex justify-between mb-1">
                               <span className="text-xs">{bet.sportTitle}</span>
                               <Badge variant="outline" className="text-xs">{formatOddStatus(bet.status)}</Badge>
@@ -1266,7 +1266,7 @@ export default function SportsBettingPage() {
                     {betHistory.length > 0 ? (
                       <div className="space-y-3">
                         {betHistory.map((bet) => (
-                          <div key={bet.id} className="bg-[#182531] p-3 rounded-md">
+                          <div key={bet.id} className="bg-[#1e2e4a] p-3 rounded-md">
                             <div className="flex justify-between mb-1">
                               <span className="text-xs">{bet.sportTitle}</span>
                               <Badge 

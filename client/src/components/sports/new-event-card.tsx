@@ -171,9 +171,9 @@ export function NewEventCard({
   };
 
   return (
-    <Card className={`bg-[#0e1824] border-[#1c2b3a] overflow-hidden ${className}`}>
+    <Card className={`bg-[#121c2e] border-[#1a2e4a] overflow-hidden ${className}`}>
       {/* Encabezado con el título de la liga */}
-      <div className="bg-[#111A29] border-b border-[#1c2b3a] p-2 flex justify-between items-center">
+      <div className="bg-[#121c2e] border-b border-[#1a2e4a] p-2 flex justify-between items-center">
         <div className="flex items-center">
           <span className="text-xs font-medium text-gray-400">{sportTitle || event.sport_key}</span>
         </div>
@@ -193,7 +193,7 @@ export function NewEventCard({
       </div>
       
       {/* Fecha del evento */}
-      <div className="bg-[#0e1824] px-3 py-2 border-b border-[#1c2b3a]">
+      <div className="bg-[#121c2e] px-3 py-1 border-b border-[#1a2e4a]">
         <div className="flex items-center text-xs text-gray-400">
           <Clock className="h-3 w-3 mr-1" />
           <span>{formatEventDate()}</span>
@@ -215,10 +215,8 @@ export function NewEventCard({
             )}
           </div>
           
-          {/* Score actual */}
-          {isLiveEvent() && (
-            <div className="text-xs font-semibold">1x2</div>
-          )}
+          {/* Indicador 1x2 */}
+          <div className="text-xs font-semibold text-gray-400">1x2</div>
         </div>
         
         {/* Equipos y cuotas */}
@@ -226,15 +224,15 @@ export function NewEventCard({
           {/* Equipo local */}
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <span className="text-sm">{event.home_team}</span>
-              {isLiveEvent() && <span className="ml-2 text-sm">0</span>}
+              <span className="text-sm font-medium">{event.home_team}</span>
+              {isLiveEvent() && <span className="ml-2 text-sm font-bold">0</span>}
             </div>
             {homeOdds && (
               <button
-                className={`min-w-[70px] p-2 rounded text-sm font-semibold text-center transition-colors ${
+                className={`min-w-[60px] py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
                   isSelectionInBetSlip(event.home_team, 'h2h')
                     ? 'bg-[#09b66d] text-white'
-                    : 'bg-[#182531] hover:bg-[#1e2d3d] text-[#09b66d]'
+                    : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
                 }`}
                 onClick={() => handleBetClick(event.home_team, homeOdds.price, 'h2h')}
               >
@@ -247,13 +245,13 @@ export function NewEventCard({
           {drawOdds && (
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <span className="text-sm">empate</span>
+                <span className="text-sm text-gray-300">empate</span>
               </div>
               <button
-                className={`min-w-[70px] p-2 rounded text-sm font-semibold text-center transition-colors ${
+                className={`min-w-[60px] py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
                   isSelectionInBetSlip('Draw', 'h2h')
                     ? 'bg-[#09b66d] text-white'
-                    : 'bg-[#182531] hover:bg-[#1e2d3d] text-[#09b66d]'
+                    : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
                 }`}
                 onClick={() => handleBetClick('Draw', drawOdds.price, 'h2h')}
               >
@@ -265,15 +263,15 @@ export function NewEventCard({
           {/* Equipo visitante */}
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <span className="text-sm">{event.away_team}</span>
-              {isLiveEvent() && <span className="ml-2 text-sm">0</span>}
+              <span className="text-sm font-medium">{event.away_team}</span>
+              {isLiveEvent() && <span className="ml-2 text-sm font-bold">0</span>}
             </div>
             {awayOdds && (
               <button
-                className={`min-w-[70px] p-2 rounded text-sm font-semibold text-center transition-colors ${
+                className={`min-w-[60px] py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
                   isSelectionInBetSlip(event.away_team, 'h2h')
                     ? 'bg-[#09b66d] text-white'
-                    : 'bg-[#182531] hover:bg-[#1e2d3d] text-[#09b66d]'
+                    : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
                 }`}
                 onClick={() => handleBetClick(event.away_team, awayOdds.price, 'h2h')}
               >
