@@ -1,5 +1,5 @@
 // The Odds API integration
-const API_KEY = '6f332c5566ae50fd96bdedfd4636deb2'; // Clave API de ejemplo (la real se configura en el servidor)
+// La API key se obtiene desde una API del servidor para no exponerla en el cliente
 const BASE_URL = 'https://api.the-odds-api.com/v4';
 
 // Types for sports data
@@ -41,11 +41,29 @@ export interface EventOdds {
 }
 
 /**
+ * Obtiene la API key del servidor
+ */
+async function getApiKey(): Promise<string> {
+  try {
+    const response = await fetch('/api/sports/apikey');
+    if (!response.ok) {
+      throw new Error(`Error obteniendo API key: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.apiKey;
+  } catch (error) {
+    console.error('Error al obtener API key:', error);
+    throw error;
+  }
+}
+
+/**
  * Fetches available sports from The Odds API
  */
 export async function fetchSports(): Promise<Sport[]> {
   try {
-    const response = await fetch(`${BASE_URL}/sports/?apiKey=${API_KEY}`);
+    const apiKey = await getApiKey();
+    const response = await fetch(`${BASE_URL}/sports/?apiKey=${apiKey}`);
     
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -69,7 +87,8 @@ export async function fetchOdds(
   oddsFormat: string = 'decimal'
 ): Promise<EventOdds[]> {
   try {
-    const url = `${BASE_URL}/sports/${sportKey}/odds/?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
+    const apiKey = await getApiKey();
+    const url = `${BASE_URL}/sports/${sportKey}/odds/?apiKey=${apiKey}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -93,7 +112,8 @@ export async function fetchUpcomingEvents(
   oddsFormat: string = 'decimal'
 ): Promise<EventOdds[]> {
   try {
-    const url = `${BASE_URL}/sports/upcoming/odds/?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
+    const apiKey = await getApiKey();
+    const url = `${BASE_URL}/sports/upcoming/odds/?apiKey=${apiKey}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
     const response = await fetch(url);
     
     if (!response.ok) {
