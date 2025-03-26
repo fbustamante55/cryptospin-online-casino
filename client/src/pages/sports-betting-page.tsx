@@ -421,6 +421,7 @@ export default function SportsBettingPage() {
                 <h2 className="text-xl font-bold">
                   {showLiveEvents ? t('sports.liveEvents') : 
                    showFavorites ? t('sports.favorites') : 
+                   showTomorrowEvents ? t('sports.tomorrow') : 
                    "Próximos Eventos"}
                 </h2>
                 <Link href="#">
