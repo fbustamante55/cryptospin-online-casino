@@ -1,7 +1,7 @@
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
-import { Search, Plus, Coins, Star, Clock, ChevronRight, Calendar, CalendarDays, Activity, Trophy, AlertTriangle, Package, Grid } from "lucide-react";
+import { Search, Plus, Coins, Star, Clock, ChevronRight, Calendar, CalendarDays, Activity, Trophy, AlertTriangle, Package, Grid, ChevronDown, Settings, Gift, Bell } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -38,6 +38,25 @@ export default function SportsBettingPage() {
   const [showFavorites, setShowFavorites] = useState<boolean>(localStorage.getItem('sportsFilter') === 'favorites');
   const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'tomorrow');
   const [activeTab, setActiveTab] = useState<string>("misBoletos");
+  const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState('USDT');
+  
+  // Lista de criptomonedas disponibles con su valor
+  const currencies = [
+    { code: 'BTC', name: 'Bitcoin', value: 0.00000019, icon: '₿', color: '#f7931a' },
+    { code: 'ETH', name: 'Ethereum', value: 0.00000000, icon: 'Ξ', color: '#627eea' },
+    { code: 'LTC', name: 'Litecoin', value: 0.00000000, icon: 'Ł', color: '#b8b8b8' },
+    { code: 'USDT', name: 'Tether', value: 0.00086244, icon: '₮', color: '#26a17b' },
+    { code: 'SOL', name: 'Solana', value: 0.00000000, icon: '◎', color: '#00ffbd' },
+    { code: 'DOGE', name: 'Dogecoin', value: 0.00000000, icon: 'Ð', color: '#c2a633' },
+    { code: 'BCH', name: 'Bitcoin Cash', value: 0.00000000, icon: '₿', color: '#8dc351' },
+    { code: 'XRP', name: 'Ripple', value: 0.00000000, icon: '✕', color: '#23292f' },
+    { code: 'TRX', name: 'TRON', value: 0.00000000, icon: '♦', color: '#ef0027' },
+    { code: 'EOS', name: 'EOS', value: 0.00000000, icon: 'ε', color: '#000000' }
+  ];
+  
+  // Obtener la moneda seleccionada
+  const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[3]; // USDT por defecto
   
   // Función para formatear el estado de las apuestas para mostrar en UI
   const formatOddStatus = (status: string): string => {
@@ -361,36 +380,120 @@ export default function SportsBettingPage() {
       {/* Header - Only visible on desktop */}
       <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10 hidden md:block">
         <div className="flex items-center justify-between h-16 px-4">
-          <div className="hidden md:flex flex-1 items-center px-4">
+          
+          <div className="hidden md:flex items-center">
             <div className="flex items-center mr-6">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
             </div>
-            <div className="max-w-md w-full">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
+          </div>
+          
+          {/* Balance con selector de criptomonedas y botón de depósito */}
+          <div className="flex-1 flex justify-center items-center">
+            <div className="flex items-center space-x-3 relative">
+              {/* Caja única con selector y botón de depósito */}
+              <div className="flex items-center bg-[#0e1824] rounded-full border border-[#1c2b3a] overflow-hidden">
+                {/* Selector de divisas */}
+                <div 
+                  className="flex items-center px-3 py-1.5 cursor-pointer hover:bg-[#192531]/70 transition-all duration-200"
+                  onClick={() => setIsWalletOpen(!isWalletOpen)}
+                >
+                  <div className="h-5 w-5 rounded-full mr-2 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: currentCurrency.color }}>
+                    {currentCurrency.icon}
+                  </div>
+                  <span className="text-white text-sm font-bold">{currentCurrency.value.toFixed(8)}</span>
+                  <ChevronDown className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`} />
                 </div>
-                <input 
-                  type="text" 
-                  className="block w-full pl-10 pr-3 py-2 rounded-md bg-[#192531] border border-[#1c2b3a] text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#09b66d] focus:border-[#09b66d]" 
-                  placeholder={t('sports.searchEvents')}
-                />
+                
+                {/* Línea vertical separadora */}
+                <div className="h-6 w-px bg-[#1c2b3a]"></div>
+                
+                {/* Botón de depósito */}
+                <button className="flex items-center px-5 py-1.5 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold text-sm transition-all duration-200">
+                  Depositar
+                </button>
               </div>
+              
+              {/* Menú desplegable de selección de moneda */}
+              {isWalletOpen && (
+                <div className="absolute top-12 bg-[#0e1824] border border-[#1c2b3a] rounded-lg shadow-lg w-60 z-50">
+                  {/* Buscador */}
+                  <div className="p-3 border-b border-[#1c2b3a]">
+                    <div className="flex items-center bg-[#192531] rounded-md px-3 py-2">
+                      <Search className="h-4 w-4 text-gray-400 mr-2" />
+                      <input 
+                        className="bg-transparent text-white text-sm w-full focus:outline-none" 
+                        placeholder="Buscar Divisas" 
+                        type="text"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Lista de monedas */}
+                  <div className="max-h-60 overflow-y-auto">
+                    {currencies.map((currency) => (
+                      <div 
+                        key={currency.code} 
+                        className={`flex items-center justify-between p-3 hover:bg-[#192531] cursor-pointer ${currency.code === selectedCurrency ? 'bg-[#192531]' : ''}`}
+                        onClick={() => {
+                          setSelectedCurrency(currency.code);
+                          setIsWalletOpen(false);
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3`} style={{ backgroundColor: currency.color }}>
+                            <span className="text-white text-xs font-bold">{currency.icon}</span>
+                          </div>
+                          <div className="text-white text-sm">{currency.code}</div>
+                        </div>
+                        <div className="text-white text-sm">{currency.value.toFixed(8)}</div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Footer */}
+                  <div className="p-3 border-t border-[#1c2b3a]">
+                    <div className="flex items-center text-[#09b66d] hover:text-[#0fda85] text-sm cursor-pointer">
+                      <Settings className="h-4 w-4 mr-2" />
+                      <span>Configuración de Monedero</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <button className="flex items-center px-3 py-1.5 rounded-md bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium text-sm transition-all duration-200">
-              <Plus className="h-4 w-4 mr-1.5" />
-              <span>{t('buttons.deposit')}</span>
-            </button>
-            
-            <div className="px-3 py-1.5 rounded-md bg-[#192531] border border-[#1c2b3a] flex items-center">
-              <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
-              <span className="text-sm font-semibold">{user?.balance}</span>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3">
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
+                <Search className="h-5 w-5" />
+              </button>
+              
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
+                <Gift className="h-5 w-5" />
+              </button>
+              
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
+                <Bell className="h-5 w-5" />
+              </button>
+              
+              <div className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-1 py-1 cursor-pointer hover:border-[#09b66d]/50 transition-all duration-200">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-[#09b66d] flex items-center justify-center text-white font-bold">
+                    {user?.username?.substring(0, 1) || 'U'}
+                  </div>
+                  <div className="px-2">
+                    <div className="text-xs text-white font-medium max-w-[80px] truncate">
+                      {user?.username || 'Usuario'}
+                    </div>
+                    <div className="flex items-center">
+                      <div className="h-2 w-2 bg-[#09b66d] rounded-full mr-1"></div>
+                      <span className="text-[10px] text-gray-400">VIP</span>
+                    </div>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-white mr-1" />
+                </div>
+              </div>
             </div>
-            
-            <NotificationDropdown />
           </div>
         </div>
       </header>
