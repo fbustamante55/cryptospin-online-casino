@@ -91,10 +91,21 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     };
   }, []);
   
-  // Calculate the total odds for a parlay bet
+  // Calculate the total odds for a parlay bet in decimal format
   const calculateParlayOdds = (): number => {
     if (selections.length === 0) return 0;
-    return selections.reduce((total, bet) => total * bet.odds, 1);
+    
+    // Ensure we're using decimal odds for calculations
+    return selections.reduce((total, bet) => {
+      // Convertir las cuotas americanas a decimales si es necesario
+      let decimalOdds = bet.odds;
+      if (bet.odds < 0) {
+        decimalOdds = (100 / Math.abs(bet.odds)) + 1;
+      } else if (bet.odds > 0) {
+        decimalOdds = (bet.odds / 100) + 1;
+      }
+      return total * decimalOdds;
+    }, 1);
   };
   
   // Calculate the potential win based on bet amount and odds (INCLUYENDO el monto apostado)
@@ -358,7 +369,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                     </div>
                     
                     <div className="text-sm font-bold text-green-400">
-                      {formatAmericanOdds(bet.odds)}
+                      {bet.odds > 0 ? ((bet.odds / 100) + 1).toFixed(2) : ((100 / Math.abs(bet.odds)) + 1).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -372,7 +383,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 {selections.length > 1 && (
                   <div className="flex items-center text-xs text-white/70">
                     <span>Probabilidades combinadas:</span>
-                    <span className="ml-1 font-bold text-green-400">{formatAmericanOdds(calculateParlayOdds())}</span>
+                    <span className="ml-1 font-bold text-green-400">{calculateParlayOdds().toFixed(2)}</span>
                   </div>
                 )}
               </div>
