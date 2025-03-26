@@ -530,13 +530,19 @@ export function SlotsGame() {
                           const randomSymbol = gameId === 'book-of-egypt' 
                             ? EGYPT_SYMBOLS[Math.floor(Math.random() * EGYPT_SYMBOLS.length)]
                             : gameConfig.symbols[Math.floor(Math.random() * gameConfig.symbols.length)];
-                          return renderSymbol(randomSymbol, reelIndex, i);
+                          return (
+                            <div key={`spin-${reelIndex}-${i}`}>
+                              {renderSymbol(randomSymbol, reelIndex, i)}
+                            </div>
+                          );
                         })}
                       </motion.div>
                     ) : (
                       <div className="absolute inset-0">
                         {reel.map((symbol, symbolIndex) => (
-                          renderSymbol(symbol, reelIndex, symbolIndex)
+                          <div key={`symbol-${reelIndex}-${symbolIndex}`}>
+                            {renderSymbol(symbol, reelIndex, symbolIndex)}
+                          </div>
                         ))}
                       </div>
                     )}
@@ -678,13 +684,19 @@ export function SlotsGame() {
                   >
                     {Array.from({ length: 10 }).map((_, i) => {
                       const randomSymbol = gameConfig.symbols[Math.floor(Math.random() * gameConfig.symbols.length)];
-                      return renderSymbol(randomSymbol, reelIndex, i);
+                      return (
+                        <div key={`spin-${reelIndex}-${i}`}>
+                          {renderSymbol(randomSymbol, reelIndex, i)}
+                        </div>
+                      );
                     })}
                   </motion.div>
                 ) : (
                   <div className="absolute inset-0">
                     {reel.map((symbol, symbolIndex) => (
-                      renderSymbol(symbol, reelIndex, symbolIndex)
+                      <div key={`symbol-${reelIndex}-${symbolIndex}`}>
+                        {renderSymbol(symbol, reelIndex, symbolIndex)}
+                      </div>
                     ))}
                   </div>
                 )}
