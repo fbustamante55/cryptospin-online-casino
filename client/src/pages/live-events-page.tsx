@@ -110,7 +110,7 @@ export default function LiveEventsPage() {
   });
 
   // Definir los eventos a mostrar (todos o filtrados)
-  const displayEvents = eventsData || [];
+  const displayEvents = Array.isArray(eventsData) ? eventsData : [];
 
   // Función para determinar si un evento está en vivo
   const isEventLive = (event: EventOdds): boolean => {
@@ -148,7 +148,7 @@ export default function LiveEventsPage() {
   }).filter(sport => sport.liveEventsCount > 0) || [];
 
   // Filter events based on live events and selected sport
-  const filteredByStatus = displayEvents?.filter(event => {
+  const filteredByStatus = displayEvents.filter(event => {
     // Solo mostrar eventos en vivo
     const passesStatusFilter = isEventLive(event);
     
@@ -295,9 +295,9 @@ export default function LiveEventsPage() {
                     const color = getSportColor(sport.group);
                     
                     // Contar eventos en vivo para este deporte
-                    const eventsCount = displayEvents?.filter(event => 
+                    const eventsCount = displayEvents.filter(event => 
                       event.sport_key === sport.key && isEventLive(event)
-                    )?.length || 0;
+                    ).length || 0;
                     
                     // No mostrar deportes sin eventos en vivo
                     if (eventsCount === 0) {
