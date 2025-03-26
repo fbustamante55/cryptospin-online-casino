@@ -731,38 +731,56 @@ export default function SportsBettingPage() {
           {/* Tablón de Apuestas - Panel lateral */}
           <div className="w-full md:w-80 lg:w-96 mt-4 md:mt-0">
             <div className="bg-[#0e1824] border border-[#1c2b3a] rounded-lg overflow-hidden">
-              {/* Pestañas del Tablón */}
-              <div className="flex border-b border-[#1c2b3a]">
+              {/* Título del tablón de apuestas */}
+              <div className="px-4 pt-4 pb-2">
+                <h2 className="text-lg font-bold">Tablón de Apuestas</h2>
+                <p className="text-xs text-gray-400">
+                  Seleccione sus apuestas y calcule las ganancias potenciales
+                </p>
+              </div>
+              
+              {/* Pestañas del Tablón - Estilo moderno con línea debajo */}
+              <div className="flex px-4 mt-2 relative">
                 <button 
-                  className={`flex-1 py-3 text-center text-sm font-medium ${
+                  className={`py-2 mr-4 text-sm font-medium relative ${
                     activeTab === 'misBoletos' 
-                      ? 'text-white border-b-2 border-[#09b66d]' 
+                      ? 'text-white' 
                       : 'text-gray-400 hover:text-gray-300'
                   }`}
                   onClick={() => setActiveTab('misBoletos')}
                 >
                   Mis Boletos
+                  {activeTab === 'misBoletos' && (
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#09b66d]"></div>
+                  )}
                 </button>
                 <button 
-                  className={`flex-1 py-3 text-center text-sm font-medium ${
+                  className={`py-2 mr-4 text-sm font-medium relative ${
                     activeTab === 'misApuestas' 
-                      ? 'text-white border-b-2 border-[#09b66d]' 
+                      ? 'text-white' 
                       : 'text-gray-400 hover:text-gray-300'
                   }`}
                   onClick={() => setActiveTab('misApuestas')}
                 >
                   Mis Apuestas
+                  {activeTab === 'misApuestas' && (
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#09b66d]"></div>
+                  )}
                 </button>
                 <button 
-                  className={`flex-1 py-3 text-center text-sm font-medium ${
+                  className={`py-2 text-sm font-medium relative ${
                     activeTab === 'historial' 
-                      ? 'text-white border-b-2 border-[#09b66d]' 
+                      ? 'text-white' 
                       : 'text-gray-400 hover:text-gray-300'
                   }`}
                   onClick={() => setActiveTab('historial')}
                 >
                   Historial
+                  {activeTab === 'historial' && (
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#09b66d]"></div>
+                  )}
                 </button>
+                <div className="absolute bottom-0 left-0 w-full h-px bg-[#1c2b3a]"></div>
               </div>
               
               {/* Contenido según la pestaña seleccionada */}
