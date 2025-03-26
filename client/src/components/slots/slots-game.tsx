@@ -228,6 +228,7 @@ export function SlotsGame() {
         ["SCARAB", "PYRAMID", "ANKH"],
         ["PYRAMID", "ANKH", "BOOK"],
         ["ANKH", "SCARAB", "EYE"],
+        ["BOOK", "PHARAOH", "PYRAMID"],
         ["BOOK", "PHARAOH", "PYRAMID"]
       ];
     } else {
@@ -381,7 +382,7 @@ export function SlotsGame() {
     // Estilo especial para Book of Egypt
     if (gameId === 'book-of-egypt') {
       // Crear un estilo de símbolo que se parece a las cartas de la referencia
-      const symbolClass = `flex items-center justify-center font-bold text-lg h-[40px]`;
+      const symbolClass = `flex items-center justify-center font-bold text-lg h-full`;
       let color = "#FFFFFF";
       
       // Obtener el color apropiado para el símbolo egipcio
@@ -400,50 +401,50 @@ export function SlotsGame() {
       switch (symbol) {
         case 'BOOK':
           return (
-            <div className={symbolClass} style={{ color: "#FFC700" }}>
-              <span className="relative px-1 py-1 rounded-sm bg-blue-900/30">
-                <img src="/images/symbols/book.svg" alt="Book" className="h-[30px] w-[30px]" />
-              </span>
+            <div className={`${symbolClass} p-1`}>
+              <div className="bg-blue-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-yellow-600/50">
+                <img src="/images/symbols/book.svg" alt="Book" className="w-full h-full max-h-[32px] max-w-[32px]" />
+              </div>
             </div>
           );
         case 'PHARAOH':
           return (
-            <div className={symbolClass} style={{ color: "#F9C846" }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/pharaoh.svg" alt="Pharaoh" className="h-[30px] w-[30px]" />
-              </span>
+            <div className={`${symbolClass} p-1`}>
+              <div className="bg-amber-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-yellow-600/50">
+                <img src="/images/symbols/pharaoh.svg" alt="Pharaoh" className="w-full h-full max-h-[32px] max-w-[32px]" />
+              </div>
             </div>
           );
         case 'ANKH':
           return (
-            <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/ankh-symbol.svg" alt="Ankh" className="h-[30px] w-[30px]" />
-              </span>
+            <div className={`${symbolClass} p-1`}>
+              <div className="bg-green-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-green-600/50">
+                <img src="/images/symbols/ankh-symbol.svg" alt="Ankh" className="w-full h-full max-h-[32px] max-w-[32px]" />
+              </div>
             </div>
           );
         case 'EYE':
           return (
-            <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/eye-of-horus.svg" alt="Eye of Horus" className="h-[30px] w-[30px]" />
-              </span>
+            <div className={`${symbolClass} p-1`}>
+              <div className="bg-pink-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-pink-600/50">
+                <img src="/images/symbols/eye-of-horus.svg" alt="Eye of Horus" className="w-full h-full max-h-[32px] max-w-[32px]" />
+              </div>
             </div>
           );
         case 'SCARAB':
           return (
-            <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/scarab.svg" alt="Scarab" className="h-[30px] w-[30px]" />
-              </span>
+            <div className={`${symbolClass} p-1`}>
+              <div className="bg-purple-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-purple-600/50">
+                <img src="/images/symbols/scarab.svg" alt="Scarab" className="w-full h-full max-h-[32px] max-w-[32px]" />
+              </div>
             </div>
           );
         case 'PYRAMID':
           return (
-            <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/pyramid.svg" alt="Pyramid" className="h-[30px] w-[30px]" />
-              </span>
+            <div className={`${symbolClass} p-1`}>
+              <div className="bg-yellow-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-yellow-600/50">
+                <img src="/images/symbols/pyramid.svg" alt="Pyramid" className="w-full h-full max-h-[32px] max-w-[32px]" />
+              </div>
             </div>
           );
         default:
@@ -530,7 +531,7 @@ export function SlotsGame() {
               {reels.map((reel, reelIndex) => (
                 <div 
                   key={reelIndex} 
-                  className={`flex-1 slot-reel ${gameConfig.theme.reelBg} rounded overflow-hidden relative h-[120px]`}
+                  className={`flex-1 slot-reel ${gameConfig.theme.reelBg} rounded overflow-hidden relative h-[140px]`}
                 >
                   <AnimatePresence>
                     {spinningReels[reelIndex] ? (
@@ -541,7 +542,10 @@ export function SlotsGame() {
                         className="absolute inset-0"
                       >
                         {Array.from({ length: 10 }).map((_, i) => {
-                          const randomSymbol = gameConfig.symbols[Math.floor(Math.random() * gameConfig.symbols.length)];
+                          // Para Book of Egypt, usar específicamente los símbolos egipcios durante la animación
+                          const randomSymbol = gameId === 'book-of-egypt' 
+                            ? EGYPT_SYMBOLS[Math.floor(Math.random() * EGYPT_SYMBOLS.length)]
+                            : gameConfig.symbols[Math.floor(Math.random() * gameConfig.symbols.length)];
                           return renderSymbol(randomSymbol, reelIndex, i);
                         })}
                       </motion.div>
@@ -678,7 +682,7 @@ export function SlotsGame() {
           {reels.map((reel, reelIndex) => (
             <div 
               key={reelIndex} 
-              className={`flex-1 slot-reel ${gameConfig.theme.reelBg} rounded overflow-hidden relative h-[120px]`}
+              className={`flex-1 slot-reel ${gameConfig.theme.reelBg} rounded overflow-hidden relative h-[140px]`}
             >
               <AnimatePresence>
                 {spinningReels[reelIndex] ? (
