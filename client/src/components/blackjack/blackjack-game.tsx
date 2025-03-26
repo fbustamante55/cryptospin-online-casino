@@ -96,9 +96,12 @@ export function BlackjackGame() {
   // Place bet and deal cards
   const dealMutation = useMutation({
     mutationFn: async () => {
-      // For now, we'll simulate the API call
-      const mockResponse = mockDealHand(betAmount);
-      return mockResponse;
+      const response = await apiRequest<BlackjackBetResponse>({
+        url: "/api/games/blackjack/bet",
+        method: "POST",
+        data: { bet: betAmount }
+      });
+      return response;
     },
     onSuccess: (response) => {
       setGameState({
@@ -138,9 +141,16 @@ export function BlackjackGame() {
   // Player action - hit
   const hitMutation = useMutation({
     mutationFn: async () => {
-      // Simulate API call
-      const newCard = drawCard();
-      return newCard;
+      const currentHand = gameState.playerHands[gameState.currentHandIndex];
+      const response = await apiRequest({
+        url: "/api/games/blackjack/hit",
+        method: "POST",
+        data: { 
+          handIndex: gameState.currentHandIndex,
+          currentCards: currentHand.cards
+        }
+      });
+      return response.card;
     },
     onSuccess: (newCard) => {
       const updatedPlayerHands = [...gameState.playerHands];
@@ -191,8 +201,12 @@ export function BlackjackGame() {
   // Player action - stand
   const standMutation = useMutation({
     mutationFn: async () => {
-      // Simulate API call
-      return true;
+      const response = await apiRequest({
+        url: "/api/games/blackjack/stand",
+        method: "POST",
+        data: { handIndex: gameState.currentHandIndex }
+      });
+      return response.success;
     },
     onSuccess: () => {
       // Move to next hand or dealer's turn
@@ -221,9 +235,24 @@ export function BlackjackGame() {
   // Player action - double down
   const doubleDownMutation = useMutation({
     mutationFn: async () => {
-      // Simulate API call
-      const newCard = drawCard();
-      return newCard;
+      const currentHand = gameState.playerHands[gameState.currentHandIndex];
+      const response = await apiRequest({
+        url: "/api/games/blackjack/double",
+        method: "POST",
+        data: { 
+          bet: betAmount,
+          handIndex: gameState.currentHandIndex,
+          currentCards: currentHand.cards
+        }
+      });
+      // Update user's balance with the new balance from response
+      if (userData && response.balance !== undefined) {
+        queryClient.setQueryData(['/api/user'], {
+          ...userData,
+          balance: response.balance
+        });
+      }
+      return response.card;
     },
     onSuccess: (newCard) => {
       const updatedPlayerHands = [...gameState.playerHands];
@@ -355,7 +384,7 @@ export function BlackjackGame() {
   };
   
   // End game and determine results
-  const handleEndGame = () => {
+  const handleEndGame = async () => {
     const dealerValue = gameState.dealerHand.value;
     const dealerHasBlackjack = isBlackjack(gameState.dealerHand);
     
@@ -422,13 +451,44 @@ export function BlackjackGame() {
     
     setGameHistory(prev => [historyItem, ...prev].slice(0, 10));
     
-    // Update user balance in UI (would normally be done via API)
-    const totalPayout = payouts.reduce((sum, payout) => sum + payout, 0);
-    if (userData) {
-      queryClient.setQueryData(['/api/user'], {
-        ...userData,
-        balance: userData.balance - (betAmount * gameState.playerHands.length) + totalPayout,
+    // Record game results on server
+    try {
+      const bets = gameState.playerHands.map(() => betAmount);
+      const response = await apiRequest({
+        url: "/api/games/blackjack/end",
+        method: "POST",
+        data: {
+          playerHands: gameState.playerHands,
+          dealerHand: gameState.dealerHand,
+          bets,
+          results,
+          payouts
+        }
       });
+      
+      // Update user balance from API response
+      if (userData && response.balance !== undefined) {
+        queryClient.setQueryData(['/api/user'], {
+          ...userData,
+          balance: response.balance
+        });
+      }
+    } catch (error) {
+      console.error("Error recording game result:", error);
+      toast({
+        title: "Error",
+        description: "Hubo un error al registrar el resultado del juego",
+        variant: "destructive",
+      });
+      
+      // Fallback UI update for balance
+      const totalPayout = payouts.reduce((sum, payout) => sum + payout, 0);
+      if (userData) {
+        queryClient.setQueryData(['/api/user'], {
+          ...userData,
+          balance: userData.balance - (betAmount * gameState.playerHands.length) + totalPayout,
+        });
+      }
     }
   };
   
