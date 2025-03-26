@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { SidebarLanguageSwitcher } from "./sidebar-language-switcher";
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   className?: string;
@@ -35,6 +36,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const { t } = useTranslation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // Determinar el tab activo basado en la URL actual
   const [activeTab, setActiveTab] = useState(
@@ -44,35 +46,35 @@ export function Sidebar({ className }: SidebarProps) {
   const isActive = (path: string) => location === path;
 
   const favoriteItems = [
-    { name: "Favoritos", icon: <Star className="h-4 w-4" /> },
-    { name: "Reciente", icon: <Clock className="h-4 w-4" /> },
-    { name: "Desafíos", icon: <Target className="h-4 w-4" /> },
-    { name: "Mis Apuestas", icon: <BarChart className="h-4 w-4" /> },
+    { name: t('sidebar.favorites'), icon: <Star className="h-4 w-4" /> },
+    { name: t('sidebar.recent'), icon: <Clock className="h-4 w-4" /> },
+    { name: t('sidebar.challenges'), icon: <Target className="h-4 w-4" /> },
+    { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
   ];
 
   const gameItems = [
-    { name: "Originales de CryptoSpin", path: "/crash", icon: <Home className="h-4 w-4" /> },
-    { name: "Exclusivos de CryptoSpin", path: "/crash", icon: <Star className="h-4 w-4" /> },
-    { name: "Crash", path: "/crash", icon: <TrendingUp className="h-4 w-4" /> },
-    { name: "Casino en Vivo", path: "/crash", icon: <PlayCircle className="h-4 w-4" /> },
-    { name: "Concursos de TV", path: "/crash", icon: <Tv className="h-4 w-4" /> },
-    { name: "Lanzamientos", path: "/crash", icon: <Rocket className="h-4 w-4" /> },
-    { name: "Compra de bonificación", path: "/wallet", icon: <DollarSign className="h-4 w-4" /> },
-    { name: "RTP mejorado", path: "/crash", icon: <Zap className="h-4 w-4" /> },
+    { name: t('sidebar.cryptoSpinOriginals'), path: "/crash", icon: <Home className="h-4 w-4" /> },
+    { name: t('sidebar.cryptoSpinExclusives'), path: "/crash", icon: <Star className="h-4 w-4" /> },
+    { name: t('sidebar.crash'), path: "/crash", icon: <TrendingUp className="h-4 w-4" /> },
+    { name: t('sidebar.liveCasino'), path: "/crash", icon: <PlayCircle className="h-4 w-4" /> },
+    { name: t('sidebar.tvShows'), path: "/crash", icon: <Tv className="h-4 w-4" /> },
+    { name: t('sidebar.releases'), path: "/crash", icon: <Rocket className="h-4 w-4" /> },
+    { name: t('sidebar.bonusBuy'), path: "/wallet", icon: <DollarSign className="h-4 w-4" /> },
+    { name: t('sidebar.enhancedRTP'), path: "/crash", icon: <Zap className="h-4 w-4" /> },
   ];
   
   // Elementos para la sección de deportes
   const sportsItems = [
-    { name: "Eventos en Vivo", icon: <Tv className="h-4 w-4" />, badge: "24" },
-    { name: "Empezando Pronto", icon: <Clock className="h-4 w-4" /> },
-    { name: "Mis Apuestas", icon: <BarChart className="h-4 w-4" /> },
+    { name: t('sidebar.liveEvents'), icon: <Tv className="h-4 w-4" />, badge: "24" },
+    { name: t('sports.comingSoon'), icon: <Clock className="h-4 w-4" /> },
+    { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
   ];
   
   // Deportes populares
   const popularSports = [
-    { name: "Fútbol", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Baloncesto", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Tenis", icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: t('sports.soccer'), icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: t('sports.basketball'), icon: <Tv className="h-4 w-4" />, hasArrow: true },
+    { name: t('sports.tennis'), icon: <Tv className="h-4 w-4" />, hasArrow: true },
     { name: "MMA", icon: <Tv className="h-4 w-4" />, hasArrow: true },
     { name: "Béisbol", icon: <Tv className="h-4 w-4" />, hasArrow: true },
     { name: "Hockey sobre hielo", icon: <Tv className="h-4 w-4" />, hasArrow: true },
@@ -84,15 +86,15 @@ export function Sidebar({ className }: SidebarProps) {
   ];
   
   const footerItems = [
-    { name: "Perfil", path: "/profile", icon: <User className="h-4 w-4" />, hasArrow: true },
-    { name: "Promociones", path: "#", icon: <Gift className="h-4 w-4" />, hasArrow: true },
-    { name: "Afiliado", path: "#", icon: <Users className="h-4 w-4" /> },
-    { name: "Club VIP", path: "#", icon: <Award className="h-4 w-4" /> },
-    { name: "Blog", path: "#", icon: <FileText className="h-4 w-4" /> },
-    { name: "Foro", path: "#", icon: <MessageCircle className="h-4 w-4" /> },
-    { name: "Patrocinios", path: "#", icon: <HeartHandshake className="h-4 w-4" />, hasArrow: true },
-    { name: "Juego Responsable", path: "#", icon: <BookOpenText className="h-4 w-4" /> },
-    { name: "Soporte en vivo", path: "#", icon: <Headset className="h-4 w-4" /> },
+    { name: t('sidebar.profile'), path: "/profile", icon: <User className="h-4 w-4" />, hasArrow: true },
+    { name: t('sidebar.promotions'), path: "#", icon: <Gift className="h-4 w-4" />, hasArrow: true },
+    { name: t('sidebar.affiliate'), path: "#", icon: <Users className="h-4 w-4" /> },
+    { name: t('sidebar.vipClub'), path: "#", icon: <Award className="h-4 w-4" /> },
+    { name: t('sidebar.blog'), path: "#", icon: <FileText className="h-4 w-4" /> },
+    { name: t('sidebar.forum'), path: "#", icon: <MessageCircle className="h-4 w-4" /> },
+    { name: t('sidebar.sponsorships'), path: "#", icon: <HeartHandshake className="h-4 w-4" />, hasArrow: true },
+    { name: t('sidebar.responsibleGaming'), path: "#", icon: <BookOpenText className="h-4 w-4" /> },
+    { name: t('sidebar.liveSupport'), path: "#", icon: <Headset className="h-4 w-4" /> },
   ];
 
   return (
@@ -119,7 +121,7 @@ export function Sidebar({ className }: SidebarProps) {
                 window.location.href = '/';
               }}
             >
-              CASINO
+              {t('tabs.casino')}
             </button>
             <button 
               className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
@@ -128,7 +130,7 @@ export function Sidebar({ className }: SidebarProps) {
                 window.location.href = '/sports';
               }}
             >
-              DEPORTES
+              {t('tabs.sports')}
             </button>
           </div>
         )}
@@ -158,7 +160,7 @@ export function Sidebar({ className }: SidebarProps) {
             <div>
               {!sidebarCollapsed && (
                 <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-                  Juegos
+                  {t('sidebar.games')}
                 </div>
               )}
 
@@ -186,7 +188,7 @@ export function Sidebar({ className }: SidebarProps) {
             <div className="border-t border-[#1c2b3a]">
               {!sidebarCollapsed && (
                 <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-                  Proveedores
+                  {t('sidebar.providers')}
                 </div>
               )}
               <Link 
@@ -196,7 +198,7 @@ export function Sidebar({ className }: SidebarProps) {
                 <span className="text-gray-400">
                   <Zap className="h-4 w-4" />
                 </span>
-                {!sidebarCollapsed && <span className="ml-3">Proveedores</span>}
+                {!sidebarCollapsed && <span className="ml-3">{t('sidebar.providers')}</span>}
               </Link>
             </div>
           </>
@@ -229,7 +231,7 @@ export function Sidebar({ className }: SidebarProps) {
             <div className="border-t border-[#1c2b3a]">
               {!sidebarCollapsed && (
                 <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-                  Mejores Deportes
+                  {t('sidebar.topSports')}
                 </div>
               )}
               
@@ -301,7 +303,7 @@ export function Sidebar({ className }: SidebarProps) {
                 onClick={() => logoutMutation.mutate()}
                 className="text-xs text-gray-400 hover:text-[#09b66d]"
               >
-                Cerrar sesión
+                {t('auth.logout')}
               </button>
             </div>
           </div>

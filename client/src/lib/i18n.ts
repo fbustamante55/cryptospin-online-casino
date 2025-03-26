@@ -59,28 +59,34 @@ const resources = {
   },
 };
 
-i18n
-  // Detectar el idioma del navegador
-  .use(LanguageDetector)
-  // Pasar el objeto i18n a react-i18next
-  .use(initReactI18next)
-  // inicializar i18next
-  .init({
-    resources,
-    fallbackLng: 'en',
-    debug: false,
-    interpolation: {
-      escapeValue: false, // no necesario para React
-    },
-    detection: {
-      // Orden de detección de idioma
-      order: ['localStorage', 'cookie', 'navigator'],
-      // Clave para localStorage/cookie
-      lookupLocalStorage: 'i18nextLng',
-    },
-    react: {
-      useSuspense: false,
-    },
-  });
+// Definir la función para inicializar i18n
+const initI18n = () => {
+  i18n
+    // Detectar el idioma del navegador
+    .use(LanguageDetector)
+    // Pasar el objeto i18n a react-i18next
+    .use(initReactI18next)
+    // inicializar i18next
+    .init({
+      resources,
+      fallbackLng: 'en',
+      debug: false,
+      interpolation: {
+        escapeValue: false, // no necesario para React
+      },
+      detection: {
+        // Orden de detección de idioma
+        order: ['localStorage', 'cookie', 'navigator'],
+        // Clave para localStorage/cookie
+        lookupLocalStorage: 'i18nextLng',
+      },
+      react: {
+        useSuspense: false,
+      },
+    });
 
-export default i18n;
+  return i18n;
+};
+
+// Inicializar y exportar la instancia de i18n
+export default initI18n();
