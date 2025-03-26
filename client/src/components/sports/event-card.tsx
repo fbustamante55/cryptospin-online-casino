@@ -436,6 +436,19 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                 </Tooltip>
               )}
             </div>
+            
+            {/* Widget de cuotas integrado */}
+            <div className="my-3">
+              <OddsWidget 
+                sportKey={event.sport_key}
+                bookmakerKeys="draftkings"
+                oddsFormat="decimal"
+                markets="h2h"
+                width="100%"
+                height="120px"
+                className="rounded-md overflow-hidden"
+              />
+            </div>
           </div>
           
           {/* Mercado de Handicap/Spread si existe */}
