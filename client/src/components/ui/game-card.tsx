@@ -13,7 +13,7 @@ interface GameCardProps {
     color: "primary" | "secondary" | "tertiary";
   };
   rating?: number;
-  gameType: "slots" | "dice" | "crash";
+  gameType: "slots" | "dice" | "crash" | "roulette" | "blackjack" | "baccarat";
   gameId?: string;
   className?: string;
 }
@@ -92,6 +92,112 @@ export function GameCard({
               <text x="400" y="200" textAnchor="middle" fill="#09b66d" fontWeight="bold" fontSize="36">2.5x</text>
               <line x1="150" y1="300" x2="650" y2="300" stroke="#1c2b3a" strokeWidth="1"/>
               <line x1="200" y1="300" x2="200" y2="100" stroke="#1c2b3a" strokeWidth="1"/>
+            </>
+          )}
+          
+          {gameType === 'roulette' && (
+            <>
+              <circle cx="400" cy="225" r="120" fill="#0F1923" stroke="#333" strokeWidth="3"/>
+              <circle cx="400" cy="225" r="100" fill="#222" stroke="#444" strokeWidth="2"/>
+              
+              {/* Wheel segments */}
+              {[...Array(37)].map((_, i) => (
+                <path 
+                  key={i}
+                  d={`M 400 225 L ${400 + 100 * Math.cos(i * 2 * Math.PI / 37)} ${225 + 100 * Math.sin(i * 2 * Math.PI / 37)} A 100 100 0 0 0 ${400 + 100 * Math.cos((i+1) * 2 * Math.PI / 37)} ${225 + 100 * Math.sin((i+1) * 2 * Math.PI / 37)} Z`}
+                  fill={i % 2 === 0 ? "#B21A1A" : "#0F1923"}
+                  stroke="#333"
+                  strokeWidth="1"
+                />
+              ))}
+              
+              <circle cx="400" cy="225" r="85" fill="#0F1923" stroke="#444" strokeWidth="2"/>
+              <circle cx="400" cy="225" r="25" fill="#09b66d" stroke="#333" strokeWidth="2"/>
+              
+              {/* Ball */}
+              <circle cx="460" cy="185" r="8" fill="#fff" stroke="#ccc" strokeWidth="1"/>
+              
+              {/* Betting table */}
+              <rect x="200" y="350" width="400" height="50" rx="5" fill="#396B43" stroke="#333" strokeWidth="2"/>
+              <line x1="300" y1="350" x2="300" y2="400" stroke="#333" strokeWidth="2"/>
+              <line x1="400" y1="350" x2="400" y2="400" stroke="#333" strokeWidth="2"/>
+              <line x1="500" y1="350" x2="500" y2="400" stroke="#333" strokeWidth="2"/>
+              
+              <text x="250" y="380" textAnchor="middle" fill="#fff" fontSize="16">1-12</text>
+              <text x="350" y="380" textAnchor="middle" fill="#fff" fontSize="16">13-24</text>
+              <text x="450" y="380" textAnchor="middle" fill="#fff" fontSize="16">25-36</text>
+              <text x="550" y="380" textAnchor="middle" fill="#fff" fontSize="16">0</text>
+            </>
+          )}
+          
+          {gameType === 'blackjack' && (
+            <>
+              <rect x="200" y="100" width="400" height="250" rx="5" fill="#396B43" stroke="#333" strokeWidth="3"/>
+              
+              {/* Dealer cards */}
+              <rect x="320" y="130" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              <rect x="340" y="130" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              <rect x="360" y="130" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              
+              <text x="330" y="180" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">A</text>
+              <text x="330" y="200" textAnchor="middle" fill="#B21A1A" fontSize="20">♥</text>
+              
+              <text x="410" y="180" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">?</text>
+              
+              {/* Player cards */}
+              <rect x="300" y="250" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              <rect x="320" y="250" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              <rect x="340" y="250" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              <rect x="360" y="250" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              
+              <text x="335" y="300" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">10</text>
+              <text x="335" y="320" textAnchor="middle" fill="#000" fontSize="20">♠</text>
+              
+              <text x="375" y="300" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">9</text>
+              <text x="375" y="320" textAnchor="middle" fill="#B21A1A" fontSize="20">♦</text>
+              
+              <text x="415" y="300" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">+</text>
+            </>
+          )}
+          
+          {gameType === 'baccarat' && (
+            <>
+              <rect x="200" y="100" width="400" height="250" rx="5" fill="#396B43" stroke="#333" strokeWidth="3"/>
+              
+              {/* Banker Cards */}
+              <rect x="280" y="130" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              <rect x="300" y="130" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              
+              <text x="315" y="180" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">K</text>
+              <text x="315" y="200" textAnchor="middle" fill="#B21A1A" fontSize="20">♦</text>
+              
+              <text x="350" y="180" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">6</text>
+              <text x="350" y="200" textAnchor="middle" fill="#000" fontSize="20">♣</text>
+              
+              <text x="240" y="170" textAnchor="middle" fill="#fff" fontSize="16">BANKER</text>
+              
+              {/* Player Cards */}
+              <rect x="430" y="130" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              <rect x="450" y="130" width="70" height="100" rx="5" fill="#fff" stroke="#333" strokeWidth="1"/>
+              
+              <text x="465" y="180" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">Q</text>
+              <text x="465" y="200" textAnchor="middle" fill="#000" fontSize="20">♠</text>
+              
+              <text x="500" y="180" textAnchor="middle" fill="#333" fontSize="24" fontWeight="bold">9</text>
+              <text x="500" y="200" textAnchor="middle" fill="#B21A1A" fontSize="20">♥</text>
+              
+              <text x="570" y="170" textAnchor="middle" fill="#fff" fontSize="16">PLAYER</text>
+              
+              {/* Bet Areas */}
+              <rect x="320" y="260" width="80" height="40" rx="5" fill="#B21A1A" stroke="#333" strokeWidth="1" opacity="0.7"/>
+              <rect x="410" y="260" width="80" height="40" rx="5" fill="#1A3CB2" stroke="#333" strokeWidth="1" opacity="0.7"/>
+              <rect x="250" y="260" width="60" height="40" rx="5" fill="#396B43" stroke="#333" strokeWidth="1" opacity="0.9"/>
+              <rect x="500" y="260" width="60" height="40" rx="5" fill="#396B43" stroke="#333" strokeWidth="1" opacity="0.9"/>
+              
+              <text x="360" y="285" textAnchor="middle" fill="#fff" fontSize="16">BANKER</text>
+              <text x="450" y="285" textAnchor="middle" fill="#fff" fontSize="16">PLAYER</text>
+              <text x="280" y="285" textAnchor="middle" fill="#fff" fontSize="16">TIE</text>
+              <text x="530" y="285" textAnchor="middle" fill="#fff" fontSize="16">PAIR</text>
             </>
           )}
         </svg>
