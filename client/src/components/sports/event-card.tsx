@@ -6,7 +6,7 @@ import { formatEventDate, formatAmericanOdds, oddsToImpliedProbability } from '@
 import { BetSelection } from '@/components/sports/bet-slip';
 import { nanoid } from 'nanoid';
 import { useTranslation } from 'react-i18next';
-import { Star, HelpCircle } from "lucide-react";
+import { Star, HelpCircle, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -207,9 +207,43 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
   const isLoaded = !isLoading;
   const isPending = addFavoriteMutation.isPending || removeFavoriteMutation.isPending;
 
+  // Estado para controlar el desplegable de mercados
+  const [showAllMarkets, setShowAllMarkets] = useState(false);
+  
+  // Función para detectar si el evento está en vivo basado en la fecha
+  const isLiveEvent = () => {
+    const now = new Date();
+    const eventDate = new Date(event.commence_time);
+    return eventDate <= now;
+  };
+  
+  // Obtiene todos los mercados únicos disponibles
+  const getAllMarkets = () => {
+    const markets: { key: string, title: string }[] = [];
+    const marketKeys = new Set<string>();
+    
+    event.bookmakers.forEach(bookmaker => {
+      bookmaker.markets.forEach(market => {
+        if (!marketKeys.has(market.key)) {
+          marketKeys.add(market.key);
+          
+          // Traduce los nombres de los mercados
+          let title = market.key;
+          if (market.key === 'h2h') title = 'Ganador del partido';
+          if (market.key === 'spreads') title = 'Handicap';
+          if (market.key === 'totals') title = 'Total de puntos';
+          
+          markets.push({ key: market.key, title });
+        }
+      });
+    });
+    
+    return markets;
+  };
+
   return (
     <TooltipProvider>
-      <Card className={`bg-[#192531] border-[#1c2b3a] p-3 ${className} relative overflow-hidden`}>
+      <Card className={`bg-[#0e1824] border-[#1c2b3a] ${className} relative overflow-hidden`}>
         {/* Favorite Star Button */}
         <Button
           variant="ghost"
@@ -217,7 +251,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
           onClick={toggleFavorite}
           disabled={!isLoaded || isPending || !user}
           className={cn(
-            "absolute top-1 right-1 z-10 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50",
+            "absolute top-2 right-2 z-10 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50",
             "w-6 h-6 flex items-center justify-center"
           )}
         >
@@ -229,72 +263,85 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
           />
         </Button>
         
-        <div className="flex items-center justify-between mb-2">
+        {/* Encabezado del evento */}
+        <div className="bg-[#0e1824] border-b border-[#1c2b3a] px-4 py-3 flex justify-between items-center">
           <div className="flex items-center">
-            <span className="text-xs font-medium text-gray-400 truncate">{sportTitle || event.sport_key}</span>
-            {event.commence_time && (
-              <Badge variant="outline" className="ml-2 text-xs bg-transparent">
-                {formatEventDate(event.commence_time)}
+            <span className="text-xs font-medium text-gray-400">{sportTitle || event.sport_key}</span>
+            {isLiveEvent() && (
+              <Badge className="ml-2 bg-red-600 text-white text-xs">
+                En Vivo
               </Badge>
             )}
           </div>
+          {event.commence_time && !isLiveEvent() && (
+            <Badge variant="outline" className="text-xs bg-transparent">
+              {formatEventDate(event.commence_time)}
+            </Badge>
+          )}
         </div>
         
-        <div className="mb-3">
-          <div className="text-sm font-medium mb-3 truncate">{event.home_team} vs {event.away_team}</div>
-          
-          {/* Headers with tooltips */}
-          <div className="grid grid-cols-3 gap-2 mb-2">
-            <div className="text-xs text-left text-gray-400">{t('sports.team')}</div>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <div className="text-xs text-center text-gray-400 flex items-center justify-center cursor-help">
-                  {t('sports.moneyline')} <HelpCircle className="h-3 w-3 ml-1" />
+        {/* Cuerpo principal del evento */}
+        <div className="p-4">
+          {/* Título del partido con diseño similar a la imagen de referencia */}
+          <div className="flex flex-col mb-4">
+            <div className="bg-[#182531] px-3 py-2 rounded-t mb-1">
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-sm font-medium">{event.home_team}</div>
+                <div className="text-sm font-medium text-gray-400">
+                  {isLiveEvent() && <span className="text-white bg-[#282e39] px-2 py-1 rounded mr-2">1</span>}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <p className="text-xs">Apuesta directamente a quien ganará el partido. <br />
-                <span className="text-green-400">+194</span>: Ganarías $194 por cada $100 apostados.<br />
-                <span className="text-red-400">-245</span>: Necesitas apostar $245 para ganar $100.</p>
-              </TooltipContent>
-            </Tooltip>
-            
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <div className="text-xs text-center text-gray-400 flex items-center justify-center cursor-help">
-                  {t('sports.spread')} <HelpCircle className="h-3 w-3 ml-1" />
+              </div>
+            </div>
+            <div className="bg-[#182531] px-3 py-2 rounded-b">
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-sm font-medium">{event.away_team}</div>
+                <div className="text-sm font-medium text-gray-400">
+                  {isLiveEvent() && <span className="text-white bg-[#282e39] px-2 py-1 rounded mr-2">0</span>}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <p className="text-xs">Apuesta con ventaja/desventaja para equilibrar las probabilidades. <br />
-                <span className="text-blue-400">-1.5</span>: El equipo debe ganar por al menos 2 puntos.<br />
-                <span className="text-blue-400">+1.5</span>: El equipo puede perder por 1 punto y seguirías ganando.</p>
-              </TooltipContent>
-            </Tooltip>
+              </div>
+            </div>
           </div>
           
-          {/* Home team row */}
-          <div className="grid grid-cols-3 gap-2 mb-2 items-center">
-            <div className="text-xs font-medium truncate">{event.home_team}</div>
-            
-            <div className="text-center">
+          {/* Mercado principal (Ganador del partido) */}
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center">
+                <h3 className="text-sm font-medium">Ganador del partido</h3>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
+                      <HelpCircle className="h-3 w-3 text-gray-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p className="text-xs">Apuesta directamente a quien ganará el partido. <br />
+                    <span className="text-green-400">+194</span>: Ganarías $194 por cada $100 apostados.<br />
+                    <span className="text-red-400">-245</span>: Necesitas apostar $245 para ganar $100.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               {homeOdds && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      className={`px-3 py-2 rounded text-xs font-bold transition-colors w-full ${
+                      className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
                         isSelectionInBetSlip(event.home_team, 'moneyline')
                           ? 'bg-[#09b66d] text-white'
-                          : homeOdds.price < 0 
-                            ? 'bg-[#282e39] hover:bg-[#313d4a] border-l-4 border-red-500'  // Favorito (cuota negativa)
-                            : 'bg-[#282e39] hover:bg-[#313d4a] border-l-4 border-green-500' // No favorito (cuota positiva)
+                          : 'bg-[#182531] hover:bg-[#1e2d3d]'
                       }`}
                       onClick={() => handleBetClick(event.home_team, homeOdds.price, 'moneyline')}
                     >
-                      <div className="flex flex-col">
-                        <span>{formatAmericanOdds(homeOdds.price)}</span>
-                        <span className="text-[10px] opacity-70">
-                          {homeOdds.price < 0 ? 'Favorito' : 'No favorito'}
+                      <div className="flex justify-between">
+                        <span className="text-gray-200">{event.home_team}</span>
+                        <span className={`${homeOdds.price < 0 ? 'text-red-400' : 'text-green-400'} font-bold`}>
+                          {formatAmericanOdds(homeOdds.price)}
+                        </span>
+                      </div>
+                      <div className="text-left mt-1">
+                        <span className="text-[10px] text-gray-400">
+                          Probabilidad: {(oddsToImpliedProbability(homeOdds.price) * 100).toFixed(1)}%
                         </span>
                       </div>
                     </button>
@@ -304,85 +351,31 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                       {homeOdds.price > 0 
                         ? `Ganarías $${homeOdds.price} por cada $100 apostados` 
                         : `Necesitas apostar $${Math.abs(homeOdds.price)} para ganar $100`}
-                      <br />
-                      Probabilidad: {(oddsToImpliedProbability(homeOdds.price) * 100).toFixed(1)}%
                     </p>
                   </TooltipContent>
                 </Tooltip>
               )}
-            </div>
-            
-            <div className="text-center">
-              {spreadMarket?.outcomes.find(o => o.name === event.home_team) && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      className={`px-3 py-2 rounded text-xs font-bold transition-colors w-full ${
-                        isSelectionInBetSlip(event.home_team, 'spread')
-                          ? 'bg-[#09b66d] text-white'
-                          : 'bg-[#282e39] hover:bg-[#313d4a] border-l-4 border-blue-500'
-                      }`}
-                      onClick={() => {
-                        const outcome = spreadMarket.outcomes.find(o => o.name === event.home_team);
-                        if (outcome) {
-                          handleBetClick(event.home_team, outcome.price, 'spread', outcome.point);
-                        }
-                      }}
-                    >
-                      <div className="flex flex-col">
-                        {(() => {
-                          const point = spreadMarket.outcomes.find(o => o.name === event.home_team)?.point;
-                          return (
-                            <span>{point && point > 0 ? `+${point}` : point}</span>
-                          );
-                        })()}
-                        <span className="text-[10px] opacity-70">
-                          {(() => {
-                            const point = spreadMarket.outcomes.find(o => o.name === event.home_team)?.point;
-                            return point && point > 0 ? 'Ventaja' : 'Desventaja';
-                          })()}
-                        </span>
-                      </div>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs">
-                      {(() => {
-                        const outcome = spreadMarket.outcomes.find(o => o.name === event.home_team);
-                        if (!outcome) return '';
-                        return outcome.point && outcome.point > 0 
-                          ? `${event.home_team} recibe ${outcome.point} puntos de ventaja` 
-                          : `${event.home_team} da ${Math.abs(outcome.point || 0)} puntos`;
-                      })()}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </div>
-          
-          {/* Away team row */}
-          <div className="grid grid-cols-3 gap-2 mb-2 items-center">
-            <div className="text-xs font-medium truncate">{event.away_team}</div>
-            
-            <div className="text-center">
+              
               {awayOdds && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      className={`px-3 py-2 rounded text-xs font-bold transition-colors w-full ${
+                      className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
                         isSelectionInBetSlip(event.away_team, 'moneyline')
                           ? 'bg-[#09b66d] text-white'
-                          : awayOdds.price < 0 
-                            ? 'bg-[#282e39] hover:bg-[#313d4a] border-l-4 border-red-500'  // Favorito (cuota negativa)
-                            : 'bg-[#282e39] hover:bg-[#313d4a] border-l-4 border-green-500' // No favorito (cuota positiva)
+                          : 'bg-[#182531] hover:bg-[#1e2d3d]'
                       }`}
                       onClick={() => handleBetClick(event.away_team, awayOdds.price, 'moneyline')}
                     >
-                      <div className="flex flex-col">
-                        <span>{formatAmericanOdds(awayOdds.price)}</span>
-                        <span className="text-[10px] opacity-70">
-                          {awayOdds.price < 0 ? 'Favorito' : 'No favorito'}
+                      <div className="flex justify-between">
+                        <span className="text-gray-200">{event.away_team}</span>
+                        <span className={`${awayOdds.price < 0 ? 'text-red-400' : 'text-green-400'} font-bold`}>
+                          {formatAmericanOdds(awayOdds.price)}
+                        </span>
+                      </div>
+                      <div className="text-left mt-1">
+                        <span className="text-[10px] text-gray-400">
+                          Probabilidad: {(oddsToImpliedProbability(awayOdds.price) * 100).toFixed(1)}%
                         </span>
                       </div>
                     </button>
@@ -392,82 +385,32 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                       {awayOdds.price > 0 
                         ? `Ganarías $${awayOdds.price} por cada $100 apostados` 
                         : `Necesitas apostar $${Math.abs(awayOdds.price)} para ganar $100`}
-                      <br />
-                      Probabilidad: {(oddsToImpliedProbability(awayOdds.price) * 100).toFixed(1)}%
                     </p>
                   </TooltipContent>
                 </Tooltip>
               )}
-            </div>
-            
-            <div className="text-center">
-              {spreadMarket?.outcomes.find(o => o.name === event.away_team) && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      className={`px-3 py-2 rounded text-xs font-bold transition-colors w-full ${
-                        isSelectionInBetSlip(event.away_team, 'spread')
-                          ? 'bg-[#09b66d] text-white'
-                          : 'bg-[#282e39] hover:bg-[#313d4a] border-l-4 border-blue-500'
-                      }`}
-                      onClick={() => {
-                        const outcome = spreadMarket.outcomes.find(o => o.name === event.away_team);
-                        if (outcome) {
-                          handleBetClick(event.away_team, outcome.price, 'spread', outcome.point);
-                        }
-                      }}
-                    >
-                      <div className="flex flex-col">
-                        {(() => {
-                          const point = spreadMarket.outcomes.find(o => o.name === event.away_team)?.point;
-                          return (
-                            <span>{point && point > 0 ? `+${point}` : point}</span>
-                          );
-                        })()}
-                        <span className="text-[10px] opacity-70">
-                          {(() => {
-                            const point = spreadMarket.outcomes.find(o => o.name === event.away_team)?.point;
-                            return point && point > 0 ? 'Ventaja' : 'Desventaja';
-                          })()}
-                        </span>
-                      </div>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs">
-                      {(() => {
-                        const outcome = spreadMarket.outcomes.find(o => o.name === event.away_team);
-                        if (!outcome) return '';
-                        return outcome.point && outcome.point > 0 
-                          ? `${event.away_team} recibe ${outcome.point} puntos de ventaja` 
-                          : `${event.away_team} da ${Math.abs(outcome.point || 0)} puntos`;
-                      })()}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </div>
-          
-          {/* Draw row (for soccer and other sports that have draws) */}
-          {drawOdds && (
-            <div className="grid grid-cols-3 gap-2 items-center pt-2 mt-1 border-t border-[#1c2b3a]">
-              <div className="text-xs font-medium">Empate</div>
               
-              <div className="text-center">
+              {drawOdds && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      className={`px-3 py-2 rounded text-xs font-bold transition-colors w-full ${
+                      className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
                         isSelectionInBetSlip('Draw', 'moneyline')
                           ? 'bg-[#09b66d] text-white'
-                          : 'bg-[#282e39] hover:bg-[#313d4a] border-l-4 border-yellow-500'
+                          : 'bg-[#182531] hover:bg-[#1e2d3d]'
                       }`}
                       onClick={() => handleBetClick('Draw', drawOdds.price, 'moneyline')}
                     >
-                      <div className="flex flex-col">
-                        <span>{formatAmericanOdds(drawOdds.price)}</span>
-                        <span className="text-[10px] opacity-70">Empate</span>
+                      <div className="flex justify-between">
+                        <span className="text-gray-200">Empate</span>
+                        <span className={`${drawOdds.price < 0 ? 'text-red-400' : 'text-yellow-400'} font-bold`}>
+                          {formatAmericanOdds(drawOdds.price)}
+                        </span>
+                      </div>
+                      <div className="text-left mt-1">
+                        <span className="text-[10px] text-gray-400">
+                          Probabilidad: {(oddsToImpliedProbability(drawOdds.price) * 100).toFixed(1)}%
+                        </span>
                       </div>
                     </button>
                   </TooltipTrigger>
@@ -479,17 +422,128 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                     </p>
                   </TooltipContent>
                 </Tooltip>
+              )}
+            </div>
+          </div>
+          
+          {/* Mercado de Handicap/Spread si existe */}
+          {spreadMarket && spreadMarket.outcomes.length > 0 && (
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center">
+                  <h3 className="text-sm font-medium">Handicap</h3>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
+                        <HelpCircle className="h-3 w-3 text-gray-400" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p className="text-xs">Apuesta con ventaja/desventaja para equilibrar las probabilidades. <br />
+                      <span className="text-blue-400">-1.5</span>: El equipo debe ganar por al menos 2 puntos.<br />
+                      <span className="text-blue-400">+1.5</span>: El equipo puede perder por 1 punto y seguirías ganando.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-              
-              <div></div>
+              <div className="grid grid-cols-2 gap-3">
+                {spreadMarket.outcomes.map((outcome, index) => {
+                  const isHome = outcome.name === event.home_team;
+                  const point = outcome.point;
+                  const pointStr = point && point > 0 ? `+${point}` : point;
+                  
+                  return (
+                    <Tooltip key={index}>
+                      <TooltipTrigger asChild>
+                        <button 
+                          className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
+                            isSelectionInBetSlip(outcome.name, 'spread')
+                              ? 'bg-[#09b66d] text-white'
+                              : 'bg-[#182531] hover:bg-[#1e2d3d]'
+                          }`}
+                          onClick={() => {
+                            handleBetClick(outcome.name, outcome.price, 'spread', outcome.point);
+                          }}
+                        >
+                          <div className="flex justify-between">
+                            <span className="text-gray-200">{outcome.name}</span>
+                            <span className="text-blue-400 font-bold">{pointStr}</span>
+                          </div>
+                          <div className="flex justify-between mt-1">
+                            <span className="text-[10px] text-gray-400">
+                              {point && point > 0 ? 'Ventaja' : 'Desventaja'}
+                            </span>
+                            <span className="text-gray-400">
+                              {formatAmericanOdds(outcome.price)}
+                            </span>
+                          </div>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">
+                          {point && point > 0 
+                            ? `${outcome.name} recibe ${point} puntos de ventaja` 
+                            : `${outcome.name} da ${Math.abs(point || 0)} puntos`}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
             </div>
           )}
-        </div>
-        
-        <div className="text-right">
-          <span className="text-xs text-[#09b66d] cursor-pointer">
-            +{event.bookmakers.reduce((count, bm) => count + bm.markets.length, 0)} {t('sports.markets')}
-          </span>
+          
+          {/* Todos los mercados (desplegable) */}
+          {event.bookmakers.length > 0 && (
+            <div className="mt-4 border-t border-[#1c2b3a] pt-3">
+              <Button 
+                variant="ghost" 
+                className="w-full flex justify-between items-center p-0 hover:bg-transparent text-[#09b66d]"
+                onClick={() => setShowAllMarkets(!showAllMarkets)}
+              >
+                <span className="text-xs flex items-center">
+                  {showAllMarkets ? 'Ocultar mercados' : `+${event.bookmakers.reduce((count, bm) => count + bm.markets.length, 0)} mercados disponibles`}
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showAllMarkets ? 'transform rotate-180' : ''}`} />
+              </Button>
+              
+              {showAllMarkets && (
+                <div className="mt-3 space-y-4">
+                  {getAllMarkets()
+                    .filter(market => market.key !== 'h2h' && market.key !== 'spreads') // Filtramos los que ya mostramos
+                    .map((market, index) => {
+                      const marketData = event.bookmakers[0]?.markets.find(m => m.key === market.key);
+                      if (!marketData) return null;
+
+                      return (
+                        <div key={index} className="border-t border-[#1c2b3a] pt-3">
+                          <h3 className="text-sm font-medium mb-2">{market.title}</h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {marketData.outcomes.map((outcome, i) => (
+                              <button 
+                                key={i}
+                                className="px-4 py-3 rounded text-sm bg-[#182531] hover:bg-[#1e2d3d]"
+                                onClick={() => handleBetClick(outcome.name, outcome.price, market.key, outcome.point)}
+                              >
+                                <div className="flex justify-between">
+                                  <span className="text-gray-200">{outcome.name}</span>
+                                  <span className="text-blue-400 font-bold">
+                                    {outcome.point ? (outcome.point > 0 ? `+${outcome.point}` : outcome.point) : ''}
+                                  </span>
+                                </div>
+                                <div className="text-right mt-1">
+                                  <span className="text-gray-400">{formatAmericanOdds(outcome.price)}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </Card>
     </TooltipProvider>
