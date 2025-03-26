@@ -58,6 +58,13 @@ export interface IStorage {
   getUserSportsBets(userId: number): Promise<SportsBet[]>;
   settleSportsBet(id: number, status: string, settledAmount: number): Promise<SportsBet | undefined>;
   
+  // Favorites operations
+  createFavorite(favorite: InsertFavorite): Promise<Favorite>;
+  getUserFavorites(userId: number): Promise<Favorite[]>;
+  getFavorite(id: number): Promise<Favorite | undefined>;
+  removeFavorite(id: number): Promise<boolean>;
+  isFavorite(userId: number, gameType: string, gameId?: string): Promise<boolean>;
+  
   // Session store
   sessionStore: ReturnType<typeof createMemoryStore>;
 }
@@ -69,6 +76,7 @@ export class MemStorage implements IStorage {
   private kycDocuments: Map<number, KycDocument>;
   private sportsEvents: Map<number, SportsEvent>;
   private sportsBets: Map<number, SportsBet>;
+  private favorites: Map<number, Favorite>;
   public sessionStore: ReturnType<typeof createMemoryStore>;
   private currentUserId: number;
   private currentTransactionId: number;
@@ -76,6 +84,7 @@ export class MemStorage implements IStorage {
   private currentKycDocumentId: number;
   private currentSportsEventId: number;
   private currentSportsBetId: number;
+  private currentFavoriteId: number;
 
   constructor() {
     this.users = new Map();
@@ -84,12 +93,14 @@ export class MemStorage implements IStorage {
     this.kycDocuments = new Map();
     this.sportsEvents = new Map();
     this.sportsBets = new Map();
+    this.favorites = new Map();
     this.currentUserId = 1;
     this.currentTransactionId = 1;
     this.currentGameHistoryId = 1;
     this.currentKycDocumentId = 1;
     this.currentSportsEventId = 1;
     this.currentSportsBetId = 1;
+    this.currentFavoriteId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
@@ -509,6 +520,46 @@ export class MemStorage implements IStorage {
     
     this.sportsBets.set(id, updatedBet);
     return updatedBet;
+  }
+
+  // Favorites methods
+  async createFavorite(favorite: InsertFavorite): Promise<Favorite> {
+    const id = this.currentFavoriteId++;
+    const now = new Date();
+    
+    const newFavorite: Favorite = {
+      ...favorite,
+      id,
+      gameId: favorite.gameId || null,
+      gameImage: favorite.gameImage || null,
+      addedAt: now
+    };
+    
+    this.favorites.set(id, newFavorite);
+    return newFavorite;
+  }
+  
+  async getUserFavorites(userId: number): Promise<Favorite[]> {
+    return Array.from(this.favorites.values())
+      .filter(favorite => favorite.userId === userId)
+      .sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
+  }
+  
+  async getFavorite(id: number): Promise<Favorite | undefined> {
+    return this.favorites.get(id);
+  }
+  
+  async removeFavorite(id: number): Promise<boolean> {
+    return this.favorites.delete(id);
+  }
+  
+  async isFavorite(userId: number, gameType: string, gameId?: string): Promise<boolean> {
+    return Array.from(this.favorites.values()).some(
+      favorite => 
+        favorite.userId === userId && 
+        favorite.gameType === gameType && 
+        (gameId ? favorite.gameId === gameId : true)
+    );
   }
 }
 

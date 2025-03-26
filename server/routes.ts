@@ -7,7 +7,8 @@ import {
   insertTransactionSchema, 
   insertGameHistorySchema, 
   insertSportsBetSchema, 
-  insertSportsEventSchema 
+  insertSportsEventSchema,
+  insertFavoriteSchema
 } from "@shared/schema";
 
 // Middleware to check if user is admin
@@ -1986,6 +1987,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  // Favorites routes
+  
+  // Get user's favorites
+  app.get("/api/favorites", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const favorites = await storage.getUserFavorites(req.user.id);
+      res.json(favorites);
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      res.status(500).json({ message: "Failed to fetch favorites" });
+    }
+  });
+  
+  // Add a favorite
+  app.post("/api/favorites", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const favoriteData = insertFavoriteSchema.parse(req.body);
+      
+      // Ensure the user can only add favorites for themselves
+      if (favoriteData.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only add favorites for yourself" });
+      }
+      
+      // Check if this is already a favorite
+      const isAlreadyFavorite = await storage.isFavorite(
+        req.user.id,
+        favoriteData.gameType,
+        favoriteData.gameId || undefined
+      );
+      
+      if (isAlreadyFavorite) {
+        return res.status(400).json({ message: "This is already in your favorites" });
+      }
+      
+      const favorite = await storage.createFavorite(favoriteData);
+      res.status(201).json(favorite);
+    } catch (error) {
+      console.error("Error adding favorite:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid favorite data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to add favorite" });
+    }
+  });
+  
+  // Check if a game is a favorite
+  app.get("/api/favorites/check", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const checkSchema = z.object({
+      gameType: z.string(),
+      gameId: z.string().optional()
+    });
+    
+    try {
+      const query = checkSchema.parse(req.query);
+      const isFavorite = await storage.isFavorite(
+        req.user.id,
+        query.gameType,
+        query.gameId
+      );
+      
+      res.json({ isFavorite });
+    } catch (error) {
+      console.error("Error checking favorite status:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid query parameters", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to check favorite status" });
+    }
+  });
+  
+  // Remove a favorite
+  app.delete("/api/favorites/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      // Check if the favorite exists and belongs to the user
+      const favorite = await storage.getFavorite(id);
+      if (!favorite) {
+        return res.status(404).json({ message: "Favorite not found" });
+      }
+      
+      if (favorite.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only remove your own favorites" });
+      }
+      
+      const removed = await storage.removeFavorite(id);
+      if (removed) {
+        res.status(200).json({ message: "Favorite removed successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to remove favorite" });
+      }
+    } catch (error) {
+      console.error("Error removing favorite:", error);
+      res.status(500).json({ message: "Failed to remove favorite" });
+    }
+  });
+
   return httpServer;
 }
 
