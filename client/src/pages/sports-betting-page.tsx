@@ -106,14 +106,23 @@ export default function SportsBettingPage() {
            eventDate.getTime() <= now.getTime();
   };
   
-  // Helper function to check if an event is tomorrow
+  // Helper function to check if an event is tomorrow (within next 24h)
   const isEventTomorrow = (event: EventOdds): boolean => {
     const eventDate = new Date(event.commence_time);
+    const now = new Date();
+    
+    // Tomamos el rango de mañana como desde las 00:00 de mañana hasta las 23:59 de mañana
+    // Crear la fecha de mañana (start of day)
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return eventDate.getDate() === tomorrow.getDate() && 
-           eventDate.getMonth() === tomorrow.getMonth() && 
-           eventDate.getFullYear() === tomorrow.getFullYear();
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    // Crear la fecha de mañana (end of day)
+    const tomorrowEnd = new Date(tomorrow);
+    tomorrowEnd.setHours(23, 59, 59, 999);
+    
+    // Verificar si el evento está entre el inicio y fin de mañana
+    return eventDate >= tomorrow && eventDate <= tomorrowEnd;
   };
   
   // Organize sports by group
@@ -430,6 +439,11 @@ export default function SportsBettingPage() {
                   setShowLiveEvents(false);
                   setShowUpcomingEvents(false);
                   localStorage.setItem('sportsFilter', 'tomorrow');
+                  
+                  // Debugging: Log eventos de mañana para verificar si existen
+                  console.log("Eventos para mañana:", 
+                    displayEvents?.filter(event => isEventTomorrow(event))
+                  );
                 }}
               >
                 <Calendar className="h-4 w-4 mr-1 text-gray-400" />
