@@ -128,6 +128,9 @@ export function NewEventCard({
   
   // Create a bet selection when user clicks on a bet option
   const handleBetClick = (teamName: string, odds: number, marketType: string, point?: number) => {
+    // Convertir las probabilidades americanas a decimales para la selección
+    const decimalOdds = convertToDecimalOdds(odds);
+    
     const selection: BetSelection = {
       id: nanoid(),
       eventId: event.id,
@@ -136,7 +139,7 @@ export function NewEventCard({
       homeTeam: event.home_team,
       awayTeam: event.away_team,
       selectedTeam: teamName,
-      odds,
+      odds: decimalOdds, // Usamos las probabilidades en formato decimal
       marketType,
       point
     };
@@ -158,6 +161,17 @@ export function NewEventCard({
     const now = new Date();
     const eventDate = new Date(event.commence_time);
     return eventDate <= now;
+  };
+  
+  // Función para convertir las probabilidades americanas a decimales
+  const convertToDecimalOdds = (americanOdds: number): number => {
+    if (americanOdds > 0) {
+      // Para probabilidades positivas: (americanOdds / 100) + 1
+      return parseFloat(((americanOdds / 100) + 1).toFixed(2));
+    } else {
+      // Para probabilidades negativas: (100 / |americanOdds|) + 1
+      return parseFloat((100 / Math.abs(americanOdds) + 1).toFixed(2));
+    }
   };
   
   // Eliminamos la función duplicada, ya que ahora usamos la importada
@@ -254,7 +268,7 @@ export function NewEventCard({
                 onClick={() => handleBetClick(event.home_team, homeOdds.price, 'h2h')}
               >
                 <span className="text-xs font-semibold mb-1">1</span>
-                <span className="text-sm font-bold">{(homeOdds.price).toFixed(2)}</span>
+                <span className="text-sm font-bold">{convertToDecimalOdds(homeOdds.price)}</span>
                 <span className="text-xs mt-1 line-clamp-1">Local</span>
               </button>
             )}
@@ -270,7 +284,7 @@ export function NewEventCard({
                 onClick={() => handleBetClick('Draw', drawOdds.price, 'h2h')}
               >
                 <span className="text-xs font-semibold mb-1">X</span>
-                <span className="text-sm font-bold">{(drawOdds.price).toFixed(2)}</span>
+                <span className="text-sm font-bold">{convertToDecimalOdds(drawOdds.price)}</span>
                 <span className="text-xs mt-1">Empate</span>
               </button>
             )}
@@ -286,7 +300,7 @@ export function NewEventCard({
                 onClick={() => handleBetClick(event.away_team, awayOdds.price, 'h2h')}
               >
                 <span className="text-xs font-semibold mb-1">2</span>
-                <span className="text-sm font-bold">{(awayOdds.price).toFixed(2)}</span>
+                <span className="text-sm font-bold">{convertToDecimalOdds(awayOdds.price)}</span>
                 <span className="text-xs mt-1 line-clamp-1">Visitante</span>
               </button>
             )}
