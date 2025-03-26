@@ -364,8 +364,10 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#0e1824] text-white">
+      <Sidebar />
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10">
           <div className="flex items-center justify-between h-16 px-4">
