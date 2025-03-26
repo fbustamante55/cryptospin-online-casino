@@ -94,6 +94,28 @@ export default function SportsBettingPage() {
   // Display either sport-specific events or upcoming events based on selection
   const displayEvents = activeSport && activeSport !== 'all' ? sportEvents : upcomingEvents;
   
+  // Helper function to check if an event is live or upcoming
+  const isEventLive = (event: EventOdds): boolean => {
+    // In a real app, this would check for a 'live' flag from the API
+    // For demo, we'll simulate some events as live (if they're scheduled for today)
+    const eventDate = new Date(event.commence_time);
+    const now = new Date();
+    return eventDate.getDate() === now.getDate() && 
+           eventDate.getMonth() === now.getMonth() && 
+           eventDate.getFullYear() === now.getFullYear() &&
+           eventDate.getTime() <= now.getTime();
+  };
+  
+  // Helper function to check if an event is tomorrow
+  const isEventTomorrow = (event: EventOdds): boolean => {
+    const eventDate = new Date(event.commence_time);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return eventDate.getDate() === tomorrow.getDate() && 
+           eventDate.getMonth() === tomorrow.getMonth() && 
+           eventDate.getFullYear() === tomorrow.getFullYear();
+  };
+  
   // Organize sports by group
   const sportsByGroup = sportsData?.reduce((groups: Record<string, Sport[]>, sport) => {
     if (!groups[sport.group]) {
@@ -102,9 +124,53 @@ export default function SportsBettingPage() {
     groups[sport.group].push(sport);
     return groups;
   }, {}) || {};
+
+  // Filter sports based on active filter (live, favorites, etc.)
+  const filteredSportsData = sportsData?.filter(sport => {
+    if (showLiveEvents) {
+      // Solo deportes que tienen eventos en vivo
+      return displayEvents?.some(event => 
+        event.sport_key === sport.key && isEventLive(event)
+      );
+    } else if (showUpcomingEvents) {
+      // Solo deportes que tienen eventos próximos (no en vivo)
+      return displayEvents?.some(event => 
+        event.sport_key === sport.key && !isEventLive(event)
+      );
+    } else if (showTomorrowEvents) {
+      // Solo deportes que tienen eventos para mañana
+      return displayEvents?.some(event => 
+        event.sport_key === sport.key && isEventTomorrow(event)
+      );
+    } else if (showFavorites) {
+      // Solo deportes que tienen eventos favoritos
+      return displayEvents?.some(event => 
+        event.sport_key === sport.key && 
+        favoriteEvents?.some(favorite => 
+          favorite.gameType === 'sports' && favorite.gameId === event.id
+        )
+      );
+    } else {
+      // Si no hay filtro activo, mostrar todos los deportes
+      return true;
+    }
+  }) || [];
+
+  // Organize filtered sports by group
+  const filteredSportsByGroup = filteredSportsData.reduce((groups: Record<string, Sport[]>, sport) => {
+    if (!groups[sport.group]) {
+      groups[sport.group] = [];
+    }
+    groups[sport.group].push(sport);
+    return groups;
+  }, {});
   
-  // Extract unique sport groups for the categories
-  const sportGroups = Object.keys(sportsByGroup).slice(0, 8);
+  // Extract unique sport groups for the categories (use filtered or all based on filters)
+  const sportGroups = Object.keys(
+    showLiveEvents || showUpcomingEvents || showTomorrowEvents || showFavorites
+      ? filteredSportsByGroup
+      : sportsByGroup
+  ).slice(0, 8);
   
   // Map sport groups to category display data
   const sportsCategories = sportGroups.map(group => {
@@ -174,28 +240,6 @@ export default function SportsBettingPage() {
       buttonColor: "bg-[#114f7a]"
     }
   ];
-  
-  // Helper function to check if an event is live or upcoming
-  const isEventLive = (event: EventOdds): boolean => {
-    // In a real app, this would check for a 'live' flag from the API
-    // For demo, we'll simulate some events as live (if they're scheduled for today)
-    const eventDate = new Date(event.commence_time);
-    const now = new Date();
-    return eventDate.getDate() === now.getDate() && 
-           eventDate.getMonth() === now.getMonth() && 
-           eventDate.getFullYear() === now.getFullYear() &&
-           eventDate.getTime() <= now.getTime();
-  };
-  
-  // Helper function to check if an event is tomorrow
-  const isEventTomorrow = (event: EventOdds): boolean => {
-    const eventDate = new Date(event.commence_time);
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return eventDate.getDate() === tomorrow.getDate() && 
-           eventDate.getMonth() === tomorrow.getMonth() && 
-           eventDate.getFullYear() === tomorrow.getFullYear();
-  };
   
   // Filter events based on live/upcoming status, favorites, tomorrow's events, and selected sport
   const filteredByStatus = displayEvents?.filter(event => {
@@ -413,7 +457,10 @@ export default function SportsBettingPage() {
                     <span className="text-xs font-bold text-white">1546</span>
                   </div>
                   
-                  {sportsData?.map((sport) => {
+                  {/* Mostrar deportes filtrados según el filtro activo */}
+                  {(showLiveEvents || showUpcomingEvents || showTomorrowEvents || showFavorites 
+                    ? filteredSportsData 
+                    : sportsData)?.map((sport) => {
                     const isActive = activeSport === sport.key;
                     const color = getSportColor(sport.group);
                     // Número aleatorio para simular cantidad de eventos (en producción debería venir del API)
