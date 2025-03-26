@@ -33,6 +33,7 @@ export default function SportsBettingPage() {
   const [showLiveEvents, setShowLiveEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'live');
   const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'upcoming' || localStorage.getItem('sportsFilter') === null);
   const [showFavorites, setShowFavorites] = useState<boolean>(localStorage.getItem('sportsFilter') === 'favorites');
+  const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'tomorrow');
   
   // Fetch available sports
   const { 
@@ -58,7 +59,8 @@ export default function SportsBettingPage() {
   const { 
     data: favoriteEvents, 
     isLoading: favoritesLoading,
-    error: favoritesError 
+    error: favoritesError,
+    refetch: refetchFavorites
   } = useQuery<any[]>({
     queryKey: ['favorites'],
     queryFn: async () => {
@@ -68,8 +70,15 @@ export default function SportsBettingPage() {
         method: 'GET'
       });
     },
-    enabled: !!user && showFavorites,
+    enabled: !!user,
   });
+  
+  // Effect to refetch favorites when showFavorites changes
+  useEffect(() => {
+    if (showFavorites && user) {
+      refetchFavorites();
+    }
+  }, [showFavorites, user, refetchFavorites]);
   
   // When a specific sport is selected, fetch its events
   const { 
@@ -177,7 +186,17 @@ export default function SportsBettingPage() {
            eventDate.getTime() <= now.getTime();
   };
   
-  // Filter events based on live/upcoming status and favorites
+  // Helper function to check if an event is tomorrow
+  const isEventTomorrow = (event: EventOdds): boolean => {
+    const eventDate = new Date(event.commence_time);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return eventDate.getDate() === tomorrow.getDate() && 
+           eventDate.getMonth() === tomorrow.getMonth() && 
+           eventDate.getFullYear() === tomorrow.getFullYear();
+  };
+  
+  // Filter events based on live/upcoming status, favorites, and tomorrow's events
   const filteredByStatus = displayEvents?.filter(event => {
     if (showLiveEvents) {
       return isEventLive(event);
@@ -193,6 +212,8 @@ export default function SportsBettingPage() {
       return favoriteEvents.some(favorite => 
         favorite.gameType === 'sports' && favorite.gameId === event.id
       );
+    } else if (showTomorrowEvents) {
+      return isEventTomorrow(event);
     }
     return true;
   }) || [];
@@ -309,15 +330,16 @@ export default function SportsBettingPage() {
             </div>
             
             {/* Quick Links */}
-            <div className="flex items-center space-x-2 mb-6 overflow-x-auto py-2">
+            <div className="flex justify-center items-center space-x-4 mb-6 py-2">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className={`${showFavorites ? 'bg-[#09b66d] border-[#09b66d]' : 'bg-[#192531] border-[#1c2b3a]'} text-white`}
+                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
                 onClick={() => {
                   setShowFavorites(true);
                   setShowLiveEvents(false);
                   setShowUpcomingEvents(false);
+                  setShowTomorrowEvents(false);
                   localStorage.setItem('sportsFilter', 'favorites');
                 }}
               >
@@ -327,10 +349,12 @@ export default function SportsBettingPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className={`${showLiveEvents ? 'bg-[#09b66d] border-[#09b66d]' : 'bg-[#192531] border-[#1c2b3a]'} text-white`}
+                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
                 onClick={() => {
                   setShowLiveEvents(true);
+                  setShowFavorites(false);
                   setShowUpcomingEvents(false);
+                  setShowTomorrowEvents(false);
                   localStorage.setItem('sportsFilter', 'live');
                 }}
               >
@@ -340,27 +364,32 @@ export default function SportsBettingPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className={`${showUpcomingEvents ? 'bg-[#09b66d] border-[#09b66d]' : 'bg-[#192531] border-[#1c2b3a]'} text-white`}
+                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
                 onClick={() => {
-                  setShowLiveEvents(false);
                   setShowUpcomingEvents(true);
+                  setShowFavorites(false);
+                  setShowLiveEvents(false);
+                  setShowTomorrowEvents(false);
                   localStorage.setItem('sportsFilter', 'upcoming');
                 }}
               >
                 <CalendarDays className="h-4 w-4 mr-1 text-gray-400" />
                 Próximos Eventos
               </Button>
-              <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
+                onClick={() => {
+                  setShowTomorrowEvents(true);
+                  setShowFavorites(false);
+                  setShowLiveEvents(false);
+                  setShowUpcomingEvents(false);
+                  localStorage.setItem('sportsFilter', 'tomorrow');
+                }}
+              >
+                <Calendar className="h-4 w-4 mr-1 text-gray-400" />
                 {t('sports.tomorrow')}
-              </Button>
-              <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
-                {t('sports.soccer')}
-              </Button>
-              <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
-                {t('sports.basketball')}
-              </Button>
-              <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
-                {t('sports.tennis')}
               </Button>
             </div>
             
