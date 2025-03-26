@@ -22,7 +22,7 @@ interface Game {
   title: string;
   description: string;
   image: string;
-  gameType: "slots" | "dice" | "crash" | "roulette" | "blackjack" | "baccarat";
+  gameType: "slots" | "dice" | "crash" | "roulette" | "blackjack" | "baccarat" | "keno";
   gameId?: string;
   featured?: boolean;
   popular?: boolean;
@@ -130,6 +130,20 @@ export default function CasinoGamesPage() {
       gameType: "slots",
       gameId: "aztec-treasure",
       rating: 4.2
+    },
+    {
+      id: "g9",
+      title: t("games.keno_title") || "American Keno",
+      description: t("games.keno_description") || "Seleccione números y obtenga premios en este clásico juego de lotería",
+      image: "/images/games/keno.webp", 
+      gameType: "keno",
+      new: true,
+      featured: true,
+      tag: {
+        text: "NUEVO",
+        color: "primary"
+      },
+      rating: 4.7
     }
   ];
 
