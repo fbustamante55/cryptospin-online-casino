@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Link } from "wouter";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 
 interface GameCardProps {
   title: string;
@@ -12,6 +13,7 @@ interface GameCardProps {
   };
   rating?: number;
   gameType: "slots" | "dice" | "crash";
+  gameId?: string;
   className?: string;
 }
 
@@ -22,6 +24,7 @@ export function GameCard({
   tag,
   rating,
   gameType,
+  gameId,
   className,
 }: GameCardProps) {
   const tagColorClasses = {
@@ -38,6 +41,12 @@ export function GameCard({
       className
     )}>
       <div className="aspect-video bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
+        <FavoriteButton 
+          gameType={gameType} 
+          gameId={gameId} 
+          gameName={title} 
+          gameImage={image}
+        />
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
           className="w-full h-full object-cover opacity-60"

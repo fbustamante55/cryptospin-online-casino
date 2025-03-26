@@ -14,6 +14,7 @@ import CrashPage from "@/pages/crash-page";
 import WalletPage from "@/pages/wallet-page";
 import HistoryPage from "@/pages/history-page";
 import ProfilePage from "@/pages/profile-page";
+import FavoritesPage from "@/pages/favorites-page";
 import TestPhoneInputPage from "@/pages/test-phone-input-page";
 import AdminDashboardPage from "@/pages/admin-dashboard-page";
 import SportsBettingPage from "@/pages/sports-betting-page";
@@ -26,6 +27,7 @@ function Router() {
       <ProtectedRoute path="/wallet" component={WalletPage} />
       <ProtectedRoute path="/history" component={HistoryPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/favorites" component={FavoritesPage} />
       <ProtectedRoute path="/admin" component={AdminDashboardPage} />
       <ProtectedRoute path="/sports" component={SportsBettingPage} />
       <Route path="/test-phone-input">
