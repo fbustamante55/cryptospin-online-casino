@@ -15,12 +15,12 @@ export default function HomePage() {
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('USDT');
   
-  // Lista de criptomonedas disponibles con su valor
+  // Lista de criptomonedas disponibles con su valor (todos a 0)
   const currencies = [
-    { code: 'BTC', name: 'Bitcoin', value: 0.00000019, icon: '₿', color: '#f7931a' },
+    { code: 'BTC', name: 'Bitcoin', value: 0.00000000, icon: '₿', color: '#f7931a' },
     { code: 'ETH', name: 'Ethereum', value: 0.00000000, icon: 'Ξ', color: '#627eea' },
     { code: 'LTC', name: 'Litecoin', value: 0.00000000, icon: 'Ł', color: '#b8b8b8' },
-    { code: 'USDT', name: 'Tether', value: 0.00086244, icon: '₮', color: '#26a17b' },
+    { code: 'USDT', name: 'Tether', value: 0.00000000, icon: '₮', color: '#26a17b' },
     { code: 'SOL', name: 'Solana', value: 0.00000000, icon: '◎', color: '#00ffbd' },
     { code: 'DOGE', name: 'Dogecoin', value: 0.00000000, icon: 'Ð', color: '#c2a633' },
     { code: 'BCH', name: 'Bitcoin Cash', value: 0.00000000, icon: '₿', color: '#8dc351' },
