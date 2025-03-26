@@ -162,7 +162,17 @@
     "slots_aztec_title": "Aztec Treasure",
     "slots_aztec_description": "Discover ancient Aztec treasures in this adventure slot",
     "slots_oriental_title": "Oriental Fortune",
-    "slots_oriental_description": "Discover oriental treasures in this slot filled with Asian symbolism and culture"
+    "slots_oriental_description": "Discover oriental treasures in this slot filled with Asian symbolism and culture",
+    "slots_50gems_title": "50 Gems",
+    "slots_50gems_description": "AGT 5x4 videoslot with 50 paylines and sparkling gems that will multiply your winnings",
+    "slots_777_title": "Slot 777",
+    "slots_777_description": "Classic slot machine featuring 7s, bells, and fruits for a nostalgic gaming experience",
+    "slots_book_of_egypt_title": "Book of Egypt",
+    "slots_book_of_egypt_description": "Discover the secrets of the pharaohs in this Egyptian-themed slot machine",
+    "slots_halloween_title": "Haunted Halloween",
+    "slots_halloween_description": "Halloween-themed slot with spooky symbols and bonus spins",
+    "slots_hot_scatter_title": "Hot Scatter",
+    "slots_hot_scatter_description": "Burning scatters will bring you amazing multipliers and big wins"
   },
   "tournaments": {
     "title": "Tournaments",

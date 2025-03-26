@@ -34,37 +34,38 @@ export default function HomePage() {
 
   const featuredGames = [
     {
-      title: "Moon Crash",
-      description: "Cash out before the crash! Multipliers can go to the moon in this thrilling game.",
-      image: "/crash.jpg",
+      title: t("games.crash_title"),
+      description: t("games.crash_description"),
+      image: "/images/games/crash.webp",
       tag: { text: "Hot", color: "tertiary" as const },
       rating: 4.9,
       gameType: "crash" as const
     },
     {
-      title: "Keno Americano",
-      description: "Selecciona números y gana con coincidencias en este clásico juego de lotería.",
+      title: t("games.slots_50gems_title"),
+      description: t("games.slots_50gems_description"),
+      image: "/images/games/50gems.webp",
+      tag: { text: "Popular", color: "primary" as const },
+      rating: 4.8,
+      gameType: "slots" as const,
+      gameId: "50gems"
+    },
+    {
+      title: t("games.keno_title"),
+      description: t("games.keno_description"),
       image: "/images/games/keno.webp",
       tag: { text: "Nuevo", color: "secondary" as const },
       rating: 4.5,
       gameType: "keno" as const
-    },
-    {
-      title: "Space Crash",
-      description: "Space-themed crash game with unique visuals and special bonuses on consecutive wins.",
-      image: "/crash.jpg",
-      tag: { text: "New", color: "secondary" as const },
-      rating: 4.7,
-      gameType: "crash" as const
     }
   ];
 
   const popularGames = [
-    { title: "Moon Crash", type: "Crash", players: 315, gameType: "crash" as const },
-    { title: "Keno Americano", type: "Keno", players: 298, gameType: "keno" as const },
-    { title: "Crypto Crash Pro", type: "Crash", players: 278, gameType: "crash" as const },
-    { title: "Space Crash", type: "Crash", players: 246, gameType: "crash" as const },
-    { title: "Fire Keno", type: "Keno", players: 220, gameType: "keno" as const }
+    { title: t("games.crash_title"), type: t("games.crash"), players: 315, gameType: "crash" as const },
+    { title: t("games.slots_50gems_title"), type: t("games.slots"), players: 301, gameType: "slots" as const, gameId: "50gems" },
+    { title: t("games.keno_title"), type: t("games.keno"), players: 298, gameType: "keno" as const },
+    { title: t("games.slots_777_title"), type: t("games.slots"), players: 265, gameType: "slots" as const, gameId: "777" },
+    { title: t("games.slots_book_of_egypt_title"), type: t("games.slots"), players: 243, gameType: "slots" as const, gameId: "book-of-egypt" }
   ];
 
   const currencyTriggerRef = useRef<HTMLDivElement>(null);
@@ -213,7 +214,7 @@ export default function HomePage() {
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {popularGames.map((game, index) => (
-                <Link key={index} href={`/${game.gameType}`}>
+                <Link key={index} href={game.gameType === "slots" && game.gameId ? `/${game.gameType}/${game.gameId}` : `/${game.gameType}`}>
                   <div className="rounded-lg overflow-hidden bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
                     <div className="aspect-square bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
                       {game.gameType === "keno" ? (
@@ -235,7 +236,7 @@ export default function HomePage() {
                           <circle cx="100" cy="130" r="12" fill="#1c2b3a" opacity="0.5" />
                           <circle cx="130" cy="130" r="12" fill="#09b66d" opacity="0.9" />
                         </svg>
-                      ) : (
+                      ) : game.gameType === "crash" ? (
                         <svg 
                           xmlns="http://www.w3.org/2000/svg" 
                           className="w-full h-full opacity-70"
@@ -246,6 +247,30 @@ export default function HomePage() {
                           <rect x="50" y="50" width="100" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
                           <path d="M70,130 Q90,80 110,110 T150,70" stroke="#09b66d" strokeWidth="3" fill="none"/>
                           <circle cx="150" cy="70" r="4" fill="#09b66d"/>
+                        </svg>
+                      ) : (
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          className="w-full h-full opacity-70"
+                          viewBox="0 0 200 200"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          {/* Slots graphic */}
+                          <rect x="40" y="50" width="120" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
+                          {/* Slots reels */}
+                          <rect x="50" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
+                          <rect x="85" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
+                          <rect x="120" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
+                          {/* Slots symbols */}
+                          <circle cx="65" cy="75" r="10" fill="#f9c846" />
+                          <text x="65" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">7</text>
+                          <circle cx="100" cy="75" r="10" fill="#09b66d" />
+                          <text x="100" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">$</text>
+                          <circle cx="135" cy="75" r="10" fill="#f95258" />
+                          <text x="135" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">♦</text>
+                          {/* Lever */}
+                          <rect x="165" y="60" width="5" height="40" fill="#09b66d" />
+                          <circle cx="167.5" cy="110" r="10" fill="#f9c846" />
                         </svg>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0e1824] to-transparent"></div>

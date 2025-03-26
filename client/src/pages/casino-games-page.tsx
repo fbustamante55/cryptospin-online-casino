@@ -55,24 +55,70 @@ export default function CasinoGamesPage() {
       },
       rating: 4.9
     },
+    // Juegos del repositorio slotopol
     {
-      id: "g2",
-      title: t("games.slots_fruity_title"),
-      description: t("games.slots_fruity_description"),
-      image: "/images/games/slots1.webp",
+      id: "s1",
+      title: t("games.slots_50gems_title"),
+      description: t("games.slots_50gems_description"),
+      image: "/images/games/50gems.webp", 
       gameType: "slots",
-      gameId: "fruity-fiesta",
+      gameId: "50gems",
+      featured: true,
       popular: true,
       tag: {
-        text: t("games.popular"),
-        color: "secondary"
+        text: "POPULAR",
+        color: "primary"
+      },
+      rating: 4.8
+    },
+    {
+      id: "s2",
+      title: t("games.slots_777_title"),
+      description: t("games.slots_777_description"),
+      image: "/images/games/777.webp",
+      gameType: "slots",
+      gameId: "777",
+      popular: true,
+      rating: 4.6
+    },
+    {
+      id: "s3",
+      title: t("games.slots_book_of_egypt_title"),
+      description: t("games.slots_book_of_egypt_description"),
+      image: "/images/games/book-of-egypt.webp",
+      gameType: "slots",
+      gameId: "book-of-egypt",
+      new: true,
+      tag: {
+        text: t("games.new"),
+        color: "tertiary"
       },
       rating: 4.7
     },
     {
+      id: "s4",
+      title: t("games.slots_halloween_title"),
+      description: t("games.slots_halloween_description"),
+      image: "/images/games/halloween.webp",
+      gameType: "slots",
+      gameId: "halloween",
+      featured: true,
+      rating: 4.5
+    },
+    {
+      id: "s5",
+      title: t("games.slots_hot_scatter_title"),
+      description: t("games.slots_hot_scatter_description"),
+      image: "/images/games/hot-scatter.webp",
+      gameType: "slots",
+      gameId: "hot-scatter",
+      rating: 4.4
+    },
+    // Juegos originales
+    {
       id: "g11",
-      title: t("games.keno_title") || "Keno Americano",
-      description: t("games.keno_description") || "Selecciona números y gana con coincidencias en este clásico juego de lotería.",
+      title: t("games.keno_title"),
+      description: t("games.keno_description"),
       image: "/images/games/keno.webp",
       gameType: "keno",
       new: true,
@@ -122,6 +168,20 @@ export default function CasinoGamesPage() {
       rating: 4.3
     },
     {
+      id: "g2",
+      title: t("games.slots_fruity_title"),
+      description: t("games.slots_fruity_description"),
+      image: "/images/games/slots1.webp",
+      gameType: "slots",
+      gameId: "fruity-fiesta",
+      popular: true,
+      tag: {
+        text: t("games.popular"),
+        color: "secondary"
+      },
+      rating: 4.7
+    },
+    {
       id: "g7",
       title: t("games.slots_crypto_title"),
       description: t("games.slots_crypto_description"),
@@ -146,8 +206,8 @@ export default function CasinoGamesPage() {
     },
     {
       id: "g9",
-      title: t("games.slots_oriental_title") || "Oriental Fortune",
-      description: t("games.slots_oriental_description") || "Descubre los tesoros orientales en esta tragamonedas llena de simbolismos y cultura asiática",
+      title: t("games.slots_oriental_title"),
+      description: t("games.slots_oriental_description"),
       image: "/images/games/slots4.webp", 
       gameType: "slots",
       gameId: "oriental-fortune",
