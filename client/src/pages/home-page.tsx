@@ -42,12 +42,12 @@ export default function HomePage() {
       gameType: "crash" as const
     },
     {
-      title: "Crypto Crash Pro",
-      description: "Our premium version with higher multipliers and better odds. Test your timing!",
-      image: "/crash.jpg",
-      tag: { text: "Premium", color: "primary" as const },
-      rating: 4.8,
-      gameType: "crash" as const
+      title: "Keno Americano",
+      description: "Selecciona números y gana con coincidencias en este clásico juego de lotería.",
+      image: "/images/games/keno.webp",
+      tag: { text: "Nuevo", color: "secondary" as const },
+      rating: 4.5,
+      gameType: "keno" as const
     },
     {
       title: "Space Crash",
@@ -61,10 +61,10 @@ export default function HomePage() {
 
   const popularGames = [
     { title: "Moon Crash", type: "Crash", players: 315, gameType: "crash" as const },
+    { title: "Keno Americano", type: "Keno", players: 298, gameType: "keno" as const },
     { title: "Crypto Crash Pro", type: "Crash", players: 278, gameType: "crash" as const },
     { title: "Space Crash", type: "Crash", players: 246, gameType: "crash" as const },
-    { title: "Rocket Crash", type: "Crash", players: 205, gameType: "crash" as const },
-    { title: "Neon Crash", type: "Crash", players: 184, gameType: "crash" as const }
+    { title: "Fire Keno", type: "Keno", players: 220, gameType: "keno" as const }
   ];
 
   const currencyTriggerRef = useRef<HTMLDivElement>(null);
@@ -216,17 +216,38 @@ export default function HomePage() {
                 <Link key={index} href={`/${game.gameType}`}>
                   <div className="rounded-lg overflow-hidden bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
                     <div className="aspect-square bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        className="w-full h-full opacity-70"
-                        viewBox="0 0 200 200"
-                        style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
-                      >
-                        {/* All items will show crash graphic in our new design */}
-                        <rect x="50" y="50" width="100" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
-                        <path d="M70,130 Q90,80 110,110 T150,70" stroke="#09b66d" strokeWidth="3" fill="none"/>
-                        <circle cx="150" cy="70" r="4" fill="#09b66d"/>
-                      </svg>
+                      {game.gameType === "keno" ? (
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          className="w-full h-full opacity-70"
+                          viewBox="0 0 200 200"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          {/* Keno graphic */}
+                          <rect x="40" y="40" width="120" height="120" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
+                          <circle cx="70" cy="70" r="12" fill="#09b66d" opacity="0.9" />
+                          <circle cx="100" cy="70" r="12" fill="#1c2b3a" opacity="0.5" />
+                          <circle cx="130" cy="70" r="12" fill="#1c2b3a" opacity="0.5" />
+                          <circle cx="70" cy="100" r="12" fill="#1c2b3a" opacity="0.5" />
+                          <circle cx="100" cy="100" r="12" fill="#09b66d" opacity="0.9" />
+                          <circle cx="130" cy="100" r="12" fill="#1c2b3a" opacity="0.5" />
+                          <circle cx="70" cy="130" r="12" fill="#1c2b3a" opacity="0.5" />
+                          <circle cx="100" cy="130" r="12" fill="#1c2b3a" opacity="0.5" />
+                          <circle cx="130" cy="130" r="12" fill="#09b66d" opacity="0.9" />
+                        </svg>
+                      ) : (
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          className="w-full h-full opacity-70"
+                          viewBox="0 0 200 200"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          {/* Crash graphic */}
+                          <rect x="50" y="50" width="100" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
+                          <path d="M70,130 Q90,80 110,110 T150,70" stroke="#09b66d" strokeWidth="3" fill="none"/>
+                          <circle cx="150" cy="70" r="4" fill="#09b66d"/>
+                        </svg>
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0e1824] to-transparent"></div>
                     </div>
                     <div className="p-3">
