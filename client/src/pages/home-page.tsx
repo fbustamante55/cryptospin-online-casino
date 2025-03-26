@@ -81,22 +81,28 @@ export default function HomePage() {
           {/* Balance con selector de criptomonedas y botón de depósito */}
           <div className="flex-1 flex justify-center items-center">
             <div className="flex items-center space-x-3 relative">
-              {/* Indicador de balance con selector */}
-              <div 
-                className="flex items-center rounded-full bg-[#0e1824] border border-[#1c2b3a] px-3 py-1.5 cursor-pointer hover:border-[#09b66d]/50 transition-all duration-200"
-                onClick={() => setIsWalletOpen(!isWalletOpen)}
-              >
-                <div className="h-5 w-5 rounded-full mr-2 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: currentCurrency.color }}>
-                  {currentCurrency.icon}
+              {/* Caja única con selector y botón de depósito */}
+              <div className="flex items-center bg-[#0e1824] rounded-full border border-[#1c2b3a] overflow-hidden">
+                {/* Selector de divisas */}
+                <div 
+                  className="flex items-center px-3 py-1.5 cursor-pointer hover:bg-[#192531]/70 transition-all duration-200"
+                  onClick={() => setIsWalletOpen(!isWalletOpen)}
+                >
+                  <div className="h-5 w-5 rounded-full mr-2 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: currentCurrency.color }}>
+                    {currentCurrency.icon}
+                  </div>
+                  <span className="text-white text-sm font-bold">{currentCurrency.value.toFixed(8)}</span>
+                  <ChevronDown className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`} />
                 </div>
-                <span className="text-white text-sm font-bold">{currentCurrency.value.toFixed(8)}</span>
-                <ChevronDown className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`} />
+                
+                {/* Línea vertical separadora */}
+                <div className="h-6 w-px bg-[#1c2b3a]"></div>
+                
+                {/* Botón de depósito */}
+                <button className="flex items-center px-5 py-1.5 bg-[#f8c541] hover:bg-[#f9d252] text-[#0e1824] font-bold text-sm transition-all duration-200">
+                  Depositar
+                </button>
               </div>
-              
-              {/* Botón de depósito */}
-              <button className="flex items-center px-5 py-1.5 rounded-full bg-[#f8c541] hover:bg-[#f9d252] text-[#0e1824] font-bold text-sm transition-all duration-200">
-                Depositar
-              </button>
               
               {/* Menú desplegable de selección de moneda */}
               {isWalletOpen && (
