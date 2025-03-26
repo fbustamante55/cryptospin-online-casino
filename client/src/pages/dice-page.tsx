@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { Sidebar } from "@/components/ui/sidebar";
-import { MobileNav } from "@/components/ui/mobile-nav";
 import { DiceGame } from "@/components/dice/dice-game";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
