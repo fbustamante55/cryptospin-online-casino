@@ -101,8 +101,25 @@ export function SlotsGame() {
   const winLinesRef = useRef<number[][]>([]);
   const winMessageRef = useRef<HTMLDivElement>(null);
   
+  // Definir interfaz para la configuración del juego
+  interface GameConfig {
+    reels: number;
+    rows: number;
+    symbols: string[];
+    symbolColors: Record<string, string>;
+    paylines: number;
+    theme: {
+      background: string;
+      highlight: string;
+      reelBg: string;
+      buttonColor: string;
+      buttonTextColor: string;
+      textColor: string;
+    }
+  }
+  
   // Configuración dinámica del juego
-  const [gameConfig, setGameConfig] = useState({
+  const [gameConfig, setGameConfig] = useState<GameConfig>({
     reels: 5,
     rows: 3,
     symbols: DEFAULT_SYMBOLS,
@@ -123,91 +140,106 @@ export function SlotsGame() {
     const pathSegments = location.split('/');
     const currentGameId = pathSegments[pathSegments.length - 1];
     
+    let symbols: string[] = DEFAULT_SYMBOLS;
+    let symbolColors: Record<string, string> = DEFAULT_SYMBOL_COLORS;
+    let newRows = 3;
+    let newReels = 5;
+    let paylines = 9;
+    let theme = {
+      background: 'bg-gradient-to-b from-teal-900 to-green-900',
+      highlight: 'bg-teal-500',
+      reelBg: 'bg-teal-900/80',
+      buttonColor: 'bg-teal-500 hover:bg-teal-600',
+      buttonTextColor: 'text-white',
+      textColor: 'text-white'
+    };
+    
     // Configurar el juego específico según la URL
     if (currentGameId === 'book-of-egypt') {
       setGameId('book-of-egypt');
       setGameTitle(t("games.slots_book_of_egypt_title"));
-      setGameConfig({
-        reels: 5,
-        rows: 3,
-        symbols: EGYPT_SYMBOLS,
-        symbolColors: EGYPT_SYMBOL_COLORS,
-        paylines: 10,
-        theme: {
-          background: 'bg-gradient-to-b from-amber-800 to-amber-950',
-          highlight: 'bg-amber-500',
-          reelBg: 'bg-amber-900 border-2 border-yellow-600',
-          buttonColor: 'bg-amber-600 hover:bg-amber-700',
-          buttonTextColor: 'text-white',
-          textColor: 'text-white'
-        }
-      });
+      symbols = EGYPT_SYMBOLS;
+      symbolColors = EGYPT_SYMBOL_COLORS;
+      paylines = 10;
+      theme = {
+        background: 'bg-gradient-to-b from-amber-800 to-amber-950',
+        highlight: 'bg-amber-500',
+        reelBg: 'bg-amber-900 border-2 border-yellow-600',
+        buttonColor: 'bg-amber-600 hover:bg-amber-700',
+        buttonTextColor: 'text-white',
+        textColor: 'text-white'
+      };
       setLines(10); // Book of Egypt usa 10 líneas
     } else if (currentGameId === '50gems') {
       setGameId('50gems');
       setGameTitle(t("games.slots_50gems_title"));
-      setGameConfig({
-        reels: 5,
-        rows: 4,
-        symbols: GEMS_SYMBOLS,
-        symbolColors: GEMS_SYMBOL_COLORS,
-        paylines: 50,
-        theme: {
-          background: 'bg-gradient-to-b from-indigo-900 to-purple-900',
-          highlight: 'bg-pink-600',
-          reelBg: 'bg-indigo-900/80',
-          buttonColor: 'bg-pink-600 hover:bg-pink-700',
-          buttonTextColor: 'text-white',
-          textColor: 'text-white'
-        }
-      });
+      symbols = GEMS_SYMBOLS;
+      symbolColors = GEMS_SYMBOL_COLORS;
+      newRows = 4;
+      paylines = 50;
+      theme = {
+        background: 'bg-gradient-to-b from-indigo-900 to-purple-900',
+        highlight: 'bg-pink-600',
+        reelBg: 'bg-indigo-900/80',
+        buttonColor: 'bg-pink-600 hover:bg-pink-700',
+        buttonTextColor: 'text-white',
+        textColor: 'text-white'
+      };
       setLines(50); // 50 Gems usa 50 líneas
     } else if (currentGameId === '777') {
       setGameId('777');
       setGameTitle(t("games.slots_777_title"));
-      setGameConfig({
-        reels: 3,
-        rows: 3,
-        symbols: CLASSIC_SYMBOLS,
-        symbolColors: CLASSIC_SYMBOL_COLORS,
-        paylines: 5,
-        theme: {
-          background: 'bg-gradient-to-b from-red-900 to-orange-900',
-          highlight: 'bg-yellow-500',
-          reelBg: 'bg-red-900/80',
-          buttonColor: 'bg-yellow-500 hover:bg-yellow-600',
-          buttonTextColor: 'text-red-900',
-          textColor: 'text-white'
-        }
-      });
+      symbols = CLASSIC_SYMBOLS;
+      symbolColors = CLASSIC_SYMBOL_COLORS;
+      newReels = 3;
+      paylines = 5;
+      theme = {
+        background: 'bg-gradient-to-b from-red-900 to-orange-900',
+        highlight: 'bg-yellow-500',
+        reelBg: 'bg-red-900/80',
+        buttonColor: 'bg-yellow-500 hover:bg-yellow-600',
+        buttonTextColor: 'text-red-900',
+        textColor: 'text-white'
+      };
       setLines(5); // 777 usa 5 líneas
     } else {
       setGameId('fruity-fiesta');
       setGameTitle(t("games.slots_fruity_title"));
-      setGameConfig({
-        reels: 5,
-        rows: 3,
-        symbols: DEFAULT_SYMBOLS,
-        symbolColors: DEFAULT_SYMBOL_COLORS,
-        paylines: 9,
-        theme: {
-          background: 'bg-gradient-to-b from-teal-900 to-green-900',
-          highlight: 'bg-teal-500',
-          reelBg: 'bg-teal-900/80',
-          buttonColor: 'bg-teal-500 hover:bg-teal-600',
-          buttonTextColor: 'text-white',
-          textColor: 'text-white'
-        }
-      });
+      // Usar valores predeterminados
     }
     
+    // Actualizar la configuración del juego
+    setGameConfig({
+      reels: newReels,
+      rows: newRows,
+      symbols: symbols,
+      symbolColors: symbolColors,
+      paylines: paylines,
+      theme: theme
+    });
+    
     // Inicializar los carretes con símbolos aleatorios al cargar
-    const initialReels = Array(gameConfig.reels).fill(0).map(() => 
-      Array(gameConfig.rows).fill(0).map(() => {
-        const randomIndex = Math.floor(Math.random() * gameConfig.symbols.length);
-        return gameConfig.symbols[randomIndex];
-      })
-    );
+    let initialReels;
+    
+    if (currentGameId === 'book-of-egypt') {
+      // Para Book of Egypt, usar una configuración inicial con los símbolos egipcios
+      initialReels = [
+        ["EYE", "BOOK", "PHARAOH"],
+        ["SCARAB", "PYRAMID", "ANKH"],
+        ["PYRAMID", "ANKH", "BOOK"],
+        ["ANKH", "SCARAB", "EYE"],
+        ["BOOK", "PHARAOH", "PYRAMID"]
+      ];
+    } else {
+      // Para los demás juegos, generar aleatoriamente
+      initialReels = Array(newReels).fill(0).map(() => 
+        Array(newRows).fill(0).map(() => {
+          const randomIndex = Math.floor(Math.random() * symbols.length);
+          return symbols[randomIndex];
+        })
+      );
+    }
+    
     setReels(initialReels);
     
   }, [location, t]);
@@ -350,7 +382,19 @@ export function SlotsGame() {
     if (gameId === 'book-of-egypt') {
       // Crear un estilo de símbolo que se parece a las cartas de la referencia
       const symbolClass = `flex items-center justify-center font-bold text-lg h-[40px]`;
-      const color = gameConfig.symbolColors[symbol as keyof typeof EGYPT_SYMBOL_COLORS] || "#FFFFFF";
+      let color = "#FFFFFF";
+      
+      // Obtener el color apropiado para el símbolo egipcio
+      if (symbol === "BOOK") color = "#FFC700";
+      else if (symbol === "PHARAOH") color = "#F9C846";
+      else if (symbol === "ANKH") color = "#00FFAA";
+      else if (symbol === "EYE") color = "#FF3E8F";
+      else if (symbol === "SCARAB") color = "#C3A3FF";
+      else if (symbol === "PYRAMID") color = "#F9C846";
+      else if (symbol === "WILD") color = "#1E88E5";
+      else if (symbol === "SCATTER") color = "#FF9800";
+      else if (symbol === "STAR") color = "#FFC700";
+      else if (symbol === "SUN") color = "#FF5E5E";
 
       // Personalizar cada símbolo para que se parezca a la referencia con imágenes SVG
       switch (symbol) {
@@ -411,10 +455,24 @@ export function SlotsGame() {
       }
     } else {
       // Estilo estándar para otros juegos
+      let color = "#FFFFFF";
+      if (gameId === "fruity-fiesta") {
+        if (symbol === "7") color = "#00FFAA";
+        else if (symbol === "BAR") color = "#FF3E8F";
+        else if (symbol === "STAR") color = "#FFC700";
+        else if (symbol === "BELL") color = "#C3A3FF";
+        else if (symbol === "CHERRY") color = "#F9C846";
+        else if (symbol === "LEMON") color = "#FFFF00";
+        else if (symbol === "PLUM") color = "#D371FF";
+        else if (symbol === "WATERMELON") color = "#FF5E5E";
+        else if (symbol === "WILD") color = "#1E88E5";
+        else if (symbol === "SCATTER") color = "#FF9800";
+      }
+      
       return (
         <div 
           className="h-[40px] flex items-center justify-center font-bold"
-          style={{ color: gameConfig.symbolColors[symbol as keyof typeof gameConfig.symbolColors] || "#FFFFFF" }}
+          style={{ color }}
         >
           {symbol}
         </div>
