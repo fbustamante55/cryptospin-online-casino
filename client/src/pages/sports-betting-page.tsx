@@ -413,9 +413,13 @@ export default function SportsBettingPage() {
                 </button>
               </div>
               
-              {/* Menú desplegable de selección de moneda */}
+              {/* Menú desplegable de selección de moneda - Usando portal para evitar recortes */}
               {isWalletOpen && (
-                <div className="absolute top-12 bg-[#0e1824] border border-[#1c2b3a] rounded-lg shadow-lg w-60 z-[100]">
+                <div className="fixed bg-[#0e1824] border border-[#1c2b3a] rounded-lg shadow-lg w-60 z-[9999]" style={{
+                  top: '60px', // Ajustar según la altura real del header
+                  left: window.innerWidth <= 768 ? '50%' : '50%', 
+                  transform: window.innerWidth <= 768 ? 'translateX(-50%)' : 'translateX(-120px)'
+                }}>
                   {/* Buscador */}
                   <div className="p-3 border-b border-[#1c2b3a]">
                     <div className="flex items-center bg-[#192531] rounded-md px-3 py-2">
