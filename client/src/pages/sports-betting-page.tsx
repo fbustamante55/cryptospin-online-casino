@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EventCard } from "@/components/sports/event-card";
 import { BetSlip, BetSelection } from "@/components/sports/bet-slip";
 import { nanoid } from "nanoid";
+import { apiRequest } from "@/lib/queryClient";
 
 // Import the sports API utilities
 import { 
@@ -176,18 +177,31 @@ export default function SportsBettingPage() {
            eventDate.getTime() <= now.getTime();
   };
   
-  // Filter events based on live/upcoming status
+  // Filter events based on live/upcoming status and favorites
   const filteredByStatus = displayEvents?.filter(event => {
     if (showLiveEvents) {
       return isEventLive(event);
     } else if (showUpcomingEvents) {
       return !isEventLive(event);
+    } else if (showFavorites) {
+      // When no favorites data, return empty array
+      if (!favoriteEvents || favoriteEvents.length === 0) {
+        return false;
+      }
+      
+      // Check if this event is in favorites
+      return favoriteEvents.some(favorite => 
+        favorite.gameType === 'sports' && favorite.gameId === event.id
+      );
     }
     return true;
   }) || [];
   
   // Filter events for display (limit to 10 for performance)
   const filteredEvents = filteredByStatus.slice(0, 10) || [];
+  
+  // Special loading state for favorites
+  const isLoadingFavorites = showFavorites && favoritesLoading;
   
   // Handler for adding a bet selection
   const handleAddSelection = (selection: BetSelection) => {
@@ -388,7 +402,7 @@ export default function SportsBettingPage() {
               </div>
               
               {/* Loading state */}
-              {eventsLoading && (
+              {(eventsLoading || isLoadingFavorites) && (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
                     <Card key={i} className="bg-[#192531] border-[#1c2b3a] p-4 animate-pulse h-28">
@@ -412,7 +426,7 @@ export default function SportsBettingPage() {
               )}
               
               {/* Events display */}
-              {!eventsLoading && !eventsError && (
+              {!eventsLoading && !isLoadingFavorites && !eventsError && (
                 <div className="space-y-4">
                   {filteredEvents.length === 0 ? (
                     <Card className="bg-[#192531] border-[#1c2b3a] p-4">
