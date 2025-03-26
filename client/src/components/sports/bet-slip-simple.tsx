@@ -172,7 +172,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 onClick={onClearSelections}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                {t('buttons.removeAll')}
+                Limpiar
               </Button>
             )}
           </div>
