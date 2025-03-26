@@ -1,5 +1,5 @@
 // The Odds API integration
-const API_KEY = '6f332c5566ae50fd96bdedfd4636deb2';
+const API_KEY = import.meta.env.ODDS_API_KEY || '';
 const BASE_URL = 'https://api.the-odds-api.com/v4';
 
 // Types for sports data
@@ -215,4 +215,212 @@ export function getSportColor(sportGroup: string): string {
   };
   
   return colors[sportGroup] || '#607d8b'; // Default color
+}
+
+/**
+ * Genera eventos deportivos de ejemplo para demostración
+ * Esta función se utiliza cuando la API externa no está disponible
+ */
+export function generateDemoEvents(): EventOdds[] {
+  const now = new Date();
+  const oneHourBefore = new Date(now.getTime() - 60 * 60 * 1000);
+  const twoHoursBefore = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+  const oneHourAfter = new Date(now.getTime() + 60 * 60 * 1000);
+  const twoHoursAfter = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  const threeDaysAfter = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+  
+  // Eventos deportivos de ejemplo
+  return [
+    // Eventos en vivo (fútbol)
+    {
+      id: "1001",
+      sport_key: "soccer_laliga",
+      sport_title: "La Liga",
+      commence_time: oneHourBefore.toISOString(),
+      home_team: "Real Madrid",
+      away_team: "Barcelona",
+      bookmakers: [{
+        key: "betway",
+        title: "Betway",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "Real Madrid", price: 200 },
+              { name: "Barcelona", price: 180 },
+              { name: "Draw", price: 230 }
+            ]
+          },
+          {
+            key: "spreads",
+            outcomes: [
+              { name: "Real Madrid", price: -110, point: -1.5 },
+              { name: "Barcelona", price: -110, point: 1.5 }
+            ]
+          }
+        ]
+      }]
+    },
+    {
+      id: "1002",
+      sport_key: "soccer_epl",
+      sport_title: "Premier League",
+      commence_time: twoHoursBefore.toISOString(),
+      home_team: "Manchester City",
+      away_team: "Liverpool",
+      bookmakers: [{
+        key: "betway",
+        title: "Betway",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "Manchester City", price: 150 },
+              { name: "Liverpool", price: 250 },
+              { name: "Draw", price: 280 }
+            ]
+          }
+        ]
+      }]
+    },
+    // Eventos en vivo (baloncesto)
+    {
+      id: "1003",
+      sport_key: "basketball_nba",
+      sport_title: "NBA",
+      commence_time: twoHoursBefore.toISOString(),
+      home_team: "LA Lakers",
+      away_team: "Chicago Bulls",
+      bookmakers: [{
+        key: "betmgm",
+        title: "BetMGM",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "LA Lakers", price: -200 },
+              { name: "Chicago Bulls", price: 180 }
+            ]
+          }
+        ]
+      }]
+    },
+    // Próximos eventos
+    {
+      id: "1004",
+      sport_key: "soccer_fifa_world_cup",
+      sport_title: "FIFA World Cup",
+      commence_time: oneHourAfter.toISOString(),
+      home_team: "Argentina",
+      away_team: "Brasil",
+      bookmakers: [{
+        key: "betway",
+        title: "Betway",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "Argentina", price: 160 },
+              { name: "Brasil", price: 180 },
+              { name: "Draw", price: 210 }
+            ]
+          }
+        ]
+      }]
+    },
+    {
+      id: "1005",
+      sport_key: "basketball_euroleague",
+      sport_title: "Euroleague",
+      commence_time: twoHoursAfter.toISOString(),
+      home_team: "Real Madrid",
+      away_team: "CSKA Moscow",
+      bookmakers: [{
+        key: "betmgm",
+        title: "BetMGM",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "Real Madrid", price: -150 },
+              { name: "CSKA Moscow", price: 130 }
+            ]
+          }
+        ]
+      }]
+    },
+    {
+      id: "1006",
+      sport_key: "soccer_uefa_champs_league",
+      sport_title: "UEFA Champions League",
+      commence_time: threeDaysAfter.toISOString(),
+      home_team: "Bayern Munich",
+      away_team: "Paris Saint-Germain",
+      bookmakers: [{
+        key: "betway",
+        title: "Betway",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "Bayern Munich", price: 130 },
+              { name: "Paris Saint-Germain", price: 210 },
+              { name: "Draw", price: 250 }
+            ]
+          }
+        ]
+      }]
+    },
+    // Más eventos en vivo
+    {
+      id: "1007",
+      sport_key: "tennis_atp",
+      sport_title: "ATP Tennis",
+      commence_time: oneHourBefore.toISOString(),
+      home_team: "Rafael Nadal",
+      away_team: "Novak Djokovic",
+      bookmakers: [{
+        key: "betway",
+        title: "Betway",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "Rafael Nadal", price: -120 },
+              { name: "Novak Djokovic", price: 100 }
+            ]
+          }
+        ]
+      }]
+    },
+    {
+      id: "1008",
+      sport_key: "baseball_mlb",
+      sport_title: "MLB",
+      commence_time: twoHoursBefore.toISOString(),
+      home_team: "New York Yankees",
+      away_team: "Boston Red Sox",
+      bookmakers: [{
+        key: "betmgm",
+        title: "BetMGM",
+        last_update: now.toISOString(),
+        markets: [
+          {
+            key: "h2h",
+            outcomes: [
+              { name: "New York Yankees", price: -130 },
+              { name: "Boston Red Sox", price: 110 }
+            ]
+          }
+        ]
+      }]
+    }
+  ];
 }

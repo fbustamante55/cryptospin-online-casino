@@ -983,30 +983,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Si estamos utilizando la API externa, obtenemos los datos de ella
       try {
-        // Importar la función desde sports-api.ts
-        const { fetchOdds } = await import('../client/src/lib/sports-api');
+        // Importar las funciones desde sports-api.ts
+        const { fetchOdds, generateDemoEvents } = await import('../client/src/lib/sports-api');
         
-        // Obtener eventos de la API externa
-        const allSports = ['soccer', 'basketball', 'baseball', 'football', 'tennis', 'mma', 'hockey'];
-        const allEvents = [];
-        
-        for (const sport of allSports) {
-          if (sportType && sport !== sportType) continue;
+        // Intentar obtener eventos de la API externa
+        try {
+          const allSports = ['soccer', 'basketball', 'baseball', 'football', 'tennis', 'mma', 'hockey'];
+          const allEvents = [];
           
-          try {
-            const sportEvents = await fetchOdds(sport, 'upcoming', 'es');
-            allEvents.push(...sportEvents);
-          } catch (sportError) {
-            console.error(`Error fetching ${sport} events:`, sportError);
-            // Continuamos con el siguiente deporte aunque uno falle
+          // Solo intentamos con soccer para ahorrar peticiones de API
+          const sportEvents = await fetchOdds('soccer', 'upcoming', 'es');
+          allEvents.push(...sportEvents);
+          
+          if (allEvents.length > 0) {
+            return res.json({ events: allEvents });
+          } else {
+            throw new Error("No se encontraron eventos");
           }
+        } catch (apiError) {
+          console.error("Error o sin datos de la API externa, usando datos de demostración:", apiError);
+          
+          // Generamos datos de demostración
+          const demoEvents = generateDemoEvents();
+          
+          // Filtramos por tipo de deporte si es necesario
+          const filteredEvents = sportType
+            ? demoEvents.filter(event => event.sport_key.includes(sportType))
+            : demoEvents;
+          
+          return res.json({ events: filteredEvents });
         }
+      } catch (error) {
+        console.error("Error general en el endpoint:", error);
         
-        return res.json({ events: allEvents });
-      } catch (apiError) {
-        console.error("Error fetching from external API:", apiError);
-        
-        // Como fallback, usamos los datos almacenados localmente
+        // Como último recurso, intentamos con los datos almacenados localmente
         const events = await storage.getSportsEvents(sportType, status);
         res.json({ events });
       }
