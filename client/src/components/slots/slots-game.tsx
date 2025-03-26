@@ -8,6 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Minus, Plus, PlayCircle, Maximize, Grid3X3, ChevronsUp, SkipBack, FastForward, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { 
+  EGYPT_ICON_MAP, 
+  EGYPT_SYMBOL_BACKGROUNDS, 
+  EGYPT_SYMBOL_BORDERS,
+  SVG_EGYPTIAN_STATUE_LEFT,
+  SVG_EGYPTIAN_STATUE_RIGHT
+} from './book-of-egypt-icons';
 import { useLocation } from 'wouter';
 
 interface SlotResult {
@@ -397,19 +404,6 @@ export function SlotsGame() {
     if (gameId === 'book-of-egypt') {
       // Crear un estilo de símbolo que se parece a las cartas de la referencia
       const symbolClass = `flex items-center justify-center font-bold text-lg h-full`;
-      let color = "#FFFFFF";
-      
-      // Obtener el color apropiado para el símbolo egipcio
-      if (symbol === "BOOK") color = "#FFC700";
-      else if (symbol === "PHARAOH") color = "#F9C846";
-      else if (symbol === "ANKH") color = "#00FFAA";
-      else if (symbol === "EYE") color = "#FF3E8F";
-      else if (symbol === "SCARAB") color = "#C3A3FF";
-      else if (symbol === "PYRAMID") color = "#F9C846";
-      else if (symbol === "WILD") color = "#1E88E5";
-      else if (symbol === "SCATTER") color = "#FF9800";
-      else if (symbol === "STAR") color = "#FFC700";
-      else if (symbol === "SUN") color = "#FF5E5E";
 
       // Imágenes SVG en base64 - incrustadas directamente para evitar problemas de carga
       const SVG_BOOK = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOSIgZmlsbD0iIzYzNDczRCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjEiLz4KICAKICA8IS0tIExpYnJvIGFiaWVydG8gLS0+CiAgPGc+CiAgICA8IS0tIFDDoWdpbmEgaXpxdWllcmRhIC0tPgogICAgPHBhdGggZD0iTTYsMTQgCiAgICAgICAgICAgICBDNiwyOCAxNywyOCAxOSwyOAogICAgICAgICAgICAgTDE5LDEwCiAgICAgICAgICAgICBDMTcsMTAgNiwxMCA2LDE0WiIgCiAgICAgICAgICBmaWxsPSIjZmZmOGUxIiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICAgICAgCiAgICA8IS0tIFDDoWdpbmEgZGVyZWNoYSAtLT4KICAgIDxwYXRoIGQ9Ik0zNCwxNCAKICAgICAgICAgICAgIEMzNCwyOCAyMywyOCAyMSwyOAogICAgICAgICAgICAgTDIxLDEwCiAgICAgICAgICAgICBDMjMsMTAgMzQsMTAgMzQsMTRaIiAKICAgICAgICAgIGZpbGw9IiNmZmY4ZTEiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAKICAgIDwhLS0gTMOtbmVhcyBkZWwgbGlicm8gLS0+CiAgICA8cGF0aCBkPSJNMTEsMTYgTDE3LDE2IE0xMSwxOSBMMTcsMTkgTTExLDIyIEwxNywyMiBNMTEsMjUgTDE1LDI1IiAKICAgICAgICAgIHN0cm9rZT0iIzM4MjUxOCIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik0yMywxNiBMMjksMTYgTTIzLDE5IEwyOSwxOSBNMjMsMjIgTDI5LDIyIE0yNSwyNSBMMjksMjUiIAogICAgICAgICAgc3Ryb2tlPSIjMzgyNTE4IiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIvPgogICAgCiAgICA8IS0tIFPDrW1ib2xvIGVuIGVsIGNlbnRybyAtLT4KICAgIDxwYXRoIGQ9Ik0yMCwxNSAKICAgICAgICAgICAgIEwyMCwyMyIgCiAgICAgICAgICBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMS41IiBmaWxsPSJub25lIi8+CiAgICAKICAgIDwhLS0gQ8OtcmN1bG8gZG9yYWRvIGVuIGVsIGNlbnRybyAoT2pvIGRlIEhvcnVzKSAtLT4KICAgIDxjaXJjbGUgY3g9IjIwIiBjeT0iMTgiIHI9IjMiIGZpbGw9IiNmN2NjNGYiLz4KICAgIDxwYXRoIGQ9Ik0xNywxOCBMMjMsMTgiIHN0cm9rZT0iIzM4MjUxOCIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICAgIDxwYXRoIGQ9Ik0yMCwxNSBMMjAsMjEiIHN0cm9rZT0iIzM4MjUxOCIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICAgIAogICAgPCEtLSBDb2JlcnR1cmEgZGVsIGxpYnJvIC0tPgogICAgPHJlY3QgeD0iNiIgeT0iNyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjMiIGZpbGw9IiM4YjVkM2IiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8cmVjdCB4PSI2IiB5PSIyOCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjUiIGZpbGw9IiM4YjVkM2IiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAKICAgIDwhLS0gQ2llcnJlcyBkZWwgbGlicm8gLS0+CiAgICA8cGF0aCBkPSJNOCw3IEw4LDMzIE0zMiw3IEwzMiwzMyIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIvPgogICAgPHJlY3QgeD0iNyIgeT0iOCIgd2lkdGg9IjIiIGhlaWdodD0iMjIiIGZpbGw9IiM4YjVkM2IiLz4KICAgIDxyZWN0IHg9IjMxIiB5PSI4IiB3aWR0aD0iMiIgaGVpZ2h0PSIyMiIgZmlsbD0iIzhiNWQzYiIvPgogIDwvZz4KPC9zdmc+";
@@ -419,77 +413,45 @@ export function SlotsGame() {
       const SVG_SCARAB = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOSIgZmlsbD0iIzYzNDczRCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjEiLz4KICAKICA8IS0tIEN1ZXJwbyBkZWwgZXNjYXJhYmFqbyAtLT4KICA8ZWxsaXBzZSBjeD0iMjAiIGN5PSIyMCIgcng9IjE0IiByeT0iMTIiIGZpbGw9IiMzODI1MTgiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAKICA8IS0tIFBhdHLDs24gZGVjb3JhdGl2byBlbiBlbCBjYXBhcmF6w7NuIC0tPgogIDxwYXRoIGQ9Ik0yMCwxMiBMMjAsMjgiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+CiAgPHBhdGggZD0iTTE1LDE0IEwyNSwxNCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTMsMTcgTDI3LDE3IiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQ9Ik0xMiwyMCBMMjgsMjAiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+CiAgPHBhdGggZD0iTTEzLDIzIEwyNywyMyIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTUsMjYgTDI1LDI2IiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIAogIDwhLS0gQ2FiZXphIHkgbWFuZMOtYnVsYXMgLS0+CiAgPHBhdGggZD0iTTE2LDkgCiAgICAgICAgICAgQzE1LDcgMjUsNyAyNCw5CiAgICAgICAgICAgQzI0LDExIDE2LDExIDE2LDlaIgogICAgICAgIGZpbGw9IiMzODI1MTgiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgCiAgPCEtLSBBbGFzIC0tPgogIDxwYXRoIGQ9Ik04LDE2IAogICAgICAgICAgIEM1LDIwIDUsMjIgOCwyNCIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMS4yIi8+CiAgPHBhdGggZD0iTTMyLDE2IAogICAgICAgICAgIEMzNSwyMCAzNSwyMiAzMiwyNCIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMS4yIi8+CiAgCiAgPCEtLSBQYXRhcyAtLT4KICA8cGF0aCBkPSJNMTIsMTkgTDksMjEiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICA8cGF0aCBkPSJNMTIsMjEgTDksMjMiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICA8cGF0aCBkPSJNMTIsMjMgTDksMjUiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICAKICA8cGF0aCBkPSJNMjgsMTkgTDMxLDIxIiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44Ii8+CiAgPHBhdGggZD0iTTI4LDIxIEwzMSwyMyIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIvPgogIDxwYXRoIGQ9Ik0yOCwyMyBMMzEsMjUiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICAKICA8IS0tIERlY29yYWNpw7NuIGNlbnRyYWwgLS0+CiAgPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iNCIgZmlsbD0iIzYzNDczRCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjEiLz4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIyIiBmaWxsPSIjZjdjYzRmIi8+Cjwvc3ZnPg==";
       const SVG_PYRAMID = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOSIgZmlsbD0iIzYzNDczRCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjEiLz4KICAKICA8IS0tIFBpcsOhbWlkZSAtIGVzdHJ1Y3R1cmEgcHJpbmNpcGFsIC0tPgogIDxwYXRoIGQ9Ik01LDMyIEwyMCw4IEwzNSwzMiBaIiAKICAgICAgICBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMS41IiBmaWxsPSIjMzgyNTE4Ii8+CiAgCiAgPCEtLSBMw61uZWFzIGRlIGJsb3F1ZXMgZGUgbGEgcGlyw6FtaWRlIC0tPgogIDxwYXRoIGQ9Ik05LDI4IEwzMSwyOCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQ9Ik0xMSwyNCBMMjksMjQiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTMsMjAgTDI3LDIwIiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44IiBmaWxsPSJub25lIi8+CiAgPHBhdGggZD0iTTE1LDE2IEwyNSwxNiIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQ9Ik0xNywxMiBMMjMsMTIiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiLz4KICAKICA8IS0tIEzDrW5lYXMgdmVydGljYWxlcyBwYXJhIGxvcyBibG9xdWVzIC0tPgogIDxwYXRoIGQ9Ik05LDI4IEw5LDMyIiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44IiBmaWxsPSJub25lIi8+CiAgPHBhdGggZD0iTTE1LDI4IEwxNSwzMiIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQ9Ik0yMSwyOCBMMjEsMzIiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiLz4KICA8cGF0aCBkPSJNMjcsMjggTDI3LDMyIiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44IiBmaWxsPSJub25lIi8+CiAgCiAgPHBhdGggZD0iTTExLDI0IEwxMSwyOCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQ9Ik0xNiwyNCBMMTYsMjgiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiLz4KICA8cGF0aCBkPSJNMjEsMjQgTDIxLDI4IiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44IiBmaWxsPSJub25lIi8+CiAgPHBhdGggZD0iTTI2LDI0IEwyNiwyOCIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIvPgogIAogIDwhLS0gU29sIHNvYnJlIGxhIHBpcsOhbWlkZSAtLT4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjUiIHI9IjIuNSIgZmlsbD0iI2Y3Y2M0ZiIvPgogIDxwYXRoIGQ9Ik0xNiw1IEwxNCw1IiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44Ii8+CiAgPHBhdGggZD0iTTI0LDUgTDI2LDUiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICA8cGF0aCBkPSJNMjAsMyBMMjAsMSIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIvPgogIDxwYXRoIGQ9Ik0yMCw3IEwyMCw5IiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44Ii8+CiAgPHBhdGggZD0iTTE3LjUsMi41IEwxNi41LDEuNSIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIvPgogIDxwYXRoIGQ9Ik0yMi41LDIuNSBMMjMuNSwxLjUiIHN0cm9rZT0iI2Y3Y2M0ZiIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICA8cGF0aCBkPSJNMTcuNSw3LjUgTDE2LjUsOC41IiBzdHJva2U9IiNmN2NjNGYiIHN0cm9rZS13aWR0aD0iMC44Ii8+CiAgPHBhdGggZD0iTTIyLjUsNy41IEwyMy41LDguNSIgc3Ryb2tlPSIjZjdjYzRmIiBzdHJva2Utd2lkdGg9IjAuOCIvPgo8L3N2Zz4=";
 
-      // Personalizar cada símbolo que se parezca a la referencia con imágenes SVG en base64
-      switch (symbol) {
-        case 'BOOK':
-          return (
-            <div className={`${symbolClass} p-1`}>
-              <div className="bg-blue-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-yellow-600/50">
-                <img src={SVG_BOOK} alt="Book" className="w-full h-full max-h-[32px] max-w-[32px]" />
-              </div>
-            </div>
-          );
-        case 'PHARAOH':
-          return (
-            <div className={`${symbolClass} p-1`}>
-              <div className="bg-amber-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-yellow-600/50">
-                <img src={SVG_PHARAOH} alt="Pharaoh" className="w-full h-full max-h-[32px] max-w-[32px]" />
-              </div>
-            </div>
-          );
-        case 'ANKH':
-          return (
-            <div className={`${symbolClass} p-1`}>
-              <div className="bg-green-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-green-600/50">
-                <img src={SVG_ANKH} alt="Ankh" className="w-full h-full max-h-[32px] max-w-[32px]" />
-              </div>
-            </div>
-          );
-        case 'EYE':
-          return (
-            <div className={`${symbolClass} p-1`}>
-              <div className="bg-pink-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-pink-600/50">
-                <img src={SVG_EYE} alt="Eye of Horus" className="w-full h-full max-h-[32px] max-w-[32px]" />
-              </div>
-            </div>
-          );
-        case 'SCARAB':
-          return (
-            <div className={`${symbolClass} p-1`}>
-              <div className="bg-purple-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-purple-600/50">
-                <img src={SVG_SCARAB} alt="Scarab" className="w-full h-full max-h-[32px] max-w-[32px]" />
-              </div>
-            </div>
-          );
-        case 'PYRAMID':
-          return (
-            <div className={`${symbolClass} p-1`}>
-              <div className="bg-yellow-900/60 w-full h-full rounded-md flex items-center justify-center p-1 border border-yellow-600/50">
-                <img src={SVG_PYRAMID} alt="Pyramid" className="w-full h-full max-h-[32px] max-w-[32px]" />
-              </div>
-            </div>
-          );
-        default:
-          return (
-            <div className={symbolClass} style={{ color }}>
-              {symbol}
-            </div>
-          );
-      }
+      // Personalizar cada símbolo utilizando los iconos egipcios predefinidos
+      
+      // Verificar si el símbolo es uno de los conocidos en los mapas
+      const hasSymbol = Object.keys(EGYPT_ICON_MAP).includes(symbol);
+      
+      // Usar el símbolo correspondiente o el de libro por defecto
+      const iconSrc = hasSymbol ? EGYPT_ICON_MAP[symbol as keyof typeof EGYPT_ICON_MAP] : EGYPT_ICON_MAP['BOOK'];
+      
+      // Obtener el color de fondo apropiado
+      const bgClass = hasSymbol 
+        ? EGYPT_SYMBOL_BACKGROUNDS[symbol as keyof typeof EGYPT_SYMBOL_BACKGROUNDS] 
+        : 'bg-amber-900/60';
+      
+      // Obtener el color del borde
+      const borderClass = hasSymbol 
+        ? EGYPT_SYMBOL_BORDERS[symbol as keyof typeof EGYPT_SYMBOL_BORDERS] 
+        : 'border-yellow-600/50';
+      
+      return (
+        <div className={`${symbolClass} p-1`}>
+          <div className={`${bgClass} w-full h-full rounded-md flex items-center justify-center p-1 border ${borderClass}`}>
+            <img src={iconSrc} alt={symbol} className="w-full h-full max-h-[32px] max-w-[32px]" />
+          </div>
+        </div>
+      );
     } else {
       // Estilo estándar para otros juegos
       let color = "#FFFFFF";
       if (gameId === "fruity-fiesta") {
-        if (symbol === "7") color = "#00FFAA";
-        else if (symbol === "BAR") color = "#FF3E8F";
-        else if (symbol === "STAR") color = "#FFC700";
-        else if (symbol === "BELL") color = "#C3A3FF";
-        else if (symbol === "CHERRY") color = "#F9C846";
-        else if (symbol === "LEMON") color = "#FFFF00";
-        else if (symbol === "PLUM") color = "#D371FF";
-        else if (symbol === "WATERMELON") color = "#FF5E5E";
-        else if (symbol === "WILD") color = "#1E88E5";
-        else if (symbol === "SCATTER") color = "#FF9800";
+        if (symbol === "7") { color = "#00FFAA"; }
+        else if (symbol === "BAR") { color = "#FF3E8F"; }
+        else if (symbol === "STAR") { color = "#FFC700"; }
+        else if (symbol === "BELL") { color = "#C3A3FF"; }
+        else if (symbol === "CHERRY") { color = "#F9C846"; }
+        else if (symbol === "LEMON") { color = "#FFFF00"; }
+        else if (symbol === "PLUM") { color = "#D371FF"; }
+        else if (symbol === "WATERMELON") { color = "#FF5E5E"; }
+        else if (symbol === "WILD") { color = "#1E88E5"; }
+        else if (symbol === "SCATTER") { color = "#FF9800"; }
       }
       
       return (
@@ -534,10 +496,10 @@ export function SlotsGame() {
             {/* Decoraciones egipcias */}
             <div className="absolute inset-0 flex justify-between pointer-events-none" style={{zIndex: 10}}>
               <div className="h-full w-[120px] flex items-center justify-center">
-                <img src="/images/slots/egyptian-statue-left.svg" alt="Egyptian statue" className="h-full opacity-80" />
+                <img src={SVG_EGYPTIAN_STATUE_LEFT} alt="Egyptian statue" className="h-full opacity-80" />
               </div>
               <div className="h-full w-[120px] flex items-center justify-center">
-                <img src="/images/slots/egyptian-statue-right.svg" alt="Egyptian statue" className="h-full opacity-80" />
+                <img src={SVG_EGYPTIAN_STATUE_RIGHT} alt="Egyptian statue" className="h-full opacity-80" />
               </div>
             </div>
             
