@@ -399,9 +399,9 @@ export default function SportsBettingPage() {
             </div>
             
             {/* Sports Categories Scrollable Bar */}
-            <div className="mb-8 bg-[#0e1824] border border-[#1c2b3a] rounded-md overflow-hidden">
-              <ScrollArea className="w-full">
-                <div className="flex items-center p-1 gap-1">
+            <div className="mb-8 bg-[#0e1824] border border-[#1c2b3a] rounded-md overflow-x-hidden">
+              <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="flex items-center p-1 gap-1 min-w-max">
                   <div 
                     className={`flex flex-col items-center py-2 px-3 cursor-pointer min-w-[65px] ${activeSport === 'all' ? 'text-[#09b66d]' : 'text-gray-400'}`}
                     onClick={() => setActiveSport('all')}
@@ -440,7 +440,7 @@ export default function SportsBettingPage() {
                     );
                   })}
                 </div>
-              </ScrollArea>
+              </div>
             </div>
             
             {/* Upcoming Events Section */}
