@@ -41,6 +41,7 @@ export interface IStorage {
   // Game history operations
   createGameHistory(history: InsertGameHistory): Promise<GameHistory>;
   getUserGameHistory(userId: number): Promise<GameHistory[]>;
+  updateGameResult(id: number, result: { result: string, win: boolean, winAmount: number }): Promise<GameHistory | undefined>;
   
   // KYC operations
   createKycDocument(document: InsertKycDocument): Promise<KycDocument>;
@@ -356,6 +357,7 @@ export class MemStorage implements IStorage {
       ...insertGameHistory, 
       id, 
       createdAt: now,
+      gameId: insertGameHistory.gameId || null,
       multiplier: insertGameHistory.multiplier || null
     };
     this.gameHistories.set(id, history);
@@ -366,6 +368,21 @@ export class MemStorage implements IStorage {
     return Array.from(this.gameHistories.values())
       .filter((history) => history.userId === userId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+  
+  async updateGameResult(id: number, result: { result: string, win: boolean, winAmount: number }): Promise<GameHistory | undefined> {
+    const gameHistory = this.gameHistories.get(id);
+    if (!gameHistory) return undefined;
+    
+    const updatedGameHistory = {
+      ...gameHistory,
+      outcome: result.result,
+      win: result.win,
+      winAmount: result.winAmount
+    };
+    
+    this.gameHistories.set(id, updatedGameHistory);
+    return updatedGameHistory;
   }
   
   // KYC document methods

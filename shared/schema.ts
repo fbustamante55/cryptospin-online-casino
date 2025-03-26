@@ -50,7 +50,7 @@ export const transactions = pgTable("transactions", {
   userId: integer("user_id").notNull().references(() => users.id),
   amount: integer("amount").notNull(),
   type: text("type").notNull(), // deposit, withdraw, bet, win
-  gameType: text("game_type"), // slots, dice, crash
+  gameType: text("game_type"), // slots, dice, crash, roulette, blackjack, keno, baccarat
   gameData: jsonb("game_data"), // Additional data for transactions
   createdAt: timestamp("created_at").notNull().defaultNow()
 });
@@ -58,7 +58,8 @@ export const transactions = pgTable("transactions", {
 export const gameHistory = pgTable("game_history", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
-  gameType: text("game_type").notNull(), // slots, dice, crash
+  gameType: text("game_type").notNull(), // slots, dice, crash, roulette, blackjack, keno, baccarat
+  gameId: text("game_id"), // Specific game ID (slotopol, bookofra, etc.)
   bet: integer("bet").notNull(),
   outcome: text("outcome").notNull(), // JSON string with game-specific outcome details
   multiplier: doublePrecision("multiplier"), // For crash, dice games
@@ -144,6 +145,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).pick({
 export const insertGameHistorySchema = createInsertSchema(gameHistory).pick({
   userId: true,
   gameType: true,
+  gameId: true,
   bet: true,
   outcome: true,
   multiplier: true,
