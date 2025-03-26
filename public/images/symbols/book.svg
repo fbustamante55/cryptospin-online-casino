@@ -1,43 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
-  <!-- Libro cerrado (base) -->
-  <rect x="5" y="8" width="20" height="14" rx="1" fill="#002a5e" stroke="#ffc700" stroke-width="1"/>
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="20" cy="20" r="19" fill="#63473D" stroke="#f7cc4f" stroke-width="1"/>
   
-  <!-- Cubierta del libro -->
-  <rect x="5" y="8" width="20" height="3" rx="1" fill="#00316b" stroke="#ffc700" stroke-width="1"/>
-  <rect x="5" y="19" width="20" height="3" rx="1" fill="#00316b" stroke="#ffc700" stroke-width="1"/>
-  
-  <!-- Divisiones de páginas -->
-  <path d="M5,12 L25,12" stroke="#ffc700" stroke-width="0.5"/>
-  <path d="M5,16 L25,16" stroke="#ffc700" stroke-width="0.5"/>
-  
-  <!-- Símbolo de ojo egipcio (Ojo de Horus) en la portada -->
-  <path d="M10,10 
-           C12,8 18,8 20,10
-           C19,12 11,12 10,10Z"
-        fill="#ffc700" stroke="#ffd700" stroke-width="0.3"/>
-  <circle cx="15" cy="10" r="1" fill="#00316b"/>
-  <path d="M16,10 L18,6" stroke="#ffc700" stroke-width="0.5"/>
-  <path d="M14,10 L12,6" stroke="#ffc700" stroke-width="0.5"/>
-  
-  <!-- Detalle decorativo en el centro -->
-  <circle cx="15" cy="14" r="3" fill="#002a5e" stroke="#ffc700" stroke-width="0.8"/>
-  <circle cx="15" cy="14" r="2" fill="#00316b" stroke="#ffc700" stroke-width="0.3"/>
-  <path d="M13,14 L17,14" stroke="#ffc700" stroke-width="0.5"/>
-  <path d="M15,12 L15,16" stroke="#ffc700" stroke-width="0.5"/>
-  
-  <!-- Texto simulado (jeroglíficos) -->
-  <path d="M8,20 L10,20" stroke="#ffc700" stroke-width="0.5"/>
-  <path d="M12,20 L14,20" stroke="#ffc700" stroke-width="0.5"/>
-  <path d="M16,20 L18,20" stroke="#ffc700" stroke-width="0.5"/>
-  <path d="M20,20 L22,20" stroke="#ffc700" stroke-width="0.5"/>
-  
-  <!-- Brillo dorado -->
-  <circle cx="8" cy="10" r="0.5" fill="#ffd700"/>
-  <circle cx="22" cy="10" r="0.5" fill="#ffd700"/>
-  <circle cx="8" cy="20" r="0.5" fill="#ffd700"/>
-  <circle cx="22" cy="20" r="0.5" fill="#ffd700"/>
-  
-  <!-- Resplandor mágico -->
-  <ellipse cx="15" cy="14" rx="7" ry="5" fill="#ffc700" opacity="0.2"/>
+  <!-- Libro abierto -->
+  <g>
+    <!-- Página izquierda -->
+    <path d="M6,14 
+             C6,28 17,28 19,28
+             L19,10
+             C17,10 6,10 6,14Z" 
+          fill="#fff8e1" stroke="#f7cc4f" stroke-width="1"/>
+          
+    <!-- Página derecha -->
+    <path d="M34,14 
+             C34,28 23,28 21,28
+             L21,10
+             C23,10 34,10 34,14Z" 
+          fill="#fff8e1" stroke="#f7cc4f" stroke-width="1"/>
+    
+    <!-- Líneas del libro -->
+    <path d="M11,16 L17,16 M11,19 L17,19 M11,22 L17,22 M11,25 L15,25" 
+          stroke="#382518" stroke-width="0.8" fill="none"/>
+    <path d="M23,16 L29,16 M23,19 L29,19 M23,22 L29,22 M25,25 L29,25" 
+          stroke="#382518" stroke-width="0.8" fill="none"/>
+    
+    <!-- Símbolo en el centro -->
+    <path d="M20,15 
+             L20,23" 
+          stroke="#f7cc4f" stroke-width="1.5" fill="none"/>
+    
+    <!-- Círculo dorado en el centro (Ojo de Horus) -->
+    <circle cx="20" cy="18" r="3" fill="#f7cc4f"/>
+    <path d="M17,18 L23,18" stroke="#382518" stroke-width="0.8"/>
+    <path d="M20,15 L20,21" stroke="#382518" stroke-width="0.8"/>
+    
+    <!-- Cobertura del libro -->
+    <rect x="6" y="7" width="28" height="3" fill="#8b5d3b" stroke="#f7cc4f" stroke-width="1"/>
+    <rect x="6" y="28" width="28" height="5" fill="#8b5d3b" stroke="#f7cc4f" stroke-width="1"/>
+    
+    <!-- Cierres del libro -->
+    <path d="M8,7 L8,33 M32,7 L32,33" stroke="#f7cc4f" stroke-width="0.8"/>
+    <rect x="7" y="8" width="2" height="22" fill="#8b5d3b"/>
+    <rect x="31" y="8" width="2" height="22" fill="#8b5d3b"/>
+  </g>
 </svg>

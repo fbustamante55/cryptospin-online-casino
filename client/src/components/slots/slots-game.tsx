@@ -35,17 +35,18 @@ const DEFAULT_SYMBOL_COLORS = {
 };
 
 // Símbolos específicos para Book of Egypt
-const EGYPT_SYMBOLS = ["BOOK", "PHARAOH", "ANKH", "EYE", "A", "K", "Q", "J", "10"];
+const EGYPT_SYMBOLS = ["BOOK", "PHARAOH", "ANKH", "EYE", "SCARAB", "PYRAMID", "WILD", "SCATTER", "STAR", "SUN"];
 const EGYPT_SYMBOL_COLORS = {
   "BOOK": "#FFC700",
   "PHARAOH": "#F9C846",
   "ANKH": "#00FFAA",
   "EYE": "#FF3E8F",
-  "A": "#C3A3FF",
-  "K": "#00FFAA",
-  "Q": "#FF3E8F",
-  "J": "#FFC700",
-  "10": "#C3A3FF"
+  "SCARAB": "#C3A3FF",
+  "PYRAMID": "#F9C846",
+  "WILD": "#1E88E5",
+  "SCATTER": "#FF9800",
+  "STAR": "#FFC700",
+  "SUN": "#FF5E5E"
 };
 
 // Símbolos de 50 Gems
@@ -330,7 +331,8 @@ export function SlotsGame() {
 
   const handleBetChange = (value: number) => {
     if (!isSpinning) {
-      setBet(Math.max(10, Math.min(10000, value)));
+      // Establecer apuesta mínima a 0.5 centavos (0.005)
+      setBet(Math.max(0.5, Math.min(1000, value)));
     }
   };
 
@@ -350,21 +352,53 @@ export function SlotsGame() {
       const symbolClass = `flex items-center justify-center font-bold text-lg h-[40px]`;
       const color = gameConfig.symbolColors[symbol as keyof typeof EGYPT_SYMBOL_COLORS] || "#FFFFFF";
 
-      // Personalizar cada símbolo para que se parezca a la referencia
+      // Personalizar cada símbolo para que se parezca a la referencia con imágenes SVG
       switch (symbol) {
         case 'BOOK':
           return (
             <div className={symbolClass} style={{ color: "#FFC700" }}>
-              <span className="relative px-2 py-1 rounded-sm border border-yellow-600 bg-blue-900/30">
-                BOOK
+              <span className="relative px-1 py-1 rounded-sm bg-blue-900/30">
+                <img src="/images/symbols/book.svg" alt="Book" className="h-[30px] w-[30px]" />
               </span>
             </div>
           );
         case 'PHARAOH':
           return (
             <div className={symbolClass} style={{ color: "#F9C846" }}>
-              <span className="relative px-1 py-1 rounded-sm text-yellow-200 font-bold text-xl">
+              <span className="relative px-1 py-1 rounded-sm">
                 <img src="/images/symbols/pharaoh.svg" alt="Pharaoh" className="h-[30px] w-[30px]" />
+              </span>
+            </div>
+          );
+        case 'ANKH':
+          return (
+            <div className={symbolClass} style={{ color }}>
+              <span className="relative px-1 py-1 rounded-sm">
+                <img src="/images/symbols/ankh-symbol.svg" alt="Ankh" className="h-[30px] w-[30px]" />
+              </span>
+            </div>
+          );
+        case 'EYE':
+          return (
+            <div className={symbolClass} style={{ color }}>
+              <span className="relative px-1 py-1 rounded-sm">
+                <img src="/images/symbols/eye-of-horus.svg" alt="Eye of Horus" className="h-[30px] w-[30px]" />
+              </span>
+            </div>
+          );
+        case 'SCARAB':
+          return (
+            <div className={symbolClass} style={{ color }}>
+              <span className="relative px-1 py-1 rounded-sm">
+                <img src="/images/symbols/scarab.svg" alt="Scarab" className="h-[30px] w-[30px]" />
+              </span>
+            </div>
+          );
+        case 'PYRAMID':
+          return (
+            <div className={symbolClass} style={{ color }}>
+              <span className="relative px-1 py-1 rounded-sm">
+                <img src="/images/symbols/pyramid.svg" alt="Pyramid" className="h-[30px] w-[30px]" />
               </span>
             </div>
           );
@@ -397,7 +431,7 @@ export function SlotsGame() {
           <div className="flex justify-between mb-4">
             <div className="px-3 py-1.5 rounded-lg bg-amber-950/80 text-sm border border-yellow-700">
               <span className="text-amber-300">{t("balance")}:</span>
-              <span className="text-white font-medium ml-1">€ {user?.balance.toFixed(2) || 0}</span>
+              <span className="text-white font-medium ml-1">$ {user?.balance.toFixed(2) || 0}</span>
             </div>
             <AnimatePresence>
               {showWin && (
@@ -408,7 +442,7 @@ export function SlotsGame() {
                   className="px-3 py-1.5 rounded-lg bg-amber-950/80 text-sm border border-yellow-700"
                 >
                   <span className="text-amber-300">{t("win")}:</span>
-                  <span className="text-yellow-300 font-medium ml-1">€ {winAmount.toFixed(2)}</span>
+                  <span className="text-yellow-300 font-medium ml-1">$ {winAmount.toFixed(2)}</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -506,7 +540,7 @@ export function SlotsGame() {
                       <Minus className="h-3 w-3" />
                     </Button>
                     <div className="text-center py-1 px-2 bg-amber-950/40 text-white font-medium">
-                      € {bet.toFixed(2)}
+                      $ {bet.toFixed(2)}
                     </div>
                     <Button 
                       variant="ghost" 
@@ -550,7 +584,7 @@ export function SlotsGame() {
                 
                 <div className="text-sm flex flex-col items-end ml-1">
                   <span className="text-amber-300 text-xs">TOTAL WIN:</span>
-                  <span className="text-white font-medium">€ {winAmount.toFixed(2)}</span>
+                  <span className="text-white font-medium">$ {winAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
