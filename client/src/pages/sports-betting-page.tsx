@@ -415,7 +415,7 @@ export default function SportsBettingPage() {
               
               {/* Menú desplegable de selección de moneda */}
               {isWalletOpen && (
-                <div className="absolute top-12 bg-[#0e1824] border border-[#1c2b3a] rounded-lg shadow-lg w-60 z-50">
+                <div className="absolute top-12 bg-[#0e1824] border border-[#1c2b3a] rounded-lg shadow-lg w-60 z-[100]">
                   {/* Buscador */}
                   <div className="p-3 border-b border-[#1c2b3a]">
                     <div className="flex items-center bg-[#192531] rounded-md px-3 py-2">
