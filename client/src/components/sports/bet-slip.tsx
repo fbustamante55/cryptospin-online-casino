@@ -1,11 +1,15 @@
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatAmericanOdds } from '@/lib/sports-api';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trash2, X, RefreshCw, ChevronsUpDown, ChevronDown, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { formatAmericanOdds } from "@/lib/sports-api";
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 
 export interface BetSelection {
   id: string;
@@ -28,34 +32,33 @@ interface BetSlipProps {
 
 export function BetSlip({ selections, onRemoveSelection, onClearSelections }: BetSlipProps) {
   const { t } = useTranslation();
-  const [betAmount, setBetAmount] = useState<string>('10');
-  const [collapsed, setCollapsed] = useState<boolean>(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [betAmount, setBetAmount] = useState<string>("10");
+  const [isProcessing, setIsProcessing] = useState(false);
   
-  // Calculate potential winnings 
-  const calculateSingleWinnings = (amount: number, odds: number): number => {
+  // Calculate the total odds for a parlay bet
+  const calculateParlayOdds = (): number => {
+    if (selections.length === 0) return 0;
+    return selections.reduce((total, bet) => total * bet.odds, 1);
+  };
+  
+  // Calculate the potential win based on bet amount and odds
+  const calculatePotentialWin = (amount: number, odds: number): number => {
+    if (odds <= 0) return 0;
     return amount * odds;
   };
   
-  // Calculate combined bet winnings
-  const calculateCombinedWinnings = (amount: number): number => {
-    if (selections.length === 0) return 0;
-    
-    // Multiply all odds
-    const combinedOdds = selections.reduce((total, bet) => total * bet.odds, 1);
-    return amount * combinedOdds;
-  };
+  // Get the potential win amount
+  const potentialWin = parseFloat(betAmount) > 0 
+    ? calculatePotentialWin(parseFloat(betAmount), calculateParlayOdds())
+    : 0;
   
-  // Determine if there are conflicting selections (same event)
-  const hasConflictingSelections = (): boolean => {
-    const eventIds = selections.map(bet => bet.eventId);
-    return eventIds.length !== new Set(eventIds).size;
-  };
-  
-  // Format the bet type for display
+  // Format the bet type description
   const formatBetType = (bet: BetSelection): string => {
     switch (bet.marketType) {
       case 'moneyline':
-        return bet.selectedTeam;
+        return bet.selectedTeam === 'Draw' ? t('sports.draw') : bet.selectedTeam;
       case 'spread':
         return `${bet.selectedTeam} ${bet.point && bet.point > 0 ? '+' : ''}${bet.point}`;
       case 'total':
@@ -65,146 +68,304 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     }
   };
   
-  const getNumericBetAmount = (): number => {
-    const amount = parseFloat(betAmount);
-    return isNaN(amount) ? 0 : amount;
-  };
-  
-  // Format numbers with commas and 2 decimal places if needed
-  const formatCurrency = (amount: number): string => {
-    return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // Handle placing a bet
+  const handlePlaceBet = async () => {
+    if (!user) {
+      toast({
+        title: t('errors.notLoggedIn'),
+        description: t('errors.loginToPlaceBets'),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (parseFloat(betAmount) <= 0) {
+      toast({
+        title: t('errors.invalidBetAmount'),
+        description: t('errors.enterPositiveBetAmount'),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (user.balance < parseFloat(betAmount)) {
+      toast({
+        title: t('errors.insufficientBalance'),
+        description: t('errors.pleaseDeposit'),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (selections.length === 0) {
+      toast({
+        title: t('errors.noBetsSelected'),
+        description: t('errors.selectBetsFirst'),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setIsProcessing(true);
+      
+      // For now, we'll just show a success message since we don't have a real API endpoint yet
+      // In a real implementation, we would send the bet data to the server
+      /*
+      const response = await apiRequest({
+        url: '/api/sports/place-bet',
+        method: 'POST',
+        data: {
+          betAmount: parseFloat(betAmount),
+          selections,
+          type: selections.length > 1 ? 'parlay' : 'single'
+        }
+      });
+      */
+      
+      // Mock success for now
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: t('sports.betPlaced'),
+        description: selections.length > 1 
+          ? t('sports.parlayBetPlaced', { count: selections.length }) 
+          : t('sports.singleBetPlaced'),
+      });
+      
+      // Clear selections after successful bet
+      onClearSelections();
+      
+      // Update user balance - in a real implementation, this would come from the API response
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      
+    } catch (error) {
+      toast({
+        title: t('errors.betFailed'),
+        description: (error as Error).message || t('errors.tryAgainLater'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
   
   return (
-    <Card className="bg-[#192531] border-[#1c2b3a] sticky top-4">
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold">{t('sports.betSlip')}</h3>
-          <div className="flex items-center">
-            {selections.length > 0 && (
-              <button
-                onClick={onClearSelections}
-                className="mr-2 text-gray-400 hover:text-red-500"
-                title={t('sports.clearAll')}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            )}
-            <button
-              onClick={() => setCollapsed(!collapsed)}
-              className="text-gray-400 hover:text-white"
-            >
-              {collapsed ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
+    <Card className="bg-[#192531] border-[#1c2b3a] overflow-hidden">
+      <Tabs defaultValue="betslip" className="w-full">
+        <TabsList className="w-full grid grid-cols-3 bg-[#0e1824] rounded-none h-auto p-0">
+          <TabsTrigger 
+            value="betslip" 
+            className="rounded-none py-3 data-[state=active]:bg-[#192531] data-[state=active]:text-white"
+          >
+            {t('sports.betSlip')} {selections.length > 0 && `(${selections.length})`}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="mybets" 
+            className="rounded-none py-3 data-[state=active]:bg-[#192531] data-[state=active]:text-white"
+          >
+            {t('sports.myBets')}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="history" 
+            className="rounded-none py-3 data-[state=active]:bg-[#192531] data-[state=active]:text-white"
+          >
+            {t('sports.history')}
+          </TabsTrigger>
+        </TabsList>
         
-        {!collapsed && (
-          <>
-            {selections.length === 0 ? (
-              <div className="py-8 text-center text-gray-400">
-                <p>{t('sports.noBetsSelected')}</p>
-                <p className="text-sm mt-2">{t('sports.selectOddsToAddBets')}</p>
+        <TabsContent value="betslip" className="p-0 m-0">
+          {/* Header with slip options */}
+          {selections.length > 0 && (
+            <div className="flex items-center justify-between p-3 border-b border-[#1c2b3a]">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs text-white/70 hover:text-white"
+                onClick={onClearSelections}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                {t('buttons.removeAll')}
+              </Button>
+              
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-white/70 hover:text-white"
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  {t('buttons.refresh')}
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-white/70 hover:text-white"
+                >
+                  <ChevronsUpDown className="h-3.5 w-3.5 mr-1.5" />
+                  {t('buttons.odds')}
+                </Button>
               </div>
-            ) : (
-              <div className="space-y-3 mb-4">
-                {selections.map((bet) => (
-                  <div key={bet.id} className="bg-[#1c2b3a] rounded-md p-3 relative">
-                    <button
+            </div>
+          )}
+          
+          {/* Bet selections */}
+          {selections.length > 0 ? (
+            <div className="px-4 py-3">
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {selections.map(bet => (
+                  <div 
+                    key={bet.id} 
+                    className="p-3 bg-[#0e1824] rounded-md relative"
+                  >
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
                       onClick={() => onRemoveSelection(bet.id)}
-                      className="absolute top-2 right-2 text-gray-400 hover:text-red-400"
+                      className="absolute right-1 top-1 h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-transparent"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                     
-                    <div className="mb-2">
-                      <Badge variant="outline" className="text-xs bg-transparent">
-                        {bet.sportTitle}
-                      </Badge>
-                      <Badge variant="outline" className="ml-2 text-xs bg-transparent">
-                        {bet.marketType}
-                      </Badge>
+                    <div className="text-xs text-white/70 mb-1">
+                      {bet.sportTitle}
                     </div>
                     
-                    <div className="text-sm mb-1">{bet.homeTeam} vs {bet.awayTeam}</div>
+                    <div className="text-sm font-medium mb-1">
+                      {bet.homeTeam} vs {bet.awayTeam}
+                    </div>
                     
-                    <div className="flex justify-between items-center">
-                      <div className="font-medium">{formatBetType(bet)}</div>
-                      <div className="text-[#09b66d]">{formatAmericanOdds(bet.odds)}</div>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="px-2 py-1 bg-[#09b66d] rounded text-xs font-medium text-white">
+                        {formatBetType(bet)}
+                      </div>
+                      
+                      <div className="text-sm font-bold">
+                        {formatAmericanOdds(bet.odds)}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
-            
-            {selections.length > 0 && (
+              
+              {/* Bet amount input */}
               <div className="mt-4">
-                <div className="mb-3">
-                  <label htmlFor="bet-amount" className="block text-sm font-medium mb-1">
-                    {t('sports.betAmount')}
-                  </label>
-                  <Input
-                    id="bet-amount"
-                    type="number"
-                    min="1"
-                    value={betAmount}
-                    onChange={(e) => setBetAmount(e.target.value)}
-                    className="bg-[#1c2b3a] border-[#293b52] text-white"
-                  />
-                </div>
-                
-                <div className="space-y-2 mb-4">
-                  {selections.length === 1 && (
-                    <div className="flex justify-between text-sm">
-                      <span>{t('sports.potentialWin')}:</span>
-                      <span className="font-medium">{formatCurrency(calculateSingleWinnings(getNumericBetAmount(), selections[0].odds))}</span>
-                    </div>
-                  )}
-                  
-                  {selections.length > 1 && !hasConflictingSelections() && (
-                    <>
-                      <div className="flex justify-between text-sm">
-                        <span>{t('sports.totalOdds')}:</span>
-                        <span className="font-medium">{formatAmericanOdds(selections.reduce((total, bet) => total * bet.odds, 1))}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>{t('sports.potentialWin')}:</span>
-                        <span className="font-medium">{formatCurrency(calculateCombinedWinnings(getNumericBetAmount()))}</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {hasConflictingSelections() && (
-                    <div className="text-yellow-400 text-sm">
-                      {t('sports.conflictingSelections')}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  {selections.length === 1 && (
-                    <Button className="w-full bg-[#09b66d] hover:bg-[#08a562]">
-                      {t('sports.placeBet')}
-                    </Button>
-                  )}
-                  
-                  {selections.length > 1 && !hasConflictingSelections() && (
-                    <Button className="w-full bg-[#09b66d] hover:bg-[#08a562]">
-                      {t('sports.placeCombinedBet')}
-                    </Button>
-                  )}
-                  
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">{t('sports.betAmount')}</span>
                   {selections.length > 1 && (
-                    <Button variant="outline" className="w-full border-[#293b52]">
-                      {t('sports.placeSeparateBets')}
-                    </Button>
+                    <div className="flex items-center text-xs text-white/70">
+                      <span>{t('sports.parlayOdds')}:</span>
+                      <span className="ml-1 font-bold">{formatAmericanOdds(calculateParlayOdds())}</span>
+                    </div>
                   )}
                 </div>
+                
+                <div className="flex gap-2 mb-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    onClick={() => setBetAmount("10")}
+                  >
+                    10
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    onClick={() => setBetAmount("25")}
+                  >
+                    25
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    onClick={() => setBetAmount("50")}
+                  >
+                    50
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    onClick={() => setBetAmount("100")}
+                  >
+                    100
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                    onClick={() => setBetAmount((user?.balance || 0).toString())}
+                  >
+                    Max
+                  </Button>
+                </div>
+                
+                <div className="relative mb-4">
+                  <Input 
+                    type="number" 
+                    value={betAmount} 
+                    onChange={(e) => setBetAmount(e.target.value)}
+                    className="bg-[#0e1824] border-[#1c2b3a] text-white pr-16"
+                    placeholder="0"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-white/70">
+                    USD
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm">{t('sports.potentialWin')}</span>
+                  <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} USD</span>
+                </div>
+                
+                <Button 
+                  className="w-full bg-[#09b66d] hover:bg-[#0fda85] text-white"
+                  onClick={handlePlaceBet}
+                  disabled={selections.length === 0 || isProcessing || parseFloat(betAmount) <= 0}
+                >
+                  {isProcessing ? t('buttons.processing') : (
+                    selections.length > 1 
+                      ? t('buttons.placeParlayBet') 
+                      : t('buttons.placeBet')
+                  )}
+                </Button>
               </div>
-            )}
-          </>
-        )}
-      </div>
+            </div>
+          ) : (
+            <div className="p-6 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
+                <Plus className="h-8 w-8 text-white/30" />
+              </div>
+              <h3 className="text-lg font-medium mb-1">{t('sports.betSlipEmpty')}</h3>
+              <p className="text-sm text-white/70 mb-4">{t('sports.selectOddsToAddBets')}</p>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="mybets" className="p-0 m-0">
+          <div className="p-6 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
+              <ChevronDown className="h-8 w-8 text-white/30" />
+            </div>
+            <h3 className="text-lg font-medium mb-1">{t('sports.noBets')}</h3>
+            <p className="text-sm text-white/70 mb-4">{t('sports.placeBetsToView')}</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="history" className="p-0 m-0">
+          <div className="p-6 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
+              <ChevronDown className="h-8 w-8 text-white/30" />
+            </div>
+            <h3 className="text-lg font-medium mb-1">{t('sports.noHistory')}</h3>
+            <p className="text-sm text-white/70 mb-4">{t('sports.betHistoryWillAppear')}</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </Card>
   );
 }
