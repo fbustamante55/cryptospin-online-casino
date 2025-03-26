@@ -197,26 +197,46 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
   return (
     <Card className="bg-[#192531] border-[#1c2b3a] overflow-hidden">
       <Tabs defaultValue="betslip" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 bg-[#0e1824] rounded-none h-auto p-0">
-          <TabsTrigger 
-            value="betslip" 
-            className="rounded-none py-3 data-[state=active]:bg-[#192531] data-[state=active]:text-white"
-          >
-            {t('sports.betSlip')} {selections.length > 0 && `(${selections.length})`}
-          </TabsTrigger>
-          <TabsTrigger 
-            value="mybets" 
-            className="rounded-none py-3 data-[state=active]:bg-[#192531] data-[state=active]:text-white"
-          >
-            {t('sports.myBets')}
-          </TabsTrigger>
-          <TabsTrigger 
-            value="history" 
-            className="rounded-none py-3 data-[state=active]:bg-[#192531] data-[state=active]:text-white"
-          >
-            {t('sports.history')}
-          </TabsTrigger>
-        </TabsList>
+        <div className="border-b border-[#1c2b3a]">
+          <TabsList className="w-full flex bg-transparent rounded-none h-auto p-0 border-none">
+            <TabsTrigger 
+              value="betslip" 
+              className="flex-1 rounded-none py-3 text-sm font-medium
+                bg-transparent text-white/70 border-b-2 border-transparent
+                data-[state=active]:bg-transparent data-[state=active]:border-[#09b66d]
+                data-[state=active]:text-white transition-all duration-200
+                hover:text-white focus:text-white"
+            >
+              <span className="flex items-center justify-center">
+                {t('sports.betSlip')} {selections.length > 0 && (
+                  <span className="ml-1.5 px-1.5 py-0.5 bg-[#09b66d] text-white text-xs rounded-full">
+                    {selections.length}
+                  </span>
+                )}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="mybets" 
+              className="flex-1 rounded-none py-3 text-sm font-medium
+                bg-transparent text-white/70 border-b-2 border-transparent
+                data-[state=active]:bg-transparent data-[state=active]:border-[#09b66d]
+                data-[state=active]:text-white transition-all duration-200
+                hover:text-white focus:text-white"
+            >
+              {t('sports.myBets')}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="history" 
+              className="flex-1 rounded-none py-3 text-sm font-medium
+                bg-transparent text-white/70 border-b-2 border-transparent
+                data-[state=active]:bg-transparent data-[state=active]:border-[#09b66d]
+                data-[state=active]:text-white transition-all duration-200
+                hover:text-white focus:text-white"
+            >
+              {t('sports.history')}
+            </TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value="betslip" className="p-0 m-0">
           {/* Header with slip options */}
