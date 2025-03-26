@@ -40,6 +40,17 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     return localStorage.getItem('selectedCurrency') || "USDT";
   });
   
+  // Estado para la configuración del monedero
+  const [walletSettings, setWalletSettings] = useState<{
+    hideZeroBalances: boolean;
+    showFiatEquivalent: boolean;
+    selectedFiat: string;
+  }>({
+    hideZeroBalances: localStorage.getItem('walletSettings.hideZeroBalances') === 'true',
+    showFiatEquivalent: localStorage.getItem('walletSettings.showFiatEquivalent') !== 'false',
+    selectedFiat: localStorage.getItem('walletSettings.selectedFiat') || 'USD'
+  });
+  
   // Obtener la moneda seleccionada del localStorage cuando se monta el componente
   useEffect(() => {
     const savedCurrency = localStorage.getItem('selectedCurrency');
@@ -62,6 +73,24 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     };
   }, []);
   
+  // Escuchar cambios en la configuración del monedero
+  useEffect(() => {
+    const handleSettingsChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        hideZeroBalances: boolean;
+        showFiatEquivalent: boolean;
+        selectedFiat: string;
+      }>;
+      setWalletSettings(customEvent.detail);
+    };
+    
+    document.addEventListener('walletSettingsChanged', handleSettingsChange as EventListener);
+    
+    return () => {
+      document.removeEventListener('walletSettingsChanged', handleSettingsChange as EventListener);
+    };
+  }, []);
+  
   // Calculate the total odds for a parlay bet
   const calculateParlayOdds = (): number => {
     if (selections.length === 0) return 0;
@@ -79,7 +108,48 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     ? calculatePotentialWin(parseFloat(betAmount), calculateParlayOdds())
     : 0;
   
+  // Función para convertir importes de criptomonedas a fiat
+  const convertCryptoToFiat = (amount: number, crypto: string, fiat: string = 'USD'): number => {
+    // Aquí se usarían tasas reales de una API. Por ahora, usamos tasas ficticias
+    const rates: Record<string, Record<string, number>> = {
+      'BTC': { 'USD': 65000, 'EUR': 60000, 'JPY': 9800000, 'GBP': 51000 },
+      'ETH': { 'USD': 3500, 'EUR': 3200, 'JPY': 530000, 'GBP': 2700 },
+      'USDT': { 'USD': 1, 'EUR': 0.92, 'JPY': 150, 'GBP': 0.78 },
+      'DOGE': { 'USD': 0.12, 'EUR': 0.11, 'JPY': 18, 'GBP': 0.094 },
+      'SOL': { 'USD': 150, 'EUR': 139, 'JPY': 22500, 'GBP': 118 },
+      'USDC': { 'USD': 1, 'EUR': 0.92, 'JPY': 150, 'GBP': 0.78 },
+    };
+    
+    const cryptoUpper = crypto.toUpperCase();
+    const fiatUpper = fiat.toUpperCase();
+    
+    // Si no tenemos la tasa para la combinación específica, devolvemos 0
+    if (!rates[cryptoUpper] || !rates[cryptoUpper][fiatUpper]) {
+      return 0;
+    }
+    
+    return amount * rates[cryptoUpper][fiatUpper];
+  };
+  
   // Format the bet type description
+  // Obtener el símbolo de moneda fiat
+  const getFiatSymbol = (currency: string): string => {
+    const symbols: Record<string, string> = {
+      'USD': '$',
+      'EUR': '€',
+      'JPY': '¥',
+      'GBP': '£',
+      'AUD': 'A$',
+      'CAD': 'C$',
+      'CHF': 'Fr',
+      'CNY': '¥',
+      'HKD': 'HK$',
+      'MXN': 'Mex$',
+    };
+    
+    return symbols[currency.toUpperCase()] || currency;
+  };
+  
   const formatBetType = (bet: BetSelection): string => {
     switch (bet.marketType) {
       case 'moneyline':
@@ -255,6 +325,24 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 )}
               </div>
               
+              {/* Mostrar el equivalente en fiat cuando la opción está activada */}
+              {walletSettings.showFiatEquivalent && (
+                <div className="relative mb-2">
+                  <div className="bg-[#0e1824] border border-[#1c2b3a] rounded-md py-2 px-3 text-white/70 text-sm flex justify-between items-center">
+                    <span>Equivale a:</span>
+                    <span className="font-medium">
+                      {getFiatSymbol(walletSettings.selectedFiat)}
+                      {convertCryptoToFiat(
+                        parseFloat(betAmount) || 0, 
+                        selectedCurrency, 
+                        walletSettings.selectedFiat
+                      ).toFixed(2)} 
+                      {walletSettings.selectedFiat}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               <div className="relative mb-4">
                 <Input 
                   type="number" 
@@ -271,7 +359,20 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
               
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm">Ganancias potenciales</span>
-                <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} {selectedCurrency}</span>
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} {selectedCurrency}</span>
+                  {walletSettings.showFiatEquivalent && (
+                    <span className="text-xs text-white/70">
+                      {getFiatSymbol(walletSettings.selectedFiat)}
+                      {convertCryptoToFiat(
+                        potentialWin, 
+                        selectedCurrency, 
+                        walletSettings.selectedFiat
+                      ).toFixed(2)} 
+                      {walletSettings.selectedFiat}
+                    </span>
+                  )}
+                </div>
               </div>
               
               <Button 
