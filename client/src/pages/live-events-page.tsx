@@ -215,7 +215,18 @@ export default function LiveEventsPage() {
   };
 
   // Banners promocionales
-  const promotions = [
+  interface PromoData {
+    id: number;
+    title: string;
+    subtitle: string;
+    action: string;
+    image: string;
+    gradient: string;
+    icon: React.ReactNode;
+    buttonColor: string;
+  }
+  
+  const promotions: PromoData[] = [
     {
       id: 1,
       title: "Potencia tus Apuestas",

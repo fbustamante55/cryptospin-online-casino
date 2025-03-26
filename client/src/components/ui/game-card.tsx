@@ -218,9 +218,8 @@ export function GameCard({
                 const isWinner = [3, 17, 33].includes(i);
                 
                 return (
-                  <>
+                  <g key={`keno-number-${i}`}>
                     <rect 
-                      key={`rect-${i}`}
                       x={x} 
                       y={y} 
                       width="24" 
@@ -231,7 +230,6 @@ export function GameCard({
                       strokeWidth="1"
                     />
                     <text 
-                      key={`text-${i}`}
                       x={x + 12} 
                       y={y + 16} 
                       textAnchor="middle" 
@@ -241,7 +239,7 @@ export function GameCard({
                     >
                       {i + 1}
                     </text>
-                  </>
+                  </g>
                 );
               })}
               

@@ -1,0 +1,77 @@
+Odds Widget Docs V1
+Feedback
+
+The Odds Widget has recently launched. We'd love to hear your thoughts, including usability, new feature requests, latency, and pricing feedback. Contact us at team@the-odds-api.com
+
+#Overview
+The odds widget lets you add recent odds to your website, along with your own bookmaker affiliate links and without the need for code. Odds are available for several sports and bookmakers.
+
+#Getting started
+Sign up for a free subscription to get an access key. Widget subscriptions can be found on the accounts page.
+
+On your subscription, add your affiliate links for the bookmakers of interest
+
+Widget Affiliate Links
+
+Using the odds widget builder, construct the odds widget HTML tag by selecting the sport, bookmaker and markets of interest, as well as other parameters. Example:
+
+<iframe
+    src="https://widget.the-odds-api.com/v1/sports/americanfootball_nfl/events/?accessKey=wk_abcdef01234567890123456789012345&bookmakerKeys=draftkings&oddsFormat=american&markets=h2h,spreads,totals&marketNames=h2h:Moneyline"
+    style="width: 350px; height: 500px; border: 1px solid black;"
+></iframe>
+Copy and paste the widget HTML tag into your website. Odds will automatically come through. When a user clicks the link in the widget, it will use your affiliate link for the specified bookmaker.
+
+#The Odds Widget HTML Tag
+The odds widget builder is the easiest way to construct the odds widget HTML tag. Alternatively you can use these docs to manually construct the HTML tag or to learn more about the parameters.
+
+The odds widget displays odds for live and upcoming games (events) for a given sport and bookmaker. An HTML iframe tag uses the following url format in its src attribute:
+
+https://widget.the-odds-api.com/v1/sports/{sportKey}/events/?accessKey={accessKey}&bookmakerKeys={bookmakerKeys}&oddsFormat={oddsFormat}&markets={markets}&marketNames={marketNames}
+#Path Parameters
+sportKey   Specifies the league or competition for which games are returned. A list of available sport keys can be found here. Tournaments with futures (outright) odds are not supported in the widget at this time.
+#Query Parameters
+accessKey   An access key that comes with a widget subscription. The widget access key starts with wk_
+
+bookmakerKeys   The bookmaker key whose odds and affiliate link are to be displayed in the widget. Currently this parameter only accepts one bookmaker key. A list of valid bookmaker keys can be found here. Based on user feedback, we may allow multiple bookmakers in future.
+
+oddsFormat   Optional - Determines the format of odds in the response. Valid values are decimal and american. Defaults to decimal. When set to american, small discrepancies might exist for some bookmakers due to rounding errors.
+
+markets   Optional - A comma-separated list of odds markets to be returned. Defaults to h2h,spreads,totals. Valid markets are h2h (head-to-head or moneyline), spreads (points handicaps), totals (over/under). For more info, see descriptions of betting markets. Outrights (futures) are not yet available in the widget.
+
+marketNames   Optional - this allows you to rename markets to be more specific to the sport or your region. This parameter is a string of comma separated market:label pairs. For example, for MLB, you may wish to rename head-to-head to "Moneyline", and rename spreads to "Run Line". This can be done by setting the marketNames parameter as follows marketNames=h2h:Moneyline,spreads:Run%20Line
+
+#Examples
+#URL
+https://widget.the-odds-api.com/v1/sports/americanfootball_nfl/events/?accessKey=wk_abcdef01234567890123456789012345&bookmakerKeys=draftkings&oddsFormat=american&markets=h2h,spreads,totals&marketNames=h2h:Moneyline,spreads:Spread,totals:Total
+#HTML Tag
+<iframe
+    src="https://widget.the-odds-api.com/v1/sports/americanfootball_nfl/events/?accessKey=wk_abcdef01234567890123456789012345&bookmakerKeys=draftkings&oddsFormat=american&markets=h2h,spreads,totals&marketNames=h2h:Moneyline,spreads:Spread,totals:Total"
+    style="width: 350px; height: 500px; border: 1px solid grey;"
+></iframe>
+#Browser Concept
+Odds Widget HTML Tag
+
+#Other Widget Scenarios
+The following lists screenshots of messages that the widget will display during selected scenarios.
+
+#Access key out of usage quota
+Odds Widget HTML Tag
+
+#Games not listing
+Odds Widget HTML Tag
+
+#Games with missing markets
+Odds Widget HTML Tag
+
+#Usage Quota Costs
+Each time a widget HTML tag is loaded (typically a website visit), it will cost 1 from the usage quota.
+
+Keeping track of quota usage
+
+The usage quota can be tracked on the accounts page.
+
+#More Info
+Odds in the widget can be up to 20 minutes old (we are planning to reduce this significantly in future).
+The list of games returned in the /odds endpoint mirrors games that are listed by major bookmakers. This usually includes games for the current round
+Games may temporarily become unavailable after a round, before bookmakers begin listing the next round of games
+Games may be unavailable if the sport is not in season. For popular sports, bookmakers may begin listing round 1 games a few months in advance
