@@ -714,6 +714,24 @@ export default function SportsBettingPage() {
                               <path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="#fff" fill="#192531"/>
                               <path d="M12 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#09b66d" fill="#09b66d"/>
                             </svg>
+                          ) : sport.key === 'lacrosse' || sport.key.includes('lacrosse') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              {/* Logo de lacrosse con palo y pelota */}
+                              <path d="M6 12c5-8 12-3 12 2 0 3-4 4-6 2" stroke="#09b66d" strokeWidth="1.5"/>
+                              <path d="M6 12c0 0 2 6 10 6" stroke="#09b66d" strokeWidth="1.5"/>
+                              <path d="M18 14c0 0-4-1-6-4" stroke="#fff" strokeWidth="1.5"/>
+                              <path d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#09b66d"/>
+                              <path d="M6 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" stroke="#fff"/>
+                            </svg>
                           ) : (
                             <div className="w-4 h-4 bg-white/20 rounded-full"></div>
                           )}
