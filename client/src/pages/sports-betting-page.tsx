@@ -696,6 +696,24 @@ export default function SportsBettingPage() {
                               <path d="M18 4L20 6M20 4L18 6" stroke="#fff"/>
                               <path d="M5 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="#09b66d"/>
                             </svg>
+                          ) : sport.key === 'icehockey_nhl' || sport.key.includes('hockey') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              {/* Logo de hockey con palo y disco */}
+                              <path d="M12 7v10" stroke="#fff" strokeWidth="2"/>
+                              <path d="M17 16l-10 3" stroke="#09b66d" strokeWidth="2"/>
+                              <path d="M7 16l10 3" stroke="#09b66d" strokeWidth="2"/>
+                              <path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="#fff" fill="#192531"/>
+                              <path d="M12 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#09b66d" fill="#09b66d"/>
+                            </svg>
                           ) : (
                             <div className="w-4 h-4 bg-white/20 rounded-full"></div>
                           )}
