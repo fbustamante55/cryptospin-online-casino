@@ -65,10 +65,17 @@ export function Sidebar({ className }: SidebarProps) {
   
   // Elementos para la sección de deportes
   const sportsItems = [
-    { name: t('sidebar.liveEvents'), icon: <Tv className="h-4 w-4" />, badge: "24" },
-    { name: t('sports.comingSoon'), icon: <Clock className="h-4 w-4" /> },
+    { name: t('sidebar.liveEvents'), icon: <Tv className="h-4 w-4" />, badge: "24", path: "/sports", onClick: () => handleSportsFilter('live') },
+    { name: t('sports.upcoming'), icon: <Clock className="h-4 w-4" />, path: "/sports", onClick: () => handleSportsFilter('upcoming') },
     { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
   ];
+  
+  // Función para filtrar eventos deportivos
+  const handleSportsFilter = (filter: 'live' | 'upcoming') => {
+    // Esta función será usada cuando se haga clic en los enlaces del sidebar
+    // La lógica se manejará en el componente SportsBettingPage
+    localStorage.setItem('sportsFilter', filter);
+  };
   
   // Deportes populares
   const popularSports = [
@@ -215,7 +222,8 @@ export function Sidebar({ className }: SidebarProps) {
               {sportsItems.map((item, index) => (
                 <Link 
                   key={index} 
-                  href="#"
+                  href={item.path || "#"}
+                  onClick={item.onClick}
                   className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
                 >
                   <div className="flex items-center">

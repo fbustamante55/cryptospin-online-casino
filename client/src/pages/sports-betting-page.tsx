@@ -29,8 +29,8 @@ export default function SportsBettingPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeSport, setActiveSport] = useState<string>("");
   const [betSelections, setBetSelections] = useState<BetSelection[]>([]);
-  const [showLiveEvents, setShowLiveEvents] = useState<boolean>(false);
-  const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(true);
+  const [showLiveEvents, setShowLiveEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'live');
+  const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'upcoming' || localStorage.getItem('sportsFilter') === null);
   
   // Fetch available sports
   const { 
@@ -289,6 +289,7 @@ export default function SportsBettingPage() {
                 onClick={() => {
                   setShowLiveEvents(true);
                   setShowUpcomingEvents(false);
+                  localStorage.setItem('sportsFilter', 'live');
                 }}
               >
                 <Clock className="h-4 w-4 mr-1 text-gray-400" />
@@ -301,6 +302,7 @@ export default function SportsBettingPage() {
                 onClick={() => {
                   setShowLiveEvents(false);
                   setShowUpcomingEvents(true);
+                  localStorage.setItem('sportsFilter', 'upcoming');
                 }}
               >
                 <CalendarDays className="h-4 w-4 mr-1 text-gray-400" />
@@ -345,7 +347,9 @@ export default function SportsBettingPage() {
             {/* Upcoming Events Section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">{t('sports.upcomingEvents')}</h2>
+                <h2 className="text-xl font-bold">
+                  {showLiveEvents ? t('sports.liveEvents') : t('sports.upcomingEvents')}
+                </h2>
                 <Link href="#">
                   <span className="text-[#09b66d] text-sm font-medium flex items-center">
                     {t('buttons.viewAll')} <ChevronRight className="h-4 w-4" />
