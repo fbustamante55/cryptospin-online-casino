@@ -243,25 +243,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
 
   return (
     <TooltipProvider>
-      <Card className={`bg-[#0e1824] border-[#1c2b3a] ${className} relative`}>
-        {/* Favorite Star Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleFavorite}
-          disabled={!isLoaded || isPending || !user}
-          className={cn(
-            "absolute top-2 right-2 z-10 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70",
-            "w-8 h-8 flex items-center justify-center"
-          )}
-        >
-          <Star
-            className={cn(
-              "h-4 w-4 transition-all",
-              isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-            )}
-          />
-        </Button>
+      <Card className={`bg-[#0e1824] border-[#1c2b3a] ${className}`}>
           
         {/* Encabezado del evento */}
         <div className="bg-[#111A29] border-b border-[#1c2b3a] px-4 py-2 flex justify-between items-center">
@@ -328,6 +310,24 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
+                {/* Favorite Star Button - MOVIDO AQUÍ */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleFavorite}
+                  disabled={!isLoaded || isPending || !user}
+                  className={cn(
+                    "rounded-full bg-[#182531] hover:bg-[#1e2d3d] mr-2",
+                    "w-8 h-8 flex items-center justify-center"
+                  )}
+                >
+                  <Star
+                    className={cn(
+                      "h-4 w-4 transition-all",
+                      isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                    )}
+                  />
+                </Button>
                 <h3 className="text-sm font-medium">Ganador del partido</h3>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
@@ -453,6 +453,8 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
+                  {/* Estilo consistente - incluimos un espacio vacío del mismo tamaño */}
+                  <div className="w-8 h-8 mr-2"></div>
                   <h3 className="text-sm font-medium">Handicap</h3>
                   <Tooltip delayDuration={0}>
                     <TooltipTrigger asChild>

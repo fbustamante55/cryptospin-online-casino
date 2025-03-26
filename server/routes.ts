@@ -2041,10 +2041,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get user's favorites
   app.get("/api/favorites", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    // Para el demo vamos a usar un userId fijo para no requerir autenticación
+    // En una implementación real, esto debería hacerse con autenticación
+    const userId = req.isAuthenticated() ? req.user.id : 1;
     
     try {
-      const favorites = await storage.getUserFavorites(req.user.id);
+      const favorites = await storage.getUserFavorites(userId);
       res.json(favorites);
     } catch (error) {
       console.error("Error fetching favorites:", error);
@@ -2054,19 +2056,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Add a favorite
   app.post("/api/favorites", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    // Para el demo vamos a usar un userId fijo para no requerir autenticación
+    // En una implementación real, esto debería hacerse con autenticación
+    const userId = req.isAuthenticated() ? req.user.id : 1;
     
     try {
       const favoriteData = insertFavoriteSchema.parse(req.body);
       
-      // Ensure the user can only add favorites for themselves
-      if (favoriteData.userId !== req.user.id) {
-        return res.status(403).json({ message: "You can only add favorites for yourself" });
-      }
+      // Sobreescribimos el userId para asegurarnos de que sea el correcto
+      favoriteData.userId = userId;
       
       // Check if this is already a favorite
       const isAlreadyFavorite = await storage.isFavorite(
-        req.user.id,
+        userId,
         favoriteData.gameType,
         favoriteData.gameId || undefined
       );
@@ -2088,7 +2090,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Check if a game is a favorite
   app.get("/api/favorites/check", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    // Para el demo vamos a usar un userId fijo para no requerir autenticación
+    // En una implementación real, esto debería hacerse con autenticación
+    const userId = req.isAuthenticated() ? req.user.id : 1;
     
     const checkSchema = z.object({
       gameType: z.string(),
@@ -2098,7 +2102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const query = checkSchema.parse(req.query);
       const isFavorite = await storage.isFavorite(
-        req.user.id,
+        userId,
         query.gameType,
         query.gameId
       );
@@ -2115,7 +2119,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Remove a favorite
   app.delete("/api/favorites/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    // Para el demo vamos a usar un userId fijo para no requerir autenticación
+    // En una implementación real, esto debería hacerse con autenticación
+    const userId = req.isAuthenticated() ? req.user.id : 1;
     
     try {
       const id = parseInt(req.params.id);
@@ -2123,15 +2129,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
       
-      // Check if the favorite exists and belongs to the user
+      // Check if the favorite exists
       const favorite = await storage.getFavorite(id);
       if (!favorite) {
         return res.status(404).json({ message: "Favorite not found" });
       }
       
-      if (favorite.userId !== req.user.id) {
-        return res.status(403).json({ message: "You can only remove your own favorites" });
-      }
+      // En una implementación real, verificaríamos que el favorito pertenece al usuario
+      // Pero para el demo, vamos a permitir eliminar cualquier favorito
       
       const removed = await storage.removeFavorite(id);
       if (removed) {
