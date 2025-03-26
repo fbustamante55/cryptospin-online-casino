@@ -1,6 +1,5 @@
 // The Odds API integration
-// Usamos la API key de las variables de entorno
-// No accedemos directamente a process.env, sino que obtenemos la clave del servidor
+const API_KEY = '6f332c5566ae50fd96bdedfd4636deb2';
 const BASE_URL = 'https://api.the-odds-api.com/v4';
 
 // Types for sports data
@@ -46,16 +45,14 @@ export interface EventOdds {
  */
 export async function fetchSports(): Promise<Sport[]> {
   try {
-    // En un entorno de producción, deberíamos usar la API real
-    // La API key debe estar en el servidor, no en el cliente
-    // Este es un fallback para desarrollo
-    return [
-      { key: 'soccer', group: 'Soccer', title: 'Fútbol', description: 'Soccer', active: true, has_outrights: false },
-      { key: 'basketball', group: 'Basketball', title: 'Baloncesto', description: 'Basketball', active: true, has_outrights: false },
-      { key: 'baseball', group: 'Baseball', title: 'Béisbol', description: 'Baseball', active: true, has_outrights: false },
-      { key: 'tennis', group: 'Tennis', title: 'Tenis', description: 'Tennis', active: true, has_outrights: false },
-      { key: 'mma', group: 'Mixed Martial Arts', title: 'MMA', description: 'Mixed Martial Arts', active: true, has_outrights: false }
-    ];
+    const response = await fetch(`${BASE_URL}/sports/?apiKey=${API_KEY}`);
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error fetching sports:', error);
     throw error;
@@ -72,45 +69,15 @@ export async function fetchOdds(
   oddsFormat: string = 'decimal'
 ): Promise<EventOdds[]> {
   try {
-    // En un entorno de producción, usaríamos la API real
-    // Por ahora, devolvemos datos de muestra
-    const now = new Date();
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const url = `${BASE_URL}/sports/${sportKey}/odds/?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
+    const response = await fetch(url);
     
-    const sampleEvents: EventOdds[] = [];
-    
-    if (sportKey === 'soccer') {
-      sampleEvents.push({
-        id: "1",
-        sport_key: "soccer",
-        sport_title: "Fútbol",
-        commence_time: yesterday.toISOString(),
-        home_team: "Real Madrid",
-        away_team: "Barcelona",
-        bookmakers: []
-      }, {
-        id: "2",
-        sport_key: "soccer",
-        sport_title: "Fútbol",
-        commence_time: tomorrow.toISOString(),
-        home_team: "Manchester United",
-        away_team: "Liverpool",
-        bookmakers: []
-      });
-    } else if (sportKey === 'basketball') {
-      sampleEvents.push({
-        id: "3",
-        sport_key: "basketball",
-        sport_title: "Baloncesto",
-        commence_time: yesterday.toISOString(),
-        home_team: "Lakers",
-        away_team: "Celtics",
-        bookmakers: []
-      });
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
     }
     
-    return sampleEvents;
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(`Error fetching odds for ${sportKey}:`, error);
     throw error;
@@ -126,16 +93,15 @@ export async function fetchUpcomingEvents(
   oddsFormat: string = 'decimal'
 ): Promise<EventOdds[]> {
   try {
-    // Devolver todos los eventos de todos los deportes
-    const sports = await fetchSports();
-    let allEvents: EventOdds[] = [];
+    const url = `${BASE_URL}/sports/upcoming/odds/?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
+    const response = await fetch(url);
     
-    for (const sport of sports) {
-      const sportEvents = await fetchOdds(sport.key, regions, markets, oddsFormat);
-      allEvents = [...allEvents, ...sportEvents];
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
     }
     
-    return allEvents;
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error fetching upcoming events:', error);
     throw error;

@@ -981,111 +981,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sportType = req.query.sportType as string | undefined;
       const status = req.query.status as string | undefined;
       
-      // Crear un conjunto de datos de muestra para eventos deportivos
-      // Esta es una solución temporal mientras se resuelven los problemas con la API
-      const now = new Date();
-      const inOneHour = new Date(now.getTime() + 60 * 60 * 1000);
-      const inTwoHours = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-      const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      
-      // Crear eventos en vivo (que comenzaron hace poco tiempo)
-      const liveEvents = [
-        {
-          id: "1",
-          sport_key: "soccer",
-          sport_title: "Fútbol",
-          commence_time: yesterday.toISOString(),
-          home_team: "Real Madrid",
-          away_team: "Barcelona",
-          bookmakers: []
-        },
-        {
-          id: "2",
-          sport_key: "basketball",
-          sport_title: "Baloncesto",
-          commence_time: yesterday.toISOString(),
-          home_team: "Lakers",
-          away_team: "Celtics",
-          bookmakers: []
-        },
-        {
-          id: "3",
-          sport_key: "tennis",
-          sport_title: "Tenis",
-          commence_time: yesterday.toISOString(),
-          home_team: "Nadal",
-          away_team: "Djokovic",
-          bookmakers: []
-        },
-        {
-          id: "4",
-          sport_key: "soccer",
-          sport_title: "Fútbol",
-          commence_time: yesterday.toISOString(),
-          home_team: "PSG",
-          away_team: "Bayern Munich",
-          bookmakers: []
-        },
-        {
-          id: "5",
-          sport_key: "baseball",
-          sport_title: "Béisbol",
-          commence_time: yesterday.toISOString(),
-          home_team: "Yankees",
-          away_team: "Red Sox",
-          bookmakers: []
+      // Si estamos utilizando la API externa, obtenemos los datos de ella
+      try {
+        // Importar la función desde sports-api.ts
+        const { fetchOdds } = await import('../client/src/lib/sports-api');
+        
+        // Obtener eventos de la API externa
+        const allSports = ['soccer', 'basketball', 'baseball', 'football', 'tennis', 'mma', 'hockey'];
+        const allEvents = [];
+        
+        for (const sport of allSports) {
+          if (sportType && sport !== sportType) continue;
+          
+          try {
+            const sportEvents = await fetchOdds(sport, 'upcoming', 'es');
+            allEvents.push(...sportEvents);
+          } catch (sportError) {
+            console.error(`Error fetching ${sport} events:`, sportError);
+            // Continuamos con el siguiente deporte aunque uno falle
+          }
         }
-      ];
-      
-      // Crear eventos próximos (que comenzarán en el futuro)
-      const upcomingEvents = [
-        {
-          id: "6",
-          sport_key: "soccer",
-          sport_title: "Fútbol",
-          commence_time: inOneHour.toISOString(),
-          home_team: "Manchester United",
-          away_team: "Liverpool",
-          bookmakers: []
-        },
-        {
-          id: "7",
-          sport_key: "basketball",
-          sport_title: "Baloncesto",
-          commence_time: inTwoHours.toISOString(),
-          home_team: "Warriors",
-          away_team: "Rockets",
-          bookmakers: []
-        },
-        {
-          id: "8",
-          sport_key: "soccer",
-          sport_title: "Fútbol",
-          commence_time: tomorrow.toISOString(),
-          home_team: "Juventus",
-          away_team: "Inter Milan",
-          bookmakers: []
-        }
-      ];
-      
-      // Filtrar eventos según los parámetros de la solicitud
-      let events = [];
-      
-      if (!status || status === 'all') {
-        events = [...liveEvents, ...upcomingEvents];
-      } else if (status === 'live') {
-        events = [...liveEvents];
-      } else if (status === 'upcoming') {
-        events = [...upcomingEvents];
+        
+        return res.json({ events: allEvents });
+      } catch (apiError) {
+        console.error("Error fetching from external API:", apiError);
+        
+        // Como fallback, usamos los datos almacenados localmente
+        const events = await storage.getSportsEvents(sportType, status);
+        res.json({ events });
       }
-      
-      // Filtrar por tipo de deporte si se proporciona
-      if (sportType) {
-        events = events.filter(event => event.sport_key === sportType);
-      }
-      
-      res.json({ events });
     } catch (error) {
       console.error("Error fetching sports events:", error);
       res.status(500).json({ message: "Failed to fetch sports events" });
