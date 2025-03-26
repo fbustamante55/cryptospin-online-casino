@@ -1072,15 +1072,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para proporcionar la API key de manera segura al cliente
   app.get('/api/sports/apikey', (req, res) => {
     try {
-      // Usa la variable de entorno ODDS_API_KEY
+      // Usa la variable de entorno ODDS_API_KEY y ODDS_API_WIDGET_KEY
       const apiKey = process.env.ODDS_API_KEY;
+      const widgetKey = process.env.ODDS_API_WIDGET_KEY;
       
       if (!apiKey) {
         console.error("¡ODDS_API_KEY no está configurada en las variables de entorno!");
         return res.status(500).json({ error: "API key no configurada" });
       }
       
-      return res.json({ apiKey });
+      return res.json({ 
+        apiKey,
+        widgetKey: widgetKey || ''
+      });
     } catch (error) {
       console.error("Error al obtener API key:", error);
       return res.status(500).json({ error: "Error al obtener API key" });

@@ -30,7 +30,7 @@ export function OddsWidget({
   const { data: apiKeyData, isLoading } = useQuery({
     queryKey: ['/api/sports/apikey'],
     queryFn: async () => {
-      return apiRequest<{ apiKey: string }>({
+      return apiRequest<{ apiKey: string, widgetKey: string }>({
         url: '/api/sports/apikey',
         method: 'GET'
       });
@@ -38,9 +38,9 @@ export function OddsWidget({
   });
   
   useEffect(() => {
-    if (apiKeyData?.apiKey) {
-      // Construir la URL del widget con la API key obtenida del backend
-      const url = `https://widget.the-odds-api.com/v1/sports/${sportKey}/events/?accessKey=${apiKeyData.apiKey}&bookmakerKeys=${bookmakerKeys}&oddsFormat=${oddsFormat}&markets=${markets}&marketNames=${marketNames}`;
+    if (apiKeyData?.widgetKey) {
+      // Usar la Widget Key especialmente para el widget (formato wk_XXXX)
+      const url = `https://widget.the-odds-api.com/v1/sports/${sportKey}/events/?accessKey=${apiKeyData.widgetKey}&bookmakerKeys=${bookmakerKeys}&oddsFormat=${oddsFormat}&markets=${markets}&marketNames=${marketNames}`;
       setWidgetUrl(url);
     }
   }, [apiKeyData, sportKey, bookmakerKeys, oddsFormat, markets, marketNames]);
