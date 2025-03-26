@@ -12,37 +12,37 @@ export default function HomePage() {
 
   const featuredGames = [
     {
-      title: "Neon Slots",
-      description: "Spin the neon reels and win big with our most popular slot game!",
-      image: "/slots.jpg",
-      tag: { text: "Popular", color: "secondary" as const },
-      rating: 4.8,
-      gameType: "slots" as const
-    },
-    {
-      title: "Crypto Dice",
-      description: "Roll the dice and test your luck with our provably fair crypto dice game!",
-      image: "/dice.jpg",
-      tag: { text: "New", color: "primary" as const },
-      rating: 4.6,
-      gameType: "dice" as const
-    },
-    {
       title: "Moon Crash",
       description: "Cash out before the crash! Multipliers can go to the moon in this thrilling game.",
       image: "/crash.jpg",
       tag: { text: "Hot", color: "tertiary" as const },
       rating: 4.9,
       gameType: "crash" as const
+    },
+    {
+      title: "Crypto Crash Pro",
+      description: "Our premium version with higher multipliers and better odds. Test your timing!",
+      image: "/crash.jpg",
+      tag: { text: "Premium", color: "primary" as const },
+      rating: 4.8,
+      gameType: "crash" as const
+    },
+    {
+      title: "Space Crash",
+      description: "Space-themed crash game with unique visuals and special bonuses on consecutive wins.",
+      image: "/crash.jpg",
+      tag: { text: "New", color: "secondary" as const },
+      rating: 4.7,
+      gameType: "crash" as const
     }
   ];
 
   const popularGames = [
-    { title: "Jackpot Gems", type: "Slots", players: 234, gameType: "slots" as const },
-    { title: "Lucky Dice", type: "Dice", players: 189, gameType: "dice" as const },
-    { title: "Crypto Crash", type: "Crash", players: 315, gameType: "crash" as const },
-    { title: "Neon Roulette", type: "Table", players: 142, gameType: "slots" as const },
-    { title: "Cyber Blackjack", type: "Card", players: 98, gameType: "dice" as const }
+    { title: "Moon Crash", type: "Crash", players: 315, gameType: "crash" as const },
+    { title: "Crypto Crash Pro", type: "Crash", players: 278, gameType: "crash" as const },
+    { title: "Space Crash", type: "Crash", players: 246, gameType: "crash" as const },
+    { title: "Rocket Crash", type: "Crash", players: 205, gameType: "crash" as const },
+    { title: "Neon Crash", type: "Crash", players: 184, gameType: "crash" as const }
   ];
 
   return (
@@ -106,7 +106,7 @@ export default function HomePage() {
                 <h2 className="font-heading text-xl md:text-3xl font-bold text-white mb-2">Welcome to <span className="text-[#00FFAA]">CryptoSpin</span></h2>
                 <p className="text-gray-300 max-w-lg mb-4">Experience the thrill of crypto casino gaming with our selection of exciting games. Play responsibly!</p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/slots">
+                  <Link href="/crash">
                     <button className="px-4 py-2 bg-[#00FFAA] hover:bg-[#33FFBB] text-[#0F1923] font-medium rounded-lg transition-all duration-200">
                       Start Playing
                     </button>
