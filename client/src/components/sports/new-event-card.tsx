@@ -129,7 +129,8 @@ export function NewEventCard({
   // Create a bet selection when user clicks on a bet option
   const handleBetClick = (teamName: string, odds: number, marketType: string, point?: number) => {
     // Convertir las probabilidades americanas a decimales para la selección
-    const decimalOdds = convertToDecimalOdds(odds);
+    const decimalOddsString = convertToDecimalOdds(odds);
+    const decimalOdds = parseFloat(decimalOddsString);
     
     const selection: BetSelection = {
       id: nanoid(),
@@ -164,21 +165,21 @@ export function NewEventCard({
   };
   
   // Función para convertir las probabilidades americanas a decimales
-  const convertToDecimalOdds = (americanOdds: number): number => {
+  const convertToDecimalOdds = (americanOdds: number): string => {
     // Manejar el caso especial de 100 para evitar divisiones por cero
-    if (americanOdds === 0) return 1.00;
+    if (americanOdds === 0) return "1.00";
     
     let decimalOdds;
     
     // En realidad, muchas de las odds vienen ya en formato decimal en la API
     // Si el número es pequeño (menor a 10), probablemente ya está en formato decimal
     if (Math.abs(americanOdds) < 10) {
-      return parseFloat(americanOdds.toFixed(2));
+      return americanOdds.toFixed(2);
     }
     
     // Primero probemos si ya es un formato decimal (como 1.85, 2.35, etc.)
     if (americanOdds >= 1 && americanOdds < 10) {
-      return parseFloat(americanOdds.toFixed(2));
+      return americanOdds.toFixed(2);
     } 
     
     // Convertir formato americano a decimal
@@ -196,7 +197,8 @@ export function NewEventCard({
       decimalOdds = Math.abs(americanOdds) / 100;
     }
     
-    return parseFloat(decimalOdds.toFixed(2));
+    // Devolvemos el valor como string con exactamente dos decimales
+    return decimalOdds.toFixed(2);
   };
   
   // Eliminamos la función duplicada, ya que ahora usamos la importada
