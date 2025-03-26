@@ -1,6 +1,5 @@
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
@@ -131,8 +130,6 @@ export default function SportsBettingPage() {
               </div>
               
               <NotificationDropdown />
-              
-              <LanguageSwitcher />
             </div>
           </div>
         </header>
