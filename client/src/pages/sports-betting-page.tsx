@@ -775,6 +775,23 @@ export default function SportsBettingPage() {
                               <path d="M6 3v18M18 9l-8 8M18 15v4h-4M13 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="#09b66d"/>
                               <path d="M7 21h10" stroke="#fff"/>
                             </svg>
+                          ) : sport.key === 'baseball_mlb' || sport.key.includes('baseball') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="12" r="8" stroke="#fff" fill="none"/>
+                              <path d="M5.5 5.5l2 2M18.5 5.5l-2 2M5.5 18.5l2-2M18.5 18.5l-2-2" stroke="#fff"/>
+                              <path d="M12 20.5V16M12 8V3.5" stroke="#09b66d"/>
+                              <path d="M3.5 12H8M16 12h4.5" stroke="#09b66d"/>
+                              <path d="M10 10l4 4M10 14l4-4" stroke="#fff"/>
+                            </svg>
                           ) : sport.key === 'baseball_kbo' || sport.key.includes('kbo') ? (
                             <svg 
                               className="w-5 h-5" 
@@ -829,8 +846,231 @@ export default function SportsBettingPage() {
                               <path d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#09b66d"/>
                               <path d="M6 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" stroke="#fff"/>
                             </svg>
+                          ) : sport.key.includes('soccer') || sport.group === 'Soccer' ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="12" r="8" stroke="#fff" fill="none"/>
+                              <path d="M12 4v2M12 18v2M4 12h2M18 12h2" stroke="#fff"/>
+                              <path d="M8 8l2 2M16 8l-2 2M8 16l2-2M16 16l-2-2" stroke="#09b66d"/>
+                              <path d="M12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fill="#09b66d"/>
+                            </svg>
+                          ) : sport.key.includes('basketball') || sport.group === 'Basketball' ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="12" r="8" stroke="#fff" fill="none"/>
+                              <path d="M4.5 4.5a10 10 0 0 1 15 15M4.5 19.5a10 10 0 0 1 15-15" stroke="#09b66d"/>
+                              <path d="M12 4v16M4 12h16" stroke="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('tennis') || sport.group === 'Tennis' ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="12" r="7" stroke="#fff" fill="none"/>
+                              <path d="M6 6c1.5 1.5 3 5 3 10" stroke="#09b66d"/>
+                              <path d="M18 6c-1.5 1.5-3 5-3 10" stroke="#09b66d"/>
+                              <path d="M6 18c1.5-1.5 5-3 10-3" stroke="#fff"/>
+                              <path d="M6 6c1.5 1.5 5 3 10 3" stroke="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('volleyball') || sport.group === 'Volleyball' ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="12" r="8" stroke="#fff" fill="none"/>
+                              <path d="M7 15a8 8 0 0 0 8-10" stroke="#09b66d"/>
+                              <path d="M12 4c1 3.5 1.5 8-4 10" stroke="#fff"/>
+                              <path d="M12 4c3 3.5 5 8 0 12" stroke="#09b66d"/>
+                              <path d="M7 9C5 12 6 16 12 17" stroke="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('tabletennis') || sport.key.includes('ping_pong') || sport.key.includes('table_tennis') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <rect x="5" y="10" width="14" height="8" rx="1" stroke="#09b66d"/>
+                              <path d="M5 14h14" stroke="#fff"/>
+                              <path d="M12 10v8" stroke="#fff"/>
+                              <path d="M6 7l6-3 6 3" stroke="#fff"/>
+                              <circle cx="16" cy="7" r="2" stroke="#09b66d" fill="#09b66d"/>
+                            </svg>
+                          ) : sport.key.includes('mma') || sport.group === 'MMA' ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M7 7l5-5 5 5" stroke="#fff"/>
+                              <path d="M7 17l5 5 5-5" stroke="#fff"/>
+                              <path d="M17 7l-5 5-5-5" stroke="#09b66d"/>
+                              <path d="M17 17l-5-5-5 5" stroke="#09b66d"/>
+                              <circle cx="12" cy="12" r="2" stroke="#fff" fill="#09b66d"/>
+                            </svg>
+                          ) : sport.key.includes('boxing') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M4 8h4v9c0 1-1 2-2 2s-2-1-2-2V8z" stroke="#09b66d" fill="none"/>
+                              <path d="M20 8h-4v9c0 1 1 2 2 2s2-1 2-2V8z" stroke="#09b66d" fill="none"/>
+                              <path d="M8 8s1-3 4-3 4 3 4 3" stroke="#fff"/>
+                              <path d="M8 12h8" stroke="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('esports') || sport.key.includes('cs2') || sport.key.includes('dota') || sport.key.includes('league') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M6 11h12v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" stroke="#09b66d" fill="none"/>
+                              <path d="M8 11V7a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v4" stroke="#fff"/>
+                              <path d="M10 14h4M8 17h8" stroke="#fff"/>
+                              <circle cx="12" cy="14" r="1" fill="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('golf') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 3v12" stroke="#fff" strokeWidth="2"/>
+                              <path d="M9 15h6l3 7H6l3-7z" stroke="#09b66d" fill="none"/>
+                              <circle cx="12" cy="18" r="1" fill="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('racing') || sport.key.includes('formula') || sport.key.includes('motorsport') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M7 10h11l2 4v2H4v-2l2-4z" stroke="#09b66d" fill="none"/>
+                              <path d="M8 14h8" stroke="#fff"/>
+                              <circle cx="7" cy="17" r="2" stroke="#fff" fill="none"/>
+                              <circle cx="17" cy="17" r="2" stroke="#fff" fill="none"/>
+                              <path d="M15 6l2 4" stroke="#fff"/>
+                              <path d="M7 6h4l4 3" stroke="#09b66d"/>
+                            </svg>
+                          ) : sport.key.includes('rugby') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M6 16c2 2 6 3 10-1s3-8 1-10-6-3-10 1-3 8-1 10z" stroke="#09b66d" fill="none"/>
+                              <path d="M10 8l4 4M8 10l4 4M6 12l4 4" stroke="#fff"/>
+                              <path d="M12 6l4 4M14 8l4 4" stroke="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('handball') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="7" r="3" stroke="#fff" fill="none"/>
+                              <path d="M10 10l-2 9M14 10l4 9" stroke="#09b66d"/>
+                              <path d="M7 18h10" stroke="#fff"/>
+                              <path d="M10 13l4-1" stroke="#fff"/>
+                            </svg>
+                          ) : sport.key.includes('football') || sport.key.includes('nfl') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <ellipse cx="12" cy="12" rx="8" ry="6" stroke="#09b66d" fill="none"/>
+                              <path d="M12 6v12" stroke="#fff"/>
+                              <path d="M7 9h10M7 15h10" stroke="#fff"/>
+                              <path d="M8 12h8" stroke="#09b66d"/>
+                            </svg>
                           ) : (
-                            <div className="w-4 h-4 bg-white/20 rounded-full"></div>
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="12" r="8" stroke="#09b66d" fill="none"/>
+                              <path d="M12 8v8M8 12h8" stroke="#fff"/>
+                            </svg>
                           )}
                         </div>
                         <span className="text-xs font-semibold">{sport.title}</span>
