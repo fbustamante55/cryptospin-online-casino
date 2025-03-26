@@ -5,6 +5,7 @@ import { Search, Plus, Coins, Star, Clock, ChevronRight, Calendar, CalendarDays,
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -12,6 +13,7 @@ import { EventCard } from "@/components/sports/event-card";
 import { BetSlip, BetSelection } from "@/components/sports/bet-slip";
 import { nanoid } from "nanoid";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 // Import the sports API utilities
 import { 
@@ -35,6 +37,21 @@ export default function SportsBettingPage() {
   const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'upcoming' || localStorage.getItem('sportsFilter') === null);
   const [showFavorites, setShowFavorites] = useState<boolean>(localStorage.getItem('sportsFilter') === 'favorites');
   const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'tomorrow');
+  const [activeTab, setActiveTab] = useState<string>("misBoletos");
+  
+  // Función para formatear el estado de las apuestas para mostrar en UI
+  const formatOddStatus = (status: string): string => {
+    switch (status) {
+      case 'pending':
+        return 'Pendiente';
+      case 'won':
+        return 'Ganada';
+      case 'lost':
+        return 'Perdida';
+      default:
+        return status;
+    }
+  };
   
   // Fetch available sports
   const { 
@@ -89,6 +106,38 @@ export default function SportsBettingPage() {
     queryKey: ['events', activeSport],
     queryFn: () => fetchOdds(activeSport, 'us', 'h2h', 'american'),
     enabled: !!activeSport && activeSport !== 'all',
+  });
+  
+  // Fetch user bet history
+  const { 
+    data: betHistory = [], 
+    isLoading: historyLoading 
+  } = useQuery({
+    queryKey: ['/api/sports/bet-history'],
+    queryFn: async () => {
+      if (!user) return [];
+      return apiRequest<any[]>({
+        url: '/api/sports/bet-history',
+        method: 'GET'
+      });
+    },
+    enabled: !!user,
+  });
+  
+  // Fetch user active bets
+  const { 
+    data: userBets = [], 
+    isLoading: betsLoading 
+  } = useQuery({
+    queryKey: ['/api/sports/user-bets'],
+    queryFn: async () => {
+      if (!user) return [];
+      return apiRequest<any[]>({
+        url: '/api/sports/user-bets',
+        method: 'GET'
+      });
+    },
+    enabled: !!user,
   });
   
   // Display either sport-specific events or upcoming events based on selection
@@ -576,13 +625,146 @@ export default function SportsBettingPage() {
             </div>
           </div>
           
-          {/* Right column - Bet Slip */}
+          {/* Tablón de Apuestas - Panel lateral */}
           <div className="w-full md:w-80 lg:w-96 mt-4 md:mt-0">
-            <BetSlip 
-              selections={betSelections}
-              onRemoveSelection={handleRemoveSelection}
-              onClearSelections={handleClearSelections}
-            />
+            <div className="bg-[#0e1824] border border-[#1c2b3a] rounded-lg overflow-hidden">
+              {/* Pestañas del Tablón */}
+              <div className="flex border-b border-[#1c2b3a]">
+                <button 
+                  className={`flex-1 py-3 text-center text-sm font-medium ${
+                    activeTab === 'misBoletos' 
+                      ? 'text-white border-b-2 border-[#09b66d]' 
+                      : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                  onClick={() => setActiveTab('misBoletos')}
+                >
+                  Mis Boletos
+                </button>
+                <button 
+                  className={`flex-1 py-3 text-center text-sm font-medium ${
+                    activeTab === 'misApuestas' 
+                      ? 'text-white border-b-2 border-[#09b66d]' 
+                      : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                  onClick={() => setActiveTab('misApuestas')}
+                >
+                  Mis Apuestas
+                </button>
+                <button 
+                  className={`flex-1 py-3 text-center text-sm font-medium ${
+                    activeTab === 'historial' 
+                      ? 'text-white border-b-2 border-[#09b66d]' 
+                      : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                  onClick={() => setActiveTab('historial')}
+                >
+                  Historial
+                </button>
+              </div>
+              
+              {/* Contenido según la pestaña seleccionada */}
+              <div className="p-1">
+                {activeTab === 'misBoletos' && (
+                  <BetSlip 
+                    selections={betSelections}
+                    onRemoveSelection={handleRemoveSelection}
+                    onClearSelections={handleClearSelections}
+                  />
+                )}
+                
+                {activeTab === 'misApuestas' && (
+                  <div className="p-3">
+                    <h3 className="text-sm font-medium mb-2">Apuestas pendientes</h3>
+                    {userBets.length > 0 ? (
+                      <div className="space-y-3">
+                        {userBets.filter(bet => bet.status === 'pending').map((bet) => (
+                          <div key={bet.id} className="bg-[#182531] p-3 rounded-md">
+                            <div className="flex justify-between mb-1">
+                              <span className="text-xs">{bet.sportTitle}</span>
+                              <Badge variant="outline" className="text-xs">{formatOddStatus(bet.status)}</Badge>
+                            </div>
+                            <p className="text-sm mb-1">{bet.homeTeam} vs {bet.awayTeam}</p>
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-xs text-[#09b66d]">
+                                  {bet.selectedTeam} 
+                                  {bet.point ? ` (${bet.point > 0 ? '+' : ''}${bet.point})` : ''}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  Apostado: ${bet.betAmount}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-medium">{formatAmericanOdds(bet.odds)}</p>
+                                <p className="text-xs text-[#09b66d]">
+                                  Posible ganancia: ${bet.potentialWin}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-5">
+                        <p className="text-sm text-gray-400">No tienes apuestas pendientes</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {activeTab === 'historial' && (
+                  <div className="p-3">
+                    <h3 className="text-sm font-medium mb-2">Historial de apuestas</h3>
+                    {betHistory.length > 0 ? (
+                      <div className="space-y-3">
+                        {betHistory.map((bet) => (
+                          <div key={bet.id} className="bg-[#182531] p-3 rounded-md">
+                            <div className="flex justify-between mb-1">
+                              <span className="text-xs">{bet.sportTitle}</span>
+                              <Badge 
+                                className={`text-xs ${
+                                  bet.status === 'won' 
+                                    ? 'bg-[#09b66d]' 
+                                    : bet.status === 'lost' 
+                                      ? 'bg-red-500' 
+                                      : 'bg-blue-500'
+                                }`}
+                              >
+                                {formatOddStatus(bet.status)}
+                              </Badge>
+                            </div>
+                            <p className="text-sm mb-1">{bet.homeTeam} vs {bet.awayTeam}</p>
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-xs text-[#09b66d]">
+                                  {bet.selectedTeam}
+                                  {bet.point ? ` (${bet.point > 0 ? '+' : ''}${bet.point})` : ''}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  Apostado: ${bet.betAmount}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-medium">{formatAmericanOdds(bet.odds)}</p>
+                                {bet.status === 'won' && (
+                                  <p className="text-xs text-[#09b66d]">
+                                    Ganancia: ${bet.settledAmount}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-5">
+                        <p className="text-sm text-gray-400">No tienes historial de apuestas</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </main>
