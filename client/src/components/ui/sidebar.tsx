@@ -66,15 +66,19 @@ export function Sidebar({ className }: SidebarProps) {
   // Elementos para la sección de deportes
   const sportsItems = [
     { name: t('sidebar.liveEvents'), icon: <Tv className="h-4 w-4" />, badge: "24", path: "/sports", onClick: () => handleSportsFilter('live') },
-    { name: t('sports.upcoming'), icon: <Clock className="h-4 w-4" />, path: "/sports", onClick: () => handleSportsFilter('upcoming') },
+    { name: "Próximos Eventos", icon: <Clock className="h-4 w-4" />, path: "/sports", onClick: () => handleSportsFilter('upcoming') },
     { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
   ];
   
   // Función para filtrar eventos deportivos
+  const [, setLocation] = useLocation();
+
   const handleSportsFilter = (filter: 'live' | 'upcoming') => {
-    // Esta función será usada cuando se haga clic en los enlaces del sidebar
-    // La lógica se manejará en el componente SportsBettingPage
+    // Guardar filtro en localStorage
     localStorage.setItem('sportsFilter', filter);
+    
+    // Navegar a la página de deportes
+    setLocation('/sports');
   };
   
   // Deportes populares
@@ -125,7 +129,7 @@ export function Sidebar({ className }: SidebarProps) {
               className={`px-4 py-2 rounded-md text-white font-medium text-sm ${activeTab === 'casino' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
               onClick={() => {
                 setActiveTab('casino');
-                window.location.href = '/';
+                setLocation('/');
               }}
             >
               {t('tabs.casino')}
@@ -134,7 +138,7 @@ export function Sidebar({ className }: SidebarProps) {
               className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
               onClick={() => {
                 setActiveTab('deportes');
-                window.location.href = '/sports';
+                setLocation('/sports');
               }}
             >
               {t('tabs.sports')}
