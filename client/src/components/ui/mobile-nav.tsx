@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Link } from "wouter";
-import { Home, Gamepad, Wallet, User, Trophy } from "lucide-react";
+import { Home, TrendingUp, Wallet, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MobileNav() {
@@ -8,8 +8,7 @@ export function MobileNav() {
   
   const isActive = (path: string) => {
     if (path === "/" && location === "/") return true;
-    if (path === "/games" && ["/slots", "/dice", "/crash", "/roulette", "/blackjack"].includes(location)) return true;
-    if (path === "/sports" && location === "/sports") return true;
+    if (path === "/crash" && location === "/crash") return true;
     if (path === "/wallet" && ["/wallet", "/history"].includes(location)) return true;
     if (path === "/profile" && location === "/profile") return true;
     return false;
@@ -26,20 +25,12 @@ export function MobileNav() {
           <span className="text-xs mt-1">Home</span>
         </Link>
         
-        <Link href="/slots" className={cn(
+        <Link href="/crash" className={cn(
           "flex flex-col items-center py-3 px-4",
-          isActive("/games") ? "text-[#00FFAA]" : "text-gray-400"
+          isActive("/crash") ? "text-[#00FFAA]" : "text-gray-400"
         )}>
-          <Gamepad className="h-5 w-5" />
-          <span className="text-xs mt-1">Games</span>
-        </Link>
-        
-        <Link href="/sports" className={cn(
-          "flex flex-col items-center py-3 px-4",
-          isActive("/sports") ? "text-[#00FFAA]" : "text-gray-400"
-        )}>
-          <Trophy className="h-5 w-5" />
-          <span className="text-xs mt-1">Sports</span>
+          <TrendingUp className="h-5 w-5" />
+          <span className="text-xs mt-1">Crash</span>
         </Link>
         
         <Link href="/wallet" className={cn(
