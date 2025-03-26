@@ -625,7 +625,23 @@ export default function SportsBettingPage() {
                         }}
                       >
                         <div className={`flex items-center justify-center w-8 h-8 rounded-md bg-[#192531] mb-1 ${isActive ? 'border-b-2 border-[#09b66d]' : ''}`}>
-                          <div className="w-4 h-4 bg-white/20 rounded-full"></div>
+                          {sport.key === 'cricket_test_match' || sport.key === 'cricket_odi' || sport.key.includes('cricket') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M6 3v18M18 9l-8 8M18 15v4h-4M13 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="#09b66d"/>
+                              <path d="M7 21h10" stroke="#fff"/>
+                            </svg>
+                          ) : (
+                            <div className="w-4 h-4 bg-white/20 rounded-full"></div>
+                          )}
                         </div>
                         <span className="text-xs font-semibold">{sport.title}</span>
                         <span className="text-xs font-bold text-white">{eventsCount}</span>
