@@ -1,15 +1,12 @@
-import { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CircleX, Trash2, Calculator, PlusCircle } from 'lucide-react';
+import { Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatAmericanOdds } from '@/lib/sports-api';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
 
-// Define types for bet selections
 export interface BetSelection {
   id: string;
   eventId: string;
@@ -31,291 +28,183 @@ interface BetSlipProps {
 
 export function BetSlip({ selections, onRemoveSelection, onClearSelections }: BetSlipProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [betType, setBetType] = useState<'simple' | 'combined'>('simple');
-  const [stakes, setStakes] = useState<{ [key: string]: number }>({});
-  const [combinedStake, setCombinedStake] = useState<number>(0);
-  const [totalPayout, setTotalPayout] = useState<number>(0);
+  const [betAmount, setBetAmount] = useState<string>('10');
+  const [collapsed, setCollapsed] = useState<boolean>(false);
   
-  // Calculate potential payouts whenever stakes or selections change
-  useEffect(() => {
-    if (betType === 'simple') {
-      const total = Object.entries(stakes).reduce((sum, [id, stake]) => {
-        const selection = selections.find(s => s.id === id);
-        return sum + (selection ? calculatePayout(stake, selection.odds) : 0);
-      }, 0);
-      setTotalPayout(total);
-    } else {
-      // Calculate combined odds and payout
-      const combinedOdds = selections.reduce((acc, selection) => acc * selection.odds, 1);
-      setTotalPayout(calculatePayout(combinedStake, combinedOdds));
-    }
-  }, [stakes, combinedStake, selections, betType]);
-  
-  // Calculate payout for a given stake and odds
-  const calculatePayout = (stake: number, odds: number): number => {
-    if (!stake) return 0;
-    
-    // For American odds
-    if (odds > 0) {
-      return stake + (stake * (odds / 100));
-    } else if (odds < 0) {
-      return stake + (stake * (100 / Math.abs(odds)));
-    }
-    return 0;
+  // Calculate potential winnings 
+  const calculateSingleWinnings = (amount: number, odds: number): number => {
+    return amount * odds;
   };
   
-  // Handle stake change for simple bets
-  const handleStakeChange = (id: string, value: string) => {
-    const numValue = parseFloat(value) || 0;
-    setStakes({...stakes, [id]: numValue});
+  // Calculate combined bet winnings
+  const calculateCombinedWinnings = (amount: number): number => {
+    if (selections.length === 0) return 0;
+    
+    // Multiply all odds
+    const combinedOdds = selections.reduce((total, bet) => total * bet.odds, 1);
+    return amount * combinedOdds;
   };
   
-  // Handle combined stake change
-  const handleCombinedStakeChange = (value: string) => {
-    setCombinedStake(parseFloat(value) || 0);
+  // Determine if there are conflicting selections (same event)
+  const hasConflictingSelections = (): boolean => {
+    const eventIds = selections.map(bet => bet.eventId);
+    return eventIds.length !== new Set(eventIds).size;
   };
   
-  // Place bets
-  const placeBets = () => {
-    // Check user's balance
-    const totalStake = betType === 'simple' 
-      ? Object.values(stakes).reduce((sum, stake) => sum + stake, 0)
-      : combinedStake;
-    
-    if (!user) {
-      toast({
-        title: t('error'),
-        description: t('errors.loginRequired'),
-        variant: "destructive"
-      });
-      return;
+  // Format the bet type for display
+  const formatBetType = (bet: BetSelection): string => {
+    switch (bet.marketType) {
+      case 'moneyline':
+        return bet.selectedTeam;
+      case 'spread':
+        return `${bet.selectedTeam} ${bet.point && bet.point > 0 ? '+' : ''}${bet.point}`;
+      case 'total':
+        return `${bet.selectedTeam} ${bet.point}`;
+      default:
+        return bet.selectedTeam;
     }
-    
-    if (user.balance < totalStake) {
-      toast({
-        title: t('error'),
-        description: t('errors.insufficientBalance'),
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (totalStake <= 0) {
-      toast({
-        title: t('error'),
-        description: t('errors.invalidBetAmount'),
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // For now, just show a success toast
-    toast({
-      title: t('success'),
-      description: t('sports.betPlacedSuccessfully'),
-    });
-    
-    // Clear the slip after placing bets
-    onClearSelections();
-    setStakes({});
-    setCombinedStake(0);
   };
   
-  // Get total stake amount
-  const getTotalStake = (): number => {
-    if (betType === 'simple') {
-      return Object.values(stakes).reduce((sum, stake) => sum + stake, 0);
-    }
-    return combinedStake;
+  const getNumericBetAmount = (): number => {
+    const amount = parseFloat(betAmount);
+    return isNaN(amount) ? 0 : amount;
   };
   
-  // Get combined odds for parlay
-  const getCombinedOdds = (): number => {
-    return selections.reduce((acc, selection) => acc * selection.odds, 1);
+  // Format numbers with commas and 2 decimal places if needed
+  const formatCurrency = (amount: number): string => {
+    return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
   
   return (
-    <Card className="bg-[#0e1824] border-[#1c2b3a] overflow-hidden w-full">
-      <div className="bg-[#192531] border-b border-[#1c2b3a] p-3 flex justify-between items-center">
-        <h2 className="font-semibold text-white">{t('sports.betSlip')}</h2>
-        <div className="flex gap-2">
-          {selections.length > 0 && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-[#192531] border-[#1c2b3a] text-gray-400 hover:text-white"
-              onClick={onClearSelections}
+    <Card className="bg-[#192531] border-[#1c2b3a] sticky top-4">
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold">{t('sports.betSlip')}</h3>
+          <div className="flex items-center">
+            {selections.length > 0 && (
+              <button
+                onClick={onClearSelections}
+                className="mr-2 text-gray-400 hover:text-red-500"
+                title={t('sports.clearAll')}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="text-gray-400 hover:text-white"
             >
-              <Trash2 className="h-4 w-4 mr-1" />
-              {t('buttons.clear')}
-            </Button>
-          )}
-        </div>
-      </div>
-      
-      <Tabs 
-        defaultValue="simple" 
-        className="w-full"
-        value={betType}
-        onValueChange={(value) => setBetType(value as 'simple' | 'combined')}
-      >
-        <div className="border-b border-[#1c2b3a]">
-          <TabsList className="w-full bg-[#192531] grid grid-cols-2">
-            <TabsTrigger 
-              value="simple"
-              className="data-[state=active]:bg-[#0e1824] data-[state=active]:text-white"
-            >
-              {t('sports.simple')}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="combined"
-              className="data-[state=active]:bg-[#0e1824] data-[state=active]:text-white"
-              disabled={selections.length < 2}
-            >
-              {t('sports.combined')}
-            </TabsTrigger>
-          </TabsList>
+              {collapsed ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
         
-        <div className="max-h-[450px] overflow-y-auto p-2">
-          {selections.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-              <Calculator className="h-10 w-10 mb-2" />
-              <p>{t('sports.emptyBetSlip')}</p>
-              <p className="text-sm">{t('sports.selectOddsToAdd')}</p>
-            </div>
-          ) : (
-            <>
-              <TabsContent value="simple" className="space-y-2 mt-0">
-                {selections.map((selection) => (
-                  <div 
-                    key={selection.id} 
-                    className="bg-[#192531] border border-[#1c2b3a] rounded-md p-3"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="text-xs text-gray-400">{selection.sportTitle}</div>
-                        <div className="text-sm font-medium mt-1">
-                          {selection.homeTeam} vs {selection.awayTeam}
-                        </div>
-                        <div className="mt-1 inline-block px-2 py-1 bg-[#282e39] rounded text-xs font-semibold">
-                          {selection.selectedTeam} {selection.point ? `(${selection.point > 0 ? '+' : ''}${selection.point})` : ''}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <button 
-                          className="text-gray-400 hover:text-white"
-                          onClick={() => onRemoveSelection(selection.id)}
-                        >
-                          <CircleX className="h-4 w-4" />
-                        </button>
-                        <div className="text-sm font-bold mt-2">
-                          {formatAmericanOdds(selection.odds)}
-                        </div>
-                      </div>
+        {!collapsed && (
+          <>
+            {selections.length === 0 ? (
+              <div className="py-8 text-center text-gray-400">
+                <p>{t('sports.noBetsSelected')}</p>
+                <p className="text-sm mt-2">{t('sports.selectOddsToAddBets')}</p>
+              </div>
+            ) : (
+              <div className="space-y-3 mb-4">
+                {selections.map((bet) => (
+                  <div key={bet.id} className="bg-[#1c2b3a] rounded-md p-3 relative">
+                    <button
+                      onClick={() => onRemoveSelection(bet.id)}
+                      className="absolute top-2 right-2 text-gray-400 hover:text-red-400"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                    
+                    <div className="mb-2">
+                      <Badge variant="outline" className="text-xs bg-transparent">
+                        {bet.sportTitle}
+                      </Badge>
+                      <Badge variant="outline" className="ml-2 text-xs bg-transparent">
+                        {bet.marketType}
+                      </Badge>
                     </div>
                     
-                    <div className="flex gap-2 mt-3 items-center">
-                      <div className="text-sm">Stake:</div>
-                      <Input 
-                        type="number" 
-                        className="bg-[#0e1824] border-[#1c2b3a] h-8 flex-1"
-                        min="0"
-                        step="0.1"
-                        value={stakes[selection.id] || ''}
-                        onChange={(e) => handleStakeChange(selection.id, e.target.value)}
-                      />
-                    </div>
+                    <div className="text-sm mb-1">{bet.homeTeam} vs {bet.awayTeam}</div>
                     
-                    <div className="mt-2 text-right text-sm">
-                      <span className="text-gray-400">Payout:</span>{' '}
-                      <span className="font-semibold">
-                        {calculatePayout(stakes[selection.id] || 0, selection.odds).toFixed(2)}
-                      </span>
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium">{formatBetType(bet)}</div>
+                      <div className="text-[#09b66d]">{formatAmericanOdds(bet.odds)}</div>
                     </div>
                   </div>
                 ))}
-              </TabsContent>
-              
-              <TabsContent value="combined" className="space-y-2 mt-0">
-                <div className="bg-[#192531] border border-[#1c2b3a] rounded-md p-3">
-                  <div className="font-medium mb-2">{t('sports.parlayBet')}</div>
-                  
-                  {selections.map((selection) => (
-                    <div 
-                      key={selection.id} 
-                      className="border-b border-[#1c2b3a] py-2 last:border-0"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="text-xs text-gray-400">{selection.sportTitle}</div>
-                          <div className="text-sm font-medium mt-1">
-                            {selection.selectedTeam} {selection.point ? `(${selection.point > 0 ? '+' : ''}${selection.point})` : ''}
-                          </div>
-                          <div className="text-xs text-gray-400 mt-1">
-                            {selection.homeTeam} vs {selection.awayTeam}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end">
-                          <button 
-                            className="text-gray-400 hover:text-white"
-                            onClick={() => onRemoveSelection(selection.id)}
-                          >
-                            <CircleX className="h-4 w-4" />
-                          </button>
-                          <div className="text-sm font-bold mt-2">
-                            {formatAmericanOdds(selection.odds)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <div className="mt-3 flex justify-between items-center">
-                    <div className="text-sm font-medium">Combined Odds:</div>
-                    <div className="text-sm font-bold">{formatAmericanOdds(getCombinedOdds())}</div>
-                  </div>
-                  
-                  <div className="flex gap-2 mt-3 items-center">
-                    <div className="text-sm">Stake:</div>
-                    <Input 
-                      type="number" 
-                      className="bg-[#0e1824] border-[#1c2b3a] h-8 flex-1"
-                      min="0"
-                      step="0.1"
-                      value={combinedStake || ''}
-                      onChange={(e) => handleCombinedStakeChange(e.target.value)}
-                    />
-                  </div>
+              </div>
+            )}
+            
+            {selections.length > 0 && (
+              <div className="mt-4">
+                <div className="mb-3">
+                  <label htmlFor="bet-amount" className="block text-sm font-medium mb-1">
+                    {t('sports.betAmount')}
+                  </label>
+                  <Input
+                    id="bet-amount"
+                    type="number"
+                    min="1"
+                    value={betAmount}
+                    onChange={(e) => setBetAmount(e.target.value)}
+                    className="bg-[#1c2b3a] border-[#293b52] text-white"
+                  />
                 </div>
-              </TabsContent>
-            </>
-          )}
-        </div>
-        
-        {selections.length > 0 && (
-          <div className="bg-[#192531] border-t border-[#1c2b3a] p-3">
-            <div className="flex justify-between items-center mb-2">
-              <div className="text-sm text-gray-400">{t('sports.totalStake')}:</div>
-              <div className="font-semibold">{getTotalStake().toFixed(2)}</div>
-            </div>
-            
-            <div className="flex justify-between items-center mb-3">
-              <div className="text-sm text-gray-400">{t('sports.potentialPayout')}:</div>
-              <div className="font-semibold">{totalPayout.toFixed(2)}</div>
-            </div>
-            
-            <Button 
-              className="w-full bg-[#09b66d] hover:bg-[#0fda85]"
-              onClick={placeBets}
-            >
-              {t('sports.placeBet')}
-            </Button>
-          </div>
+                
+                <div className="space-y-2 mb-4">
+                  {selections.length === 1 && (
+                    <div className="flex justify-between text-sm">
+                      <span>{t('sports.potentialWin')}:</span>
+                      <span className="font-medium">{formatCurrency(calculateSingleWinnings(getNumericBetAmount(), selections[0].odds))}</span>
+                    </div>
+                  )}
+                  
+                  {selections.length > 1 && !hasConflictingSelections() && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span>{t('sports.totalOdds')}:</span>
+                        <span className="font-medium">{formatAmericanOdds(selections.reduce((total, bet) => total * bet.odds, 1))}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>{t('sports.potentialWin')}:</span>
+                        <span className="font-medium">{formatCurrency(calculateCombinedWinnings(getNumericBetAmount()))}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {hasConflictingSelections() && (
+                    <div className="text-yellow-400 text-sm">
+                      {t('sports.conflictingSelections')}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  {selections.length === 1 && (
+                    <Button className="w-full bg-[#09b66d] hover:bg-[#08a562]">
+                      {t('sports.placeBet')}
+                    </Button>
+                  )}
+                  
+                  {selections.length > 1 && !hasConflictingSelections() && (
+                    <Button className="w-full bg-[#09b66d] hover:bg-[#08a562]">
+                      {t('sports.placeCombinedBet')}
+                    </Button>
+                  )}
+                  
+                  {selections.length > 1 && (
+                    <Button variant="outline" className="w-full border-[#293b52]">
+                      {t('sports.placeSeparateBets')}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
-      </Tabs>
+      </div>
     </Card>
   );
 }
