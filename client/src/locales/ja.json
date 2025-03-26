@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "ホーム",
+    "crash": "クラッシュ",
+    "favorites": "お気に入り",
+    "wallet": "ウォレット",
+    "bets": "ベット"
+  },
+  "tabs": {
+    "casino": "カジノ",
+    "sports": "スポーツ"
+  },
+  "sidebar": {
+    "favorites": "お気に入り",
+    "recent": "最近",
+    "challenges": "チャレンジ",
+    "myBets": "マイベット",
+    "games": "ゲーム",
+    "cryptoSpinOriginals": "CryptoSpinオリジナル",
+    "cryptoSpinExclusives": "CryptoSpin限定",
+    "crash": "クラッシュ",
+    "liveCasino": "ライブカジノ",
+    "tvShows": "TVショー",
+    "releases": "新着",
+    "bonusBuy": "ボーナス購入",
+    "enhancedRTP": "強化RTP",
+    "providers": "プロバイダー",
+    "liveEvents": "ライブイベント",
+    "comingSoon": "近日公開",
+    "topSports": "トップスポーツ",
+    "profile": "プロフィール",
+    "promotions": "プロモーション",
+    "affiliate": "アフィリエイト",
+    "vipClub": "VIPクラブ",
+    "blog": "ブログ",
+    "forum": "フォーラム",
+    "sponsorships": "スポンサーシップ",
+    "responsibleGaming": "責任あるゲーミング",
+    "liveSupport": "ライブサポート",
+    "language": "言語"
+  },
+  "buttons": {
+    "deposit": "入金",
+    "startPlaying": "プレイを開始",
+    "learnMore": "詳細を見る",
+    "viewAll": "すべて表示",
+    "watchNow": "今すぐ見る",
+    "viewMatches": "試合を見る",
+    "betNow": "今すぐベット"
+  },
+  "header": {
+    "searchGames": "ゲームを検索..."
+  },
+  "home": {
+    "welcome": "ようこそ",
+    "welcomeDescription": "興奮あふれるゲーム選択でクリプトカジノゲームのスリルを体験しましょう。責任を持ってプレイしてください！",
+    "featuredGames": "注目のゲーム",
+    "popularGames": "人気のゲーム"
+  },
+  "sports": {
+    "searchEvents": "イベントを検索...",
+    "nba": "NBAから",
+    "allMatches": "すべての試合",
+    "pay3rdQuarter": "第3クォーター支払い",
+    "badStartsInsurance": "悪いスタート保険",
+    "premierLeague": "プレミアリーグ",
+    "pay3Goals": "3ゴール支払い",
+    "favorites": "お気に入り",
+    "live": "ライブ",
+    "today": "今日",
+    "tomorrow": "明日",
+    "soccer": "サッカー",
+    "basketball": "バスケットボール",
+    "tennis": "テニス",
+    "topSports": "トップスポーツ",
+    "liveEvents": "ライブイベント",
+    "markets": "マーケット"
+  },
+  "gameDetails": {
+    "type": "タイプ",
+    "players": "プレイヤー"
+  },
+  "wallet": {
+    "balance": "残高",
+    "deposit": "入金",
+    "withdraw": "出金",
+    "history": "履歴"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "登録",
+    "logout": "ログアウト"
+  },
+  "languageSelector": {
+    "selectLanguage": "言語を選択",
+    "languageUpdated": "言語が更新されました",
+    "languageUpdateDescription": "言語設定が更新されました。変更を適用するためにページが再読み込みされます。",
+    "errorUpdating": "言語の更新中にエラーが発生しました",
+    "unknownError": "不明なエラーが発生しました"
+  }
+}

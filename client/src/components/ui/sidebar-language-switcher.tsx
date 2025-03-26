@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { useTranslation } from 'react-i18next';
+import i18n from '@/lib/i18n';
 
 interface Language {
   code: string;
@@ -40,6 +42,7 @@ const LANGUAGES: Language[] = [
 export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boolean }) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isChangingLanguage, setIsChangingLanguage] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   
@@ -54,6 +57,9 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
     try {
       setIsChangingLanguage(true);
       
+      // Cambiar el idioma en i18next inmediatamente para una mejor experiencia
+      await i18n.changeLanguage(languageCode);
+      
       // Call API to update language preference
       await apiRequest({
         method: "POST",
@@ -62,21 +68,21 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
       });
       
       toast({
-        title: "Idioma actualizado",
-        description: "Tu preferencia de idioma ha sido actualizada. La página se recargará para aplicar los cambios.",
+        title: t('languageSelector.languageUpdated'),
+        description: t('languageSelector.languageUpdateDescription'),
       });
       
       // Cerrar el diálogo
       setIsOpen(false);
       
-      // Recargar la página para aplicar el nuevo idioma
+      // Recargar la página para aplicar el nuevo idioma completamente
       setTimeout(() => {
         window.location.reload();
       }, 1500);
     } catch (error) {
       toast({
-        title: "Error al actualizar el idioma",
-        description: error instanceof Error ? error.message : "Ocurrió un error desconocido",
+        title: t('languageSelector.errorUpdating'),
+        description: error instanceof Error ? error.message : t('languageSelector.unknownError'),
         variant: "destructive",
       });
     } finally {
@@ -96,7 +102,7 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
         </DialogTrigger>
         <DialogContent className="bg-[#192531] border-[#1c2b3a] text-white">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold mb-4">Seleccionar idioma</DialogTitle>
+            <DialogTitle className="text-xl font-bold mb-4">{t('languageSelector.selectLanguage')}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto">
             {LANGUAGES.map((language) => (
@@ -128,7 +134,7 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
             <span className="text-gray-400">
               <Globe className="h-4 w-4" />
             </span>
-            <span className="ml-3">Idioma: {currentLanguage.flag} {currentLanguage.nativeName}</span>
+            <span className="ml-3">{t('sidebar.language')}: {currentLanguage.flag} {currentLanguage.nativeName}</span>
           </div>
           <span className="text-gray-400">
             <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -139,7 +145,7 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
       </DialogTrigger>
       <DialogContent className="bg-[#192531] border-[#1c2b3a] text-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold mb-4">Seleccionar idioma</DialogTitle>
+          <DialogTitle className="text-xl font-bold mb-4">{t('languageSelector.selectLanguage')}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto">
           {LANGUAGES.map((language) => (
