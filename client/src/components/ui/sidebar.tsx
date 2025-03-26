@@ -3,17 +3,21 @@ import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import {
   Home,
-  Dices,
-  Gamepad,
   TrendingUp,
   Wallet,
   Clock,
   User,
-  Settings,
-  Trophy,
-  Disc,
-  Heart
+  Star,
+  Target,
+  BarChart,
+  Tv,
+  Rocket,
+  PlayCircle,
+  DollarSign,
+  Zap,
+  Menu
 } from "lucide-react";
+import { useState } from "react";
 
 interface SidebarProps {
   className?: string;
@@ -22,68 +26,146 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState("casino");
 
   const isActive = (path: string) => location === path;
 
-  const navItems = [
-    { name: "Home", path: "/", icon: <Home className="h-5 w-5" /> },
-    { name: "Crash", path: "/crash", icon: <TrendingUp className="h-5 w-5" /> },
-    { name: "Wallet", path: "/wallet", icon: <Wallet className="h-5 w-5" /> },
-    { name: "History", path: "/history", icon: <Clock className="h-5 w-5" /> },
-    { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
+  const favoriteItems = [
+    { name: "Favoritos", icon: <Star className="h-4 w-4" /> },
+    { name: "Reciente", icon: <Clock className="h-4 w-4" /> },
+    { name: "Desafíos", icon: <Target className="h-4 w-4" /> },
+    { name: "Mis Apuestas", icon: <BarChart className="h-4 w-4" /> },
+  ];
+
+  const gameItems = [
+    { name: "Originales de CryptoSpin", path: "/crash", icon: <Home className="h-4 w-4" /> },
+    { name: "Exclusivos de CryptoSpin", path: "/crash", icon: <Star className="h-4 w-4" /> },
+    { name: "Crash", path: "/crash", icon: <TrendingUp className="h-4 w-4" /> },
+    { name: "Casino en Vivo", path: "/crash", icon: <PlayCircle className="h-4 w-4" /> },
+    { name: "Concursos de TV", path: "/crash", icon: <Tv className="h-4 w-4" /> },
+    { name: "Lanzamientos", path: "/crash", icon: <Rocket className="h-4 w-4" /> },
+    { name: "Compra de bonificación", path: "/wallet", icon: <DollarSign className="h-4 w-4" /> },
+    { name: "RTP mejorado", path: "/crash", icon: <Zap className="h-4 w-4" /> },
   ];
 
   return (
-    <div className={cn("hidden md:flex flex-col w-64 bg-[#1A2634] border-r border-gray-800", className)}>
-      <div className="p-4 border-b border-gray-800">
-        <h1 className="font-heading font-bold text-2xl text-white tracking-wider">
-          <span className="text-[#00FFAA]">Crypto</span>Spin
-        </h1>
+    <div className={cn(
+      "hidden md:flex flex-col bg-[#0e1824] border-r border-[#1c2b3a] transition-all duration-300",
+      sidebarCollapsed ? "w-16" : "w-64",
+      className
+    )}>
+      {/* Top section with menu button and tabs */}
+      <div className="flex items-center border-b border-[#1c2b3a] p-2">
+        <button 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="text-gray-400 hover:text-white p-1"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        
+        {!sidebarCollapsed && (
+          <div className="flex ml-2">
+            <button 
+              className={`px-4 py-2 rounded-md text-white font-medium text-sm ${activeTab === 'casino' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
+              onClick={() => setActiveTab('casino')}
+            >
+              CASINO
+            </button>
+            <button 
+              className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
+              onClick={() => setActiveTab('deportes')}
+            >
+              DEPORTES
+            </button>
+          </div>
+        )}
       </div>
-      
-      <div className="flex-1 overflow-y-auto py-4">
-        <nav className="px-2 space-y-1">
-          {navItems.map((item) => (
+
+      {/* Sidebar content */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Favorites section */}
+        <div className="py-2 border-b border-[#1c2b3a]">
+          {favoriteItems.map((item, index) => (
             <Link 
-              key={item.path} 
-              href={item.path}
+              key={index} 
+              href="#"
+              className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+            >
+              <span className="text-gray-400">
+                {item.icon}
+              </span>
+              {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
+            </Link>
+          ))}
+        </div>
+
+        {/* Games section */}
+        <div>
+          {!sidebarCollapsed && (
+            <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
+              Juegos
+            </div>
+          )}
+
+          {gameItems.map((item, index) => (
+            <Link 
+              key={index} 
+              href={item.path || "#"}
               className={cn(
-                "flex items-center px-4 py-3 text-gray-300 rounded-lg group transition-colors",
-                isActive(item.path) 
-                  ? "bg-[#0F1923] text-white" 
-                  : "hover:bg-[#0F1923] hover:text-white"
+                "flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors",
+                item.path && isActive(item.path) ? "bg-[#192531]" : ""
               )}
             >
               <span className={cn(
-                "mr-3", 
-                isActive(item.path) 
-                  ? "text-[#00FFAA]" 
-                  : "text-gray-400 group-hover:text-[#00FFAA]"
+                "", 
+                item.path && isActive(item.path) ? "text-[#09b66d]" : "text-gray-400"
               )}>
                 {item.icon}
               </span>
-              <span>{item.name}</span>
+              {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
             </Link>
           ))}
-        </nav>
-      </div>
-      
-      <div className="p-4 border-t border-gray-800">
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-[#00FFAA] flex items-center justify-center text-[#0F1923]">
-            <User className="h-4 w-4" />
-          </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-white">{user?.username}</p>
-            <button 
-              onClick={() => logoutMutation.mutate()}
-              className="text-xs text-gray-400 hover:text-[#00FFAA]"
-            >
-              Sign out
-            </button>
-          </div>
+        </div>
+
+        {/* Providers section */}
+        <div className="border-t border-[#1c2b3a]">
+          {!sidebarCollapsed && (
+            <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
+              Proveedores
+            </div>
+          )}
+          <Link 
+            href="#"
+            className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+          >
+            <span className="text-gray-400">
+              <Zap className="h-4 w-4" />
+            </span>
+            {!sidebarCollapsed && <span className="ml-3">Proveedores</span>}
+          </Link>
         </div>
       </div>
+      
+      {/* User section */}
+      {!sidebarCollapsed && (
+        <div className="p-4 border-t border-[#1c2b3a]">
+          <div className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-[#09b66d] flex items-center justify-center text-[#0e1824]">
+              <User className="h-4 w-4" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-white">{user?.username}</p>
+              <button 
+                onClick={() => logoutMutation.mutate()}
+                className="text-xs text-gray-400 hover:text-[#09b66d]"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

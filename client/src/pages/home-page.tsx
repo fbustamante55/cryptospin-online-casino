@@ -46,23 +46,13 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#0F1923] text-white">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#0e1824] text-white">
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-[#0F1923] border-b border-gray-800 sticky top-0 z-10">
+        {/* Header - Only visible on desktop */}
+        <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10 hidden md:block">
           <div className="flex items-center justify-between h-16 px-4">
-            <div className="flex items-center md:hidden">
-              <button type="button" className="text-gray-400 hover:text-white focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <h1 className="font-heading font-bold text-xl text-white tracking-wider ml-3">
-                <span className="text-[#00FFAA]">Crypto</span>Spin
-              </h1>
-            </div>
             
             <div className="hidden md:flex flex-1 px-4">
               <div className="max-w-md w-full">
@@ -97,27 +87,27 @@ export default function HomePage() {
           </div>
         </header>
         
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        {/* Main Content - Add top padding on mobile for the mobile header */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6">
           <div className="max-w-7xl mx-auto">
             {/* Hero Banner */}
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1A2634] to-[#0F1923] mb-8">
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#192531] to-[#0e1824] mb-8">
               <div className="relative z-10 p-6 md:p-8">
-                <h2 className="font-heading text-xl md:text-3xl font-bold text-white mb-2">Welcome to <span className="text-[#00FFAA]">CryptoSpin</span></h2>
+                <h2 className="font-heading text-xl md:text-3xl font-bold text-white mb-2">Welcome to <span className="text-[#09b66d]">CryptoSpin</span></h2>
                 <p className="text-gray-300 max-w-lg mb-4">Experience the thrill of crypto casino gaming with our selection of exciting games. Play responsibly!</p>
                 <div className="flex flex-wrap gap-3">
                   <Link href="/crash">
-                    <button className="px-4 py-2 bg-[#00FFAA] hover:bg-[#33FFBB] text-[#0F1923] font-medium rounded-lg transition-all duration-200">
+                    <button className="px-4 py-2 bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium rounded-md transition-all duration-200">
                       Start Playing
                     </button>
                   </Link>
-                  <button className="px-4 py-2 bg-[#0F1923]/50 hover:bg-[#0F1923] text-white font-medium rounded-lg border border-gray-700 transition-all duration-200">
+                  <button className="px-4 py-2 bg-[#313d4a] hover:bg-[#2a3441] text-white font-medium rounded-md transition-all duration-200">
                     Learn More
                   </button>
                 </div>
               </div>
               <div className="hidden md:block absolute top-0 right-0 w-1/3 h-full">
-                <div className="w-full h-full opacity-25 bg-gradient-to-l from-[#00FFAA]/30 to-transparent"></div>
+                <div className="w-full h-full opacity-25 bg-gradient-to-l from-[#09b66d]/30 to-transparent"></div>
                 <svg 
                   className="absolute top-1/2 right-16 transform -translate-y-1/2 opacity-30" 
                   width="200" 
@@ -126,11 +116,11 @@ export default function HomePage() {
                   fill="none" 
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <circle cx="100" cy="100" r="80" stroke="#00FFAA" strokeWidth="4" />
-                  <path d="M100 20 L100 180" stroke="#00FFAA" strokeWidth="4" strokeDasharray="10 10" />
-                  <path d="M20 100 L180 100" stroke="#00FFAA" strokeWidth="4" strokeDasharray="10 10" />
-                  <circle cx="100" cy="100" r="40" stroke="#FF3E8F" strokeWidth="4" fill="#0F1923" />
-                  <path d="M70 100 L130 100 M100 70 L100 130" stroke="#FF3E8F" strokeWidth="4" />
+                  <circle cx="100" cy="100" r="80" stroke="#09b66d" strokeWidth="4" />
+                  <path d="M100 20 L100 180" stroke="#09b66d" strokeWidth="4" strokeDasharray="10 10" />
+                  <path d="M20 100 L180 100" stroke="#09b66d" strokeWidth="4" strokeDasharray="10 10" />
+                  <circle cx="100" cy="100" r="40" stroke="#fff" strokeWidth="4" fill="#0e1824" />
+                  <path d="M70 100 L130 100 M100 70 L100 130" stroke="#fff" strokeWidth="4" />
                 </svg>
               </div>
             </div>
@@ -149,63 +139,26 @@ export default function HomePage() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-heading text-xl font-bold text-white">Popular Games</h2>
-                <a href="#" className="text-[#00FFAA] hover:text-[#33FFBB] text-sm font-medium">View All</a>
+                <a href="#" className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">View All</a>
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {popularGames.map((game, index) => (
                   <Link key={index} href={`/${game.gameType}`}>
-                    <div className="rounded-lg overflow-hidden bg-[#1A2634] border border-gray-800 hover:border-[#00FFAA]/30 transition-all duration-300 cursor-pointer">
-                      <div className="aspect-square bg-gradient-to-br from-[#1A2634] to-[#0F1923] relative overflow-hidden">
+                    <div className="rounded-lg overflow-hidden bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                      <div className="aspect-square bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
                         <svg 
                           xmlns="http://www.w3.org/2000/svg" 
                           className="w-full h-full opacity-70"
                           viewBox="0 0 200 200"
-                          style={{ background: 'linear-gradient(135deg, #1A2634 0%, #0F1923 100%)' }}
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
                         >
-                          {game.type === "Slots" && (
-                            <>
-                              <rect x="50" y="50" width="100" height="100" rx="10" fill="#0F1923" stroke="#333" strokeWidth="2"/>
-                              <circle cx="75" cy="100" r="15" fill="#00FFAA" opacity="0.8"/>
-                              <circle cx="100" cy="100" r="15" fill="#FF3E8F" opacity="0.8"/>
-                              <circle cx="125" cy="100" r="15" fill="#F9C846" opacity="0.8"/>
-                            </>
-                          )}
-                          {game.type === "Dice" && (
-                            <>
-                              <rect x="60" y="60" width="80" height="80" rx="10" fill="#0F1923" stroke="#333" strokeWidth="2"/>
-                              <circle cx="75" cy="75" r="5" fill="#fff"/>
-                              <circle cx="100" cy="100" r="5" fill="#fff"/>
-                              <circle cx="125" cy="125" r="5" fill="#fff"/>
-                              <circle cx="75" cy="125" r="5" fill="#fff"/>
-                              <circle cx="125" cy="75" r="5" fill="#fff"/>
-                            </>
-                          )}
-                          {game.type === "Crash" && (
-                            <>
-                              <rect x="50" y="50" width="100" height="100" rx="5" fill="#0F1923" stroke="#333" strokeWidth="2"/>
-                              <path d="M70,130 Q90,80 110,110 T150,70" stroke="#00FFAA" strokeWidth="3" fill="none"/>
-                              <circle cx="150" cy="70" r="4" fill="#00FFAA"/>
-                            </>
-                          )}
-                          {game.type === "Table" && (
-                            <>
-                              <rect x="50" y="70" width="100" height="60" rx="5" fill="#0F1923" stroke="#333" strokeWidth="2"/>
-                              <circle cx="70" cy="100" r="10" fill="#F9C846" opacity="0.8"/>
-                              <circle cx="100" cy="100" r="10" fill="#FF3E8F" opacity="0.8"/>
-                              <circle cx="130" cy="100" r="10" fill="#00FFAA" opacity="0.8"/>
-                            </>
-                          )}
-                          {game.type === "Card" && (
-                            <>
-                              <rect x="70" y="60" width="40" height="60" rx="3" fill="#0F1923" stroke="#fff" strokeWidth="1"/>
-                              <rect x="90" y="80" width="40" height="60" rx="3" fill="#0F1923" stroke="#fff" strokeWidth="1"/>
-                              <text x="80" y="85" fill="#FF3E8F" fontSize="12">A♥</text>
-                              <text x="130" y="135" fill="#00FFAA" fontSize="12">K♠</text>
-                            </>
-                          )}
+                          {/* All items will show crash graphic in our new design */}
+                          <rect x="50" y="50" width="100" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
+                          <path d="M70,130 Q90,80 110,110 T150,70" stroke="#09b66d" strokeWidth="3" fill="none"/>
+                          <circle cx="150" cy="70" r="4" fill="#09b66d"/>
                         </svg>
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0F1923] to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0e1824] to-transparent"></div>
                       </div>
                       <div className="p-3">
                         <h3 className="font-heading font-medium text-white text-sm">{game.title}</h3>
