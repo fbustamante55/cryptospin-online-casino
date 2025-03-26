@@ -212,10 +212,10 @@ export function CrashGame() {
   };
 
   return (
-    <Card className="rounded-xl overflow-hidden bg-[#1A2634] border-gray-800">
-      <div className="border-b border-gray-800 px-4 py-3 flex justify-between items-center">
+    <Card className="rounded-xl overflow-hidden bg-[#192531] border-[#1c2b3a]">
+      <div className="border-b border-[#1c2b3a] px-4 py-3 flex justify-between items-center">
         <h3 className="font-heading font-semibold text-white flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#F9C846] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#09b66d] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
           Crash Game
@@ -227,29 +227,29 @@ export function CrashGame() {
       
       <div className="p-4">
         <div className="flex justify-between mb-4">
-          <div className="px-3 py-1.5 rounded-lg bg-[#0F1923] text-sm">
+          <div className="px-3 py-1.5 rounded-md bg-[#0e1824] text-sm border border-[#1c2b3a]">
             <span className="text-gray-400">Balance:</span>
             <span className="text-white font-medium ml-1">{user?.balance || 0}</span>
           </div>
-          <div className="px-3 py-1.5 rounded-lg bg-[#0F1923] text-sm text-center">
-            <span className="text-[#00FFAA] font-bold text-xl">{currentMultiplier.toFixed(2)}x</span>
+          <div className="px-3 py-1.5 rounded-md bg-[#0e1824] text-sm text-center border border-[#1c2b3a]">
+            <span className="text-[#09b66d] font-bold text-xl">{currentMultiplier.toFixed(2)}x</span>
           </div>
         </div>
         
         <div 
           ref={graphRef}
-          className="h-48 bg-[#0F1923] rounded-lg mb-4 relative overflow-hidden"
+          className="h-48 bg-[#0e1824] rounded-md mb-4 relative overflow-hidden border border-[#1c2b3a]"
         >
           <svg width="100%" height="100%" className="absolute inset-0">
             {/* Grid lines */}
-            <line x1="10" y1="10" x2="10" y2="100%" stroke="#333" strokeWidth="1" />
-            <line x1="0" y1="100%" x2="100%" y2="100%" stroke="#333" strokeWidth="1" />
+            <line x1="10" y1="10" x2="10" y2="100%" stroke="#1c2b3a" strokeWidth="1" />
+            <line x1="0" y1="100%" x2="100%" y2="100%" stroke="#1c2b3a" strokeWidth="1" />
             
             {/* Crash path */}
             <path
               ref={crashLineRef}
               d="M 10,100% Q 30,100% 50,80%"
-              stroke={isCrashed ? "#FF3E8F" : "#00FFAA"}
+              stroke={isCrashed ? "#e64d6b" : "#09b66d"}
               strokeWidth="3"
               fill="none"
             />
@@ -261,7 +261,7 @@ export function CrashGame() {
                 cx={crashLineRef.current?.getPointAtLength(crashLineRef.current.getTotalLength()).x || 0}
                 cy={crashLineRef.current?.getPointAtLength(crashLineRef.current.getTotalLength()).y || 0}
                 r="6"
-                fill="#FF3E8F"
+                fill="#e64d6b"
               />
             )}
             
@@ -271,7 +271,7 @@ export function CrashGame() {
                 cx={crashLineRef.current?.getPointAtLength(crashLineRef.current.getTotalLength()).x || 0}
                 cy={crashLineRef.current?.getPointAtLength(crashLineRef.current.getTotalLength()).y || 0}
                 r="6"
-                fill="#00FFAA"
+                fill="#09b66d"
               />
             )}
           </svg>
@@ -283,7 +283,7 @@ export function CrashGame() {
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 1 }}
               >
-                <span className="font-bold text-4xl text-[#00FFAA]">{currentMultiplier.toFixed(2)}x</span>
+                <span className="font-bold text-4xl text-[#09b66d]">{currentMultiplier.toFixed(2)}x</span>
               </motion.div>
             )}
             
@@ -293,7 +293,7 @@ export function CrashGame() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <span className="font-bold text-4xl text-[#FF3E8F]">CRASH</span>
+                <span className="font-bold text-4xl text-[#e64d6b]">CRASH</span>
               </motion.div>
             )}
             
@@ -303,7 +303,7 @@ export function CrashGame() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <span className="font-bold text-2xl text-[#00FFAA]">+{showWinAmount}</span>
+                <span className="font-bold text-2xl text-[#09b66d]">+{showWinAmount}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -322,7 +322,7 @@ export function CrashGame() {
               type="number"
               value={bet}
               onChange={(e) => setBet(parseInt(e.target.value) || 10)}
-              className="bg-[#0F1923] text-center border border-gray-800 py-2 w-full text-white rounded-lg focus:outline-none focus:border-[#00FFAA]"
+              className="bg-[#0e1824] text-center border border-[#1c2b3a] py-2 w-full text-white rounded-md focus:outline-none focus:border-[#09b66d]"
               disabled={!canBet || betMutation.isPending}
             />
           </div>
@@ -353,7 +353,7 @@ export function CrashGame() {
                   setAutoCashout(value);
                 }
               }}
-              className="bg-[#0F1923] text-center border border-gray-800 py-2 w-full text-white rounded-lg focus:outline-none focus:border-[#00FFAA]"
+              className="bg-[#0e1824] text-center border border-[#1c2b3a] py-2 w-full text-white rounded-md focus:outline-none focus:border-[#09b66d]"
               disabled={!canBet || betMutation.isPending || !isAutoCashoutEnabled}
             />
           </div>
