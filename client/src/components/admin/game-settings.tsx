@@ -59,7 +59,7 @@ const rouletteSettingsSchema = z.object({
 
 const slotsSettingsSchema = z.object({
   houseEdge: z.number().min(0).max(15),
-  minBet: z.number().min(0.5),
+  minBet: z.number().min(1),
   maxBet: z.number().min(10),
   maxWin: z.number().min(100),
   symbolFrequencies: z.object({
@@ -77,43 +77,6 @@ const slotsSettingsSchema = z.object({
   jackpotEnabled: z.boolean(),
   jackpotAmount: z.number().min(1000),
   jackpotContribution: z.number().min(0).max(10),
-  payouts: z.object({
-    '7': z.object({
-      symbol: z.string(),
-      label: z.string(),
-      multiplier: z.number().min(1).max(100),
-    }),
-    'BAR': z.object({
-      symbol: z.string(),
-      label: z.string(),
-      multiplier: z.number().min(1).max(50),
-    }),
-    '2xBAR': z.object({
-      symbol: z.string(),
-      label: z.string(),
-      multiplier: z.number().min(1).max(50),
-    }),
-    '3xBAR': z.object({
-      symbol: z.string(),
-      label: z.string(),
-      multiplier: z.number().min(1).max(30),
-    }),
-    'CHERRY': z.object({
-      symbol: z.string(),
-      label: z.string(),
-      multiplier: z.number().min(1).max(20),
-    }),
-    'ANY': z.object({
-      symbol: z.string(),
-      label: z.string(),
-      multiplier: z.number().min(1).max(10),
-    }),
-  }).optional(),
-  bookOfEgyptSettings: z.object({
-    winProbability: z.number().min(1).max(100),
-    maxMultiplier: z.number().min(5).max(100),
-    specialSymbolFrequency: z.number().min(1).max(30),
-  }).optional(),
 });
 
 const diceSettingsSchema = z.object({
@@ -206,7 +169,7 @@ export function GameSettings() {
     resolver: zodResolver(slotsSettingsSchema),
     defaultValues: {
       houseEdge: 5,
-      minBet: 0.5,
+      minBet: 10,
       maxBet: 5000,
       maxWin: 50000,
       symbolFrequencies: {
@@ -224,19 +187,6 @@ export function GameSettings() {
       jackpotEnabled: true,
       jackpotAmount: 10000,
       jackpotContribution: 2,
-      payouts: {
-        '7': { symbol: '7', label: 'Three 7s', multiplier: 10 },
-        'BAR': { symbol: 'BAR', label: 'Three BARs', multiplier: 5 },
-        '2xBAR': { symbol: '2xBAR', label: 'Three 2xBARs', multiplier: 4 },
-        '3xBAR': { symbol: '3xBAR', label: 'Three 3xBARs', multiplier: 3 },
-        'CHERRY': { symbol: 'CH', label: 'Three CHERRYs', multiplier: 2.5 },
-        'ANY': { symbol: 'ANY', label: 'Any matching symbols', multiplier: 2 }
-      },
-      bookOfEgyptSettings: {
-        winProbability: 25, // 25% probabilidad de ganar (baja)
-        maxMultiplier: 10,  // Multiplicador máximo de 10x
-        specialSymbolFrequency: 10 // Frecuencia de símbolos especiales (10%)
-      }
     },
   });
 
@@ -989,275 +939,6 @@ export function GameSettings() {
                           <FormDescription>
                             Maximum amount a player can win in a single spin (excluding jackpot)
                           </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                
-                <Separator className="my-4 bg-gray-800" />
-                
-                {/* Book of Egypt Settings */}
-                <div className="space-y-4">
-                  <div className="text-lg font-semibold flex items-center">
-                    <svg 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="#00FFAA"
-                      strokeWidth="2"
-                      className="h-5 w-5 mr-2"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                      <path d="M7 7h10v10H7z"></path>
-                      <path d="M8 12h8"></path>
-                      <path d="M12 8v8"></path>
-                    </svg>
-                    Book of Egypt Specific Settings
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField
-                      control={slotsForm.control}
-                      name="bookOfEgyptSettings.winProbability"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Win Probability (%)</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={5}
-                                max={50}
-                                step={1}
-                                value={[field.value || 25]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-10 text-center">{field.value || 25}%</span>
-                          </div>
-                          <FormDescription>
-                            Probability of getting a winning combination (lower = harder)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={slotsForm.control}
-                      name="bookOfEgyptSettings.maxMultiplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Maximum Multiplier</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={2}
-                                max={50}
-                                step={1}
-                                value={[field.value || 10]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-10 text-center">{field.value || 10}x</span>
-                          </div>
-                          <FormDescription>
-                            Highest possible multiplier for Book of Egypt
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={slotsForm.control}
-                      name="bookOfEgyptSettings.specialSymbolFrequency"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Special Symbol Frequency (%)</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={1}
-                                max={30}
-                                step={1}
-                                value={[field.value || 10]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-10 text-center">{field.value || 10}%</span>
-                          </div>
-                          <FormDescription>
-                            How often special book symbols appear
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                
-                <Separator className="my-4 bg-gray-800" />
-                
-                {/* Payout Table Settings */}
-                <div className="space-y-4">
-                  <div className="text-lg font-semibold flex items-center">
-                    <svg 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="#00FFAA"
-                      strokeWidth="2"
-                      className="h-5 w-5 mr-2"
-                    >
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M12 6v6l4 2"></path>
-                    </svg>
-                    Payout Table Settings
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={slotsForm.control}
-                      name="payouts.7.multiplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>7 Symbol Multiplier</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={1}
-                                max={20}
-                                step={0.5}
-                                value={[field.value || 10]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-12 text-center">{field.value || 10}x</span>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={slotsForm.control}
-                      name="payouts.BAR.multiplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>BAR Symbol Multiplier</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={1}
-                                max={10}
-                                step={0.5}
-                                value={[field.value || 5]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-12 text-center">{field.value || 5}x</span>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={slotsForm.control}
-                      name="payouts.2xBAR.multiplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>2xBAR Symbol Multiplier</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={1}
-                                max={8}
-                                step={0.5}
-                                value={[field.value || 4]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-12 text-center">{field.value || 4}x</span>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={slotsForm.control}
-                      name="payouts.3xBAR.multiplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>3xBAR Symbol Multiplier</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={1}
-                                max={6}
-                                step={0.5}
-                                value={[field.value || 3]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-12 text-center">{field.value || 3}x</span>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={slotsForm.control}
-                      name="payouts.CHERRY.multiplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CHERRY Symbol Multiplier</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={1}
-                                max={5}
-                                step={0.1}
-                                value={[field.value || 2.5]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-12 text-center">{field.value || 2.5}x</span>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={slotsForm.control}
-                      name="payouts.ANY.multiplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>ANY Matching Symbols Multiplier</FormLabel>
-                          <div className="flex items-center gap-4">
-                            <FormControl>
-                              <Slider
-                                min={1}
-                                max={3}
-                                step={0.1}
-                                value={[field.value || 2]}
-                                onValueChange={(value) => field.onChange(value[0])}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <span className="w-12 text-center">{field.value || 2}x</span>
-                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
