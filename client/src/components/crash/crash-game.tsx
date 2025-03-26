@@ -276,9 +276,10 @@ export function CrashGame() {
             )}
           </svg>
           
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {isPlaying && !isCrashed && !cashedOut && (
               <motion.div 
+                key="playing"
                 className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 1 }}
@@ -289,6 +290,7 @@ export function CrashGame() {
             
             {isCrashed && (
               <motion.div 
+                key="crashed"
                 className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -299,6 +301,7 @@ export function CrashGame() {
             
             {cashedOut && (
               <motion.div 
+                key="cashedout"
                 className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}

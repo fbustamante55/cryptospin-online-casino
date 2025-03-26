@@ -637,7 +637,7 @@ export default function ProfilePage() {
                           <div className="flex justify-end">
                             <Button 
                               type="submit"
-                              className="bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                              className="bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
                               disabled={isSubmittingProfile}
                             >
                               {isSubmittingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -670,7 +670,7 @@ export default function ProfilePage() {
                         </div>
                         <Button 
                           variant="outline" 
-                          className="border-gray-700 hover:border-[#00FFAA] hover:text-[#00FFAA]"
+                          className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
                           onClick={() => setShowPasswordChangeDialog(true)}
                         >
                           <Lock className="h-4 w-4 mr-2" />
@@ -700,7 +700,7 @@ export default function ProfilePage() {
                         ) : (
                           <Button 
                             variant="outline" 
-                            className="border-gray-700 hover:border-[#00FFAA] hover:text-[#00FFAA]"
+                            className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
                             onClick={() => setShowSetup2FADialog(true)}
                           >
                             <Shield className="h-4 w-4 mr-2" />
@@ -927,7 +927,7 @@ export default function ProfilePage() {
                 {!phoneVerificationSent ? (
                   <Button 
                     type="submit" 
-                    className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                    className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
                     disabled={isSubmittingPhone}
                   >
                     {isSubmittingPhone && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -936,7 +936,7 @@ export default function ProfilePage() {
                 ) : (
                   <Button 
                     type="submit" 
-                    className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                    className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
                     disabled={isVerifyingPhone}
                   >
                     {isVerifyingPhone && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -961,7 +961,7 @@ export default function ProfilePage() {
           
           <div className="py-4 space-y-4">
             <Alert className="bg-[#0F1923] border-gray-800">
-              <Mail className="h-4 w-4 text-[#00FFAA]" />
+              <Mail className="h-4 w-4 text-[#09b66d]" />
               <AlertTitle>Verification Required</AlertTitle>
               <AlertDescription>
                 We have sent a verification email to <span className="font-medium">{user?.email}</span>. 
@@ -976,7 +976,7 @@ export default function ProfilePage() {
           
           <DialogFooter>
             <Button 
-              className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
             >
               Resend Verification Email
             </Button>
@@ -1056,7 +1056,7 @@ export default function ProfilePage() {
               <DialogFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                  className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
                   disabled={isChangingPassword}
                 >
                   {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -1080,7 +1080,7 @@ export default function ProfilePage() {
           
           <div className="py-4 space-y-6">
             <Alert className="bg-[#0F1923] border-gray-800">
-              <Shield className="h-4 w-4 text-[#00FFAA]" />
+              <Shield className="h-4 w-4 text-[#09b66d]" />
               <AlertTitle>Stronger Security</AlertTitle>
               <AlertDescription>
                 Two-factor authentication adds an extra layer of security to your account. Each time you sign in, you'll need your password and a verification code.
@@ -1097,7 +1097,7 @@ export default function ProfilePage() {
               
               <div>
                 <p className="text-sm text-gray-300 mb-2">Manual Setup Code:</p>
-                <code className="bg-[#0F1923] text-[#00FFAA] px-3 py-1 rounded-md text-sm">
+                <code className="bg-[#0F1923] text-[#09b66d] px-3 py-1 rounded-md text-sm">
                   ABCD EFGH IJKL MNOP
                 </code>
               </div>
@@ -1118,7 +1118,7 @@ export default function ProfilePage() {
           
           <DialogFooter>
             <Button 
-              className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
               onClick={() => setup2FA("123456")} // In a real app, this would use the input value
             >
               Enable 2FA
@@ -1226,7 +1226,7 @@ export default function ProfilePage() {
               <DialogFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                  className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
                   disabled={isAddingWallet}
                 >
                   {isAddingWallet && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -1250,7 +1250,7 @@ export default function ProfilePage() {
           
           <div className="py-4 space-y-6">
             <Alert className="bg-[#0F1923] border-gray-800">
-              <AlertCircle className="h-4 w-4 text-[#00FFAA]" />
+              <AlertCircle className="h-4 w-4 text-[#09b66d]" />
               <AlertTitle>Why we need this</AlertTitle>
               <AlertDescription>
                 KYC verification is required to comply with regulations and to protect against fraud and money laundering.
@@ -1269,7 +1269,7 @@ export default function ProfilePage() {
                     <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
                       <div className="flex flex-col items-center justify-center space-y-2">
                         <div className="p-2 rounded-full bg-[#0F1923]">
-                          <Upload className="h-5 w-5 text-[#00FFAA]" />
+                          <Upload className="h-5 w-5 text-[#09b66d]" />
                         </div>
                         <p className="text-sm font-medium">Front Side</p>
                         <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
@@ -1279,7 +1279,7 @@ export default function ProfilePage() {
                     <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
                       <div className="flex flex-col items-center justify-center space-y-2">
                         <div className="p-2 rounded-full bg-[#0F1923]">
-                          <Upload className="h-5 w-5 text-[#00FFAA]" />
+                          <Upload className="h-5 w-5 text-[#09b66d]" />
                         </div>
                         <p className="text-sm font-medium">Back Side</p>
                         <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
@@ -1295,7 +1295,7 @@ export default function ProfilePage() {
                   <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="p-2 rounded-full bg-[#0F1923]">
-                        <Upload className="h-5 w-5 text-[#00FFAA]" />
+                        <Upload className="h-5 w-5 text-[#09b66d]" />
                       </div>
                       <p className="text-sm font-medium">Address Document</p>
                       <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
@@ -1308,7 +1308,7 @@ export default function ProfilePage() {
           
           <DialogFooter>
             <Button 
-              className="w-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
               disabled={isUploadingKYC}
               onClick={submitKYC}
             >
