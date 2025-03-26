@@ -62,7 +62,7 @@ export default function HomePage() {
                   </div>
                   <input 
                     type="text" 
-                    className="block w-full pl-10 pr-3 py-2 rounded-lg bg-[#1A2634] border border-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00FFAA] focus:border-[#00FFAA]" 
+                    className="block w-full pl-10 pr-3 py-2 rounded-md bg-[#192531] border border-[#1c2b3a] text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#09b66d] focus:border-[#09b66d]" 
                     placeholder="Search games..."
                   />
                 </div>
@@ -70,12 +70,12 @@ export default function HomePage() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <button className="flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 text-[#0F1923] font-medium text-sm hover:from-[#33FFBB] hover:to-[#00FFAA] transition-all duration-200">
+              <button className="flex items-center px-3 py-1.5 rounded-md bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium text-sm transition-all duration-200">
                 <Plus className="h-4 w-4 mr-1.5" />
                 <span>Deposit</span>
               </button>
               
-              <div className="px-3 py-1.5 rounded-full bg-[#1A2634] border border-gray-700 flex items-center">
+              <div className="px-3 py-1.5 rounded-md bg-[#192531] border border-[#1c2b3a] flex items-center">
                 <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
                 <span className="text-sm font-semibold">{user?.balance}</span>
               </div>

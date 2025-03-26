@@ -11,13 +11,13 @@ export function AnimatedBackground({ children, className = '' }: AnimatedBackgro
   const particlesRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   
-  // Esquemas de colores para transiciones
+  // Esquemas de colores para transiciones en tono verde/azul para CryptoSpin
   const colorSchemes = [
-    { background: 'from-black via-[#1E1E3F] to-[#3D0000]', accent: '#ff3a3a' },
-    { background: 'from-[#000F1A] via-[#002440] to-[#003A66]', accent: '#00a3ff' },
-    { background: 'from-[#001A02] via-[#003D07] to-[#005C0C]', accent: '#00ff44' },
-    { background: 'from-[#1A0020] via-[#350040] to-[#5F0073]', accent: '#d275ff' },
-    { background: 'from-[#201A00] via-[#403500] to-[#736000]', accent: '#ffce00' },
+    { background: 'from-[#0e1824] via-[#192531] to-[#0e1824]', accent: '#09b66d' },
+    { background: 'from-[#0e1824] via-[#1e354a] to-[#0e1824]', accent: '#09b66d' },
+    { background: 'from-[#0e1824] via-[#0e2a24] to-[#0e1824]', accent: '#09b66d' },
+    { background: 'from-[#0e1824] via-[#192531] to-[#1c2b3a]', accent: '#09b66d' },
+    { background: 'from-[#0e1824] via-[#0e2a24] to-[#0e1d24]', accent: '#09b66d' },
   ];
 
   // Partículas animadas para el fondo

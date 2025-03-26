@@ -25,24 +25,24 @@ export function GameCard({
   className,
 }: GameCardProps) {
   const tagColorClasses = {
-    primary: "bg-[#00FFAA] text-[#0F1923]",
-    secondary: "bg-[#FF3E8F] text-white",
-    tertiary: "bg-[#F9C846] text-[#0F1923]"
+    primary: "bg-[#09b66d] text-white",
+    secondary: "bg-[#313d4a] text-white",
+    tertiary: "bg-[#F9C846] text-[#0e1824]"
   };
 
   const path = `/${gameType}`;
 
   return (
     <Card className={cn(
-      "rounded-xl overflow-hidden bg-[#1A2634] border-gray-800 hover:border-[#00FFAA]/50 transition-all duration-300 glow-border",
+      "rounded-xl overflow-hidden bg-[#192531] border-[#1c2b3a] hover:border-[#09b66d]/50 transition-all duration-300",
       className
     )}>
-      <div className="aspect-video bg-gradient-to-br from-[#1A2634] to-[#0F1923] relative overflow-hidden">
+      <div className="aspect-video bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
           className="w-full h-full object-cover opacity-60"
           viewBox="0 0 800 450"
-          style={{ background: 'linear-gradient(135deg, #1A2634 0%, #0F1923 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
         >
           {gameType === 'slots' && (
             <>
@@ -75,17 +75,17 @@ export function GameCard({
           
           {gameType === 'crash' && (
             <>
-              <rect x="150" y="100" width="500" height="250" rx="10" fill="#0F1923" stroke="#333" strokeWidth="3"/>
-              <path d="M200,300 Q250,200 300,270 T400,150 T500,100" stroke="#00FFAA" strokeWidth="4" fill="none"/>
-              <circle cx="500" cy="100" r="10" fill="#00FFAA"/>
-              <text x="400" y="200" textAnchor="middle" fill="#00FFAA" fontWeight="bold" fontSize="36">2.5x</text>
-              <line x1="150" y1="300" x2="650" y2="300" stroke="#444" strokeWidth="1"/>
-              <line x1="200" y1="300" x2="200" y2="100" stroke="#444" strokeWidth="1"/>
+              <rect x="150" y="100" width="500" height="250" rx="10" fill="#0e1824" stroke="#1c2b3a" strokeWidth="3"/>
+              <path d="M200,300 Q250,200 300,270 T400,150 T500,100" stroke="#09b66d" strokeWidth="4" fill="none"/>
+              <circle cx="500" cy="100" r="10" fill="#09b66d"/>
+              <text x="400" y="200" textAnchor="middle" fill="#09b66d" fontWeight="bold" fontSize="36">2.5x</text>
+              <line x1="150" y1="300" x2="650" y2="300" stroke="#1c2b3a" strokeWidth="1"/>
+              <line x1="200" y1="300" x2="200" y2="100" stroke="#1c2b3a" strokeWidth="1"/>
             </>
           )}
         </svg>
         
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F1923] to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0e1824] to-transparent"></div>
         
         {tag && (
           <div className="absolute bottom-3 left-3">
@@ -112,7 +112,7 @@ export function GameCard({
         <p className="text-gray-400 text-sm mb-3">{description}</p>
         
         <Link href={path}>
-          <button className="w-full py-2 bg-[#0F1923] hover:bg-[#0F1923]/80 text-[#00FFAA] border border-[#00FFAA]/30 rounded-lg transition-all duration-200 font-medium text-sm">
+          <button className="w-full py-2 bg-[#0e1824] hover:bg-[#192531] text-[#09b66d] border border-[#09b66d]/30 rounded-md transition-all duration-200 font-medium text-sm">
             Play Now
           </button>
         </Link>
