@@ -27,7 +27,10 @@ export function MobileNav() {
         <div className="flex">
           <button 
             className={`px-4 py-2 rounded-md text-white font-medium text-sm ${activeTab === 'casino' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
-            onClick={() => setActiveTab('casino')}
+            onClick={() => {
+              setActiveTab('casino');
+              window.location.href = '/';
+            }}
           >
             CASINO
           </button>
