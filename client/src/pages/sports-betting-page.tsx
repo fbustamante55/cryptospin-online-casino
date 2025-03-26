@@ -678,6 +678,24 @@ export default function SportsBettingPage() {
                               <path d="M6 3v18M18 9l-8 8M18 15v4h-4M13 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="#09b66d"/>
                               <path d="M7 21h10" stroke="#fff"/>
                             </svg>
+                          ) : sport.key === 'baseball_kbo' || sport.key.includes('kbo') ? (
+                            <svg 
+                              className="w-5 h-5" 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              {/* Logo KBO con bate, pelota y letras */}
+                              <path d="M5 17A9 9 0 0 1 14 8 9 9 0 0 1 5 17Z" stroke="#09b66d" fill="none"/>
+                              <path d="M18 6L13 11" stroke="#09b66d" strokeWidth="2"/>
+                              <path d="M9 9c0 1 .8 2 2 2M9 13c0 1 .8 2 2 2" stroke="#fff"/>
+                              <path d="M18 4L20 6M20 4L18 6" stroke="#fff"/>
+                              <path d="M5 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="#09b66d"/>
+                            </svg>
                           ) : (
                             <div className="w-4 h-4 bg-white/20 rounded-full"></div>
                           )}
