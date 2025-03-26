@@ -22,6 +22,7 @@ import CasinoGamesPage from "@/pages/casino-games-page";
 import TournamentsPage from "@/pages/tournaments-page";
 import RewardsPage from "@/pages/rewards-page";
 import SupportPage from "@/pages/support-page";
+import RecentGamesPage from "@/pages/recent-games-page";
 
 function Router() {
   return (
@@ -32,6 +33,7 @@ function Router() {
       <ProtectedRoute path="/history" component={HistoryPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/favorites" component={FavoritesPage} />
+      <ProtectedRoute path="/recent" component={RecentGamesPage} />
       <ProtectedRoute path="/admin" component={AdminDashboardPage} />
       <ProtectedRoute path="/sports" component={SportsBettingPage} />
       <ProtectedRoute path="/games" component={CasinoGamesPage} />

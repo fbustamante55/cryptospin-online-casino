@@ -47,7 +47,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   const favoriteItems = [
     { name: t('sidebar.favorites'), path: "/favorites", icon: <Star className="h-4 w-4" /> },
-    { name: t('sidebar.recent'), icon: <Clock className="h-4 w-4" /> },
+    { name: t('sidebar.recent'), path: "/recent", icon: <Clock className="h-4 w-4" /> },
     { name: t('sidebar.challenges'), icon: <Target className="h-4 w-4" /> },
     { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
   ];
