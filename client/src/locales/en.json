@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "Home",
+    "crash": "Crash",
+    "favorites": "Favorites",
+    "wallet": "Wallet",
+    "bets": "Bets"
+  },
+  "tabs": {
+    "casino": "CASINO",
+    "sports": "SPORTS"
+  },
+  "sidebar": {
+    "favorites": "Favorites",
+    "recent": "Recent",
+    "challenges": "Challenges",
+    "myBets": "My Bets",
+    "games": "Games",
+    "cryptoSpinOriginals": "CryptoSpin Originals",
+    "cryptoSpinExclusives": "CryptoSpin Exclusives",
+    "crash": "Crash",
+    "liveCasino": "Live Casino",
+    "tvShows": "TV Shows",
+    "releases": "Releases",
+    "bonusBuy": "Bonus Buy",
+    "enhancedRTP": "Enhanced RTP",
+    "providers": "Providers",
+    "liveEvents": "Live Events",
+    "comingSoon": "Coming Soon",
+    "topSports": "Top Sports",
+    "profile": "Profile",
+    "promotions": "Promotions",
+    "affiliate": "Affiliate",
+    "vipClub": "VIP Club",
+    "blog": "Blog",
+    "forum": "Forum",
+    "sponsorships": "Sponsorships",
+    "responsibleGaming": "Responsible Gaming",
+    "liveSupport": "Live Support",
+    "language": "Language"
+  },
+  "buttons": {
+    "deposit": "Deposit",
+    "startPlaying": "Start Playing",
+    "learnMore": "Learn More",
+    "viewAll": "View All",
+    "watchNow": "Watch Now",
+    "viewMatches": "View Matches",
+    "betNow": "Bet Now"
+  },
+  "header": {
+    "searchGames": "Search games..."
+  },
+  "home": {
+    "welcome": "Welcome to",
+    "welcomeDescription": "Experience the thrill of crypto casino gaming with our selection of exciting games. Play responsibly!",
+    "featuredGames": "Featured Games",
+    "popularGames": "Popular Games"
+  },
+  "sports": {
+    "searchEvents": "Search events...",
+    "nba": "From NBA",
+    "allMatches": "All matches",
+    "pay3rdQuarter": "3rd Q Payment",
+    "badStartsInsurance": "Insurance for bad starts",
+    "premierLeague": "Premier League",
+    "pay3Goals": "Pay for 3 goals",
+    "favorites": "Favorites",
+    "live": "Live",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "soccer": "Soccer",
+    "basketball": "Basketball",
+    "tennis": "Tennis",
+    "topSports": "Top Sports",
+    "liveEvents": "Live Events",
+    "markets": "markets"
+  },
+  "gameDetails": {
+    "type": "Type",
+    "players": "Players"
+  },
+  "wallet": {
+    "balance": "Balance",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "history": "History"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "languageSelector": {
+    "selectLanguage": "Select Language",
+    "languageUpdated": "Language updated",
+    "languageUpdateDescription": "Your language preference has been updated. The page will reload to apply the changes.",
+    "errorUpdating": "Error updating language",
+    "unknownError": "An unknown error occurred"
+  }
+}

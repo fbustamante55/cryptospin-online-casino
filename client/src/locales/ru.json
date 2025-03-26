@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "Главная",
+    "crash": "Crash",
+    "favorites": "Избранное",
+    "wallet": "Кошелек",
+    "bets": "Ставки"
+  },
+  "tabs": {
+    "casino": "КАЗИНО",
+    "sports": "СПОРТ"
+  },
+  "sidebar": {
+    "favorites": "Избранное",
+    "recent": "Недавнее",
+    "challenges": "Задания",
+    "myBets": "Мои ставки",
+    "games": "Игры",
+    "cryptoSpinOriginals": "Оригиналы CryptoSpin",
+    "cryptoSpinExclusives": "Эксклюзивы CryptoSpin",
+    "crash": "Crash",
+    "liveCasino": "Живое казино",
+    "tvShows": "ТВ-шоу",
+    "releases": "Новинки",
+    "bonusBuy": "Покупка бонусов",
+    "enhancedRTP": "Улучшенный RTP",
+    "providers": "Провайдеры",
+    "liveEvents": "Прямые трансляции",
+    "comingSoon": "Скоро",
+    "topSports": "Топ спорта",
+    "profile": "Профиль",
+    "promotions": "Акции",
+    "affiliate": "Партнерство",
+    "vipClub": "VIP клуб",
+    "blog": "Блог",
+    "forum": "Форум",
+    "sponsorships": "Спонсорство",
+    "responsibleGaming": "Ответственная игра",
+    "liveSupport": "Живая поддержка",
+    "language": "Язык"
+  },
+  "buttons": {
+    "deposit": "Депозит",
+    "startPlaying": "Начать игру",
+    "learnMore": "Подробнее",
+    "viewAll": "Смотреть все",
+    "watchNow": "Смотреть сейчас",
+    "viewMatches": "Смотреть матчи",
+    "betNow": "Сделать ставку"
+  },
+  "header": {
+    "searchGames": "Поиск игр..."
+  },
+  "home": {
+    "welcome": "Добро пожаловать в",
+    "welcomeDescription": "Испытайте азарт крипто-казино с нашим выбором захватывающих игр. Играйте ответственно!",
+    "featuredGames": "Рекомендуемые игры",
+    "popularGames": "Популярные игры"
+  },
+  "sports": {
+    "searchEvents": "Поиск событий...",
+    "nba": "Из NBA",
+    "allMatches": "Все матчи",
+    "pay3rdQuarter": "Выплата в 3-й четверти",
+    "badStartsInsurance": "Страховка при плохом начале",
+    "premierLeague": "Премьер-лига",
+    "pay3Goals": "Оплата за 3 гола",
+    "favorites": "Избранное",
+    "live": "Трансляция",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "soccer": "Футбол",
+    "basketball": "Баскетбол",
+    "tennis": "Теннис",
+    "topSports": "Топ спорта",
+    "liveEvents": "Прямые трансляции",
+    "markets": "рынков"
+  },
+  "gameDetails": {
+    "type": "Тип",
+    "players": "Игроки"
+  },
+  "wallet": {
+    "balance": "Баланс",
+    "deposit": "Пополнить",
+    "withdraw": "Вывести",
+    "history": "История"
+  },
+  "auth": {
+    "login": "Вход",
+    "register": "Регистрация",
+    "logout": "Выход"
+  },
+  "languageSelector": {
+    "selectLanguage": "Выбрать язык",
+    "languageUpdated": "Язык обновлен",
+    "languageUpdateDescription": "Ваш язык был обновлен. Страница будет перезагружена для применения изменений.",
+    "errorUpdating": "Ошибка обновления языка",
+    "unknownError": "Произошла неизвестная ошибка"
+  }
+}

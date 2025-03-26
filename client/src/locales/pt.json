@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "Início",
+    "crash": "Crash",
+    "favorites": "Favoritos",
+    "wallet": "Carteira",
+    "bets": "Apostas"
+  },
+  "tabs": {
+    "casino": "CASSINO",
+    "sports": "ESPORTES"
+  },
+  "sidebar": {
+    "favorites": "Favoritos",
+    "recent": "Recentes",
+    "challenges": "Desafios",
+    "myBets": "Minhas Apostas",
+    "games": "Jogos",
+    "cryptoSpinOriginals": "Originais do CryptoSpin",
+    "cryptoSpinExclusives": "Exclusivos do CryptoSpin",
+    "crash": "Crash",
+    "liveCasino": "Cassino ao Vivo",
+    "tvShows": "Programas de TV",
+    "releases": "Lançamentos",
+    "bonusBuy": "Compra de Bônus",
+    "enhancedRTP": "RTP Melhorado",
+    "providers": "Provedores",
+    "liveEvents": "Eventos ao Vivo",
+    "comingSoon": "Em Breve",
+    "topSports": "Principais Esportes",
+    "profile": "Perfil",
+    "promotions": "Promoções",
+    "affiliate": "Afiliado",
+    "vipClub": "Clube VIP",
+    "blog": "Blog",
+    "forum": "Fórum",
+    "sponsorships": "Patrocínios",
+    "responsibleGaming": "Jogo Responsável",
+    "liveSupport": "Suporte ao Vivo",
+    "language": "Idioma"
+  },
+  "buttons": {
+    "deposit": "Depositar",
+    "startPlaying": "Começar a Jogar",
+    "learnMore": "Saiba Mais",
+    "viewAll": "Ver Todos",
+    "watchNow": "Assistir Agora",
+    "viewMatches": "Ver Partidas",
+    "betNow": "Apostar Agora"
+  },
+  "header": {
+    "searchGames": "Buscar jogos..."
+  },
+  "home": {
+    "welcome": "Bem-vindo ao",
+    "welcomeDescription": "Experimente a emoção dos jogos de cassino com criptomoedas com nossa seleção de jogos emocionantes. Jogue com responsabilidade!",
+    "featuredGames": "Jogos em Destaque",
+    "popularGames": "Jogos Populares"
+  },
+  "sports": {
+    "searchEvents": "Buscar eventos...",
+    "nba": "Da NBA",
+    "allMatches": "Todas as partidas",
+    "pay3rdQuarter": "Pagamento no 3º Quarto",
+    "badStartsInsurance": "Seguro para maus inícios",
+    "premierLeague": "Premier League",
+    "pay3Goals": "Paga por 3 gols",
+    "favorites": "Favoritos",
+    "live": "Ao Vivo",
+    "today": "Hoje",
+    "tomorrow": "Amanhã",
+    "soccer": "Futebol",
+    "basketball": "Basquete",
+    "tennis": "Tênis",
+    "topSports": "Principais Esportes",
+    "liveEvents": "Eventos ao Vivo",
+    "markets": "mercados"
+  },
+  "gameDetails": {
+    "type": "Tipo",
+    "players": "Jogadores"
+  },
+  "wallet": {
+    "balance": "Saldo",
+    "deposit": "Depositar",
+    "withdraw": "Sacar",
+    "history": "Histórico"
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Registrar",
+    "logout": "Sair"
+  },
+  "languageSelector": {
+    "selectLanguage": "Selecionar Idioma",
+    "languageUpdated": "Idioma atualizado",
+    "languageUpdateDescription": "Sua preferência de idioma foi atualizada. A página será recarregada para aplicar as alterações.",
+    "errorUpdating": "Erro ao atualizar o idioma",
+    "unknownError": "Ocorreu um erro desconhecido"
+  }
+}

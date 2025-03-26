@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "Home",
+    "crash": "Crash",
+    "favorites": "Preferiti",
+    "wallet": "Portafoglio",
+    "bets": "Scommesse"
+  },
+  "tabs": {
+    "casino": "CASINÒ",
+    "sports": "SPORT"
+  },
+  "sidebar": {
+    "favorites": "Preferiti",
+    "recent": "Recenti",
+    "challenges": "Sfide",
+    "myBets": "Le mie scommesse",
+    "games": "Giochi",
+    "cryptoSpinOriginals": "Originali CryptoSpin",
+    "cryptoSpinExclusives": "Esclusivi CryptoSpin",
+    "crash": "Crash",
+    "liveCasino": "Casinò dal vivo",
+    "tvShows": "Programmi TV",
+    "releases": "Novità",
+    "bonusBuy": "Acquisto bonus",
+    "enhancedRTP": "RTP migliorato",
+    "providers": "Fornitori",
+    "liveEvents": "Eventi dal vivo",
+    "comingSoon": "In arrivo",
+    "topSports": "Sport principali",
+    "profile": "Profilo",
+    "promotions": "Promozioni",
+    "affiliate": "Affiliato",
+    "vipClub": "Club VIP",
+    "blog": "Blog",
+    "forum": "Forum",
+    "sponsorships": "Sponsorizzazioni",
+    "responsibleGaming": "Gioco responsabile",
+    "liveSupport": "Supporto dal vivo",
+    "language": "Lingua"
+  },
+  "buttons": {
+    "deposit": "Deposito",
+    "startPlaying": "Inizia a giocare",
+    "learnMore": "Scopri di più",
+    "viewAll": "Vedi tutti",
+    "watchNow": "Guarda ora",
+    "viewMatches": "Vedi partite",
+    "betNow": "Scommetti ora"
+  },
+  "header": {
+    "searchGames": "Cerca giochi..."
+  },
+  "home": {
+    "welcome": "Benvenuto su",
+    "welcomeDescription": "Prova l'emozione dei giochi da casinò crypto con la nostra selezione di giochi entusiasmanti. Gioca responsabilmente!",
+    "featuredGames": "Giochi in evidenza",
+    "popularGames": "Giochi popolari"
+  },
+  "sports": {
+    "searchEvents": "Cerca eventi...",
+    "nba": "Dalla NBA",
+    "allMatches": "Tutte le partite",
+    "pay3rdQuarter": "Pagamento al 3° quarto",
+    "badStartsInsurance": "Assicurazione per inizi negativi",
+    "premierLeague": "Premier League",
+    "pay3Goals": "Paga per 3 gol",
+    "favorites": "Preferiti",
+    "live": "In diretta",
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "soccer": "Calcio",
+    "basketball": "Basket",
+    "tennis": "Tennis",
+    "topSports": "Sport principali",
+    "liveEvents": "Eventi dal vivo",
+    "markets": "mercati"
+  },
+  "gameDetails": {
+    "type": "Tipo",
+    "players": "Giocatori"
+  },
+  "wallet": {
+    "balance": "Saldo",
+    "deposit": "Deposito",
+    "withdraw": "Prelievo",
+    "history": "Cronologia"
+  },
+  "auth": {
+    "login": "Accedi",
+    "register": "Registrati",
+    "logout": "Esci"
+  },
+  "languageSelector": {
+    "selectLanguage": "Seleziona lingua",
+    "languageUpdated": "Lingua aggiornata",
+    "languageUpdateDescription": "La tua preferenza linguistica è stata aggiornata. La pagina verrà ricaricata per applicare le modifiche.",
+    "errorUpdating": "Errore nell'aggiornamento della lingua",
+    "unknownError": "Si è verificato un errore sconosciuto"
+  }
+}

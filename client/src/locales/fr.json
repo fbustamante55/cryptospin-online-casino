@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "crash": "Crash",
+    "favorites": "Favoris",
+    "wallet": "Portefeuille",
+    "bets": "Paris"
+  },
+  "tabs": {
+    "casino": "CASINO",
+    "sports": "SPORTS"
+  },
+  "sidebar": {
+    "favorites": "Favoris",
+    "recent": "Récent",
+    "challenges": "Défis",
+    "myBets": "Mes Paris",
+    "games": "Jeux",
+    "cryptoSpinOriginals": "Originaux de CryptoSpin",
+    "cryptoSpinExclusives": "Exclusifs de CryptoSpin",
+    "crash": "Crash",
+    "liveCasino": "Casino en Direct",
+    "tvShows": "Émissions TV",
+    "releases": "Nouveautés",
+    "bonusBuy": "Achat de Bonus",
+    "enhancedRTP": "RTP Amélioré",
+    "providers": "Fournisseurs",
+    "liveEvents": "Événements en Direct",
+    "comingSoon": "Bientôt Disponible",
+    "topSports": "Meilleurs Sports",
+    "profile": "Profil",
+    "promotions": "Promotions",
+    "affiliate": "Affilié",
+    "vipClub": "Club VIP",
+    "blog": "Blog",
+    "forum": "Forum",
+    "sponsorships": "Partenariats",
+    "responsibleGaming": "Jeu Responsable",
+    "liveSupport": "Support en Direct",
+    "language": "Langue"
+  },
+  "buttons": {
+    "deposit": "Dépôt",
+    "startPlaying": "Commencer à Jouer",
+    "learnMore": "En Savoir Plus",
+    "viewAll": "Voir Tout",
+    "watchNow": "Regarder Maintenant",
+    "viewMatches": "Voir les Matchs",
+    "betNow": "Parier Maintenant"
+  },
+  "header": {
+    "searchGames": "Rechercher des jeux..."
+  },
+  "home": {
+    "welcome": "Bienvenue sur",
+    "welcomeDescription": "Découvrez l'excitation des jeux de casino crypto avec notre sélection de jeux passionnants. Jouez de manière responsable !",
+    "featuredGames": "Jeux en Vedette",
+    "popularGames": "Jeux Populaires"
+  },
+  "sports": {
+    "searchEvents": "Rechercher des événements...",
+    "nba": "De la NBA",
+    "allMatches": "Tous les matchs",
+    "pay3rdQuarter": "Paiement au 3ème Q",
+    "badStartsInsurance": "Assurance pour les mauvais départs",
+    "premierLeague": "Premier League",
+    "pay3Goals": "Paie pour 3 buts",
+    "favorites": "Favoris",
+    "live": "En Direct",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "soccer": "Football",
+    "basketball": "Basketball",
+    "tennis": "Tennis",
+    "topSports": "Meilleurs Sports",
+    "liveEvents": "Événements en Direct",
+    "markets": "marchés"
+  },
+  "gameDetails": {
+    "type": "Type",
+    "players": "Joueurs"
+  },
+  "wallet": {
+    "balance": "Solde",
+    "deposit": "Dépôt",
+    "withdraw": "Retrait",
+    "history": "Historique"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "logout": "Déconnexion"
+  },
+  "languageSelector": {
+    "selectLanguage": "Sélectionner la Langue",
+    "languageUpdated": "Langue mise à jour",
+    "languageUpdateDescription": "Votre préférence de langue a été mise à jour. La page va se recharger pour appliquer les changements.",
+    "errorUpdating": "Erreur lors de la mise à jour de la langue",
+    "unknownError": "Une erreur inconnue s'est produite"
+  }
+}
