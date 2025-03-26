@@ -58,56 +58,21 @@ export default function HomePage() {
             </div>
           </div>
           
-          {/* Barra de navegación centrada */}
-          <div className="flex-1 flex justify-center">
-            <nav className="flex items-center">
-              <div className="flex rounded-lg bg-[#192531] border border-[#1c2b3a] overflow-hidden">
-                <Link href="/sports-betting">
-                  <div className={`flex items-center px-4 py-2 text-white transition-colors cursor-pointer ${location === '/sports-betting' ? 'bg-[#0e1824]' : 'hover:bg-[#243546]'} relative`}>
-                    <Trophy className={`h-4 w-4 mr-2 ${location === '/sports-betting' ? 'text-[#09b66d]' : ''}`} />
-                    <span className="text-sm font-medium">Deportes</span>
-                    {location === '/sports-betting' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#09b66d]"></div>}
-                  </div>
-                </Link>
-                <Link href="/casino-games">
-                  <div className={`flex items-center px-4 py-2 text-white transition-colors cursor-pointer ${location === '/casino-games' ? 'bg-[#0e1824]' : 'hover:bg-[#243546]'} relative`}>
-                    <Dices className={`h-4 w-4 mr-2 ${location === '/casino-games' ? 'text-[#09b66d]' : ''}`} />
-                    <span className="text-sm font-medium">Casino</span>
-                    {location === '/casino-games' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#09b66d]"></div>}
-                  </div>
-                </Link>
-                <Link href="/crash">
-                  <div className={`flex items-center px-4 py-2 text-white transition-colors cursor-pointer ${location === '/crash' ? 'bg-[#0e1824]' : 'hover:bg-[#243546]'} relative`}>
-                    <TrendingUp className={`h-4 w-4 mr-2 ${location === '/crash' ? 'text-[#09b66d]' : ''}`} />
-                    <span className="text-sm font-medium">Crash</span>
-                    {location === '/crash' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#09b66d]"></div>}
-                  </div>
-                </Link>
-                <Link href="/rewards">
-                  <div className={`flex items-center px-4 py-2 text-white transition-colors cursor-pointer ${location === '/rewards' ? 'bg-[#0e1824]' : 'hover:bg-[#243546]'} relative`}>
-                    <Gift className={`h-4 w-4 mr-2 ${location === '/rewards' ? 'text-[#09b66d]' : ''}`} />
-                    <span className="text-sm font-medium">Recompensas</span>
-                    {location === '/rewards' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#09b66d]"></div>}
-                  </div>
-                </Link>
-              </div>
-            </nav>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center">
-              <div className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-3 py-1.5 mr-3">
-                <div className="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-white text-sm font-medium mr-1">${user?.balance || '0.00'}</span>
-                <ChevronDown className="h-4 w-4 text-white" />
+          {/* Balance con botón de depósito centrado */}
+          <div className="flex-1 flex justify-center items-center">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center rounded-full bg-[#09b66d] px-3 py-1.5">
+                <div className="h-4 w-4 rounded-full bg-white mr-2 flex-shrink-0"></div>
+                <span className="text-white text-sm font-bold mr-1">${user?.balance || '0.00'}</span>
               </div>
               
-              <button className="flex items-center px-4 py-1.5 rounded-md bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium text-sm transition-all duration-200">
-                <Plus className="h-4 w-4 mr-1.5" />
+              <button className="flex items-center px-5 py-1.5 rounded-full bg-[#f8c541] hover:bg-[#f9d252] text-[#0e1824] font-bold text-sm transition-all duration-200">
                 {t('buttons.deposit')}
               </button>
             </div>
-            
+          </div>
+          
+          <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-3">
               <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
                 <Search className="h-5 w-5" />
