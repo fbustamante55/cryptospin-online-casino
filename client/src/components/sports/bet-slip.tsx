@@ -580,7 +580,6 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
             </div>
           )}
         </TabsContent>
-      </Tabs>
     </Card>
   );
 }

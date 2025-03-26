@@ -121,8 +121,8 @@ export function Sidebar({ className }: SidebarProps) {
       name: t('sidebar.liveEvents'), 
       icon: <Tv className="h-4 w-4" />, 
       badge: liveEventsCount.toString(), 
-      path: "/sports", 
-      onClick: () => handleSportsFilter('live')
+      path: "/sports/vivo",
+      onClick: undefined
     },
     { 
       name: "Próximos Eventos", 
