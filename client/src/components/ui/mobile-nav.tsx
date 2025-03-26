@@ -20,7 +20,10 @@ export function MobileNav() {
     <>
       {/* Top mobile header */}
       <div className="md:hidden fixed top-0 left-0 right-0 bg-[#0e1824] border-b border-[#1c2b3a] z-20 px-4 py-2 flex items-center justify-between">
-        <Menu className="h-5 w-5 text-gray-400" />
+        <div className="flex items-center">
+          <Menu className="h-5 w-5 text-gray-400 mr-3" />
+          <h1 className="text-lg font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
+        </div>
         <div className="flex">
           <button 
             className={`px-4 py-2 rounded-md text-white font-medium text-sm ${activeTab === 'casino' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}

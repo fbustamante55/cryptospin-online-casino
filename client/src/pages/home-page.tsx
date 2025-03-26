@@ -54,7 +54,10 @@ export default function HomePage() {
         <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10 hidden md:block">
           <div className="flex items-center justify-between h-16 px-4">
             
-            <div className="hidden md:flex flex-1 px-4">
+            <div className="hidden md:flex flex-1 items-center px-4">
+              <div className="flex items-center mr-6">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
+              </div>
               <div className="max-w-md w-full">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

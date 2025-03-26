@@ -15,7 +15,16 @@ import {
   PlayCircle,
   DollarSign,
   Zap,
-  Menu
+  Menu,
+  Gift,
+  Users,
+  Award,
+  FileText,
+  MessageCircle,
+  Globe,
+  HeartHandshake,
+  Headset,
+  BookOpenText
 } from "lucide-react";
 import { useState } from "react";
 
@@ -47,6 +56,19 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Lanzamientos", path: "/crash", icon: <Rocket className="h-4 w-4" /> },
     { name: "Compra de bonificación", path: "/wallet", icon: <DollarSign className="h-4 w-4" /> },
     { name: "RTP mejorado", path: "/crash", icon: <Zap className="h-4 w-4" /> },
+  ];
+  
+  const footerItems = [
+    { name: "Perfil", path: "/profile", icon: <User className="h-4 w-4" />, hasArrow: true },
+    { name: "Promociones", path: "#", icon: <Gift className="h-4 w-4" />, hasArrow: true },
+    { name: "Afiliado", path: "#", icon: <Users className="h-4 w-4" /> },
+    { name: "Club VIP", path: "#", icon: <Award className="h-4 w-4" /> },
+    { name: "Blog", path: "#", icon: <FileText className="h-4 w-4" /> },
+    { name: "Foro", path: "#", icon: <MessageCircle className="h-4 w-4" /> },
+    { name: "Patrocinios", path: "#", icon: <HeartHandshake className="h-4 w-4" />, hasArrow: true },
+    { name: "Juego Responsable", path: "#", icon: <BookOpenText className="h-4 w-4" /> },
+    { name: "Soporte en vivo", path: "#", icon: <Headset className="h-4 w-4" /> },
+    { name: "Idioma: Español", path: "#", icon: <Globe className="h-4 w-4" />, hasArrow: true },
   ];
 
   return (
@@ -144,6 +166,31 @@ export function Sidebar({ className }: SidebarProps) {
             </span>
             {!sidebarCollapsed && <span className="ml-3">Proveedores</span>}
           </Link>
+        </div>
+        
+        {/* Footer Items */}
+        <div className="border-t border-[#1c2b3a]">
+          {footerItems.map((item, index) => (
+            <Link 
+              key={index} 
+              href={item.path || "#"}
+              className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+            >
+              <div className="flex items-center">
+                <span className="text-gray-400">
+                  {item.icon}
+                </span>
+                {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
+              </div>
+              {!sidebarCollapsed && item.hasArrow && (
+                <span className="text-gray-400">
+                  <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 9L5 5L1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              )}
+            </Link>
+          ))}
         </div>
       </div>
       
