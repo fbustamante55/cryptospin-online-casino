@@ -104,13 +104,13 @@ export function NotificationSender() {
       });
       
       toast({
-        title: "Notification Sent",
-        description: `The notification has been successfully sent to ${
-          data.targetType === "all" ? "all users" : 
-          data.targetType === "specific" ? "specified users" :
-          data.targetType === "winners" ? "users with winning records" :
-          data.targetType === "losers" ? "users with losing records" :
-          data.targetType === "highRollers" ? "high rollers" : "new users"
+        title: "Notificación Enviada",
+        description: `La notificación ha sido enviada exitosamente a ${
+          data.targetType === "all" ? "todos los usuarios" : 
+          data.targetType === "specific" ? "usuarios específicos" :
+          data.targetType === "winners" ? "usuarios con registros ganadores" :
+          data.targetType === "losers" ? "usuarios con registros perdedores" :
+          data.targetType === "highRollers" ? "grandes apostadores" : "nuevos usuarios"
         }`,
         variant: "default",
       });
@@ -122,7 +122,7 @@ export function NotificationSender() {
       console.error("Error sending notification:", error);
       toast({
         title: "Error",
-        description: "Failed to send notification. Please try again.",
+        description: "No se pudo enviar la notificación. Por favor, intenta de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -135,10 +135,10 @@ export function NotificationSender() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="h-5 w-5 text-[#00FFAA]" />
-          Send Global Notification
+          Enviar Notificación Global
         </CardTitle>
         <CardDescription>
-          Send platform-wide or targeted notifications to users
+          Envía notificaciones a toda la plataforma o a usuarios específicos
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -151,16 +151,16 @@ export function NotificationSender() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notification Title</FormLabel>
+                      <FormLabel>Título de la Notificación</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Enter notification title" 
+                          placeholder="Ingresa el título de la notificación" 
                           className="bg-[#0F1923] border-gray-800"
                           {...field} 
                         />
                       </FormControl>
                       <FormDescription>
-                        A clear, concise title for this notification
+                        Un título claro y conciso para esta notificación
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -172,16 +172,16 @@ export function NotificationSender() {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Message</FormLabel>
+                      <FormLabel>Mensaje</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Enter notification message"
+                          placeholder="Ingresa el mensaje de la notificación"
                           className="min-h-[120px] bg-[#0F1923] border-gray-800"
                           {...field} 
                         />
                       </FormControl>
                       <FormDescription>
-                        The main content of your notification
+                        El contenido principal de tu notificación
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -194,20 +194,20 @@ export function NotificationSender() {
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type</FormLabel>
+                        <FormLabel>Tipo</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-[#0F1923] border-gray-800">
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder="Seleccionar tipo" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-[#1A2634] border-gray-800">
-                            <SelectItem value="info">Information</SelectItem>
-                            <SelectItem value="success">Success</SelectItem>
-                            <SelectItem value="warning">Warning</SelectItem>
+                            <SelectItem value="info">Información</SelectItem>
+                            <SelectItem value="success">Éxito</SelectItem>
+                            <SelectItem value="warning">Advertencia</SelectItem>
                             <SelectItem value="error">Error</SelectItem>
                           </SelectContent>
                         </Select>
@@ -221,21 +221,21 @@ export function NotificationSender() {
                     name="priority"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Priority</FormLabel>
+                        <FormLabel>Prioridad</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-[#0F1923] border-gray-800">
-                              <SelectValue placeholder="Select priority" />
+                              <SelectValue placeholder="Seleccionar prioridad" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-[#1A2634] border-gray-800">
-                            <SelectItem value="low">Low</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="high">High</SelectItem>
-                            <SelectItem value="urgent">Urgent</SelectItem>
+                            <SelectItem value="low">Baja</SelectItem>
+                            <SelectItem value="medium">Media</SelectItem>
+                            <SelectItem value="high">Alta</SelectItem>
+                            <SelectItem value="urgent">Urgente</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -251,7 +251,7 @@ export function NotificationSender() {
                   name="targetType"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel>Target Audience</FormLabel>
+                      <FormLabel>Audiencia Objetivo</FormLabel>
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
@@ -263,7 +263,7 @@ export function NotificationSender() {
                               <RadioGroupItem value="all" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              All Users
+                              Todos los Usuarios
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -271,7 +271,7 @@ export function NotificationSender() {
                               <RadioGroupItem value="specific" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              Specific Users
+                              Usuarios Específicos
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -279,7 +279,7 @@ export function NotificationSender() {
                               <RadioGroupItem value="winners" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              Winners
+                              Ganadores
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -287,7 +287,7 @@ export function NotificationSender() {
                               <RadioGroupItem value="losers" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              Losers
+                              Perdedores
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -295,7 +295,7 @@ export function NotificationSender() {
                               <RadioGroupItem value="highRollers" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              High Rollers
+                              Grandes Apostadores
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -303,7 +303,7 @@ export function NotificationSender() {
                               <RadioGroupItem value="newUsers" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              New Users
+                              Nuevos Usuarios
                             </FormLabel>
                           </FormItem>
                         </RadioGroup>
@@ -319,16 +319,16 @@ export function NotificationSender() {
                     name="userIdsText"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>User IDs</FormLabel>
+                        <FormLabel>IDs de Usuarios</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Enter comma-separated user IDs"
+                            placeholder="Ingresa IDs de usuarios separados por comas"
                             className="h-[80px] bg-[#0F1923] border-gray-800"
                             {...field} 
                           />
                         </FormControl>
                         <FormDescription>
-                          Enter comma-separated list of user IDs
+                          Ingresa lista de IDs de usuarios separados por comas
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -342,9 +342,9 @@ export function NotificationSender() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-800 p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel>Persistent</FormLabel>
+                        <FormLabel>Persistente</FormLabel>
                         <FormDescription>
-                          Will remain visible until manually dismissed
+                          Permanecerá visible hasta que se descarte manualmente
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -363,9 +363,9 @@ export function NotificationSender() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-800 p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel>Schedule Send</FormLabel>
+                        <FormLabel>Programar Envío</FormLabel>
                         <FormDescription>
-                          Send notification at a scheduled time
+                          Enviar notificación en un momento programado
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -384,7 +384,7 @@ export function NotificationSender() {
                     name="scheduledTime"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Scheduled Time</FormLabel>
+                        <FormLabel>Fecha y Hora Programada</FormLabel>
                         <FormControl>
                           <Input 
                             type="datetime-local"
@@ -404,9 +404,9 @@ export function NotificationSender() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-800 p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel>Action Required</FormLabel>
+                        <FormLabel>Requiere Acción</FormLabel>
                         <FormDescription>
-                          Add an action button to this notification
+                          Agregar un botón de acción a esta notificación
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -426,10 +426,10 @@ export function NotificationSender() {
                       name="actionText"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Button Text</FormLabel>
+                          <FormLabel>Texto del Botón</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="e.g. Claim Bonus"
+                              placeholder="ej. Reclamar Bono"
                               className="bg-[#0F1923] border-gray-800"
                               {...field} 
                             />
@@ -444,10 +444,10 @@ export function NotificationSender() {
                       name="actionUrl"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Action URL</FormLabel>
+                          <FormLabel>URL de Acción</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="e.g. /wallet"
+                              placeholder="ej. /billetera"
                               className="bg-[#0F1923] border-gray-800"
                               {...field} 
                             />
@@ -469,12 +469,12 @@ export function NotificationSender() {
               {isSending ? (
                 <div className="flex items-center">
                   <Send className="mr-2 h-4 w-4 animate-pulse" /> 
-                  Sending...
+                  Enviando...
                 </div>
               ) : (
                 <div className="flex items-center">
                   <Send className="mr-2 h-4 w-4" /> 
-                  Send Notification
+                  Enviar Notificación
                 </div>
               )}
             </Button>
