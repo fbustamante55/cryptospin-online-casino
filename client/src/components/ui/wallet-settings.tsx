@@ -16,9 +16,16 @@ interface FiatCurrency {
 
 export function WalletSettings({ isOpen, onClose }: WalletSettingsProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [hideZeroBalances, setHideZeroBalances] = React.useState(false);
-  const [showFiatEquivalent, setShowFiatEquivalent] = React.useState(true);
-  const [selectedFiat, setSelectedFiat] = React.useState('USD');
+  // Inicializar con valores del localStorage o valores por defecto
+  const [hideZeroBalances, setHideZeroBalances] = React.useState(() => {
+    return localStorage.getItem('walletSettings.hideZeroBalances') === 'true' || false;
+  });
+  const [showFiatEquivalent, setShowFiatEquivalent] = React.useState(() => {
+    return localStorage.getItem('walletSettings.showFiatEquivalent') === 'false' ? false : true;
+  });
+  const [selectedFiat, setSelectedFiat] = React.useState(() => {
+    return localStorage.getItem('walletSettings.selectedFiat') || 'USD';
+  });
   
   const fiatCurrencies: FiatCurrency[] = [
     { code: 'USD', name: 'Dólar estadounidense', symbol: '$' },
@@ -71,7 +78,21 @@ export function WalletSettings({ isOpen, onClose }: WalletSettingsProps) {
   }, [isOpen, onClose]);
   
   const handleSave = () => {
-    // Aquí guardaríamos la configuración en algún almacenamiento persistente
+    // Guardar la configuración en localStorage
+    localStorage.setItem('walletSettings.hideZeroBalances', hideZeroBalances.toString());
+    localStorage.setItem('walletSettings.showFiatEquivalent', showFiatEquivalent.toString());
+    localStorage.setItem('walletSettings.selectedFiat', selectedFiat);
+    
+    // Publicar un evento personalizado para notificar a otros componentes del cambio
+    const event = new CustomEvent('walletSettingsChanged', {
+      detail: {
+        hideZeroBalances,
+        showFiatEquivalent,
+        selectedFiat
+      }
+    });
+    document.dispatchEvent(event);
+    
     console.log('Configuración guardada:', {
       hideZeroBalances,
       showFiatEquivalent,
