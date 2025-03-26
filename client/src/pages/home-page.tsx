@@ -1,7 +1,6 @@
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
 import { GameCard } from "@/components/ui/game-card";
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
@@ -84,8 +83,6 @@ export default function HomePage() {
               </div>
               
               <NotificationDropdown />
-              
-              <LanguageSwitcher />
             </div>
           </div>
         </header>

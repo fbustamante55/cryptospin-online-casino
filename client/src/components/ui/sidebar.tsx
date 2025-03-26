@@ -21,12 +21,12 @@ import {
   Award,
   FileText,
   MessageCircle,
-  Globe,
   HeartHandshake,
   Headset,
   BookOpenText
 } from "lucide-react";
 import { useState } from "react";
+import { SidebarLanguageSwitcher } from "./sidebar-language-switcher";
 
 interface SidebarProps {
   className?: string;
@@ -93,7 +93,6 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Patrocinios", path: "#", icon: <HeartHandshake className="h-4 w-4" />, hasArrow: true },
     { name: "Juego Responsable", path: "#", icon: <BookOpenText className="h-4 w-4" /> },
     { name: "Soporte en vivo", path: "#", icon: <Headset className="h-4 w-4" /> },
-    { name: "Idioma: Español", path: "#", icon: <Globe className="h-4 w-4" />, hasArrow: true },
   ];
 
   return (
@@ -261,6 +260,10 @@ export function Sidebar({ className }: SidebarProps) {
         
         {/* Footer Items */}
         <div className="border-t border-[#1c2b3a]">
+          {/* Idioma Selector */}
+          <SidebarLanguageSwitcher collapsed={sidebarCollapsed} />
+          
+          {/* Otros items */}
           {footerItems.map((item, index) => (
             <Link 
               key={index} 
