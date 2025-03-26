@@ -165,13 +165,38 @@ export function NewEventCard({
   
   // Función para convertir las probabilidades americanas a decimales
   const convertToDecimalOdds = (americanOdds: number): number => {
+    // Manejar el caso especial de 100 para evitar divisiones por cero
+    if (americanOdds === 0) return 1.00;
+    
+    let decimalOdds;
+    
+    // En realidad, muchas de las odds vienen ya en formato decimal en la API
+    // Si el número es pequeño (menor a 10), probablemente ya está en formato decimal
+    if (Math.abs(americanOdds) < 10) {
+      return parseFloat(americanOdds.toFixed(2));
+    }
+    
+    // Primero probemos si ya es un formato decimal (como 1.85, 2.35, etc.)
+    if (americanOdds >= 1 && americanOdds < 10) {
+      return parseFloat(americanOdds.toFixed(2));
+    } 
+    
+    // Convertir formato americano a decimal
     if (americanOdds > 0) {
       // Para probabilidades positivas: (americanOdds / 100) + 1
-      return parseFloat(((americanOdds / 100) + 1).toFixed(2));
+      decimalOdds = (americanOdds / 100) + 1;
     } else {
       // Para probabilidades negativas: (100 / |americanOdds|) + 1
-      return parseFloat((100 / Math.abs(americanOdds) + 1).toFixed(2));
+      decimalOdds = (100 / Math.abs(americanOdds)) + 1;
     }
+    
+    // Directamente mostramos los odds proporcionados por la API como valores decimales
+    // Aquí asumimos que 185 significa 1.85, 250 significa 2.50, etc.
+    if (Math.abs(americanOdds) >= 100 && Math.abs(americanOdds) < 1000) {
+      decimalOdds = Math.abs(americanOdds) / 100;
+    }
+    
+    return parseFloat(decimalOdds.toFixed(2));
   };
   
   // Eliminamos la función duplicada, ya que ahora usamos la importada
