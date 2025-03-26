@@ -1,7 +1,7 @@
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
-import { Search, Plus, Coins, Star, Clock, ChevronRight, Calendar, Activity, Trophy, AlertTriangle } from "lucide-react";
+import { Search, Plus, Coins, Star, Clock, ChevronRight, Calendar, CalendarDays, Activity, Trophy, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -29,6 +29,8 @@ export default function SportsBettingPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeSport, setActiveSport] = useState<string>("");
   const [betSelections, setBetSelections] = useState<BetSelection[]>([]);
+  const [showLiveEvents, setShowLiveEvents] = useState<boolean>(false);
+  const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(true);
   
   // Fetch available sports
   const { 
@@ -144,8 +146,30 @@ export default function SportsBettingPage() {
     }
   ];
   
-  // Filter events for display
-  const filteredEvents = displayEvents?.slice(0, 10) || [];
+  // Helper function to check if an event is live or upcoming
+  const isEventLive = (event: EventOdds): boolean => {
+    // In a real app, this would check for a 'live' flag from the API
+    // For demo, we'll simulate some events as live (if they're scheduled for today)
+    const eventDate = new Date(event.commence_time);
+    const now = new Date();
+    return eventDate.getDate() === now.getDate() && 
+           eventDate.getMonth() === now.getMonth() && 
+           eventDate.getFullYear() === now.getFullYear() &&
+           eventDate.getTime() <= now.getTime();
+  };
+  
+  // Filter events based on live/upcoming status
+  const filteredByStatus = displayEvents?.filter(event => {
+    if (showLiveEvents) {
+      return isEventLive(event);
+    } else if (showUpcomingEvents) {
+      return !isEventLive(event);
+    }
+    return true;
+  }) || [];
+  
+  // Filter events for display (limit to 10 for performance)
+  const filteredEvents = filteredByStatus.slice(0, 10) || [];
   
   // Handler for adding a bet selection
   const handleAddSelection = (selection: BetSelection) => {
@@ -258,12 +282,29 @@ export default function SportsBettingPage() {
                 <Star className="h-4 w-4 mr-1 text-[#f8c541]" />
                 {t('sports.favorites')}
               </Button>
-              <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={`${showLiveEvents ? 'bg-[#09b66d] border-[#09b66d]' : 'bg-[#192531] border-[#1c2b3a]'} text-white`}
+                onClick={() => {
+                  setShowLiveEvents(true);
+                  setShowUpcomingEvents(false);
+                }}
+              >
                 <Clock className="h-4 w-4 mr-1 text-gray-400" />
                 {t('sports.live')}
               </Button>
-              <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
-                {t('sports.today')}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={`${showUpcomingEvents ? 'bg-[#09b66d] border-[#09b66d]' : 'bg-[#192531] border-[#1c2b3a]'} text-white`}
+                onClick={() => {
+                  setShowLiveEvents(false);
+                  setShowUpcomingEvents(true);
+                }}
+              >
+                <CalendarDays className="h-4 w-4 mr-1 text-gray-400" />
+                {t('sports.upcoming')}
               </Button>
               <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
                 {t('sports.tomorrow')}
