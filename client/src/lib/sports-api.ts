@@ -110,12 +110,44 @@ export async function fetchUpcomingEvents(
 
 /**
  * Formats American odds to a more readable format
+ * Explanation:
+ * - Positive odds (e.g. +200): Amount you win on a $100 bet
+ * - Negative odds (e.g. -150): Amount you need to bet to win $100
+ * 
+ * @param odds American odds value
+ * @param showInfo Whether to show additional information about the odds
+ * @returns Formatted odds string
  */
-export function formatAmericanOdds(odds: number): string {
+export function formatAmericanOdds(odds: number, showInfo: boolean = false): string {
   if (odds > 0) {
+    if (showInfo) {
+      const impliedProb = (100 / (odds + 100) * 100).toFixed(1);
+      return `+${odds} (${impliedProb}%)`;
+    }
     return `+${odds}`;
+  } else {
+    if (showInfo) {
+      const impliedProb = (Math.abs(odds) / (Math.abs(odds) + 100) * 100).toFixed(1);
+      return `${odds} (${impliedProb}%)`;
+    }
+    return `${odds}`;
   }
-  return `${odds}`;
+}
+
+/**
+ * Converts American odds to implied probability
+ * 
+ * @param odds American odds value
+ * @returns Implied probability as a percentage
+ */
+export function oddsToImpliedProbability(odds: number): number {
+  if (odds > 0) {
+    // Positive odds formula: 100 / (odds + 100)
+    return 100 / (odds + 100);
+  } else {
+    // Negative odds formula: |odds| / (|odds| + 100)
+    return Math.abs(odds) / (Math.abs(odds) + 100);
+  }
 }
 
 /**
