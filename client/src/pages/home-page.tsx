@@ -5,7 +5,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import { Search, Gift, Bell, ChevronDown, ChevronUp, Settings, Trophy, Dices, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -66,6 +67,8 @@ export default function HomePage() {
     { title: "Neon Crash", type: "Crash", players: 184, gameType: "crash" as const }
   ];
 
+  const currencyTriggerRef = useRef<HTMLDivElement>(null);
+  
   return (
     <>
       {/* Header - Only visible on desktop */}
@@ -85,6 +88,7 @@ export default function HomePage() {
               <div className="flex items-center bg-[#0e1824] rounded-full border border-[#1c2b3a] overflow-hidden">
                 {/* Selector de divisas */}
                 <div 
+                  ref={currencyTriggerRef}
                   className="flex items-center px-3 py-1.5 cursor-pointer hover:bg-[#192531]/70 transition-all duration-200"
                   onClick={() => setIsWalletOpen(!isWalletOpen)}
                 >
@@ -104,56 +108,15 @@ export default function HomePage() {
                 </button>
               </div>
               
-              {/* Menú desplegable de selección de moneda - Usando portal para evitar recortes */}
-              {isWalletOpen && (
-                <div className="fixed bg-[#0e1824] border border-[#1c2b3a] rounded-lg shadow-lg w-60 z-[9999]" style={{
-                  top: '60px', // Ajustar según la altura real del header
-                  left: window.innerWidth <= 768 ? '50%' : '50%', 
-                  transform: window.innerWidth <= 768 ? 'translateX(-50%)' : 'translateX(-120px)'
-                }}>
-                  {/* Buscador */}
-                  <div className="p-3 border-b border-[#1c2b3a]">
-                    <div className="flex items-center bg-[#192531] rounded-md px-3 py-2">
-                      <Search className="h-4 w-4 text-gray-400 mr-2" />
-                      <input 
-                        className="bg-transparent text-white text-sm w-full focus:outline-none" 
-                        placeholder="Buscar Divisas" 
-                        type="text"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Lista de monedas */}
-                  <div className="max-h-60 overflow-y-auto">
-                    {currencies.map((currency) => (
-                      <div 
-                        key={currency.code} 
-                        className={`flex items-center justify-between p-3 hover:bg-[#192531] cursor-pointer ${currency.code === selectedCurrency ? 'bg-[#192531]' : ''}`}
-                        onClick={() => {
-                          setSelectedCurrency(currency.code);
-                          setIsWalletOpen(false);
-                        }}
-                      >
-                        <div className="flex items-center">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3`} style={{ backgroundColor: currency.color }}>
-                            <span className="text-white text-xs font-bold">{currency.icon}</span>
-                          </div>
-                          <div className="text-white text-sm">{currency.code}</div>
-                        </div>
-                        <div className="text-white text-sm">{currency.value.toFixed(8)}</div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Footer */}
-                  <div className="p-3 border-t border-[#1c2b3a]">
-                    <div className="flex items-center text-[#09b66d] hover:text-[#0fda85] text-sm cursor-pointer">
-                      <Settings className="h-4 w-4 mr-2" />
-                      <span>Configuración de Monedero</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Usando nuestro componente de portal de monedas */}
+              <CurrencyDropdown 
+                isOpen={isWalletOpen}
+                onClose={() => setIsWalletOpen(false)}
+                currencies={currencies}
+                selectedCurrency={selectedCurrency}
+                onCurrencySelect={setSelectedCurrency}
+                triggerRef={currencyTriggerRef}
+              />
             </div>
           </div>
           
