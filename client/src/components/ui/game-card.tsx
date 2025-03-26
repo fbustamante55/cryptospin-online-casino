@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Link } from "wouter";
 import { FavoriteButton } from "@/components/ui/favorite-button";
+import { useTranslation } from "react-i18next";
 
 interface GameCardProps {
   title: string;
@@ -27,6 +28,7 @@ export function GameCard({
   gameId,
   className,
 }: GameCardProps) {
+  const { t } = useTranslation();
   const tagColorClasses = {
     primary: "bg-[#09b66d] text-white",
     secondary: "bg-[#313d4a] text-white",
@@ -122,7 +124,7 @@ export function GameCard({
         
         <Link href={path}>
           <button className="w-full py-2 bg-[#0e1824] hover:bg-[#192531] text-[#09b66d] border border-[#09b66d]/30 rounded-md transition-all duration-200 font-medium text-sm">
-            Play Now
+            {t("games.play_now")}
           </button>
         </Link>
       </div>

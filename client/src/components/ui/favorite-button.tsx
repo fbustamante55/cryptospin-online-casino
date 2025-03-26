@@ -104,8 +104,8 @@ export function FavoriteButton({
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to remove from favorites",
+        title: t("error"),
+        description: error.message || t("favorites.failed_remove"),
         variant: "destructive"
       });
     }
@@ -120,8 +120,8 @@ export function FavoriteButton({
   const toggleFavorite = () => {
     if (!user) {
       toast({
-        title: "Login required",
-        description: "You must be logged in to add favorites",
+        title: t("auth.login_required"),
+        description: t("favorites.login_required_message"),
         variant: "destructive"
       });
       return;
