@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { Search, Plus, Coins, Star, Clock, ChevronRight, Calendar, CalendarDays, Activity, Trophy, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -394,38 +395,46 @@ export default function SportsBettingPage() {
             
             {/* Sports Categories */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4">{t('sports.topSports')}</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-4">
-                {sportsData?.map((sport, index) => {
-                  const isActive = activeSport === sport.key;
-                  const color = getSportColor(sport.group);
-                  return (
-                    <div 
-                      key={sport.key} 
-                      className={`bg-[#192531] rounded-lg overflow-hidden aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-[#1c2b3a] transition-colors ${isActive ? 'ring-2 ring-[#09b66d]' : ''}`}
-                      style={{ 
-                        background: `linear-gradient(to bottom, ${color}33, #192531)`,
-                        borderTop: `3px solid ${color}`
-                      }}
-                      onClick={() => {
-                        if (activeSport === sport.key) {
-                          // Si ya está seleccionado, deseleccionamos
-                          setActiveSport('all');
-                        } else {
-                          // Seleccionamos este deporte
-                          setActiveSport(sport.key);
-                        }
-                      }}
-                    >
-                      <div className={`w-14 h-14 bg-[#1c2b3a] rounded-full flex items-center justify-center mb-2 ${isActive ? 'bg-[#09b66d]/20' : ''}`}>
-                        <div className="w-8 h-8 bg-white/20 rounded-full"></div>
-                      </div>
-                      <span className={`text-xs font-bold ${isActive ? 'text-[#09b66d]' : ''}`}>
-                        {sport.title.toUpperCase()}
-                      </span>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">{t('sports.topSports')}</h2>
+                <div className="flex items-center">
+                  <ScrollArea className="w-64 whitespace-nowrap">
+                    <div className="flex space-x-2 p-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`px-3 py-1 text-xs font-medium ${activeSport === 'all' ? 'bg-[#09b66d] text-white' : 'bg-[#192531] border-[#1c2b3a]'}`}
+                        onClick={() => setActiveSport('all')}
+                      >
+                        TODOS
+                      </Button>
+                      {sportsData?.map((sport) => {
+                        const isActive = activeSport === sport.key;
+                        const color = getSportColor(sport.group);
+                        return (
+                          <Button
+                            key={sport.key}
+                            variant="outline"
+                            size="sm"
+                            className={`px-3 py-1 text-xs font-medium ${isActive ? 'bg-[#09b66d] text-white' : 'bg-[#192531] border-[#1c2b3a]'}`}
+                            style={{
+                              borderLeft: isActive ? 'none' : `2px solid ${color}`
+                            }}
+                            onClick={() => {
+                              if (activeSport === sport.key) {
+                                setActiveSport('all');
+                              } else {
+                                setActiveSport(sport.key);
+                              }
+                            }}
+                          >
+                            {sport.title.toUpperCase()}
+                          </Button>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </ScrollArea>
+                </div>
               </div>
             </div>
             
