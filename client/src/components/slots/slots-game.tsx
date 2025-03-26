@@ -352,60 +352,95 @@ export function SlotsGame() {
       const symbolClass = `flex items-center justify-center font-bold text-lg h-[40px]`;
       const color = gameConfig.symbolColors[symbol as keyof typeof EGYPT_SYMBOL_COLORS] || "#FFFFFF";
 
-      // Personalizar cada símbolo para que se parezca a la referencia con imágenes SVG
+      // Personalizar cada símbolo con jeroglíficos y emojis egipcios
       switch (symbol) {
         case 'BOOK':
           return (
             <div className={symbolClass} style={{ color: "#FFC700" }}>
-              <span className="relative px-1 py-1 rounded-sm bg-blue-900/30">
-                <img src="/images/symbols/book.svg" alt="Book" className="h-[30px] w-[30px]" />
+              <span className="relative px-1 py-1 rounded-sm bg-blue-900/30 text-2xl">
+                📜
               </span>
             </div>
           );
         case 'PHARAOH':
           return (
             <div className={symbolClass} style={{ color: "#F9C846" }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/pharaoh.svg" alt="Pharaoh" className="h-[30px] w-[30px]" />
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                𓀛
               </span>
             </div>
           );
         case 'ANKH':
           return (
             <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/ankh-symbol.svg" alt="Ankh" className="h-[30px] w-[30px]" />
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                𓋹
               </span>
             </div>
           );
         case 'EYE':
           return (
             <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/eye-of-horus.svg" alt="Eye of Horus" className="h-[30px] w-[30px]" />
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                𓂀
               </span>
             </div>
           );
         case 'SCARAB':
           return (
             <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/scarab.svg" alt="Scarab" className="h-[30px] w-[30px]" />
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                𓆣
               </span>
             </div>
           );
         case 'PYRAMID':
           return (
             <div className={symbolClass} style={{ color }}>
-              <span className="relative px-1 py-1 rounded-sm">
-                <img src="/images/symbols/pyramid.svg" alt="Pyramid" className="h-[30px] w-[30px]" />
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                🛕
+              </span>
+            </div>
+          );
+        case 'WILD':
+          return (
+            <div className={symbolClass} style={{ color: "#FFEC00" }}>
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                ⚱️
+              </span>
+            </div>
+          );
+        case 'SCATTER':
+          return (
+            <div className={symbolClass} style={{ color: "#00ADFF" }}>
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                𓁀
+              </span>
+            </div>
+          );
+        case 'STAR':
+          return (
+            <div className={symbolClass} style={{ color: "#FFA500" }}>
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                𓀾
+              </span>
+            </div>
+          );
+        case 'SUN':
+          return (
+            <div className={symbolClass} style={{ color: "#FFFF00" }}>
+              <span className="relative px-1 py-1 rounded-sm text-2xl">
+                𓀮
               </span>
             </div>
           );
         default:
+          // Si hay algún símbolo que no se ha identificado, mostrar un jeroglífico o un emoji aleatorio
+          const randomEgyptianSymbols = ['🐪', '🐫', '🏺', '𓁈', '𓆙'];
+          const randomIndex = Math.floor(Math.random() * randomEgyptianSymbols.length);
           return (
             <div className={symbolClass} style={{ color }}>
-              {symbol}
+              <span className="text-2xl">{randomEgyptianSymbols[randomIndex]}</span>
             </div>
           );
       }
