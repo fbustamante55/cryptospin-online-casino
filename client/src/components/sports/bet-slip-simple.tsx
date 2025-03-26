@@ -316,7 +316,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
           <div className="flex items-center justify-between">
             <span className="text-base font-medium">
               <span className="flex items-center">
-                MiApuesta PRO {selections.length > 0 && (
+                Mi Apuesta {selections.length > 0 && (
                   <span className="ml-1.5 px-1.5 py-0.5 bg-[#09b66d] text-white text-xs rounded-full">
                     {selections.length}
                   </span>
@@ -443,7 +443,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
             <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
               <Plus className="h-8 w-8 text-white/30" />
             </div>
-            <h3 className="text-lg font-medium mb-1">¡Tu MiApuesta PRO está vacío!</h3>
+            <h3 className="text-lg font-medium mb-1">¡Tu Mi Apuesta está vacío!</h3>
             <p className="text-sm text-white/70 mb-4">Selecciona cuotas para comenzar a ganar</p>
           </div>
         )}
