@@ -202,7 +202,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
   const isPending = addFavoriteMutation.isPending || removeFavoriteMutation.isPending;
 
   return (
-    <Card className={`bg-[#192531] border-[#1c2b3a] p-4 ${className} relative`}>
+    <Card className={`bg-[#192531] border-[#1c2b3a] p-3 ${className} relative overflow-hidden`}>
       {/* Favorite Star Button */}
       <Button
         variant="ghost"
@@ -210,13 +210,13 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
         onClick={toggleFavorite}
         disabled={!isLoaded || isPending || !user}
         className={cn(
-          "absolute top-2 right-2 z-10 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50",
-          "w-8 h-8 flex items-center justify-center"
+          "absolute top-1 right-1 z-10 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50",
+          "w-6 h-6 flex items-center justify-center"
         )}
       >
         <Star
           className={cn(
-            "h-4 w-4 transition-all",
+            "h-3 w-3 transition-all",
             isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
           )}
         />
@@ -224,7 +224,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
       
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center">
-          <span className="text-xs font-medium text-gray-400">{sportTitle || event.sport_key}</span>
+          <span className="text-xs font-medium text-gray-400 truncate">{sportTitle || event.sport_key}</span>
           {event.commence_time && (
             <Badge variant="outline" className="ml-2 text-xs bg-transparent">
               {formatEventDate(event.commence_time)}
@@ -233,22 +233,22 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
         </div>
       </div>
       
-      <div className="mb-4">
-        <div className="grid grid-cols-3 gap-4 mb-3">
-          <div className="col-span-1 text-sm font-medium">{t('sports.team')}</div>
-          <div className="col-span-1 text-center text-sm font-medium">{t('sports.moneyline')}</div>
-          <div className="col-span-1 text-center text-sm font-medium">{t('sports.spread')}</div>
+      <div className="mb-3">
+        <div className="text-sm font-medium mb-2 truncate">{event.home_team} vs {event.away_team}</div>
+        
+        <div className="grid grid-cols-3 gap-2 mb-2">
+          <div className="text-xs text-center text-gray-400">{t('sports.team')}</div>
+          <div className="text-xs text-center text-gray-400">{t('sports.moneyline')}</div>
+          <div className="text-xs text-center text-gray-400">{t('sports.spread')}</div>
         </div>
         
-        <div className="grid grid-cols-3 gap-4 mb-2 items-center">
-          <div className="col-span-1">
-            <div className="text-sm font-medium">{event.home_team}</div>
-          </div>
+        <div className="grid grid-cols-3 gap-2 mb-1 items-center">
+          <div className="text-xs font-medium truncate">{event.home_team}</div>
           
-          <div className="col-span-1 text-center">
+          <div className="text-center">
             {homeOdds && (
               <button 
-                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${
+                className={`px-2 py-1 rounded text-xs font-bold transition-colors ${
                   isSelectionInBetSlip(event.home_team, 'moneyline')
                     ? 'bg-[#09b66d] text-white'
                     : 'bg-[#282e39] hover:bg-[#313d4a]'
@@ -260,10 +260,10 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
             )}
           </div>
           
-          <div className="col-span-1 text-center">
+          <div className="text-center">
             {spreadMarket?.outcomes.find(o => o.name === event.home_team) && (
               <button 
-                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${
+                className={`px-2 py-1 rounded text-xs font-bold transition-colors ${
                   isSelectionInBetSlip(event.home_team, 'spread')
                     ? 'bg-[#09b66d] text-white'
                     : 'bg-[#282e39] hover:bg-[#313d4a]'
@@ -275,22 +275,19 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                   }
                 }}
               >
-                {spreadMarket.outcomes.find(o => o.name === event.home_team)?.point > 0 ? '+' : ''}
-                {spreadMarket.outcomes.find(o => o.name === event.home_team)?.point} ({formatAmericanOdds(spreadMarket.outcomes.find(o => o.name === event.home_team)?.price || 0)})
+                {spreadMarket.outcomes.find(o => o.name === event.home_team)?.point}
               </button>
             )}
           </div>
         </div>
         
-        <div className="grid grid-cols-3 gap-4 mb-2 items-center">
-          <div className="col-span-1">
-            <div className="text-sm font-medium">{event.away_team}</div>
-          </div>
+        <div className="grid grid-cols-3 gap-2 mb-1 items-center">
+          <div className="text-xs font-medium truncate">{event.away_team}</div>
           
-          <div className="col-span-1 text-center">
+          <div className="text-center">
             {awayOdds && (
               <button 
-                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${
+                className={`px-2 py-1 rounded text-xs font-bold transition-colors ${
                   isSelectionInBetSlip(event.away_team, 'moneyline')
                     ? 'bg-[#09b66d] text-white'
                     : 'bg-[#282e39] hover:bg-[#313d4a]'
@@ -302,10 +299,10 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
             )}
           </div>
           
-          <div className="col-span-1 text-center">
+          <div className="text-center">
             {spreadMarket?.outcomes.find(o => o.name === event.away_team) && (
               <button 
-                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${
+                className={`px-2 py-1 rounded text-xs font-bold transition-colors ${
                   isSelectionInBetSlip(event.away_team, 'spread')
                     ? 'bg-[#09b66d] text-white'
                     : 'bg-[#282e39] hover:bg-[#313d4a]'
@@ -317,8 +314,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                   }
                 }}
               >
-                {spreadMarket.outcomes.find(o => o.name === event.away_team)?.point > 0 ? '+' : ''}
-                {spreadMarket.outcomes.find(o => o.name === event.away_team)?.point} ({formatAmericanOdds(spreadMarket.outcomes.find(o => o.name === event.away_team)?.price || 0)})
+                {spreadMarket.outcomes.find(o => o.name === event.away_team)?.point}
               </button>
             )}
           </div>
@@ -326,14 +322,12 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
         
         {/* Draw row (for soccer and other sports that have draws) */}
         {drawOdds && (
-          <div className="grid grid-cols-3 gap-4 items-center pt-2 border-t border-[#1c2b3a]">
-            <div className="col-span-1">
-              <div className="text-sm font-medium">Draw</div>
-            </div>
+          <div className="grid grid-cols-3 gap-2 items-center pt-1 border-t border-[#1c2b3a]">
+            <div className="text-xs font-medium">Draw</div>
             
-            <div className="col-span-1 text-center">
+            <div className="text-center">
               <button 
-                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${
+                className={`px-2 py-1 rounded text-xs font-bold transition-colors ${
                   isSelectionInBetSlip('Draw', 'moneyline')
                     ? 'bg-[#09b66d] text-white'
                     : 'bg-[#282e39] hover:bg-[#313d4a]'
@@ -344,29 +338,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
               </button>
             </div>
             
-            <div className="col-span-1"></div>
-          </div>
-        )}
-        
-        {/* Total (Over/Under) market */}
-        {totalsMarket && totalsMarket.outcomes.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-[#1c2b3a]">
-            <div className="text-sm font-medium mb-2">Total Points</div>
-            <div className="flex gap-3">
-              {totalsMarket.outcomes.map((outcome, index) => (
-                <button 
-                  key={index}
-                  className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${
-                    isSelectionInBetSlip(`${outcome.name}`, 'total')
-                      ? 'bg-[#09b66d] text-white'
-                      : 'bg-[#282e39] hover:bg-[#313d4a]'
-                  }`}
-                  onClick={() => handleBetClick(`${outcome.name}`, outcome.price, 'total', outcome.point)}
-                >
-                  {outcome.name} {outcome.point} ({formatAmericanOdds(outcome.price)})
-                </button>
-              ))}
-            </div>
+            <div></div>
           </div>
         )}
       </div>

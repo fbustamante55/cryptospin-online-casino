@@ -294,20 +294,20 @@ export default function SportsBettingPage() {
       </header>
       
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-4">
+      <main className="flex-1 overflow-y-auto p-2 md:p-4 pt-16 md:pt-4 overflow-x-hidden">
+        <div className="w-full mx-auto flex flex-col md:flex-row gap-4">
           
           {/* Left column - Events and betting options */}
-          <div className="flex-1">
+          <div className="flex-1 max-w-full">
             {/* Featured Events */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
               {featuredEvents.map((event) => (
                 <div 
                   key={event.id} 
                   className="rounded-lg overflow-hidden" 
                   style={{ background: `${event.backgroundColor}` }}
                 >
-                  <div className="p-4 h-[150px] relative flex flex-col justify-between">
+                  <div className="p-3 h-[140px] relative flex flex-col justify-between">
                     <div>
                       <h3 className="text-lg font-bold text-white">{event.title}</h3>
                       <p className="text-sm text-white/80">{event.subtitle}</p>
@@ -322,7 +322,7 @@ export default function SportsBettingPage() {
                     
                     {/* Image placeholder */}
                     <div className="absolute right-0 bottom-0 h-full w-1/3 opacity-70 flex items-center justify-center">
-                      <div className="w-24 h-24 bg-white/10 rounded-full"></div>
+                      <div className="w-20 h-20 bg-white/10 rounded-full"></div>
                     </div>
                   </div>
                 </div>
@@ -330,11 +330,11 @@ export default function SportsBettingPage() {
             </div>
             
             {/* Quick Links */}
-            <div className="flex justify-center items-center space-x-4 mb-6 py-2">
+            <div className="flex justify-center items-center flex-wrap gap-2 mb-4 py-1">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
+                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
                 onClick={() => {
                   setShowFavorites(true);
                   setShowLiveEvents(false);
@@ -349,7 +349,7 @@ export default function SportsBettingPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
+                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
                 onClick={() => {
                   setShowLiveEvents(true);
                   setShowFavorites(false);
@@ -364,7 +364,7 @@ export default function SportsBettingPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
+                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
                 onClick={() => {
                   setShowUpcomingEvents(true);
                   setShowFavorites(false);
@@ -374,12 +374,12 @@ export default function SportsBettingPage() {
                 }}
               >
                 <CalendarDays className="h-4 w-4 mr-1 text-gray-400" />
-                Próximos Eventos
+                Próximos
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="min-w-[120px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
+                className="min-w-[105px] bg-[#192531] border-[#1c2b3a] text-white hover:bg-[#09b66d] hover:border-[#09b66d] transition-all"
                 onClick={() => {
                   setShowTomorrowEvents(true);
                   setShowFavorites(false);
