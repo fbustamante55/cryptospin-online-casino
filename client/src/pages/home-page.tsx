@@ -3,7 +3,7 @@ import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { UserDropdown } from "@/components/ui/user-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
-import { Search, Gift, Bell, ChevronDown } from "lucide-react";
+import { Search, Gift, Bell, ChevronDown, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function HomePage() {
@@ -48,44 +48,45 @@ export default function HomePage() {
   return (
     <>
       {/* Header - Only visible on desktop */}
-      <header className="bg-[#101034] sticky top-0 z-10 hidden md:block">
+      <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10 hidden md:block">
         <div className="flex items-center justify-between h-16 px-4">
           
           <div className="hidden md:flex items-center">
             <div className="flex items-center mr-6">
-              <h1 className="text-2xl font-bold text-yellow-500 font-['Montserrat']">ROOBET</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
             </div>
           </div>
           
           <div className="flex items-center space-x-3 ml-auto">
             <div className="flex items-center">
-              <div className="flex items-center bg-[#202044] rounded-full px-3 py-1.5 mr-3">
+              <div className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-3 py-1.5 mr-3">
                 <div className="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
                 <span className="text-white text-sm font-medium mr-1">${user?.balance || '0.00'}</span>
                 <ChevronDown className="h-4 w-4 text-white" />
               </div>
               
-              <button className="flex items-center px-4 py-1.5 rounded-full bg-yellow-500 hover:bg-yellow-400 text-[#101034] font-bold text-sm transition-all duration-200">
+              <button className="flex items-center px-4 py-1.5 rounded-md bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium text-sm transition-all duration-200">
+                <Plus className="h-4 w-4 mr-1.5" />
                 {t('buttons.deposit')}
               </button>
             </div>
             
             <div className="flex items-center space-x-3">
-              <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#202044] text-white">
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
                 <Search className="h-5 w-5" />
               </button>
               
-              <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#202044] text-white">
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
                 <Gift className="h-5 w-5" />
               </button>
               
-              <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#202044] text-white">
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
                 <Bell className="h-5 w-5" />
               </button>
               
-              <div className="flex items-center bg-[#202044] rounded-full px-1 py-1 cursor-pointer">
+              <div className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-1 py-1 cursor-pointer hover:border-[#09b66d]/50 transition-all duration-200">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-[#101034] font-bold">
+                  <div className="w-8 h-8 rounded-full bg-[#09b66d] flex items-center justify-center text-white font-bold">
                     {user?.username?.substring(0, 1) || 'U'}
                   </div>
                   <div className="px-2">
@@ -93,7 +94,7 @@ export default function HomePage() {
                       {user?.username || 'Usuario'}
                     </div>
                     <div className="flex items-center">
-                      <div className="h-2 w-2 bg-yellow-500 rounded-full mr-1"></div>
+                      <div className="h-2 w-2 bg-[#09b66d] rounded-full mr-1"></div>
                       <span className="text-[10px] text-gray-400">VIP</span>
                     </div>
                   </div>
