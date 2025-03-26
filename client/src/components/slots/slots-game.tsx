@@ -268,6 +268,17 @@ export function SlotsGame() {
 
   const playSlotsMutation = useMutation({
     mutationFn: async (params: { bet: number, lines: number, gameId: string }) => {
+      // Verificar si hay un usuario en localStorage como fallback
+      const localUser = localStorage.getItem('user');
+      if (!user && localUser) {
+        try {
+          const parsedUser = JSON.parse(localUser);
+          queryClient.setQueryData(["/api/user"], parsedUser);
+        } catch (e) {
+          console.error("Error al parsear usuario local:", e);
+        }
+      }
+      
       return apiRequest<SlotResult>({
         method: "POST", 
         url: "/api/games/slots", 
@@ -333,6 +344,24 @@ export function SlotsGame() {
         // Invalidar historial de juego para mostrar la nueva partida
         queryClient.invalidateQueries({ queryKey: ["/api/game-history"] });
       }, 2000);
+    },
+    onError: (error: any) => {
+      console.error("Error en la apuesta:", error);
+      setIsSpinning(false);
+      
+      // Detener la animación y limpiar el intervalo
+      const elements = document.querySelectorAll('.slot-reel');
+      elements.forEach(el => {
+        (el as HTMLElement).style.animation = 'none';
+      });
+      
+      // Si recibimos un 401, intentamos redirigir al usuario para renovar la sesión
+      if (error.message && (error.message.includes("401") || error.message.includes("Unauthorized"))) {
+        alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+        window.location.href = "/auth";
+      } else {
+        alert("Error al realizar la apuesta. Por favor, inténtalo de nuevo.");
+      }
     }
   });
 
@@ -367,9 +396,7 @@ export function SlotsGame() {
     playSlotsMutation.mutate({ 
       bet, 
       lines, 
-      gameId,
-      reels: gameConfig.reels,
-      rows: gameConfig.rows 
+      gameId
     });
     
     // Detener giro después de un retraso (escalonado para efecto visual)
