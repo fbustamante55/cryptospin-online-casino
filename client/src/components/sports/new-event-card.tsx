@@ -214,15 +214,20 @@ export function NewEventCard({
         
         {/* Equipos y cuotas */}
         <div className="flex flex-col space-y-1">
-          {/* Equipo local */}
-          <div className="flex justify-between items-center">
+          {/* Nombres de equipos */}
+          <div className="flex justify-between items-center mb-2">
             <div className="flex items-center">
-              <span className="text-sm font-medium">{event.home_team}</span>
-              {isLiveEvent() && <span className="ml-2 text-sm font-bold">0</span>}
+              <span className="text-sm font-medium">{event.home_team} vs {event.away_team}</span>
+              {isLiveEvent() && <span className="ml-2 text-sm font-bold">0-0</span>}
             </div>
+          </div>
+          
+          {/* Botones de apuestas en formato horizontal */}
+          <div className="flex justify-between items-center space-x-2">
+            {/* Equipo local */}
             {homeOdds && (
               <button
-                className={`min-w-[60px] py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
+                className={`flex-1 py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
                   isSelectionInBetSlip(event.home_team, 'h2h')
                     ? 'bg-[#09b66d] text-white'
                     : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
@@ -232,45 +237,47 @@ export function NewEventCard({
                 {(homeOdds.price).toFixed(2)}
               </button>
             )}
+            
+            {/* Empate (solo para deportes que pueden terminar en empate) */}
+            {drawOdds && (
+              <>
+                <div className="text-gray-400 text-sm">+</div>
+                <button
+                  className={`flex-1 py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
+                    isSelectionInBetSlip('Draw', 'h2h')
+                      ? 'bg-[#09b66d] text-white'
+                      : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
+                  }`}
+                  onClick={() => handleBetClick('Draw', drawOdds.price, 'h2h')}
+                >
+                  {(drawOdds.price).toFixed(2)}
+                </button>
+              </>
+            )}
+            
+            {/* Equipo visitante */}
+            {awayOdds && (
+              <>
+                <div className="text-gray-400 text-sm">+</div>
+                <button
+                  className={`flex-1 py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
+                    isSelectionInBetSlip(event.away_team, 'h2h')
+                      ? 'bg-[#09b66d] text-white'
+                      : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
+                  }`}
+                  onClick={() => handleBetClick(event.away_team, awayOdds.price, 'h2h')}
+                >
+                  {(awayOdds.price).toFixed(2)}
+                </button>
+              </>
+            )}
           </div>
           
-          {/* Empate (solo para deportes que pueden terminar en empate) */}
-          {drawOdds && (
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <span className="text-sm text-gray-300">empate</span>
-              </div>
-              <button
-                className={`min-w-[60px] py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
-                  isSelectionInBetSlip('Draw', 'h2h')
-                    ? 'bg-[#09b66d] text-white'
-                    : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
-                }`}
-                onClick={() => handleBetClick('Draw', drawOdds.price, 'h2h')}
-              >
-                {(drawOdds.price).toFixed(2)}
-              </button>
-            </div>
-          )}
-          
-          {/* Equipo visitante */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">{event.away_team}</span>
-              {isLiveEvent() && <span className="ml-2 text-sm font-bold">0</span>}
-            </div>
-            {awayOdds && (
-              <button
-                className={`min-w-[60px] py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
-                  isSelectionInBetSlip(event.away_team, 'h2h')
-                    ? 'bg-[#09b66d] text-white'
-                    : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
-                }`}
-                onClick={() => handleBetClick(event.away_team, awayOdds.price, 'h2h')}
-              >
-                {(awayOdds.price).toFixed(2)}
-              </button>
-            )}
+          {/* Etiquetas de los equipos */}
+          <div className="flex justify-between mt-1 text-xs text-gray-400">
+            <span>{event.home_team}</span>
+            {drawOdds && <span>Empate</span>}
+            <span>{event.away_team}</span>
           </div>
         </div>
       </div>
