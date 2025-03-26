@@ -4,11 +4,17 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Calendar, ChevronRight, Package, Tv } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { 
+  AlertTriangle, Calendar, ChevronRight, Package, Tv, 
+  Timer, Zap, Trophy, TrendingUp, BarChart3, Heart, Star, 
+  Shield, Monitor, Video, Flame, Clock, Activity, Award
+} from 'lucide-react';
 import { BetSlip, BetSelection } from '@/components/sports/bet-slip-simple';
 import { EventCard } from '@/components/sports/event-card';
-import { EventOdds, fetchOdds, fetchSports, formatAmericanOdds, getSportColor } from '@/lib/sports-api';
+import { EventOdds, fetchOdds, fetchSports, formatAmericanOdds, getSportColor, formatEventDate } from '@/lib/sports-api';
 import { useTranslation } from 'react-i18next';
+import { AnimatedBackground } from '@/components/ui/animated-background';
 
 export default function LiveEventsPage() {
   const { t } = useTranslation();
@@ -212,39 +218,339 @@ export default function LiveEventsPage() {
   const promotions = [
     {
       id: 1,
-      title: t('sports.boostOdds'),
-      subtitle: t('sports.getBoost'),
-      action: t('buttons.seeAll'),
-      image: "",
-      backgroundColor: "#1a2639",
-      buttonColor: "bg-[#1a2639]"
+      title: "Potencia tus Apuestas",
+      subtitle: "Cuota mejorada x2 en la primera apuesta del día",
+      action: "Ver Promoción",
+      image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=500&q=60",
+      gradient: "from-[#09b66d]/90 to-[#09b66d]/10",
+      icon: <Zap className="h-5 w-5" />,
+      buttonColor: "bg-[#09b66d] hover:bg-[#08a962]"
     },
     {
       id: 2,
-      title: t('sports.pay3rdQuarter'),
-      subtitle: t('sports.badStartsInsurance'),
-      action: t('buttons.viewMatches'),
-      image: "",
-      backgroundColor: "#333966",
-      buttonColor: "bg-[#333966]"
+      title: "Apuesta Sin Riesgo",
+      subtitle: "Devolución en créditos si pierdes tu primera apuesta live",
+      action: "Activar Bono",
+      image: "https://images.unsplash.com/photo-1529720317453-c8da503f2051?auto=format&fit=crop&w=500&q=60",
+      gradient: "from-[#e64d6b]/90 to-[#e64d6b]/10",
+      icon: <Shield className="h-5 w-5" />,
+      buttonColor: "bg-[#e64d6b] hover:bg-[#d54562]"
     },
     {
       id: 3,
-      title: t('sports.premierLeague'),
-      subtitle: t('sports.pay3Goals'),
-      action: t('buttons.betNow'),
-      image: "",
-      backgroundColor: "#114f7a",
-      buttonColor: "bg-[#114f7a]"
+      title: "Copa América 2025",
+      subtitle: "Apuestas anticipadas con mejor cuota garantizada",
+      action: "Apostar Ahora",
+      image: "https://images.unsplash.com/photo-1579952929770-3a4981d9a3e7?auto=format&fit=crop&w=500&q=60",
+      gradient: "from-[#114f7a]/90 to-[#114f7a]/10",
+      icon: <Trophy className="h-5 w-5" />,
+      buttonColor: "bg-[#114f7a] hover:bg-[#0f4469]"
     }
   ];
 
+  // Imagen de fondo para cada deporte
+  const getSportBackgroundImage = (sportKey: string): string => {
+    if (sportKey.includes('soccer')) {
+      return 'https://images.unsplash.com/photo-1508098682722-e99c643e7f66?auto=format&fit=crop&w=1200&q=60';
+    } else if (sportKey.includes('basketball')) {
+      return 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=60';
+    } else if (sportKey.includes('baseball')) {
+      return 'https://images.unsplash.com/photo-1471295253337-3ceaaedca402?auto=format&fit=crop&w=1200&q=60';
+    } else if (sportKey.includes('tennis')) {
+      return 'https://images.unsplash.com/photo-1531315396756-905d68d21b56?auto=format&fit=crop&w=1200&q=60';
+    } else if (sportKey.includes('hockey')) {
+      return 'https://images.unsplash.com/photo-1580748141549-71748dbe0bdc?auto=format&fit=crop&w=1200&q=60';
+    } else if (sportKey.includes('mma') || sportKey.includes('ufc')) {
+      return 'https://images.unsplash.com/photo-1555597673-b21d5c3f65af?auto=format&fit=crop&w=1200&q=60';
+    } else if (sportKey.includes('cricket')) {
+      return 'https://images.unsplash.com/photo-1593766788229-8bb31ade4c65?auto=format&fit=crop&w=1200&q=60';
+    } else {
+      return 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1200&q=60';
+    }
+  };
+
+  // Función para obtener estadísticas aleatorias para un evento
+  const getRandomStats = (sportKey: string) => {
+    if (sportKey.includes('soccer')) {
+      return {
+        possessionHome: Math.floor(Math.random() * 30) + 40,
+        possessionAway: Math.floor(Math.random() * 30) + 30,
+        shotsHome: Math.floor(Math.random() * 15) + 5,
+        shotsAway: Math.floor(Math.random() * 15) + 5,
+        cornersHome: Math.floor(Math.random() * 8) + 2,
+        cornersAway: Math.floor(Math.random() * 8) + 2,
+        yellowCardsHome: Math.floor(Math.random() * 3),
+        yellowCardsAway: Math.floor(Math.random() * 3),
+      };
+    } else if (sportKey.includes('basketball')) {
+      return {
+        pointsHome: Math.floor(Math.random() * 40) + 50,
+        pointsAway: Math.floor(Math.random() * 40) + 50,
+        reboundsHome: Math.floor(Math.random() * 20) + 15,
+        reboundsAway: Math.floor(Math.random() * 20) + 15,
+        assistsHome: Math.floor(Math.random() * 15) + 10,
+        assistsAway: Math.floor(Math.random() * 15) + 10,
+      };
+    } else if (sportKey.includes('baseball')) {
+      return {
+        inning: Math.floor(Math.random() * 9) + 1,
+        hitsHome: Math.floor(Math.random() * 10) + 3,
+        hitsAway: Math.floor(Math.random() * 10) + 3,
+        errorsHome: Math.floor(Math.random() * 3),
+        errorsAway: Math.floor(Math.random() * 3),
+      };
+    } else if (sportKey.includes('tennis')) {
+      const setsHome = Math.floor(Math.random() * 2);
+      const setsAway = Math.floor(Math.random() * 2);
+      return {
+        currentSet: Math.min(setsHome + setsAway + 1, 3),
+        setsHome,
+        setsAway,
+        gamesHome: Math.floor(Math.random() * 6) + 1,
+        gamesAway: Math.floor(Math.random() * 6) + 1,
+        acesHome: Math.floor(Math.random() * 10) + 1,
+        acesAway: Math.floor(Math.random() * 10) + 1,
+      };
+    } else {
+      return {
+        scoreHome: Math.floor(Math.random() * 5),
+        scoreAway: Math.floor(Math.random() * 5),
+        timeElapsed: `${Math.floor(Math.random() * 90)}:00`,
+      };
+    }
+  };
+
+  // Verificar si hay eventos para mostrar la sección de destacados
+  const hasLiveEvents = filteredEvents.length > 0;
+  const featuredEvent = hasLiveEvents ? filteredEvents[0] : null;
+  const featuredSportKey = featuredEvent?.sport_key || '';
+  const featuredStats = featuredEvent ? getRandomStats(featuredSportKey) : null;
+
   return (
     <>
-      <main className="container mx-auto px-4 py-6">
+      <main className="relative container mx-auto px-4 py-6">
+        {/* Hero Banner con Evento Destacado */}
+        {featuredEvent && (
+          <div className="mb-8 relative overflow-hidden rounded-2xl border border-[#1c2b3a]">
+            <div className="absolute inset-0 z-0">
+              <div 
+                className="w-full h-full bg-cover bg-center"
+                style={{ 
+                  backgroundImage: `url(${getSportBackgroundImage(featuredSportKey)})`,
+                  filter: 'brightness(0.3) saturate(1.2)'
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0e1824] via-transparent to-transparent opacity-90" />
+            </div>
+            
+            <div className="relative z-10 p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+                <div>
+                  <Badge variant="outline" className="text-[#09b66d] border-[#09b66d] mb-2 font-semibold">
+                    <Activity className="w-3 h-3 mr-1 animate-pulse" />
+                    EN VIVO
+                  </Badge>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white">
+                    {featuredEvent.home_team} vs {featuredEvent.away_team}
+                  </h2>
+                  <div className="flex items-center mt-2 text-gray-300">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span>{formatEventDate(featuredEvent.commence_time)}</span>
+                    <Badge className="ml-2 bg-[#192531] text-gray-300">
+                      {sportsData?.find(s => s.key === featuredEvent.sport_key)?.title || featuredEvent.sport_key}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="mt-4 md:mt-0">
+                  <Button 
+                    className="bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium"
+                    onClick={() => {
+                      // Crear una selección para equipo local
+                      const homeSelection: BetSelection = {
+                        id: `${featuredEvent.id}-home`,
+                        eventId: featuredEvent.id,
+                        sportKey: featuredEvent.sport_key,
+                        sportTitle: sportsData?.find(s => s.key === featuredEvent.sport_key)?.title || featuredEvent.sport_key,
+                        homeTeam: featuredEvent.home_team,
+                        awayTeam: featuredEvent.away_team,
+                        selectedTeam: featuredEvent.home_team,
+                        odds: featuredEvent.bookmakers?.[0]?.markets?.[0]?.outcomes?.find(o => o.name === featuredEvent.home_team)?.price || 1.5,
+                        marketType: 'moneyline'
+                      };
+                      
+                      handleAddSelection(homeSelection);
+                    }}
+                  >
+                    <Zap className="w-4 h-4 mr-1" />
+                    Apostar Ahora
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Estadísticas de juego basado en el tipo de deporte */}
+              {featuredStats && (
+                <div className="bg-[#192531]/80 rounded-xl p-4 mt-4">
+                  <h3 className="text-lg font-semibold mb-3 text-white">Estadísticas del Partido</h3>
+                  
+                  {featuredSportKey.includes('soccer') && (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="flex flex-col items-center">
+                        <span className="text-sm text-gray-400">Posesión</span>
+                        <div className="w-full bg-gray-700 rounded-full h-2.5 my-2">
+                          <div className="bg-[#09b66d] h-2.5 rounded-full" style={{ width: `${featuredStats.possessionHome}%` }}></div>
+                        </div>
+                        <div className="flex justify-between w-full">
+                          <span className="text-xs font-medium text-white">{featuredStats.possessionHome}%</span>
+                          <span className="text-xs font-medium text-white">{featuredStats.possessionAway}%</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-around">
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.shotsHome}</span>
+                          <span className="text-xs text-gray-400">Tiros</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.cornersHome}</span>
+                          <span className="text-xs text-gray-400">Corners</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.yellowCardsHome}</span>
+                          <span className="text-xs text-gray-400">T. Amarillas</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-around">
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.shotsAway}</span>
+                          <span className="text-xs text-gray-400">Tiros</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.cornersAway}</span>
+                          <span className="text-xs text-gray-400">Corners</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.yellowCardsAway}</span>
+                          <span className="text-xs text-gray-400">T. Amarillas</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {featuredSportKey.includes('basketball') && (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-bold text-white">{featuredStats.pointsHome}</span>
+                          <span className="text-xl font-medium text-gray-400">-</span>
+                          <span className="text-3xl font-bold text-white">{featuredStats.pointsAway}</span>
+                        </div>
+                        <span className="text-xs text-gray-400 mt-1">Puntuación</span>
+                      </div>
+                      
+                      <div className="flex justify-around">
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.reboundsHome}</span>
+                          <span className="text-xs text-gray-400">Rebotes</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.assistsHome}</span>
+                          <span className="text-xs text-gray-400">Asistencias</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-around">
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.reboundsAway}</span>
+                          <span className="text-xs text-gray-400">Rebotes</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-2xl font-bold text-white">{featuredStats.assistsAway}</span>
+                          <span className="text-xs text-gray-400">Asistencias</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {featuredSportKey.includes('tennis') && (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <span className="text-gray-400 text-sm">Set Actual</span>
+                        <div className="text-2xl font-bold text-white">{featuredStats.currentSet}</div>
+                        <div className="flex justify-center gap-2 mt-1">
+                          <div className="text-white bg-[#0e1824] px-2 py-1 rounded text-sm">{featuredStats.setsHome}</div>
+                          <div className="text-white bg-[#0e1824] px-2 py-1 rounded text-sm">{featuredStats.setsAway}</div>
+                        </div>
+                        <span className="text-xs text-gray-400 mt-1">Sets</span>
+                      </div>
+                      
+                      <div className="text-center">
+                        <span className="text-gray-400 text-sm">Games</span>
+                        <div className="flex justify-center gap-2 mt-1">
+                          <div className="text-2xl font-bold text-white">{featuredStats.gamesHome}</div>
+                          <div className="text-gray-400 text-2xl">-</div>
+                          <div className="text-2xl font-bold text-white">{featuredStats.gamesAway}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <span className="text-gray-400 text-sm">Aces</span>
+                        <div className="flex justify-center gap-8 mt-1">
+                          <div className="text-xl font-bold text-white">{featuredStats.acesHome}</div>
+                          <div className="text-xl font-bold text-white">{featuredStats.acesAway}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Opciones de apuesta para el evento destacado */}
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                {featuredEvent.bookmakers && featuredEvent.bookmakers[0]?.markets[0]?.outcomes.map((outcome, index) => (
+                  <div 
+                    key={`${outcome.name}-${index}`}
+                    className="bg-[#192531]/80 hover:bg-[#192531] cursor-pointer transition-colors rounded-xl p-3 flex items-center justify-between"
+                    onClick={() => {
+                      const selection: BetSelection = {
+                        id: `${featuredEvent.id}-${outcome.name}`,
+                        eventId: featuredEvent.id,
+                        sportKey: featuredEvent.sport_key,
+                        sportTitle: sportsData?.find(s => s.key === featuredEvent.sport_key)?.title || featuredEvent.sport_key,
+                        homeTeam: featuredEvent.home_team,
+                        awayTeam: featuredEvent.away_team,
+                        selectedTeam: outcome.name,
+                        odds: outcome.price,
+                        marketType: 'moneyline'
+                      };
+                      
+                      handleAddSelection(selection);
+                    }}
+                  >
+                    <div>
+                      <span className="text-sm font-medium text-white">{outcome.name}</span>
+                      <p className="text-xs text-gray-400">
+                        {outcome.name === featuredEvent.home_team ? 'Local' : 
+                         outcome.name === featuredEvent.away_team ? 'Visitante' : 'Empate'}
+                      </p>
+                    </div>
+                    <div className="text-lg font-bold text-[#09b66d]">
+                      {formatAmericanOdds(outcome.price)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">{t('sports.liveEvents')}</h1>
-          <p className="text-gray-400">{t('sports.liveEventsDescription')}</p>
+          <h1 className="text-2xl font-bold text-white flex items-center">
+            <Activity className="h-5 w-5 mr-2 text-[#09b66d]" />
+            {t('sports.liveEvents')}
+          </h1>
+          <p className="text-gray-400">Todos los eventos en vivo disponibles para apostar en tiempo real</p>
         </div>
         
         {/* Contenido principal */}
@@ -257,16 +563,28 @@ export default function LiveEventsPage() {
                 {promotions.map((promo) => (
                   <div 
                     key={promo.id}
-                    className="rounded-lg p-4 h-40 flex flex-col justify-between bg-gradient-to-br from-[#0e1824] to-[#0e1824]"
-                    style={{ backgroundColor: promo.backgroundColor }}
+                    className="rounded-xl overflow-hidden h-44 relative flex flex-col justify-between bg-gradient-to-br from-[#0e1824] to-[#1c2b3a] border border-[#1c2b3a] hover:border-gray-600 transition-all cursor-pointer group"
                   >
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-1">{promo.title}</h3>
-                      <p className="text-sm text-gray-300 mb-4">{promo.subtitle}</p>
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div 
+                        className="w-full h-full bg-cover bg-center scale-105 group-hover:scale-110 transition-transform duration-500"
+                        style={{ backgroundImage: `url(${promo.image})` }}
+                      />
+                      <div className={`absolute inset-0 bg-gradient-to-br ${promo.gradient}`} />
                     </div>
-                    <button className={`text-sm px-4 py-2 rounded-md text-white ${promo.buttonColor}`}>
-                      {promo.action}
-                    </button>
+                    
+                    <div className="relative z-10 p-4 flex flex-col h-full justify-between">
+                      <div>
+                        <div className="inline-block rounded-lg bg-white/10 backdrop-blur-sm p-2 mb-2">
+                          {promo.icon}
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-1">{promo.title}</h3>
+                        <p className="text-sm text-white/80 max-w-[90%]">{promo.subtitle}</p>
+                      </div>
+                      <button className={`text-sm px-4 py-2 rounded-md font-medium text-white ${promo.buttonColor} mt-3 shadow-lg w-fit`}>
+                        {promo.action}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -477,14 +795,15 @@ export default function LiveEventsPage() {
             
             {/* Live Events Section */}
             <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold flex items-center">
+                  <Video className="h-5 w-5 mr-2 text-[#09b66d]" />
                   {activeSport && activeSport !== 'all' ? 
                     sportsData?.find(s => s.key === activeSport)?.title || activeSport :
-                    "Eventos en Vivo"}
+                    "Todos los Eventos en Vivo"}
                 </h2>
                 <Link href="/sports">
-                  <span className="text-[#09b66d] text-sm font-medium flex items-center">
+                  <span className="text-[#09b66d] text-sm font-medium flex items-center hover:underline">
                     {t('buttons.viewAll')} <ChevronRight className="h-4 w-4" />
                   </span>
                 </Link>
@@ -518,26 +837,220 @@ export default function LiveEventsPage() {
               {!eventsLoading && !eventsError && (
                 <div className="space-y-4">
                   {filteredEvents.length === 0 ? (
-                    <Card className="bg-[#192531] border-[#1c2b3a] p-4">
+                    <Card className="bg-[#192531] border-[#1c2b3a] p-8">
                       <div className="flex flex-col items-center justify-center py-8">
-                        <Tv className="h-12 w-12 text-gray-500 mb-2" />
-                        <h3 className="text-lg font-medium">No hay eventos en vivo en este momento</h3>
-                        <p className="text-sm text-gray-400">Intenta seleccionar un deporte diferente o vuelve más tarde</p>
+                        <div className="relative mb-4">
+                          <Tv className="h-16 w-16 text-gray-700" />
+                          <div className="absolute -top-1 -right-1 rounded-full bg-[#192531] border border-gray-700 p-1">
+                            <AlertTriangle className="h-5 w-5 text-gray-500" />
+                          </div>
+                        </div>
+                        <h3 className="text-xl font-medium text-white mb-2">No hay eventos en vivo en este momento</h3>
+                        <p className="text-base text-gray-400 text-center max-w-md">
+                          Intenta seleccionar un deporte diferente o vuelve más tarde
+                          para ver los próximos eventos en vivo
+                        </p>
+                        
+                        <Button
+                          variant="outline"
+                          className="mt-6 border-[#09b66d] text-[#09b66d] hover:bg-[#09b66d] hover:text-white"
+                          onClick={() => {
+                            // Navegar a deportes para ver todos los eventos
+                            setLocation('/sports');
+                          }}
+                        >
+                          Ver todos los eventos deportivos
+                        </Button>
                       </div>
                     </Card>
                   ) : (
-                    filteredEvents.map((event) => {
-                      const sportTitle = sportsData?.find(s => s.key === event.sport_key)?.title || event.sport_key;
-                      return (
-                        <EventCard
-                          key={event.id}
-                          event={event}
-                          onAddSelection={handleAddSelection}
-                          selectedBets={betSelections}
-                          sportTitle={sportTitle}
-                        />
-                      );
-                    })
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredEvents.slice(1).map((event) => {
+                          const sportTitle = sportsData?.find(s => s.key === event.sport_key)?.title || event.sport_key;
+                          const sportStats = getRandomStats(event.sport_key);
+                          
+                          return (
+                            <Card 
+                              key={event.id}
+                              className="bg-[#192531] border-[#1c2b3a] overflow-hidden transition-all hover:border-[#09b66d]/50"
+                            >
+                              <div className="relative">
+                                <div className="h-20 overflow-hidden">
+                                  <div 
+                                    className="w-full h-full bg-cover bg-center"
+                                    style={{ 
+                                      backgroundImage: `url(${getSportBackgroundImage(event.sport_key)})`,
+                                      filter: 'brightness(0.6)'
+                                    }}
+                                  />
+                                </div>
+                                
+                                <div className="absolute top-2 left-3">
+                                  <Badge className="bg-[#e64d6b] text-white">
+                                    <Activity className="w-3 h-3 mr-1 animate-pulse" />
+                                    LIVE
+                                  </Badge>
+                                </div>
+                                
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#192531] to-transparent h-10" />
+                              </div>
+                              
+                              <div className="p-4">
+                                <div className="flex items-center mb-2">
+                                  <Badge variant="outline" className="text-gray-300 border-gray-600 mr-2">
+                                    {sportTitle}
+                                  </Badge>
+                                  <span className="text-xs text-gray-400">
+                                    {formatEventDate(event.commence_time)}
+                                  </span>
+                                </div>
+                                
+                                <h3 className="text-lg font-bold text-white mb-3">
+                                  {event.home_team} vs {event.away_team}
+                                </h3>
+                                
+                                <div className="grid grid-cols-3 gap-2 mb-4">
+                                  {event.bookmakers && event.bookmakers[0]?.markets[0]?.outcomes.map((outcome, index) => (
+                                    <div 
+                                      key={`${outcome.name}-${index}`}
+                                      className="bg-[#0e1824] hover:bg-[#09b66d]/10 cursor-pointer transition-colors rounded-lg p-2 flex flex-col items-center justify-center border border-[#1c2b3a] hover:border-[#09b66d]"
+                                      onClick={() => {
+                                        const selection: BetSelection = {
+                                          id: `${event.id}-${outcome.name}`,
+                                          eventId: event.id,
+                                          sportKey: event.sport_key,
+                                          sportTitle: sportTitle,
+                                          homeTeam: event.home_team,
+                                          awayTeam: event.away_team,
+                                          selectedTeam: outcome.name,
+                                          odds: outcome.price,
+                                          marketType: 'moneyline'
+                                        };
+                                        
+                                        handleAddSelection(selection);
+                                      }}
+                                    >
+                                      <span className="text-xs font-medium text-gray-400 mb-1">
+                                        {outcome.name === event.home_team ? 'Local' : 
+                                         outcome.name === event.away_team ? 'Visitante' : 'Empate'}
+                                      </span>
+                                      <span className="text-base font-bold text-[#09b66d]">
+                                        {formatAmericanOdds(outcome.price)}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                                <Button 
+                                  className="w-full bg-[#0e1824] hover:bg-[#192531] border border-[#1c2b3a] text-white"
+                                  variant="outline"
+                                  onClick={() => {
+                                    // Destacar este evento (solo visual para demo)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }}
+                                >
+                                  <Monitor className="w-4 h-4 mr-1.5" />
+                                  Ver detalles del partido
+                                </Button>
+                              </div>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {filteredEvents.slice(0, 3).map((event, idx) => {
+                          const sportTitle = sportsData?.find(s => s.key === event.sport_key)?.title || event.sport_key;
+                          if (idx === 0) return null; // Ya mostramos el primero como destacado
+                          
+                          // Crear un estilo diferente para los eventos "recomendados"
+                          return (
+                            <Card 
+                              key={`compact-${event.id}`}
+                              className="bg-[#192531] border-[#1c2b3a] p-4 hover:border-[#09b66d]/50 transition-all"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <Badge className="bg-[#09b66d]/20 text-[#09b66d] border border-[#09b66d]/30">
+                                  DESTACADO
+                                </Badge>
+                                <Star className="h-4 w-4 text-[#09b66d]" />
+                              </div>
+                              
+                              <h3 className="text-lg font-bold text-white my-2">
+                                {event.home_team} vs {event.away_team}
+                              </h3>
+                              
+                              <div className="flex items-center gap-2 mb-3">
+                                <Badge variant="outline" className="text-xs text-gray-300 border-gray-700">
+                                  {sportTitle}
+                                </Badge>
+                                <span className="text-xs text-gray-400">
+                                  {formatEventDate(event.commence_time)}
+                                </span>
+                              </div>
+                              
+                              <div className="grid grid-cols-3 gap-2">
+                                {event.bookmakers && event.bookmakers[0]?.markets[0]?.outcomes.map((outcome, index) => (
+                                  <div 
+                                    key={`mini-${outcome.name}-${index}`}
+                                    className="bg-[#0e1824] hover:bg-[#09b66d]/10 cursor-pointer transition-colors rounded-lg p-2 flex items-center justify-between border border-[#1c2b3a] hover:border-[#09b66d]"
+                                    onClick={() => {
+                                      const selection: BetSelection = {
+                                        id: `${event.id}-${outcome.name}`,
+                                        eventId: event.id,
+                                        sportKey: event.sport_key,
+                                        sportTitle: sportTitle,
+                                        homeTeam: event.home_team,
+                                        awayTeam: event.away_team,
+                                        selectedTeam: outcome.name,
+                                        odds: outcome.price,
+                                        marketType: 'moneyline'
+                                      };
+                                      
+                                      handleAddSelection(selection);
+                                    }}
+                                  >
+                                    <span className="text-xs font-medium text-gray-400">
+                                      {outcome.name === event.home_team ? '1' : 
+                                       outcome.name === event.away_team ? '2' : 'X'}
+                                    </span>
+                                    <span className="text-sm font-bold text-[#09b66d]">
+                                      {formatAmericanOdds(outcome.price)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* EventCards de respaldo para más partidos */}
+                      {filteredEvents.length > 3 && (
+                        <div className="space-y-4 mt-8">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-lg font-medium text-white flex items-center">
+                              <Award className="h-4 w-4 mr-2 text-[#09b66d]" />
+                              Más partidos en vivo
+                            </h3>
+                          </div>
+                          
+                          {filteredEvents.slice(3).map((event) => {
+                            const sportTitle = sportsData?.find(s => s.key === event.sport_key)?.title || event.sport_key;
+                            return (
+                              <EventCard
+                                key={event.id}
+                                event={event}
+                                onAddSelection={handleAddSelection}
+                                selectedBets={betSelections}
+                                sportTitle={sportTitle}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
