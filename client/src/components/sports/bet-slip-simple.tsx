@@ -246,10 +246,10 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
             {/* Bet amount input */}
             <div className="mt-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">{t('sports.betAmount')}</span>
+                <span className="text-sm font-medium">Monto de apuesta</span>
                 {selections.length > 1 && (
                   <div className="flex items-center text-xs text-white/70">
-                    <span>{t('sports.parlayOdds')}:</span>
+                    <span>Probabilidades combinadas:</span>
                     <span className="ml-1 font-bold text-green-400">{formatAmericanOdds(calculateParlayOdds())}</span>
                   </div>
                 )}
@@ -279,10 +279,10 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 onClick={handlePlaceBet}
                 disabled={selections.length === 0 || isProcessing || parseFloat(betAmount) <= 0}
               >
-                {isProcessing ? t('buttons.processing') : (
+                {isProcessing ? "Procesando..." : (
                   selections.length > 1 
-                    ? t('buttons.placeParlayBet') 
-                    : t('buttons.placeBet')
+                    ? "Colocar apuesta combinada" 
+                    : "Colocar apuesta"
                 )}
               </Button>
             </div>
@@ -292,8 +292,8 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
             <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
               <Plus className="h-8 w-8 text-white/30" />
             </div>
-            <h3 className="text-lg font-medium mb-1">{t('sports.betSlipEmpty')}</h3>
-            <p className="text-sm text-white/70 mb-4">{t('sports.selectOddsToAddBets')}</p>
+            <h3 className="text-lg font-medium mb-1">Boleto de apuestas vacío</h3>
+            <p className="text-sm text-white/70 mb-4">Selecciona una cuota para agregar apuestas</p>
           </div>
         )}
       </div>
