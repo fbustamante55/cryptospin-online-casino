@@ -146,6 +146,36 @@ export default function SportsBettingPage() {
   
   // Filter events for display
   const filteredEvents = displayEvents?.slice(0, 10) || [];
+  
+  // Handler for adding a bet selection
+  const handleAddSelection = (selection: BetSelection) => {
+    // Check if the selection already exists
+    const existingSelectionIndex = betSelections.findIndex(
+      bet => bet.eventId === selection.eventId && 
+             bet.selectedTeam === selection.selectedTeam && 
+             bet.marketType === selection.marketType
+    );
+    
+    if (existingSelectionIndex !== -1) {
+      // Remove it if it already exists (toggle behavior)
+      const newSelections = [...betSelections];
+      newSelections.splice(existingSelectionIndex, 1);
+      setBetSelections(newSelections);
+    } else {
+      // Add new selection
+      setBetSelections([...betSelections, selection]);
+    }
+  };
+  
+  // Handler for removing a bet selection
+  const handleRemoveSelection = (id: string) => {
+    setBetSelections(betSelections.filter(bet => bet.id !== id));
+  };
+  
+  // Handler for clearing all selections
+  const handleClearSelections = () => {
+    setBetSelections([]);
+  };
 
   return (
     <>
@@ -338,15 +368,11 @@ export default function SportsBettingPage() {
           
           {/* Right column - Bet Slip */}
           <div className="w-full md:w-80 lg:w-96 mt-4 md:mt-0">
-            <Card className="bg-[#192531] border-[#1c2b3a] sticky top-4">
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-4">{t('sports.betSlip')}</h3>
-                <div className="py-8 text-center text-gray-400">
-                  <p>{t('sports.noBetsSelected')}</p>
-                  <p className="text-sm mt-2">{t('sports.selectOddsToAddBets')}</p>
-                </div>
-              </div>
-            </Card>
+            <BetSlip 
+              selections={betSelections}
+              onRemoveSelection={handleRemoveSelection}
+              onClearSelections={handleClearSelections}
+            />
           </div>
         </div>
       </main>
