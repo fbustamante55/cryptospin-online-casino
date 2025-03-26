@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="20" cy="20" r="19" fill="#63473D" stroke="#f7cc4f" stroke-width="1"/>
+  
+  <!-- Cuerpo del escarabajo -->
+  <ellipse cx="20" cy="20" rx="14" ry="12" fill="#382518" stroke="#f7cc4f" stroke-width="1.5"/>
+  
+  <!-- Patrón decorativo en el caparazón -->
+  <path d="M20,12 L20,28" stroke="#f7cc4f" stroke-width="1" fill="none"/>
+  <path d="M15,14 L25,14" stroke="#f7cc4f" stroke-width="1" fill="none"/>
+  <path d="M13,17 L27,17" stroke="#f7cc4f" stroke-width="1" fill="none"/>
+  <path d="M12,20 L28,20" stroke="#f7cc4f" stroke-width="1" fill="none"/>
+  <path d="M13,23 L27,23" stroke="#f7cc4f" stroke-width="1" fill="none"/>
+  <path d="M15,26 L25,26" stroke="#f7cc4f" stroke-width="1" fill="none"/>
+  
+  <!-- Cabeza y mandíbulas -->
+  <path d="M16,9 
+           C15,7 25,7 24,9
+           C24,11 16,11 16,9Z"
+        fill="#382518" stroke="#f7cc4f" stroke-width="1"/>
+  
+  <!-- Alas -->
+  <path d="M8,16 
+           C5,20 5,22 8,24"
+        fill="none" stroke="#f7cc4f" stroke-width="1.2"/>
+  <path d="M32,16 
+           C35,20 35,22 32,24"
+        fill="none" stroke="#f7cc4f" stroke-width="1.2"/>
+  
+  <!-- Patas -->
+  <path d="M12,19 L9,21" stroke="#f7cc4f" stroke-width="0.8"/>
+  <path d="M12,21 L9,23" stroke="#f7cc4f" stroke-width="0.8"/>
+  <path d="M12,23 L9,25" stroke="#f7cc4f" stroke-width="0.8"/>
+  
+  <path d="M28,19 L31,21" stroke="#f7cc4f" stroke-width="0.8"/>
+  <path d="M28,21 L31,23" stroke="#f7cc4f" stroke-width="0.8"/>
+  <path d="M28,23 L31,25" stroke="#f7cc4f" stroke-width="0.8"/>
+  
+  <!-- Decoración central -->
+  <circle cx="20" cy="20" r="4" fill="#63473D" stroke="#f7cc4f" stroke-width="1"/>
+  <circle cx="20" cy="20" r="2" fill="#f7cc4f"/>
+</svg>
