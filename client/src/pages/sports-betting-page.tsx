@@ -31,6 +31,7 @@ export default function SportsBettingPage() {
   const [betSelections, setBetSelections] = useState<BetSelection[]>([]);
   const [showLiveEvents, setShowLiveEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'live');
   const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'upcoming' || localStorage.getItem('sportsFilter') === null);
+  const [showFavorites, setShowFavorites] = useState<boolean>(localStorage.getItem('sportsFilter') === 'favorites');
   
   // Fetch available sports
   const { 
@@ -50,6 +51,23 @@ export default function SportsBettingPage() {
   } = useQuery<EventOdds[]>({
     queryKey: ['events', 'upcoming'],
     queryFn: () => fetchUpcomingEvents('us', 'h2h', 'american'),
+  });
+  
+  // Fetch favorite events
+  const { 
+    data: favoriteEvents, 
+    isLoading: favoritesLoading,
+    error: favoritesError 
+  } = useQuery<any[]>({
+    queryKey: ['favorites'],
+    queryFn: async () => {
+      if (!user) return [];
+      return apiRequest<any[]>({
+        url: '/api/favorites',
+        method: 'GET'
+      });
+    },
+    enabled: !!user && showFavorites,
   });
   
   // When a specific sport is selected, fetch its events
@@ -278,7 +296,17 @@ export default function SportsBettingPage() {
             
             {/* Quick Links */}
             <div className="flex items-center space-x-2 mb-6 overflow-x-auto py-2">
-              <Button variant="outline" size="sm" className="bg-[#192531] border-[#1c2b3a] text-white">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={`${showFavorites ? 'bg-[#09b66d] border-[#09b66d]' : 'bg-[#192531] border-[#1c2b3a]'} text-white`}
+                onClick={() => {
+                  setShowFavorites(true);
+                  setShowLiveEvents(false);
+                  setShowUpcomingEvents(false);
+                  localStorage.setItem('sportsFilter', 'favorites');
+                }}
+              >
                 <Star className="h-4 w-4 mr-1 text-[#f8c541]" />
                 {t('sports.favorites')}
               </Button>
@@ -348,7 +376,9 @@ export default function SportsBettingPage() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">
-                  {showLiveEvents ? t('sports.liveEvents') : "Próximos Eventos"}
+                  {showLiveEvents ? t('sports.liveEvents') : 
+                   showFavorites ? t('sports.favorites') : 
+                   "Próximos Eventos"}
                 </h2>
                 <Link href="#">
                   <span className="text-[#09b66d] text-sm font-medium flex items-center">
