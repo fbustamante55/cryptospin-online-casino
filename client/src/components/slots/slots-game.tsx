@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Minus, Plus, PlayCircle, Maximize, Grid3X3, ChevronsUp, SkipBack, FastForward, Settings } from 'lucide-react';
+import { Minus, Plus, PlayCircle, Maximize, Grid3X3, ChevronsUp, SkipBack, FastForward, Settings, DollarSign, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -15,6 +15,7 @@ import {
   SVG_EGYPTIAN_STATUE_LEFT,
   SVG_EGYPTIAN_STATUE_RIGHT
 } from './book-of-egypt-icons';
+import { EgyptPayoutsTable } from './egypt-payouts-table';
 import { useLocation } from 'wouter';
 
 interface SlotResult {
@@ -678,6 +679,11 @@ export function SlotsGame() {
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Tabla de pagos estilo egipcio */}
+          <div className="mt-6">
+            <EgyptPayoutsTable />
           </div>
         </div>
       );
