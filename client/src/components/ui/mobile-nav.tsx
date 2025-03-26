@@ -33,7 +33,10 @@ export function MobileNav() {
           </button>
           <button 
             className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
-            onClick={() => setActiveTab('deportes')}
+            onClick={() => {
+              setActiveTab('deportes');
+              window.location.href = '/sports';
+            }}
           >
             DEPORTES
           </button>
@@ -76,9 +79,9 @@ export function MobileNav() {
             <span className="text-xs mt-1">Wallet</span>
           </Link>
           
-          <Link href="#" className={cn(
+          <Link href="/sports" className={cn(
             "flex flex-col items-center py-3 px-4",
-            "text-gray-400"
+            isActive("/sports") ? "text-[#09b66d]" : "text-gray-400"
           )}>
             <BarChart className="h-5 w-5" />
             <span className="text-xs mt-1">Apuestas</span>
