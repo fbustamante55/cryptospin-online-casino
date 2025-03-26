@@ -1,10 +1,18 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from "@/components/ui/button";
 import { EventOdds } from '@/lib/sports-api';
 import { formatEventDate, formatAmericanOdds } from '@/lib/sports-api';
 import { BetSelection } from '@/components/sports/bet-slip';
 import { nanoid } from 'nanoid';
 import { useTranslation } from 'react-i18next';
+import { Star } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 interface EventCardProps {
   event: EventOdds;
@@ -16,7 +24,15 @@ interface EventCardProps {
 
 export function EventCard({ event, onAddSelection, selectedBets, sportTitle = '', className = '' }: EventCardProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [favoriteId, setFavoriteId] = useState<number | null>(null);
   
+  const gameType = 'sports'; // Using 'sports' as the gameType for all sport events
+  const gameId = event.id; // Each event has a unique ID
+  const gameName = `${event.home_team} vs. ${event.away_team}`; // Create a human-readable game name
+
   // Get the moneyline (h2h) market if available
   const moneylineMarket = event.bookmakers?.length > 0 
     ? event.bookmakers[0].markets.find(market => market.key === 'h2h') 
@@ -31,6 +47,111 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
   const totalsMarket = event.bookmakers?.length > 0 
     ? event.bookmakers[0].markets.find(market => market.key === 'totals') 
     : undefined;
+    
+  // Check if this event is already a favorite
+  const { data, isLoading } = useQuery({
+    queryKey: ['/api/favorites/check', gameType, gameId],
+    queryFn: async () => {
+      if (!user) return { isFavorite: false };
+      
+      const params = new URLSearchParams({
+        gameType,
+        gameId
+      });
+      
+      return apiRequest<{ isFavorite: boolean, favoriteId?: number }>({
+        url: `/api/favorites/check?${params}`,
+        method: 'GET'
+      });
+    },
+    enabled: !!user,
+  });
+  
+  // Add to favorites
+  const addFavoriteMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error(t("favorites.login_required"));
+      
+      return apiRequest({
+        url: '/api/favorites',
+        method: 'POST',
+        data: {
+          userId: user.id,
+          gameType,
+          gameId,
+          gameTitle: gameName,
+          gameImage: null // No image for sports events
+        }
+      });
+    },
+    onSuccess: (data) => {
+      setFavoriteId(data.id);
+      queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/favorites/check', gameType, gameId] });
+      toast({
+        title: t("favorites.added_title"),
+        description: t("favorites.added_description", { gameName }),
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t("error"),
+        description: error.message || t("favorites.failed_add"),
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Remove from favorites
+  const removeFavoriteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      if (!user) throw new Error(t("favorites.login_required_remove"));
+      
+      return apiRequest({
+        url: `/api/favorites/${id}`,
+        method: 'DELETE'
+      });
+    },
+    onSuccess: () => {
+      setFavoriteId(null);
+      queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/favorites/check', gameType, gameId] });
+      toast({
+        title: t("favorites.removed_title"),
+        description: t("favorites.removed_description", { gameName }),
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t("error"),
+        description: error.message || t("favorites.failed_remove"),
+        variant: "destructive"
+      });
+    }
+  });
+  
+  useEffect(() => {
+    if (data?.favoriteId) {
+      setFavoriteId(data.favoriteId);
+    }
+  }, [data]);
+  
+  const toggleFavorite = () => {
+    if (!user) {
+      toast({
+        title: t("auth.login_required"),
+        description: t("favorites.login_required_message"),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (data?.isFavorite && favoriteId) {
+      removeFavoriteMutation.mutate(favoriteId);
+    } else {
+      addFavoriteMutation.mutate();
+    }
+  };
   
   // Get home team odds
   const homeOdds = moneylineMarket?.outcomes.find(outcome => outcome.name === event.home_team);
@@ -75,8 +196,32 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
     onAddSelection(selection);
   };
   
+  // Prepare favorite button status
+  const isFavorite = data?.isFavorite || false;
+  const isLoaded = !isLoading;
+  const isPending = addFavoriteMutation.isPending || removeFavoriteMutation.isPending;
+
   return (
-    <Card className={`bg-[#192531] border-[#1c2b3a] p-4 ${className}`}>
+    <Card className={`bg-[#192531] border-[#1c2b3a] p-4 ${className} relative`}>
+      {/* Favorite Star Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleFavorite}
+        disabled={!isLoaded || isPending || !user}
+        className={cn(
+          "absolute top-2 right-2 z-10 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50",
+          "w-8 h-8 flex items-center justify-center"
+        )}
+      >
+        <Star
+          className={cn(
+            "h-4 w-4 transition-all",
+            isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+          )}
+        />
+      </Button>
+      
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center">
           <span className="text-xs font-medium text-gray-400">{sportTitle || event.sport_key}</span>
