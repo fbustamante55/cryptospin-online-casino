@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- Resplandor de fondo -->
+  <circle cx="15" cy="15" r="13" fill="#00FFAA" opacity="0.1"/>
+  
+  <!-- Cruz Ankh (símbolo de la vida) -->
+  <path d="M15,5 
+           L15,20" 
+        stroke="#00FFAA" stroke-width="2" fill="none"/>
+  
+  <!-- Parte superior oval del Ankh -->
+  <path d="M10,10 
+           C10,6 20,6 20,10
+           C20,14 10,14 10,10Z"
+        stroke="#00FFAA" stroke-width="2" fill="none"/>
+  
+  <!-- Base horizontal del Ankh -->
+  <path d="M10,20 L20,20" 
+        stroke="#00FFAA" stroke-width="2" fill="none"/>
+        
+  <!-- Detalles interiores -->
+  <path d="M15,14 L15,20" 
+        stroke="#008866" stroke-width="1" fill="none"/>
+        
+  <!-- Detalles en la parte oval -->
+  <path d="M13,10 C13,8 17,8 17,10" 
+        stroke="#008866" stroke-width="0.5" fill="none"/>
+        
+  <!-- Pequeño brillo en la parte superior -->
+  <circle cx="15" cy="7" r="0.5" fill="#FFFFFF"/>
+  
+  <!-- Líneas decorativas (jeroglíficos) -->
+  <path d="M10,22 L20,22" stroke="#00FFAA" stroke-width="0.5"/>
+  <path d="M12,24 L18,24" stroke="#00FFAA" stroke-width="0.5"/>
+  <path d="M14,26 L16,26" stroke="#00FFAA" stroke-width="0.5"/>
+</svg>

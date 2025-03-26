@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- Resplandor de fondo -->
+  <circle cx="15" cy="15" r="13" fill="#FF3E8F" opacity="0.1"/>
+  
+  <!-- Contorno principal del ojo -->
+  <path d="M5,15 
+           C10,7 20,7 25,15
+           C20,23 10,23 5,15Z" 
+        stroke="#FF3E8F" stroke-width="1.5" fill="none"/>
+  
+  <!-- Pupila -->
+  <circle cx="15" cy="15" r="3" fill="#FF3E8F"/>
+  <circle cx="16" cy="14" r="1" fill="white"/>
+  
+  <!-- Detalle debajo del ojo -->
+  <path d="M12,18 
+           C13,19 17,19 18,18" 
+        stroke="#FF3E8F" stroke-width="1" fill="none"/>
+  
+  <!-- Decoración vertical -->
+  <path d="M15,15 L15,21" 
+        stroke="#FF3E8F" stroke-width="1.5" fill="none"/>
+  
+  <!-- Marcas distintivas del ojo de Horus -->
+  <path d="M6,15 L9,15" 
+        stroke="#FF3E8F" stroke-width="1.5" fill="none"/>
+        
+  <path d="M21,15 L24,15" 
+        stroke="#FF3E8F" stroke-width="1.5" fill="none"/>
+  
+  <!-- Decoración superior -->
+  <path d="M11,10 L13,6" 
+        stroke="#FF3E8F" stroke-width="1" fill="none"/>
+        
+  <path d="M19,10 L17,6" 
+        stroke="#FF3E8F" stroke-width="1" fill="none"/>
+        
+  <!-- Pequeños detalles -->
+  <circle cx="9" cy="15" r="0.5" fill="#FF3E8F"/>
+  <circle cx="21" cy="15" r="0.5" fill="#FF3E8F"/>
+  <circle cx="15" cy="21" r="0.5" fill="#FF3E8F"/>
+</svg>

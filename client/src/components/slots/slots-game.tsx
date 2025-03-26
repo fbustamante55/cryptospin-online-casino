@@ -419,10 +419,10 @@ export function SlotsGame() {
             {/* Decoraciones egipcias */}
             <div className="absolute inset-0 flex justify-between pointer-events-none" style={{zIndex: 10}}>
               <div className="h-full w-[120px] flex items-center justify-center">
-                <img src="/images/slots/egyptian-statue-left.png" alt="Egyptian statue" className="h-full opacity-80" />
+                <img src="/images/slots/egyptian-statue-left.svg" alt="Egyptian statue" className="h-full opacity-80" />
               </div>
               <div className="h-full w-[120px] flex items-center justify-center">
-                <img src="/images/slots/egyptian-statue-right.png" alt="Egyptian statue" className="h-full opacity-80" />
+                <img src="/images/slots/egyptian-statue-right.svg" alt="Egyptian statue" className="h-full opacity-80" />
               </div>
             </div>
             

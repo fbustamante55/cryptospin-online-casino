@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo dorado claro -->
+  <circle cx="15" cy="15" r="14" fill="#f9c846" opacity="0.1"/>
+  
+  <!-- Contorno de la cabeza del faraón -->
+  <path d="M15,2 
+           C10,2 6,6 6,12
+           C6,16 9,19 15,19
+           C21,19 24,16 24,12
+           C24,6 20,2 15,2Z" 
+        fill="#e0b03a" stroke="#c7a95c" stroke-width="0.5"/>
+  
+  <!-- Máscara del faraón -->
+  <path d="M10,8 
+           L10,17
+           C12,19 18,19 20,17
+           L20,8
+           C18,10 12,10 10,8Z" 
+        fill="#f4d160" stroke="#c7a95c" stroke-width="0.5"/>
+  
+  <!-- Rayas de la corona -->
+  <path d="M10,8 
+           L10,5
+           L20,5
+           L20,8"
+        fill="#f4d160" stroke="#c7a95c" stroke-width="0.5"/>
+  
+  <!-- Ojos del faraón -->
+  <ellipse cx="12" cy="12" rx="1.5" ry="2" fill="#111"/>
+  <ellipse cx="18" cy="12" rx="1.5" ry="2" fill="#111"/>
+  
+  <!-- Barba ceremonial -->
+  <path d="M13,17 
+           L13,22
+           L17,22
+           L17,17"
+        fill="#e0b03a" stroke="#c7a95c" stroke-width="0.5"/>
+  
+  <!-- Líneas decorativas en la máscara -->
+  <path d="M11,15 L19,15" stroke="#c7a95c" stroke-width="0.5"/>
+  <path d="M15,12 L15,17" stroke="#c7a95c" stroke-width="0.5"/>
+  
+  <!-- Corona superior -->
+  <path d="M10,5 
+           L15,1
+           L20,5"
+        fill="#f9c846" stroke="#c7a95c" stroke-width="0.5"/>
+  
+  <!-- Serpiente en la corona (uraeus) -->
+  <path d="M15,3 
+           C13,3 13,1 15,1
+           C17,1 17,3 15,3Z"
+        fill="#e0b03a" stroke="#c7a95c" stroke-width="0.3"/>
+  
+  <!-- Detalles adicionales -->
+  <path d="M11,7 L19,7" stroke="#c7a95c" stroke-width="0.3"/>
+  <path d="M11,9 L19,9" stroke="#c7a95c" stroke-width="0.3"/>
+  
+  <!-- Collar ceremonial -->
+  <path d="M10,17 
+           C13,21 17,21 20,17"
+        fill="none" stroke="#c7a95c" stroke-width="1"/>
+  
+  <!-- Símbolo del ojo de Horus -->
+  <path d="M14,24 
+           C12,25 12,27 14,28
+           C16,28 18,28 20,26"
+        fill="none" stroke="#c7a95c" stroke-width="0.5"/>
+</svg>
