@@ -43,6 +43,11 @@ export function Sidebar({ className }: SidebarProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [liveEventsCount, setLiveEventsCount] = useState(0);
   
+  // Obtener el filtro actual de localStorage
+  const [activeFilter, setActiveFilter] = useState(
+    localStorage.getItem('sportsFilter') || 'upcoming'
+  );
+  
   // Determinar el tab activo basado en la URL actual
   const [activeTab, setActiveTab] = useState(
     location.includes('/sports') ? 'deportes' : 'casino'
@@ -82,6 +87,23 @@ export function Sidebar({ className }: SidebarProps) {
       setLiveEventsCount(liveEvents.length);
     }
   }, [eventsData]);
+  
+  // Escuchar los cambios de filtro desde otras partes de la aplicación
+  useEffect(() => {
+    // Función para actualizar el estado del filtro
+    const handleFilterChange = (event: CustomEvent) => {
+      const { filter } = event.detail;
+      setActiveFilter(filter);
+    };
+    
+    // Agregar el listener para el evento personalizado
+    window.addEventListener('sportsFilterChanged', handleFilterChange as EventListener);
+    
+    // Limpiar el listener cuando el componente se desmonta
+    return () => {
+      window.removeEventListener('sportsFilterChanged', handleFilterChange as EventListener);
+    };
+  }, []);
 
   const isActive = (path: string) => location === path;
 
@@ -117,8 +139,14 @@ export function Sidebar({ className }: SidebarProps) {
     // Guardar filtro en localStorage
     localStorage.setItem('sportsFilter', filter);
     
+    // Actualizar el estado activeFilter
+    setActiveFilter(filter);
+    
     // Navegar a la página de deportes
     setLocation('/sports');
+    
+    // Emitir evento personalizado para sincronizar el filtro en toda la aplicación
+    window.dispatchEvent(new CustomEvent('sportsFilterChanged', { detail: { filter } }));
   };
   
   // Deportes populares
@@ -263,26 +291,35 @@ export function Sidebar({ className }: SidebarProps) {
           <>
             {/* Sports section */}
             <div className="py-2">
-              {sportsItems.map((item, index) => (
-                <Link 
-                  key={index} 
-                  href={item.path || "#"}
-                  onClick={item.onClick}
-                  className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="text-gray-400">
-                      {item.icon}
-                    </span>
-                    {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
-                  </div>
-                  {!sidebarCollapsed && item.badge && (
-                    <span className="text-xs bg-[#f8c541] text-[#0e1824] font-bold px-1.5 py-0.5 rounded">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
+              {sportsItems.map((item, index) => {
+                // Determinar si este elemento es el botón de Eventos En Vivo
+                const isLiveEvents = item.name === t('sidebar.liveEvents');
+                // Está activo si es Eventos En Vivo y el filtro activo es 'live', 
+                // o si es Próximos Eventos y el filtro activo es 'upcoming'
+                const isActive = (isLiveEvents && activeFilter === 'live') || 
+                                 (item.name === "Próximos Eventos" && activeFilter === 'upcoming');
+                
+                return (
+                  <Link 
+                    key={index} 
+                    href={item.path || "#"}
+                    onClick={item.onClick}
+                    className={`flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors ${isActive ? 'bg-[#192531]' : ''}`}
+                  >
+                    <div className="flex items-center">
+                      <span className={isActive ? "text-[#09b66d]" : "text-gray-400"}>
+                        {item.icon}
+                      </span>
+                      {!sidebarCollapsed && <span className={`ml-3 ${isActive ? 'text-[#09b66d] font-medium' : ''}`}>{item.name}</span>}
+                    </div>
+                    {!sidebarCollapsed && item.badge && (
+                      <span className="text-xs bg-[#f8c541] text-[#0e1824] font-bold px-1.5 py-0.5 rounded">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Mejores Deportes section */}
