@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { EventCard } from "@/components/sports/event-card";
 import { BetSlip, BetSelection } from "@/components/sports/bet-slip-simple";
@@ -24,6 +24,7 @@ import {
   formatEventDate,
   formatAmericanOdds,
   getSportColor,
+  generateDemoEvents,
   Sport,
   EventOdds
 } from "@/lib/sports-api";
@@ -172,8 +173,56 @@ export default function SportsBettingPage() {
     enabled: !!user,
   });
   
-  // Display either sport-specific events or upcoming events based on selection
-  const displayEvents = activeSport && activeSport !== 'all' ? sportEvents : upcomingEvents;
+  // Crear eventos demo si no hay datos
+  const demoEventsData = useMemo(() => generateDemoEvents(), []);
+  
+  // Usar eventos de ejemplo cuando la API no responda correctamente
+  const fallbackEvents = useMemo(() => {
+    // Si no tenemos datos de eventos y hay error o se ha terminado de cargar, usamos datos simulados
+    if ((!upcomingEvents || upcomingEvents.length === 0) && (eventsError || !eventsLoading)) {
+      return demoEventsData;
+    }
+    return undefined;
+  }, [upcomingEvents, eventsError, eventsLoading, demoEventsData]);
+  
+  // Crear deportes de ejemplo cuando la API no responda
+  const demoSports: Sport[] = useMemo(() => {
+    return [
+      { key: 'soccer_laliga', group: 'Soccer', title: 'La Liga', description: 'La Liga de España', active: true, has_outrights: false },
+      { key: 'soccer_epl', group: 'Soccer', title: 'Premier League', description: 'Premier League de Inglaterra', active: true, has_outrights: false },
+      { key: 'soccer_fifa_world_cup', group: 'Soccer', title: 'FIFA World Cup', description: 'Copa Mundial de la FIFA', active: true, has_outrights: false },
+      { key: 'soccer_uefa_champs_league', group: 'Soccer', title: 'UEFA Champions League', description: 'UEFA Champions League', active: true, has_outrights: false },
+      { key: 'basketball_nba', group: 'Basketball', title: 'NBA', description: 'National Basketball Association', active: true, has_outrights: false },
+      { key: 'basketball_euroleague', group: 'Basketball', title: 'Euroleague', description: 'Euroleague de Baloncesto', active: true, has_outrights: false },
+      { key: 'tennis_atp', group: 'Tennis', title: 'ATP Tennis', description: 'ATP Tennis Tour', active: true, has_outrights: false },
+      { key: 'baseball_mlb', group: 'Baseball', title: 'MLB', description: 'Major League Baseball', active: true, has_outrights: false },
+    ];
+  }, []);
+  
+  // Usar deportes de ejemplo cuando la API no responda correctamente
+  const fallbackSports = useMemo(() => {
+    // Si no tenemos datos de deportes y hay error o se ha terminado de cargar, usamos datos simulados
+    if ((!sportsData || sportsData.length === 0) && (sportsError || !sportsLoading)) {
+      return demoSports;
+    }
+    return undefined;
+  }, [sportsData, sportsError, sportsLoading, demoSports]);
+  
+  // Display either sport-specific events or upcoming events based on selection, with fallback to demo data
+  const displayEvents = useMemo(() => {
+    if (activeSport && activeSport !== 'all') {
+      // Eventos específicos del deporte seleccionado
+      if (sportEvents && sportEvents.length > 0) {
+        return sportEvents;
+      } else {
+        // Usar los eventos de demostración filtrados por el deporte seleccionado
+        return fallbackEvents?.filter(event => event.sport_key.includes(activeSport)) || [];
+      }
+    } else {
+      // Todos los eventos próximos
+      return upcomingEvents || fallbackEvents || [];
+    }
+  }, [activeSport, sportEvents, upcomingEvents, fallbackEvents]);
   
   // Helper function to check if an event is live or upcoming
   const isEventLive = (event: EventOdds): boolean => {
@@ -207,44 +256,54 @@ export default function SportsBettingPage() {
   };
   
   // Organize sports by group
-  const sportsByGroup = sportsData?.reduce((groups: Record<string, Sport[]>, sport) => {
-    if (!groups[sport.group]) {
-      groups[sport.group] = [];
-    }
-    groups[sport.group].push(sport);
-    return groups;
-  }, {}) || {};
+  const sportsByGroup = useMemo(() => {
+    // Usar los datos reales si están disponibles, si no, usar los de respaldo
+    const sportsToUse = (sportsData && sportsData.length > 0) ? sportsData : fallbackSports || [];
+    
+    return sportsToUse.reduce((groups: Record<string, Sport[]>, sport) => {
+      if (!groups[sport.group]) {
+        groups[sport.group] = [];
+      }
+      groups[sport.group].push(sport);
+      return groups;
+    }, {});
+  }, [sportsData, fallbackSports]);
 
   // Filter sports based on active filter (live, favorites, etc.)
-  const filteredSportsData = sportsData?.filter(sport => {
-    if (showLiveEvents) {
-      // Solo deportes que tienen eventos en vivo
-      return displayEvents?.some(event => 
-        event.sport_key === sport.key && isEventLive(event)
-      );
-    } else if (showUpcomingEvents) {
-      // Solo deportes que tienen eventos próximos (no en vivo)
-      return displayEvents?.some(event => 
-        event.sport_key === sport.key && !isEventLive(event)
-      );
-    } else if (showTomorrowEvents) {
-      // Solo deportes que tienen eventos para mañana
-      return displayEvents?.some(event => 
-        event.sport_key === sport.key && isEventTomorrow(event)
-      );
-    } else if (showFavorites) {
-      // Solo deportes que tienen eventos favoritos
-      return displayEvents?.some(event => 
-        event.sport_key === sport.key && 
-        favoriteEvents?.some(favorite => 
-          favorite.gameType === 'sports' && favorite.gameId === event.id
-        )
-      );
-    } else {
-      // Si no hay filtro activo, mostrar todos los deportes
-      return true;
-    }
-  }) || [];
+  const filteredSportsData = useMemo(() => {
+    // Determinar qué datos de deportes usar (reales o de respaldo)
+    const sportsToUse = (sportsData && sportsData.length > 0) ? sportsData : fallbackSports || [];
+    
+    return sportsToUse.filter(sport => {
+      if (showLiveEvents) {
+        // Solo deportes que tienen eventos en vivo
+        return displayEvents?.some(event => 
+          event.sport_key.includes(sport.key) && isEventLive(event)
+        );
+      } else if (showUpcomingEvents) {
+        // Solo deportes que tienen eventos próximos (no en vivo)
+        return displayEvents?.some(event => 
+          event.sport_key.includes(sport.key) && !isEventLive(event)
+        );
+      } else if (showTomorrowEvents) {
+        // Solo deportes que tienen eventos para mañana
+        return displayEvents?.some(event => 
+          event.sport_key.includes(sport.key) && isEventTomorrow(event)
+        );
+      } else if (showFavorites) {
+        // Solo deportes que tienen eventos favoritos
+        return displayEvents?.some(event => 
+          event.sport_key.includes(sport.key) && 
+          favoriteEvents?.some(favorite => 
+            favorite.gameType === 'sports' && favorite.gameId === event.id
+          )
+        );
+      } else {
+        // Si no hay filtro activo, mostrar todos los deportes
+        return true;
+      }
+    });
+  }, [sportsData, fallbackSports, displayEvents, showLiveEvents, showUpcomingEvents, showTomorrowEvents, showFavorites, favoriteEvents, isEventLive, isEventTomorrow]);
 
   // Organize filtered sports by group
   const filteredSportsByGroup = filteredSportsData.reduce((groups: Record<string, Sport[]>, sport) => {

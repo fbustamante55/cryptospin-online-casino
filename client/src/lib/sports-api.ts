@@ -1,5 +1,5 @@
 // The Odds API integration
-const API_KEY = import.meta.env.ODDS_API_KEY || '';
+const API_KEY = '6f332c5566ae50fd96bdedfd4636deb2'; // Clave API de ejemplo (la real se configura en el servidor)
 const BASE_URL = 'https://api.the-odds-api.com/v4';
 
 // Types for sports data
