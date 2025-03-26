@@ -403,8 +403,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 {walletSettings.showFiatEquivalent ? (
                   <div className="flex flex-col items-end">
                     <span className="text-sm font-bold text-[#09b66d]">
-                      {getFiatSymbol(walletSettings.selectedFiat)}
-                      {(parseFloat(betAmount) * calculateParlayOdds()).toFixed(2)}
+                      {getFiatSymbol(walletSettings.selectedFiat)}{(parseFloat(betAmount) * calculateParlayOdds()).toFixed(2)}
                     </span>
                     <span className="text-xs text-white/70">
                       (Equivalente a {potentialWin.toFixed(4)} {selectedCurrency})
