@@ -99,7 +99,7 @@ export default function HomePage() {
                 <div className="h-6 w-px bg-[#1c2b3a]"></div>
                 
                 {/* Botón de depósito */}
-                <button className="flex items-center px-5 py-1.5 bg-[#f8c541] hover:bg-[#f9d252] text-[#0e1824] font-bold text-sm transition-all duration-200">
+                <button className="flex items-center px-5 py-1.5 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold text-sm transition-all duration-200">
                   Depositar
                 </button>
               </div>
