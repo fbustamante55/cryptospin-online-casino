@@ -6,7 +6,8 @@ import { formatEventDate, formatAmericanOdds, oddsToImpliedProbability } from '@
 import { BetSelection } from '@/components/sports/bet-slip';
 import { nanoid } from 'nanoid';
 import { useTranslation } from 'react-i18next';
-import { Star, HelpCircle, ChevronDown } from "lucide-react";
+import { Star, HelpCircle, ChevronDown, BarChart3 } from "lucide-react";
+import { OddsWidget } from '@/components/sports/odds-widget';
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -507,6 +508,24 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
               </div>
             </div>
           )}
+          
+          {/* Widget de cuotas integrado */}
+          <div className="mt-4 border-t border-[#1c2b3a] pt-3">
+            <div className="flex items-center mb-2">
+              <BarChart3 className="h-4 w-4 text-[#09b66d] mr-2" />
+              <h3 className="text-sm font-medium">Estadísticas y Cuotas Detalladas</h3>
+            </div>
+            <div className="bg-[#192531] rounded p-2">
+              <OddsWidget 
+                sportKey={event.sport_key}
+                width="100%"
+                height="240px"
+                oddsFormat="decimal"
+                className="w-full rounded"
+                marketNames="h2h:Ganador,spreads:Handicap,totals:Total"
+              />
+            </div>
+          </div>
           
           {/* Todos los mercados (desplegable) */}
           {event.bookmakers.length > 0 && (
