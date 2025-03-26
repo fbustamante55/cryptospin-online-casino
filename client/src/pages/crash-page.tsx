@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { CrashGame } from "@/components/crash/crash-game";
 import { Card, CardContent } from "@/components/ui/card";
+import { UserDropdown } from "@/components/ui/user-dropdown";
+import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { GameHistory } from "@shared/schema";
@@ -37,11 +39,17 @@ export default function CrashPage() {
             <h1 className="text-xl font-heading font-bold">{t('sidebar.crash')}</h1>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <div className="px-3 py-1.5 rounded-md bg-[#192531] border border-[#1c2b3a] flex items-center">
               <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
               <span className="text-sm font-semibold">{user?.balance}</span>
             </div>
+            
+            {/* User Dropdown Menu */}
+            <UserDropdown />
+            
+            {/* Notification Dropdown */}
+            <NotificationDropdown />
           </div>
         </div>
       </header>

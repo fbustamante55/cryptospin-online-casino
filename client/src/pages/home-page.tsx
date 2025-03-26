@@ -1,5 +1,6 @@
 import { GameCard } from "@/components/ui/game-card";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
+import { UserDropdown } from "@/components/ui/user-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 import { Search, Plus, Coins } from "lucide-react";
@@ -68,7 +69,7 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <button className="flex items-center px-3 py-1.5 rounded-md bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium text-sm transition-all duration-200">
               <Plus className="h-4 w-4 mr-1.5" />
               <span>{t('buttons.deposit')}</span>
@@ -78,6 +79,9 @@ export default function HomePage() {
               <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
               <span className="text-sm font-semibold">{user?.balance}</span>
             </div>
+            
+            {/* User Dropdown Menu */}
+            <UserDropdown />
             
             <NotificationDropdown />
           </div>
