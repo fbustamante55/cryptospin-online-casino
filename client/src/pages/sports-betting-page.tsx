@@ -196,26 +196,25 @@ export default function SportsBettingPage() {
            eventDate.getFullYear() === tomorrow.getFullYear();
   };
   
-  // Filter events based on live/upcoming status, favorites, and tomorrow's events
+  // Filter events based on live/upcoming status, favorites, tomorrow's events, and selected sport
   const filteredByStatus = displayEvents?.filter(event => {
-    if (showLiveEvents) {
-      return isEventLive(event);
-    } else if (showUpcomingEvents) {
-      return !isEventLive(event);
-    } else if (showFavorites) {
-      // When no favorites data, return empty array
-      if (!favoriteEvents || favoriteEvents.length === 0) {
-        return false;
-      }
-      
-      // Check if this event is in favorites
-      return favoriteEvents.some(favorite => 
+    // First filter by event status (live, upcoming, favorites, tomorrow)
+    const passesStatusFilter = 
+      (showLiveEvents && isEventLive(event)) ||
+      (showUpcomingEvents && !isEventLive(event)) ||
+      (showFavorites && favoriteEvents?.some(favorite => 
         favorite.gameType === 'sports' && favorite.gameId === event.id
-      );
-    } else if (showTomorrowEvents) {
-      return isEventTomorrow(event);
-    }
-    return true;
+      )) ||
+      (showTomorrowEvents && isEventTomorrow(event)) ||
+      (!showLiveEvents && !showUpcomingEvents && !showFavorites && !showTomorrowEvents);
+    
+    // Then filter by selected sport if any
+    const passesSportFilter = 
+      !activeSport || 
+      activeSport === 'all' || 
+      (activeSport && event.sport_key === activeSport);
+    
+    return passesStatusFilter && passesSportFilter;
   }) || [];
   
   // Filter events for display (limit to 10 for performance)
@@ -397,21 +396,36 @@ export default function SportsBettingPage() {
             <div className="mb-8">
               <h2 className="text-xl font-bold mb-4">{t('sports.topSports')}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-4">
-                {sportsCategories.map((sport, index) => (
-                  <div 
-                    key={index} 
-                    className="bg-[#192531] rounded-lg overflow-hidden aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-[#1c2b3a] transition-colors"
-                    style={{ 
-                      background: `linear-gradient(to bottom, ${sport.color}33, #192531)`,
-                      borderTop: `3px solid ${sport.color}`
-                    }}
-                  >
-                    <div className="w-14 h-14 bg-[#1c2b3a] rounded-full flex items-center justify-center mb-2">
-                      <div className="w-8 h-8 bg-white/20 rounded-full"></div>
+                {sportsData?.map((sport, index) => {
+                  const isActive = activeSport === sport.key;
+                  const color = getSportColor(sport.group);
+                  return (
+                    <div 
+                      key={sport.key} 
+                      className={`bg-[#192531] rounded-lg overflow-hidden aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-[#1c2b3a] transition-colors ${isActive ? 'ring-2 ring-[#09b66d]' : ''}`}
+                      style={{ 
+                        background: `linear-gradient(to bottom, ${color}33, #192531)`,
+                        borderTop: `3px solid ${color}`
+                      }}
+                      onClick={() => {
+                        if (activeSport === sport.key) {
+                          // Si ya está seleccionado, deseleccionamos
+                          setActiveSport('all');
+                        } else {
+                          // Seleccionamos este deporte
+                          setActiveSport(sport.key);
+                        }
+                      }}
+                    >
+                      <div className={`w-14 h-14 bg-[#1c2b3a] rounded-full flex items-center justify-center mb-2 ${isActive ? 'bg-[#09b66d]/20' : ''}`}>
+                        <div className="w-8 h-8 bg-white/20 rounded-full"></div>
+                      </div>
+                      <span className={`text-xs font-bold ${isActive ? 'text-[#09b66d]' : ''}`}>
+                        {sport.title.toUpperCase()}
+                      </span>
                     </div>
-                    <span className="text-xs font-bold">{sport.name}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
             
@@ -419,10 +433,12 @@ export default function SportsBettingPage() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">
-                  {showLiveEvents ? t('sports.liveEvents') : 
-                   showFavorites ? t('sports.favorites') : 
-                   showTomorrowEvents ? t('sports.tomorrow') : 
-                   "Próximos Eventos"}
+                  {activeSport && activeSport !== 'all' ? 
+                    sportsData?.find(s => s.key === activeSport)?.title || activeSport :
+                    (showLiveEvents ? t('sports.liveEvents') : 
+                     showFavorites ? t('sports.favorites') : 
+                     showTomorrowEvents ? t('sports.tomorrow') : 
+                     "Próximos Eventos")}
                 </h2>
                 <Link href="#">
                   <span className="text-[#09b66d] text-sm font-medium flex items-center">
