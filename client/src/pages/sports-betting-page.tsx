@@ -743,6 +743,11 @@ export default function SportsBettingPage() {
                       )?.length || 0;
                     }
                     
+                    // No mostrar deportes sin eventos cuando se filtran
+                    if ((showLiveEvents || showUpcomingEvents || showTomorrowEvents || showFavorites) && eventsCount === 0) {
+                      return null;
+                    }
+                    
                     return (
                       <div 
                         key={sport.key}
