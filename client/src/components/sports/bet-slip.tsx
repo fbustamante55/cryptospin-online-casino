@@ -97,8 +97,8 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     ? calculatePotentialWin(parseFloat(betAmount), calculateParlayOdds())
     : 0;
   
-  // Format the bet type description
-  const formatBetType = (bet: BetSelection): string => {
+  // Format the bet type description - works with both BetSelection and SportsBet
+  const formatBetType = (bet: BetSelection | SportsBet): string => {
     switch (bet.marketType) {
       case 'moneyline':
         return bet.selectedTeam === 'Draw' ? t('sports.draw') : bet.selectedTeam;
