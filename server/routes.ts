@@ -244,28 +244,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const betSchema = z.object({
       bet: z.number().min(10).max(10000),
+      lines: z.number().min(1).max(9).default(9),
+      gameId: z.string().optional(),
+      reels: z.number().min(3).max(5).default(5),
+      rows: z.number().min(3).max(4).default(3)
     });
 
     try {
-      const { bet } = betSchema.parse(req.body);
+      const { bet, lines, gameId, reels, rows } = betSchema.parse(req.body);
       
       // Check if user has enough balance
       if (req.user.balance < bet) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
 
-      // Game logic for slots
-      const reels = [
-        generateReelResult(),
-        generateReelResult(),
-        generateReelResult()
-      ];
+      // Generate result using the new function
+      const reelsResult = generateSlotsResult(reels, rows);
       
-      // Determine win amount based on reel combination
-      const { win, multiplier, winAmount } = calculateSlotsWin(reels, bet);
+      // Calculate win using the new function
+      const { isWin, winAmount } = calculateSlotsWin(reelsResult, bet, lines);
+      
+      // Calculate multiplier (for game history)
+      const multiplier = isWin ? winAmount / bet : 0;
       
       // Update user balance
-      const amountChange = win ? winAmount - bet : -bet;
+      const amountChange = isWin ? winAmount - bet : -bet;
       const updatedUser = await storage.updateUserBalance(req.user.id, amountChange);
       
       if (!updatedUser) {
@@ -277,15 +280,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user.id,
         amount: -bet,
         type: "bet",
-        gameType: "slots"
+        gameType: "slots",
+        description: gameId ? `Slots - ${gameId}` : "Slots"
       });
 
-      if (win) {
+      if (isWin) {
         await storage.createTransaction({
           userId: req.user.id,
           amount: winAmount,
           type: "win",
-          gameType: "slots"
+          gameType: "slots",
+          description: gameId ? `Slots - ${gameId}` : "Slots"
         });
       }
 
@@ -293,18 +298,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createGameHistory({
         userId: req.user.id,
         gameType: "slots",
+        gameId: gameId,
         bet,
-        outcome: JSON.stringify(reels),
+        outcome: JSON.stringify(reelsResult),
         multiplier,
-        win,
-        winAmount: win ? winAmount : 0
+        win: isWin,
+        winAmount: isWin ? winAmount : 0
       });
 
       res.json({
-        reels,
-        win,
+        reels: reelsResult,
+        win: isWin,
+        winLines: [], // En la versión mejorada podríamos devolver qué líneas ganaron
         multiplier,
-        winAmount: win ? winAmount : 0,
+        winAmount: isWin ? winAmount : 0,
+        balance: updatedUser.balance
+      });
+    } catch (error) {
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+    }
+  });
+  
+  // Play keno game
+  app.post("/api/games/keno", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const betSchema = z.object({
+      bet: z.number().min(10).max(10000),
+      selectedNumbers: z.array(z.number().min(1).max(80)).min(1).max(10),
+      gameId: z.string().default('americankeno')
+    });
+
+    try {
+      const { bet, selectedNumbers, gameId } = betSchema.parse(req.body);
+      
+      // Check if user has enough balance
+      if (req.user.balance < bet) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Generate 20 random winning numbers
+      const winningNumbers = generateKenoNumbers();
+      
+      // Count how many numbers match
+      const matchCount = selectedNumbers.filter(num => winningNumbers.includes(num)).length;
+      
+      // Calculate win amount
+      const { isWin, winAmount } = calculateKenoWin(matchCount, selectedNumbers.length, bet, gameId);
+      
+      // Update user balance
+      const amountChange = isWin ? winAmount - bet : -bet;
+      const updatedUser = await storage.updateUserBalance(req.user.id, amountChange);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update balance" });
+      }
+
+      // Calculate effective multiplier for game history
+      const multiplier = isWin ? winAmount / bet : 0;
+
+      // Record transaction
+      await storage.createTransaction({
+        userId: req.user.id,
+        amount: -bet,
+        type: "bet",
+        gameType: "keno",
+        description: `Keno - ${gameId}`
+      });
+
+      if (isWin) {
+        await storage.createTransaction({
+          userId: req.user.id,
+          amount: winAmount,
+          type: "win",
+          gameType: "keno",
+          description: `Keno - ${gameId}`
+        });
+      }
+
+      // Record game history
+      await storage.createGameHistory({
+        userId: req.user.id,
+        gameType: "keno",
+        gameId: gameId,
+        bet,
+        outcome: JSON.stringify({ 
+          selected: selectedNumbers, 
+          winning: winningNumbers, 
+          matches: matchCount 
+        }),
+        multiplier,
+        win: isWin,
+        winAmount: isWin ? winAmount : 0
+      });
+
+      res.json({
+        selectedNumbers,
+        winningNumbers,
+        matchCount,
+        win: isWin,
+        multiplier,
+        winAmount: isWin ? winAmount : 0,
         balance: updatedUser.balance
       });
     } catch (error) {
@@ -2222,40 +2316,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 // Helper functions for game logic
 
+// Nota: La función generateReelResult ya no se utiliza como principal,
+// se mantiene para compatibilidad con código existente
 function generateReelResult(): string {
-  const symbols = ["7", "BAR", "2xBAR", "3xBAR", "CHERRY", "LEMON", "ORANGE", "PLUM"];
+  const symbols = ["7", "BAR", "STAR", "BELL", "CHERRY", "LEMON", "PLUM", "WATERMELON"];
   const randomIndex = Math.floor(Math.random() * symbols.length);
   return symbols[randomIndex];
 }
 
-function calculateSlotsWin(reels: string[], bet: number): { win: boolean; multiplier: number; winAmount: number } {
-  // Check for winning combinations
-  if (reels[0] === reels[1] && reels[1] === reels[2]) {
-    // All three symbols match
-    switch (reels[0]) {
-      case "7":
-        return { win: true, multiplier: 10, winAmount: bet * 10 };
-      case "BAR":
-        return { win: true, multiplier: 5, winAmount: bet * 5 };
-      case "2xBAR":
-        return { win: true, multiplier: 4, winAmount: bet * 4 };
-      case "3xBAR":
-        return { win: true, multiplier: 3, winAmount: bet * 3 };
-      case "CHERRY":
-        return { win: true, multiplier: 2.5, winAmount: Math.floor(bet * 2.5) };
-      default:
-        return { win: true, multiplier: 2, winAmount: bet * 2 };
-    }
-  } else if (
-    (reels[0] === "BAR" || reels[0] === "2xBAR" || reels[0] === "3xBAR") &&
-    (reels[1] === "BAR" || reels[1] === "2xBAR" || reels[1] === "3xBAR") &&
-    (reels[2] === "BAR" || reels[2] === "2xBAR" || reels[2] === "3xBAR")
-  ) {
-    // Any three BAR symbols
-    return { win: true, multiplier: 1.5, winAmount: Math.floor(bet * 1.5) };
-  } else if (reels.filter(r => r === "CHERRY").length >= 2) {
-    // At least two CHERRY symbols
-    return { win: true, multiplier: 1.2, winAmount: Math.floor(bet * 1.2) };
+// Función renombrada para evitar conflictos
+function calculateOldSlotsWin(reels: string[], bet: number): { win: boolean; multiplier: number; winAmount: number } {
+  // Esta función está obsoleta, use calculateSlotsWin con la nueva implementación
+  console.warn("Usando versión obsoleta de calculateSlotsWin, actualice al nuevo formato");
+  
+  // Simulamos comportamiento similar al original
+  if (reels.length >= 3 && reels[0] === reels[1] && reels[1] === reels[2]) {
+    const multiplier = reels[0] === "7" ? 10 : 
+                      reels[0] === "BAR" ? 5 : 
+                      reels[0] === "CHERRY" ? 2.5 : 2;
+    return { 
+      win: true, 
+      multiplier: multiplier, 
+      winAmount: Math.floor(bet * multiplier) 
+    };
   }
   
   // No win
@@ -2279,4 +2362,244 @@ function generateCrashPoint(): number {
   const crashPoint = Math.max(1, Math.floor((100 * houseEdgeFactor / (1 - r * houseEdgeFactor)) / 100 * 100) / 100);
   
   return parseFloat(crashPoint.toFixed(2));
+}
+
+// Casino games utilities
+/**
+ * Genera una matriz de símbolos para una máquina tragamonedas
+ * @param reels Número de carretes (columnas)
+ * @param rows Número de filas visibles
+ * @returns Una matriz con los símbolos generados
+ */
+function generateSlotsResult(reels: number = 5, rows: number = 3): string[][] {
+  const symbols = ['7', 'BAR', 'STAR', 'BELL', 'CHERRY', 'LEMON', 'PLUM', 'WATERMELON', 'WILD', 'SCATTER'];
+  // Asignar pesos a los símbolos (mayor número = menor probabilidad)
+  const weights: Record<string, number> = {
+    '7': 20,       // más raro
+    'BAR': 15,
+    'STAR': 15,
+    'BELL': 12,
+    'CHERRY': 10,
+    'LEMON': 8,
+    'PLUM': 8,
+    'WATERMELON': 8,
+    'WILD': 25,     // el más raro
+    'SCATTER': 18
+  };
+  
+  // Total de pesos para normalizar
+  const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
+  
+  // Generar resultado
+  const result: string[][] = [];
+  
+  for (let r = 0; r < reels; r++) {
+    const reel: string[] = [];
+    for (let row = 0; row < rows; row++) {
+      // Seleccionar un símbolo basado en su peso
+      let randomWeight = Math.random() * totalWeight;
+      let selectedSymbol = symbols[0];
+      
+      for (const symbol of symbols) {
+        randomWeight -= weights[symbol];
+        if (randomWeight <= 0) {
+          selectedSymbol = symbol;
+          break;
+        }
+      }
+      
+      reel.push(selectedSymbol);
+    }
+    result.push(reel);
+  }
+  
+  return result;
+}
+
+/**
+ * Calcula el resultado de una jugada de tragamonedas
+ * @param reels Resultado de los carretes
+ * @param bet Apuesta realizada
+ * @param lines Número de líneas jugadas
+ * @returns Objeto con información sobre si se ganó, multiplicador y cantidad ganada
+ */
+function calculateSlotsWin(reels: string[][], bet: number, lines: number = 9): { isWin: boolean, winAmount: number } {
+  // Definir las líneas de pago (para un juego 5x3 con 9 líneas)
+  const paylines: number[][] = [
+    [1, 1, 1, 1, 1], // línea central horizontal
+    [0, 0, 0, 0, 0], // línea superior horizontal
+    [2, 2, 2, 2, 2], // línea inferior horizontal
+    [0, 1, 2, 1, 0], // V
+    [2, 1, 0, 1, 2], // Λ
+    [0, 0, 1, 2, 2], // diagonal descendente 1
+    [2, 2, 1, 0, 0], // diagonal descendente 2
+    [0, 1, 1, 1, 0], // forma de diamante 1
+    [2, 1, 1, 1, 2]  // forma de diamante 2
+  ];
+  
+  // Limitar las líneas al máximo disponible
+  const activeLines = Math.min(lines, paylines.length);
+  
+  // Definir pagos por símbolo (cantidad de símbolos consecutivos)
+  const symbolPay: Record<string, number[]> = {
+    '7': [0, 0, 5, 20, 100],
+    'BAR': [0, 0, 4, 15, 75],
+    'STAR': [0, 0, 4, 15, 75],
+    'BELL': [0, 0, 3, 10, 50],
+    'CHERRY': [0, 0, 3, 10, 50],
+    'LEMON': [0, 0, 2, 5, 25],
+    'PLUM': [0, 0, 2, 5, 25],
+    'WATERMELON': [0, 0, 2, 5, 25],
+    'WILD': [0, 0, 10, 50, 500],
+    'SCATTER': [0, 2, 5, 20, 100] // los scatters pagan en cualquier posición
+  };
+  
+  let totalWin = 0;
+  let hasScatter = 0;
+  
+  // Contar SCATTERS (pagan en cualquier posición)
+  reels.forEach(reel => {
+    reel.forEach(symbol => {
+      if (symbol === 'SCATTER') hasScatter++;
+    });
+  });
+  
+  // Pago por scatter
+  if (hasScatter >= 2) {
+    totalWin += bet * symbolPay['SCATTER'][Math.min(hasScatter, 5) - 1];
+  }
+  
+  // Comprobar cada línea de pago activa
+  for (let l = 0; l < activeLines; l++) {
+    const payline = paylines[l];
+    const lineSymbols: string[] = [];
+    
+    // Obtener los símbolos en esta línea
+    for (let r = 0; r < reels.length; r++) {
+      const rowIdx = payline[r];
+      if (rowIdx >= 0 && rowIdx < reels[r].length) {
+        lineSymbols.push(reels[r][rowIdx]);
+      }
+    }
+    
+    // Contar símbolos consecutivos desde la izquierda
+    let currentSymbol = lineSymbols[0];
+    let count = 1;
+    let hasWild = currentSymbol === 'WILD';
+    
+    for (let i = 1; i < lineSymbols.length; i++) {
+      const symbol = lineSymbols[i];
+      
+      // El WILD puede sustituir a cualquier símbolo excepto SCATTER
+      if (symbol === 'WILD') {
+        hasWild = true;
+        if (currentSymbol !== 'SCATTER') {
+          count++;
+        } else {
+          break; // WILD no sustituye a SCATTER
+        }
+      } 
+      else if (symbol === currentSymbol || (currentSymbol === 'WILD' && symbol !== 'SCATTER')) {
+        count++;
+        if (currentSymbol === 'WILD') currentSymbol = symbol;
+      } 
+      else {
+        break; // Secuencia interrumpida
+      }
+    }
+    
+    // WILD tiene su propio pago si forma una línea completa de WILDs
+    if (currentSymbol === 'WILD' && hasWild) {
+      totalWin += bet * symbolPay['WILD'][Math.min(count, 5) - 1] / activeLines;
+    } 
+    // Calcular el pago para esta línea (excepto SCATTER que ya se calculó)
+    else if (currentSymbol !== 'SCATTER' && count >= 2) {
+      totalWin += bet * symbolPay[currentSymbol][Math.min(count, 5) - 1] / activeLines;
+    }
+  }
+  
+  // Redondear para evitar errores de punto flotante
+  totalWin = Math.round(totalWin * 100) / 100;
+  
+  return {
+    isWin: totalWin > 0,
+    winAmount: totalWin
+  };
+}
+
+/**
+ * Genera 20 números aleatorios para un juego de keno
+ * @returns Array con 20 números enteros únicos entre 1 y 80
+ */
+function generateKenoNumbers(): number[] {
+  const numbers: number[] = [];
+  while (numbers.length < 20) {
+    const num = Math.floor(Math.random() * 80) + 1;
+    if (!numbers.includes(num)) {
+      numbers.push(num);
+    }
+  }
+  return numbers.sort((a, b) => a - b);
+}
+
+/**
+ * Calcula las ganancias para un juego de keno
+ * @param matchCount Número de coincidencias
+ * @param selectedCount Número de números seleccionados por el jugador
+ * @param bet Cantidad apostada
+ * @param gameId Tipo de juego de keno
+ * @returns Objeto con información sobre si se ganó y cantidad ganada
+ */
+function calculateKenoWin(matchCount: number, selectedCount: number, bet: number, gameId: string = 'americankeno'): { isWin: boolean, winAmount: number } {
+  // Tabla de pagos para diferentes tipos de keno
+  const paytables: Record<string, Record<number, number[]>> = {
+    // American Keno paytable
+    americankeno: {
+      1: [0, 3],
+      2: [0, 1, 9],
+      3: [0, 1, 2, 16],
+      4: [0, 0.5, 2, 6, 12],
+      5: [0, 0.5, 1, 3, 15, 50],
+      6: [0, 0.5, 1, 2, 3, 30, 75],
+      7: [0, 0.5, 0.5, 1, 6, 12, 36, 100],
+      8: [0, 0.5, 0.5, 1, 3, 6, 19, 90, 720],
+      9: [0, 0.5, 0.5, 1, 2, 4, 8, 20, 80, 1200],
+      10: [0, 0, 0.5, 1, 2, 3, 5, 10, 30, 600, 1800]
+    },
+    // Fire Keno - multiplicadores más altos
+    firekeno: {
+      1: [0, 3.5],
+      2: [0, 1.2, 10],
+      3: [0, 1, 2.5, 18],
+      4: [0, 0.5, 2.2, 7, 14],
+      5: [0, 0.5, 1.5, 3.5, 18, 60],
+      6: [0, 0.5, 1.2, 2.2, 4, 40, 90],
+      7: [0, 0.5, 0.8, 1.5, 8, 15, 50, 150],
+      8: [0, 0.5, 0.8, 1.2, 4, 8, 25, 120, 850],
+      9: [0, 0.5, 0.8, 1, 3, 5, 10, 30, 100, 1500],
+      10: [0, 0, 0.8, 1.2, 3, 4, 7, 15, 40, 800, 2500]
+    }
+  };
+  
+  // Usar paytable de americankeno por defecto si no se reconoce el gameId
+  const gamePaytable = paytables[gameId] || paytables.americankeno;
+  
+  // Si hay más selecciones de las que soporta la tabla, usar el máximo disponible
+  const effectiveSelectedCount = Math.min(selectedCount, Object.keys(gamePaytable).length);
+  
+  // Si hay más coincidencias que selecciones, algo está mal
+  if (matchCount > effectiveSelectedCount) {
+    return { isWin: false, winAmount: 0 };
+  }
+  
+  // Obtener multiplicador según la tabla de pagos
+  const multiplier = gamePaytable[effectiveSelectedCount][matchCount];
+  
+  // Calcular ganancia
+  const winAmount = bet * multiplier;
+  
+  return {
+    isWin: winAmount > 0,
+    winAmount: Math.round(winAmount * 100) / 100 // Redondear a 2 decimales
+  };
 }
