@@ -310,7 +310,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
               </div>
               
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm">{t('sports.potentialWin')}</span>
+                <span className="text-sm">Ganancias potenciales</span>
                 <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} {selectedCurrency}</span>
               </div>
               
