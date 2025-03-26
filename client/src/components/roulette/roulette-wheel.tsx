@@ -115,8 +115,8 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
     
     // Calcular grados para posicionar la bola en el número ganador
     // Múltiples vueltas más la posición final precisa
-    const wheelDegree = -1440 - (wheelIndex * 9.73); // Giro de la rueda (negativo = sentido horario)
-    const ballDegree = 2160 + (wheelIndex * 9.73); // Giro de la bola (positivo = sentido antihorario)
+    const wheelDegree = -1800 - (wheelIndex * 9.73); // Giro de la rueda (negativo = sentido horario)
+    const ballDegree = 2520 + (wheelIndex * 9.73); // Giro de la bola (positivo = sentido antihorario)
     
     // Resetear posiciones iniciales
     setShowBall(false);
@@ -137,7 +137,7 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
     // Iniciar animación de la rueda (más lento al principio, acelerando y luego desacelerando)
     const t1 = setTimeout(() => {
       if (wheelRef.current) {
-        wheelRef.current.style.transition = 'transform 7s cubic-bezier(0.32, 0.94, 0.6, 1)';
+        wheelRef.current.style.transition = 'transform 8s cubic-bezier(0.32, 0.94, 0.6, 1)';
         wheelRef.current.style.transform = `rotate(${wheelDegree}deg)`;
       }
     }, 50);
@@ -147,8 +147,8 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
     const t2 = setTimeout(() => {
       setShowBall(true);
       if (ballTrackRef.current && ballRef.current) {
-        ballTrackRef.current.style.transition = 'transform 2.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-        ballTrackRef.current.style.transform = 'rotate(720deg)';
+        ballTrackRef.current.style.transition = 'transform 3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        ballTrackRef.current.style.transform = 'rotate(900deg)';
         
         // Pequeña animación de rebote para la bola
         ballRef.current.style.transition = 'transform 0.3s ease-in-out';
@@ -164,26 +164,58 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
     }, 200);
     timerRef.current.push(t2);
     
-    // Acelerar la bola
+    // Primera fase de rebotes pequeños y rápidos
     const t3 = setTimeout(() => {
-      if (ballTrackRef.current) {
-        ballTrackRef.current.style.transition = 'transform 1.5s cubic-bezier(0.5, 0, 0.75, 0.5)';
-        ballTrackRef.current.style.transform = 'rotate(1440deg)';
+      if (ballRef.current) {
+        animateBouncingBall(ballRef.current, 5, 0.05, 100);
       }
-    }, 2700);
+    }, 2200);
     timerRef.current.push(t3);
     
-    // Desacelerar la bola gradualmente y posicionarla en el número ganador
+    // Acelerar la bola
     const t4 = setTimeout(() => {
       if (ballTrackRef.current) {
-        ballTrackRef.current.style.transition = 'transform 3.5s cubic-bezier(0.1, 0.7, 0.1, 1)';
-        ballTrackRef.current.style.transform = `rotate(${ballDegree}deg)`;
+        ballTrackRef.current.style.transition = 'transform 1.5s cubic-bezier(0.5, 0, 0.75, 0.5)';
+        ballTrackRef.current.style.transform = 'rotate(1800deg)';
       }
-    }, 4200);
+    }, 3000);
     timerRef.current.push(t4);
     
-    // Efecto de flash cuando se determina el resultado
+    // Segunda fase de rebotes más pronunciados
     const t5 = setTimeout(() => {
+      if (ballRef.current) {
+        animateBouncingBall(ballRef.current, 3, 0.1, 150);
+      }
+    }, 4000);
+    timerRef.current.push(t5);
+    
+    // Desacelerar la bola gradualmente y posicionarla en el número ganador
+    const t6 = setTimeout(() => {
+      if (ballTrackRef.current) {
+        ballTrackRef.current.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)';
+        ballTrackRef.current.style.transform = `rotate(${ballDegree}deg)`;
+      }
+      
+      // Simular la caída final de la bola al bolsillo
+      const t6b = setTimeout(() => {
+        if (ballRef.current) {
+          // Mover la bola hacia el centro para simular la caída
+          ballRef.current.style.transition = 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          ballRef.current.style.transform = 'translate(-50%, -50%) rotate(720deg) scale(0.9)';
+          ballRef.current.style.top = '10%';
+          
+          // Rebotes finales más pequeños
+          setTimeout(() => {
+            animateBouncingBall(ballRef.current, 2, 0.03, 100);
+          }, 500);
+        }
+      }, 3000);
+      timerRef.current.push(t6b);
+    }, 4500);
+    timerRef.current.push(t6);
+    
+    // Efecto de flash cuando se determina el resultado
+    const t7 = setTimeout(() => {
       setShowFlash(true);
       
       // Ocultar el flash después de un momento
@@ -192,16 +224,40 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
       }, 500);
       timerRef.current.push(hideFlash);
       
-    }, 7600);
-    timerRef.current.push(t5);
+    }, 8500);
+    timerRef.current.push(t7);
     
     // Completar el giro y notificar
-    const t6 = setTimeout(() => {
+    const t8 = setTimeout(() => {
       setResult(winningNumber);
       spinningRef.current = false;
       onSpinComplete(winningNumber);
-    }, 8000);
-    timerRef.current.push(t6);
+    }, 9000);
+    timerRef.current.push(t8);
+  };
+  
+  // Función para animar los rebotes de la bola
+  const animateBouncingBall = (ballElement: HTMLDivElement, bounces: number, intensity: number, interval: number) => {
+    let bounce = 0;
+    
+    const doBounce = () => {
+      if (bounce >= bounces) return;
+      
+      const scale = 1 + (Math.random() * 0.1);
+      ballElement.style.transition = `transform ${interval/1000}s cubic-bezier(0.34, 1.56, 0.64, 1)`;
+      ballElement.style.transform = `translate(-50%, -50%) rotate(720deg) scale(${scale})`;
+      
+      setTimeout(() => {
+        ballElement.style.transform = `translate(-50%, -50%) rotate(720deg) scale(1)`;
+        bounce++;
+        
+        if (bounce < bounces) {
+          setTimeout(doBounce, interval);
+        }
+      }, interval);
+    };
+    
+    doBounce();
   };
 
   // Obtener el color del resultado para la visualización
@@ -263,20 +319,33 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
                       {/* Sector triangular de cada número */}
                       <div 
                         className={cn(
-                          "h-full w-[15px] rounded-t-sm",
+                          "h-full rounded-t-sm",
                           isRed ? "bg-gradient-to-t from-[#d10000] to-[#ff2424]" : 
                           isGreen ? "bg-gradient-to-t from-[#006400] to-[#009600]" : 
                           "bg-gradient-to-t from-[#000000] to-[#333333]"
                         )}
+                        style={{ 
+                          width: index === 0 ? '18px' : '16px', // El cero es ligeramente más ancho
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.3) inset'
+                        }}
                       >
                         {/* Separadores metálicos entre números */}
-                        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64]"></div>
-                        <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64]"></div>
+                        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64] opacity-80"></div>
+                        <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64] opacity-80"></div>
                         
                         {/* Número */}
                         <div 
-                          className="absolute top-[8%] left-1/2 transform -translate-x-1/2 text-white font-bold text-sm w-6 h-6 rounded-full flex items-center justify-center"
-                          style={{ textShadow: '0px 1px 1px rgba(0,0,0,0.7)' }}
+                          className={cn(
+                            "absolute left-1/2 transform -translate-x-1/2 text-white font-bold flex items-center justify-center rounded-sm",
+                            isGreen ? "bg-green-600/30" : "bg-transparent"
+                          )}
+                          style={{ 
+                            top: '10%',
+                            width: '14px',
+                            height: '18px',
+                            fontSize: number > 9 ? '0.65rem' : '0.75rem',
+                            textShadow: '0px 1px 1px rgba(0,0,0,0.9)'
+                          }}
                         >
                           {number}
                         </div>
@@ -286,13 +355,36 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
                 })}
                 
                 {/* Centro de la rueda (cono decorativo) */}
-                <div className="absolute w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#b69f64] to-[#8a7847] border-2 border-[#fcf3b6] flex items-center justify-center shadow-inner">
+                <div className="absolute w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#b69f64] to-[#8a7847] border border-[#fcf3b6] flex items-center justify-center shadow-inner">
+                  {/* Anillo exterior decorativo */}
+                  <div className="absolute w-[98%] h-[98%] rounded-full border-4 border-[#826f38]/40"></div>
+                  
+                  {/* Anillo medio */}
                   <div className="w-[85%] h-[85%] rounded-full bg-gradient-to-br from-[#8a7847] to-[#524626] border border-[#b69f64] shadow-inner flex items-center justify-center">
+                    {/* Tornillos decorativos */}
+                    {[45, 135, 225, 315].map(angle => (
+                      <div 
+                        key={`screw-${angle}`} 
+                        className="absolute w-3 h-3 rounded-full bg-gradient-to-br from-[#b6b6b6] to-[#8a8a8a] border border-[#333]"
+                        style={{ 
+                          transform: `rotate(${angle}deg) translateY(-135%) rotate(-${angle}deg)`,
+                          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.6), 0 1px 1px rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        <div className="absolute inset-[2px] bg-[#6a6a6a]/40"></div>
+                      </div>
+                    ))}
+                    
                     {/* Logo central */}
-                    <div className="w-[70%] h-[70%] rounded-full bg-gradient-to-br from-[#00FFAA]/90 to-[#00FFAA]/60 flex items-center justify-center">
-                      <span className="font-heading font-bold text-xl text-[#0F1923] tracking-wider">
-                        <span className="text-white">Crypto</span>Spin
-                      </span>
+                    <div className="w-[75%] h-[75%] rounded-full bg-gradient-to-br from-[#00FFAA]/90 to-[#00AA77]/80 border border-[#00FFAA]/30 flex items-center justify-center shadow-inner">
+                      {/* Brillo superior */}
+                      <div className="absolute w-full h-[30%] top-0 rounded-t-full bg-white/10"></div>
+                      
+                      {/* Texto del logo */}
+                      <div className="font-heading font-bold text-xl text-center leading-tight tracking-wider drop-shadow-md">
+                        <div className="text-white text-opacity-90">Crypto</div>
+                        <div className="text-[#0F1923]">Spin</div>
+                      </div>
                     </div>
                   </div>
                 </div>
