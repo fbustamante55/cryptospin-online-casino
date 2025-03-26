@@ -372,9 +372,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p className="text-xs">
-                      {homeOdds.price > 0 
-                        ? `+${formatAmericanOdds(homeOdds.price)}: Ganarías $${homeOdds.price} por cada $100 apostados` 
-                        : `-${formatAmericanOdds(homeOdds.price)}: Necesitas apostar $${Math.abs(homeOdds.price)} para ganar $100`}
+                      Cuota {formatAmericanOdds(homeOdds.price)}: Por cada $1 apostado ganarías ${formatAmericanOdds(homeOdds.price)}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -408,9 +406,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p className="text-xs">
-                      {awayOdds.price > 0 
-                        ? `+${formatAmericanOdds(awayOdds.price)}: Ganarías $${awayOdds.price} por cada $100 apostados` 
-                        : `-${formatAmericanOdds(awayOdds.price)}: Necesitas apostar $${Math.abs(awayOdds.price)} para ganar $100`}
+                      Cuota {formatAmericanOdds(awayOdds.price)}: Por cada $1 apostado ganarías ${formatAmericanOdds(awayOdds.price)}
                     </p>
                   </TooltipContent>
                 </Tooltip>

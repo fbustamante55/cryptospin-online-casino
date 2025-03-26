@@ -109,29 +109,35 @@ export async function fetchUpcomingEvents(
 }
 
 /**
- * Formats American odds to a more readable format
- * Explanation:
- * - Positive odds (e.g. +200): Amount you win on a $100 bet
- * - Negative odds (e.g. -150): Amount you need to bet to win $100
+ * Formats odds to decimal format with two decimal places
+ * Converts American odds to decimal format:
+ * - Positive odds (e.g. +200): (odds / 100) + 1
+ * - Negative odds (e.g. -150): (100 / |odds|) + 1
  * 
  * @param odds American odds value
  * @param showInfo Whether to show additional information about the odds
- * @returns Formatted odds string
+ * @returns Formatted decimal odds string
  */
 export function formatAmericanOdds(odds: number, showInfo: boolean = false): string {
+  let decimalOdds: number;
+  
   if (odds > 0) {
-    if (showInfo) {
-      const impliedProb = (100 / (odds + 100) * 100).toFixed(1);
-      return `+${odds} (${impliedProb}%)`;
-    }
-    return `+${odds}`;
+    // Convertir cuota positiva a decimal: (cuota/100) + 1
+    decimalOdds = (odds / 100) + 1;
   } else {
-    if (showInfo) {
-      const impliedProb = (Math.abs(odds) / (Math.abs(odds) + 100) * 100).toFixed(1);
-      return `${odds} (${impliedProb}%)`;
-    }
-    return `${odds}`;
+    // Convertir cuota negativa a decimal: (100/|cuota|) + 1
+    decimalOdds = (100 / Math.abs(odds)) + 1;
   }
+  
+  // Formatear a dos decimales
+  const formattedOdds = decimalOdds.toFixed(2);
+  
+  if (showInfo) {
+    const impliedProb = ((1 / decimalOdds) * 100).toFixed(1);
+    return `${formattedOdds} (${impliedProb}%)`;
+  }
+  
+  return formattedOdds;
 }
 
 /**
