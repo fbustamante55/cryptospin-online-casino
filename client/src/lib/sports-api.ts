@@ -41,14 +41,27 @@ export interface EventOdds {
 }
 
 /**
- * Obtiene la API key del servidor
+ * Obtiene la API key del servidor o de variables de entorno
+ * 
+ * Si se llama desde el servidor, usa directamente process.env.ODDS_API_KEY
+ * Si se llama desde el cliente, hace una petición al servidor
  */
 async function getApiKey(): Promise<string> {
   try {
-    const response = await fetch('/api/sports/apikey');
+    // Si estamos en el servidor y tenemos acceso a process.env
+    if (typeof process !== 'undefined' && process.env && process.env.ODDS_API_KEY) {
+      return process.env.ODDS_API_KEY;
+    }
+    
+    // Si estamos en el cliente, pedimos la API key al servidor
+    // Usamos URL absoluta para evitar problemas cuando se llama desde diferentes contextos
+    const url = typeof window !== 'undefined' ? '/api/sports/apikey' : 'http://localhost:5000/api/sports/apikey';
+    const response = await fetch(url);
+    
     if (!response.ok) {
       throw new Error(`Error obteniendo API key: ${response.status}`);
     }
+    
     const data = await response.json();
     return data.apiKey;
   } catch (error) {

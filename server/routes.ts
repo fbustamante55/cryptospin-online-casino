@@ -975,6 +975,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Sports betting routes
   
+  // Endpoint para proporcionar la API key de manera segura al cliente
+  app.get('/api/sports/apikey', (req, res) => {
+    try {
+      // Usa la variable de entorno ODDS_API_KEY
+      const apiKey = process.env.ODDS_API_KEY;
+      
+      if (!apiKey) {
+        console.error("¡ODDS_API_KEY no está configurada en las variables de entorno!");
+        return res.status(500).json({ error: "API key no configurada" });
+      }
+      
+      return res.json({ apiKey });
+    } catch (error) {
+      console.error("Error al obtener API key:", error);
+      return res.status(500).json({ error: "Error al obtener API key" });
+    }
+  });
+  
   // Get all upcoming sports events with filters
   app.get("/api/sports/events", async (req, res) => {
     try {
@@ -991,8 +1009,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const allSports = ['soccer', 'basketball', 'baseball', 'football', 'tennis', 'mma', 'hockey'];
           const allEvents = [];
           
+          // Usamos la API key directamente para evitar peticiones innecesarias
+          const apiKey = process.env.ODDS_API_KEY;
+          if (!apiKey) {
+            throw new Error("API key no configurada en variables de entorno");
+          }
+          
           // Solo intentamos con soccer para ahorrar peticiones de API
-          const sportEvents = await fetchOdds('soccer', 'upcoming', 'es');
+          const response = await fetch(`https://api.the-odds-api.com/v4/sports/soccer/odds/?apiKey=${apiKey}&regions=us&markets=h2h&oddsFormat=decimal`);
+          
+          if (!response.ok) {
+            throw new Error(`Error de API: ${response.status}`);
+          }
+          
+          const sportEvents = await response.json();
           allEvents.push(...sportEvents);
           
           if (allEvents.length > 0) {
