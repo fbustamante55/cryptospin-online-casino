@@ -361,14 +361,14 @@ export function CrashGame() {
         
         <div className="grid grid-cols-2 gap-4">
           <Button 
-            className="py-2.5 bg-gradient-to-r from-[#F9C846] to-[#F9C846]/80 text-[#0F1923] font-medium rounded-lg transition-all duration-200"
+            className="py-2.5 bg-[#313d4a] hover:bg-[#2a3441] text-white font-medium rounded-md transition-all duration-200"
             onClick={handleBet}
             disabled={!canBet || betMutation.isPending || !user || user.balance < bet}
           >
             Bet
           </Button>
           <Button 
-            className="py-2.5 bg-[#00FFAA] hover:bg-[#33FFBB] text-[#0F1923] font-medium rounded-lg transition-all duration-200"
+            className="py-2.5 bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium rounded-md transition-all duration-200"
             onClick={handleCashout}
             disabled={!isPlaying || cashedOut || isCrashed}
             variant={isPlaying && !cashedOut && !isCrashed ? "default" : "secondary"}
@@ -380,7 +380,7 @@ export function CrashGame() {
         <div className="mt-4">
           <div className="flex justify-between text-xs text-gray-400 mb-1">
             <span>Recent Crashes</span>
-            <Link href="/history" className="text-[#00FFAA] hover:underline">View History</Link>
+            <Link href="/history" className="text-[#09b66d] hover:underline">View History</Link>
           </div>
           <div className="flex gap-1.5 overflow-x-auto py-1">
             {recentCrashes.map((crash, index) => (
@@ -388,10 +388,10 @@ export function CrashGame() {
                 key={index}
                 className={`px-2 py-1 rounded text-xs ${
                   crash < 2 
-                    ? 'bg-[#FF3E8F]/20 text-[#FF3E8F]' 
+                    ? 'bg-[#e64d6b]/20 text-[#e64d6b]' 
                     : crash > 5 
-                      ? 'bg-[#F9C846]/20 text-[#F9C846]' 
-                      : 'bg-[#00FFAA]/20 text-[#00FFAA]'
+                      ? 'bg-[#f8c541]/20 text-[#f8c541]' 
+                      : 'bg-[#09b66d]/20 text-[#09b66d]'
                 }`}
               >
                 {crash.toFixed(2)}x
