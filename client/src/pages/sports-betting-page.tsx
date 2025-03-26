@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { EventCard } from "@/components/sports/event-card";
+import { NewEventCard } from "@/components/sports/new-event-card";
 import { BetSlip, BetSelection } from "@/components/sports/bet-slip-simple";
 import { nanoid } from "nanoid";
 import { apiRequest } from "@/lib/queryClient";
@@ -1139,7 +1140,7 @@ export default function SportsBettingPage() {
                     filteredEvents.map((event) => {
                       const sportTitle = sportsData?.find(s => s.key === event.sport_key)?.title || event.sport_key;
                       return (
-                        <EventCard
+                        <NewEventCard
                           key={event.id}
                           event={event}
                           onAddSelection={handleAddSelection}

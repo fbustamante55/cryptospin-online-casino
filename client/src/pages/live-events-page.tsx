@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { BetSlip, BetSelection } from '@/components/sports/bet-slip-simple';
 import { EventCard } from '@/components/sports/event-card';
+import { NewEventCard } from '@/components/sports/new-event-card';
 import { EventOdds, fetchOdds, fetchSports, formatAmericanOdds, getSportColor, formatEventDate } from '@/lib/sports-api';
 import { useTranslation } from 'react-i18next';
 import { AnimatedBackground } from '@/components/ui/animated-background';
@@ -1091,7 +1092,7 @@ export default function LiveEventsPage() {
                           {filteredEvents.slice(3).map((event) => {
                             const sportTitle = sportsData?.find(s => s.key === event.sport_key)?.title || event.sport_key;
                             return (
-                              <EventCard
+                              <NewEventCard
                                 key={event.id}
                                 event={event}
                                 onAddSelection={handleAddSelection}
