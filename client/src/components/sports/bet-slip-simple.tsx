@@ -103,9 +103,52 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
     return amount * odds;
   };
   
-  // Get the potential win amount
+  // Calcular el monto apostado real en criptomonedas cuando se usa fiat
+  const calculateRealBetAmount = (): number => {
+    if (!walletSettings.showFiatEquivalent) {
+      return parseFloat(betAmount) || 0;
+    }
+    
+    // Cuando está en modo fiat, necesitamos convertir el monto fiat a cripto
+    const fiatAmount = parseFloat(betAmount) || 0;
+    const cryptoRate = getCryptoToFiatRate(selectedCurrency, walletSettings.selectedFiat);
+    
+    // Si la tasa es 0, significa que no tenemos datos para esta combinación
+    if (cryptoRate === 0) return fiatAmount;
+    
+    // Convertir de fiat a cripto (dividir por la tasa)
+    return fiatAmount / cryptoRate;
+  };
+  
+  // Obtener la tasa de conversión de cripto a fiat
+  const getCryptoToFiatRate = (crypto: string, fiat: string): number => {
+    const rates: Record<string, Record<string, number>> = {
+      'BTC': { 'USD': 65000, 'EUR': 60000, 'JPY': 9800000, 'GBP': 51000 },
+      'ETH': { 'USD': 3500, 'EUR': 3200, 'JPY': 530000, 'GBP': 2700 },
+      'USDT': { 'USD': 1, 'EUR': 0.92, 'JPY': 150, 'GBP': 0.78 },
+      'DOGE': { 'USD': 0.12, 'EUR': 0.11, 'JPY': 18, 'GBP': 0.094 },
+      'SOL': { 'USD': 150, 'EUR': 139, 'JPY': 22500, 'GBP': 118 },
+      'USDC': { 'USD': 1, 'EUR': 0.92, 'JPY': 150, 'GBP': 0.78 },
+    };
+    
+    const cryptoUpper = crypto.toUpperCase();
+    const fiatUpper = fiat.toUpperCase();
+    
+    if (!rates[cryptoUpper] || !rates[cryptoUpper][fiatUpper]) {
+      return 0;
+    }
+    
+    return rates[cryptoUpper][fiatUpper];
+  };
+  
+  // Get the potential win amount in crypto
   const potentialWin = parseFloat(betAmount) > 0 
-    ? calculatePotentialWin(parseFloat(betAmount), calculateParlayOdds())
+    ? calculatePotentialWin(
+        walletSettings.showFiatEquivalent 
+          ? calculateRealBetAmount() // Si está en modo fiat, primero convertimos a cripto
+          : parseFloat(betAmount), 
+        calculateParlayOdds()
+      )
     : 0;
   
   // Función para convertir importes de criptomonedas a fiat
@@ -183,7 +226,12 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
       return;
     }
     
-    if (user.balance < parseFloat(betAmount)) {
+    // Calcular el monto real de apuesta en criptomoneda
+    const realBetAmount = walletSettings.showFiatEquivalent 
+      ? calculateRealBetAmount() 
+      : parseFloat(betAmount);
+      
+    if (user.balance < realBetAmount) {
       toast({
         title: t('errors.insufficientBalance'),
         description: t('errors.pleaseDeposit'),
@@ -211,7 +259,10 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
         url: '/api/sports/place-bet',
         method: 'POST',
         data: {
-          betAmount: parseFloat(betAmount),
+          betAmount: realBetAmount, // Usar el monto real en criptomonedas
+          originalAmount: parseFloat(betAmount), // Monto original ingresado (puede ser en fiat)
+          isFiatAmount: walletSettings.showFiatEquivalent, // Indicar si es un monto en fiat
+          fiatCurrency: walletSettings.showFiatEquivalent ? walletSettings.selectedFiat : null,
           selections,
           type: selections.length > 1 ? 'parlay' : 'single'
         }
@@ -352,10 +403,10 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   <div className="flex flex-col items-end">
                     <span className="text-sm font-bold text-[#09b66d]">
                       {getFiatSymbol(walletSettings.selectedFiat)}
-                      {convertCryptoToFiat(potentialWin, selectedCurrency, walletSettings.selectedFiat).toFixed(2)}
+                      {(parseFloat(betAmount) * calculateParlayOdds()).toFixed(2)}
                     </span>
                     <span className="text-xs text-white/70">
-                      {potentialWin.toFixed(2)} {selectedCurrency}
+                      {potentialWin.toFixed(4)} {selectedCurrency}
                     </span>
                   </div>
                 ) : (
