@@ -35,7 +35,7 @@ export default function SportsBettingPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeSport, setActiveSport] = useState<string>("");
   const [betSelections, setBetSelections] = useState<BetSelection[]>([]);
-  // Eliminada la referencia a eventos en vivo
+  const [showLiveEvents, setShowLiveEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'live');
   const [showUpcomingEvents, setShowUpcomingEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'upcoming' || localStorage.getItem('sportsFilter') === null);
   const [showFavorites, setShowFavorites] = useState<boolean>(localStorage.getItem('sportsFilter') === 'favorites');
   const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'tomorrow');
@@ -275,8 +275,13 @@ export default function SportsBettingPage() {
     const sportsToUse = (sportsData && sportsData.length > 0) ? sportsData : fallbackSports || [];
     
     return sportsToUse.filter(sport => {
-      if (showUpcomingEvents) {
-        // Solo deportes que tienen eventos próximos
+      if (showLiveEvents) {
+        // Solo deportes que tienen eventos en vivo
+        return displayEvents?.some(event => 
+          event.sport_key.includes(sport.key) && isEventLive(event)
+        );
+      } else if (showUpcomingEvents) {
+        // Solo deportes que tienen eventos próximos (no en vivo)
         return displayEvents?.some(event => 
           event.sport_key.includes(sport.key) && !isEventLive(event)
         );
@@ -311,7 +316,7 @@ export default function SportsBettingPage() {
   
   // Extract unique sport groups for the categories (use filtered or all based on filters)
   const sportGroups = Object.keys(
-    showUpcomingEvents || showTomorrowEvents || showFavorites
+    showLiveEvents || showUpcomingEvents || showTomorrowEvents || showFavorites
       ? filteredSportsByGroup
       : sportsByGroup
   ).slice(0, 8);
@@ -385,16 +390,17 @@ export default function SportsBettingPage() {
     }
   ];
   
-  // Filter events based on upcoming status, favorites, tomorrow's events, and selected sport
+  // Filter events based on live/upcoming status, favorites, tomorrow's events, and selected sport
   const filteredByStatus = displayEvents?.filter(event => {
-    // First filter by event status (upcoming, favorites, tomorrow)
+    // First filter by event status (live, upcoming, favorites, tomorrow)
     const passesStatusFilter = 
+      (showLiveEvents && isEventLive(event)) ||
       (showUpcomingEvents && !isEventLive(event)) ||
       (showFavorites && favoriteEvents?.some(favorite => 
         favorite.gameType === 'sports' && favorite.gameId === event.id
       )) ||
       (showTomorrowEvents && isEventTomorrow(event)) ||
-      (!showUpcomingEvents && !showFavorites && !showTomorrowEvents);
+      (!showLiveEvents && !showUpcomingEvents && !showFavorites && !showTomorrowEvents);
     
     // Then filter by selected sport if any
     const passesSportFilter = 
@@ -577,6 +583,7 @@ export default function SportsBettingPage() {
                   } transition-all duration-200`}
                   onClick={() => {
                     setShowFavorites(true);
+                    setShowLiveEvents(false);
                     setShowUpcomingEvents(false);
                     setShowTomorrowEvents(false);
                     localStorage.setItem('sportsFilter', 'favorites');
@@ -586,7 +593,28 @@ export default function SportsBettingPage() {
                   <span className="text-sm font-medium">{t('sports.favorites')}</span>
                 </button>
                 
-
+                <button 
+                  className={`flex items-center justify-center flex-1 px-2 py-2.5 ${
+                    showLiveEvents 
+                      ? 'bg-[#09b66d] text-white' 
+                      : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
+                  } transition-all duration-200`}
+                  onClick={() => {
+                    setShowLiveEvents(true);
+                    setShowFavorites(false);
+                    setShowUpcomingEvents(false);
+                    setShowTomorrowEvents(false);
+                    localStorage.setItem('sportsFilter', 'live');
+                  }}
+                >
+                  <div className={`flex items-center justify-center h-4 w-4 mr-1.5 ${showLiveEvents ? 'text-white' : 'text-red-500'}`}>
+                    <span className="relative flex h-2 w-2">
+                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${showLiveEvents ? 'bg-white/70' : 'bg-red-400'} opacity-75`}></span>
+                      <span className={`relative inline-flex rounded-full h-2 w-2 ${showLiveEvents ? 'bg-white' : 'bg-red-500'}`}></span>
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium">{t('sports.live')}</span>
+                </button>
                 
                 <button 
                   className={`flex items-center justify-center flex-1 px-2 py-2.5 ${
@@ -597,6 +625,7 @@ export default function SportsBettingPage() {
                   onClick={() => {
                     setShowUpcomingEvents(true);
                     setShowFavorites(false);
+                    setShowLiveEvents(false);
                     setShowTomorrowEvents(false);
                     localStorage.setItem('sportsFilter', 'upcoming');
                   }}
