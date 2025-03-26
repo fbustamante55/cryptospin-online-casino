@@ -164,120 +164,146 @@ export function NewEventCard({
   // desde sports-api.ts
 
   return (
-    <Card className={`bg-[#121c2e] border-[#1a2e4a] overflow-hidden ${className}`}>
-      {/* Encabezado con el título de la liga */}
-      <div className="bg-[#121c2e] border-b border-[#1a2e4a] p-2 flex justify-between items-center">
+    <Card className={`bg-[#121c2e] border-[#1a2e4a] overflow-hidden ${className} hover:border-[#2a3e5a] transition-colors`}>
+      {/* Encabezado con el título de la liga y deporte */}
+      <div className="bg-gradient-to-r from-[#121c2e] to-[#1a2e4a] p-2 flex justify-between items-center border-b border-[#1a2e4a]">
         <div className="flex items-center">
-          <span className="text-xs font-medium text-gray-400">{sportTitle || event.sport_key}</span>
+          <div className="w-5 h-5 rounded-full bg-[#1e2e4a] flex items-center justify-center mr-2">
+            {event.sport_key.includes('soccer') && <span className="text-xs">⚽</span>}
+            {event.sport_key.includes('basketball') && <span className="text-xs">🏀</span>}
+            {event.sport_key.includes('tennis') && <span className="text-xs">🎾</span>}
+            {event.sport_key.includes('baseball') && <span className="text-xs">⚾</span>}
+            {!event.sport_key.includes('soccer') && 
+             !event.sport_key.includes('basketball') && 
+             !event.sport_key.includes('tennis') && 
+             !event.sport_key.includes('baseball') && <span className="text-xs">🏆</span>}
+          </div>
+          <span className="text-xs font-medium text-white">{sportTitle || event.sport_key}</span>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleFavorite}
-          className="h-5 w-5 p-0"
+          className="h-6 w-6 p-0 hover:bg-[#1e2e4a]"
+          title="Añadir a favoritos"
         >
           <Star
             className={cn(
-              "h-3 w-3",
+              "h-4 w-4",
               favoriteData?.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
             )}
           />
         </Button>
       </div>
       
-      {/* Fecha del evento */}
-      <div className="bg-[#121c2e] px-3 py-1 border-b border-[#1a2e4a]">
-        <div className="flex items-center text-xs text-gray-400">
-          <Clock className="h-3 w-3 mr-1" />
-          <span>{formatEventDate(event.commence_time)}</span>
-        </div>
-      </div>
-      
-      {/* Contenido principal - basado en el diseño del screenshot */}
-      <div className="p-2">
-        <div className="flex items-center justify-between mb-1">
-          {/* Sección de estado (En Vivo / Medio Tiempo) */}
-          <div className="flex">
-            {isLiveEvent() && (
-              <Badge className="mr-2 bg-red-600 text-white text-xs py-0 px-1.5 h-4">
-                En Vivo
-              </Badge>
-            )}
-            {isLiveEvent() && (
-              <span className="text-xs text-gray-400">Medio Tiempo</span>
-            )}
+      {/* Contenido principal - diseño mejorado */}
+      <div className="p-3">
+        {/* Barra de estado en vivo */}
+        {isLiveEvent() && (
+          <div className="flex items-center justify-between mb-3 bg-[#1a2736] p-1.5 rounded-md">
+            <Badge className="bg-red-600 text-white text-xs py-0.5 px-2">
+              EN VIVO
+            </Badge>
+            <span className="text-xs text-gray-300">
+              <span className="text-xs font-bold text-white">45:00</span> Medio Tiempo
+            </span>
           </div>
-          
-          {/* Indicador 1x2 */}
-          <div className="text-xs font-semibold text-gray-400">1x2</div>
-        </div>
+        )}
         
-        {/* Equipos y cuotas */}
-        <div className="flex flex-col space-y-1">
-          {/* Nombres de equipos */}
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">{event.home_team} vs {event.away_team}</span>
-              {isLiveEvent() && <span className="ml-2 text-sm font-bold">0-0</span>}
+        {/* Equipos y cuotas - Diseño mejorado */}
+        <div className="flex flex-col space-y-3">
+          {/* Equipos con iconos y puntuación */}
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col items-center w-5/12">
+              <div className="w-8 h-8 bg-[#1e2e4a] rounded-full flex items-center justify-center mb-1">
+                <span className="text-xs font-bold text-white">🏠</span>
+              </div>
+              <span className="text-xs font-medium text-center line-clamp-1">{event.home_team}</span>
+              {isLiveEvent() && <span className="text-sm font-bold text-[#09b66d]">0</span>}
+            </div>
+            
+            <div className="flex flex-col items-center w-2/12">
+              <span className="text-xs text-gray-400 mb-1">VS</span>
+              {isLiveEvent() && <span className="text-xs font-bold text-red-500">EN VIVO</span>}
+            </div>
+            
+            <div className="flex flex-col items-center w-5/12">
+              <div className="w-8 h-8 bg-[#1e2e4a] rounded-full flex items-center justify-center mb-1">
+                <span className="text-xs font-bold text-white">✈️</span>
+              </div>
+              <span className="text-xs font-medium text-center line-clamp-1">{event.away_team}</span>
+              {isLiveEvent() && <span className="text-sm font-bold text-[#09b66d]">0</span>}
             </div>
           </div>
           
-          {/* Botones de apuestas en formato horizontal */}
-          <div className="flex justify-between items-center space-x-2">
-            {/* Equipo local */}
+          {/* Título de apuestas */}
+          <div className="bg-[#0e1624] py-1 px-2 rounded-t-md border-b border-[#1a2e4a]">
+            <span className="text-xs font-semibold text-white">ELIGE TU APUESTA (1X2)</span>
+          </div>
+          
+          {/* Botones de apuestas en formato horizontal con etiquetas claras */}
+          <div className="flex items-stretch space-x-2">
+            {/* Equipo local (1) */}
             {homeOdds && (
               <button
-                className={`flex-1 py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
+                className={`flex-1 py-2 px-2 rounded-md flex flex-col items-center transition-colors ${
                   isSelectionInBetSlip(event.home_team, 'h2h')
                     ? 'bg-[#09b66d] text-white'
                     : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
                 }`}
                 onClick={() => handleBetClick(event.home_team, homeOdds.price, 'h2h')}
               >
-                {(homeOdds.price).toFixed(2)}
+                <span className="text-xs font-semibold mb-1">1</span>
+                <span className="text-sm font-bold">{(homeOdds.price).toFixed(2)}</span>
+                <span className="text-xs mt-1 line-clamp-1">Local</span>
               </button>
             )}
             
-            {/* Empate (solo para deportes que pueden terminar en empate) */}
+            {/* Empate (X) */}
             {drawOdds && (
-              <>
-                <div className="text-gray-400 text-sm">+</div>
-                <button
-                  className={`flex-1 py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
-                    isSelectionInBetSlip('Draw', 'h2h')
-                      ? 'bg-[#09b66d] text-white'
-                      : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
-                  }`}
-                  onClick={() => handleBetClick('Draw', drawOdds.price, 'h2h')}
-                >
-                  {(drawOdds.price).toFixed(2)}
-                </button>
-              </>
+              <button
+                className={`flex-1 py-2 px-2 rounded-md flex flex-col items-center transition-colors ${
+                  isSelectionInBetSlip('Draw', 'h2h')
+                    ? 'bg-[#09b66d] text-white'
+                    : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
+                }`}
+                onClick={() => handleBetClick('Draw', drawOdds.price, 'h2h')}
+              >
+                <span className="text-xs font-semibold mb-1">X</span>
+                <span className="text-sm font-bold">{(drawOdds.price).toFixed(2)}</span>
+                <span className="text-xs mt-1">Empate</span>
+              </button>
             )}
             
-            {/* Equipo visitante */}
+            {/* Equipo visitante (2) */}
             {awayOdds && (
-              <>
-                <div className="text-gray-400 text-sm">+</div>
-                <button
-                  className={`flex-1 py-1 px-2 rounded text-sm font-semibold text-center transition-colors ${
-                    isSelectionInBetSlip(event.away_team, 'h2h')
-                      ? 'bg-[#09b66d] text-white'
-                      : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
-                  }`}
-                  onClick={() => handleBetClick(event.away_team, awayOdds.price, 'h2h')}
-                >
-                  {(awayOdds.price).toFixed(2)}
-                </button>
-              </>
+              <button
+                className={`flex-1 py-2 px-2 rounded-md flex flex-col items-center transition-colors ${
+                  isSelectionInBetSlip(event.away_team, 'h2h')
+                    ? 'bg-[#09b66d] text-white'
+                    : 'bg-[#1e2e4a] hover:bg-[#263b5b] text-white'
+                }`}
+                onClick={() => handleBetClick(event.away_team, awayOdds.price, 'h2h')}
+              >
+                <span className="text-xs font-semibold mb-1">2</span>
+                <span className="text-sm font-bold">{(awayOdds.price).toFixed(2)}</span>
+                <span className="text-xs mt-1 line-clamp-1">Visitante</span>
+              </button>
             )}
           </div>
           
-          {/* Etiquetas de los equipos */}
-          <div className="flex justify-between mt-1 text-xs text-gray-400">
-            <span>{event.home_team}</span>
-            {drawOdds && <span>Empate</span>}
-            <span>{event.away_team}</span>
+          {/* Información adicional */}
+          <div className="flex justify-between items-center text-xs text-gray-400 pt-1 border-t border-[#1a2e4a]">
+            <div className="flex items-center">
+              <Clock className="h-3 w-3 mr-1" />
+              <span>{formatEventDate(event.commence_time)}</span>
+            </div>
+            <div className="flex items-center">
+              <span>Más mercados</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 h-3 w-3">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
