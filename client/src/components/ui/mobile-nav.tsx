@@ -8,7 +8,7 @@ export function MobileNav() {
   
   const isActive = (path: string) => {
     if (path === "/" && location === "/") return true;
-    if (path === "/games" && ["/slots", "/dice", "/crash"].includes(location)) return true;
+    if (path === "/games" && ["/slots", "/dice", "/crash", "/roulette", "/blackjack"].includes(location)) return true;
     if (path === "/sports" && location === "/sports") return true;
     if (path === "/wallet" && ["/wallet", "/history"].includes(location)) return true;
     if (path === "/profile" && location === "/profile") return true;
