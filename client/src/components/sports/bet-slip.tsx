@@ -2,14 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, X, RefreshCw, ChevronsUpDown, ChevronDown, Plus } from "lucide-react";
+import { Trash2, X, RefreshCw, ChevronsUpDown, ChevronDown, Plus, Clock, Check, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { formatAmericanOdds } from "@/lib/sports-api";
+import { formatAmericanOdds, formatEventDate } from "@/lib/sports-api";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 export interface BetSelection {
   id: string;
@@ -24,6 +25,27 @@ export interface BetSelection {
   point?: number; // For spread and total bets
 }
 
+interface SportsBet {
+  id: number;
+  userId: number;
+  eventId: string;
+  sportKey: string;
+  sportTitle: string;
+  homeTeam: string;
+  awayTeam: string;
+  selectedTeam: string;
+  odds: number;
+  marketType: string;
+  point?: number;
+  betAmount: number;
+  potentialWin: number;
+  status: 'pending' | 'won' | 'lost';
+  settledAmount?: number;
+  createdAt: string;
+  selectionData: any;
+  type: 'single' | 'parlay';
+}
+
 interface BetSlipProps {
   selections: BetSelection[];
   onRemoveSelection: (id: string) => void;
@@ -36,6 +58,27 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
   const { toast } = useToast();
   const [betAmount, setBetAmount] = useState<string>("10");
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Obtener las apuestas del usuario actual
+  const { 
+    data: userBets = [], 
+    isLoading: isLoadingBets,
+    error: betsError,
+    refetch: refetchBets
+  } = useQuery<SportsBet[]>({
+    queryKey: ['/api/sports/user-bets'],
+    enabled: !!user, // Solo ejecutar si el usuario está autenticado
+    refetchInterval: 60000, // Actualizar cada minuto para mantener el estado actualizado
+  });
+  
+  // Obtener el historial de apuestas completadas
+  const { 
+    data: betHistory = [], 
+    isLoading: isLoadingHistory,
+  } = useQuery<SportsBet[]>({
+    queryKey: ['/api/sports/bet-history'],
+    enabled: !!user,
+  });
   
   // Calculate the total odds for a parlay bet
   const calculateParlayOdds = (): number => {
@@ -136,8 +179,9 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
       // Clear selections after successful bet
       onClearSelections();
       
-      // Update user balance - in a real implementation, this would come from the API response
+      // Update user balance and bet list
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sports/user-bets'] });
       
     } catch (error) {
       toast({
@@ -347,23 +391,192 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
         </TabsContent>
         
         <TabsContent value="mybets" className="p-0 m-0">
-          <div className="p-6 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
-              <ChevronDown className="h-8 w-8 text-white/30" />
+          {isLoadingBets ? (
+            <div className="p-6 flex flex-col items-center justify-center">
+              <RefreshCw className="h-8 w-8 animate-spin text-white/50 mb-3" />
+              <p className="text-sm text-white/70">{t('common.loading')}</p>
             </div>
-            <h3 className="text-lg font-medium mb-1">{t('sports.noBets')}</h3>
-            <p className="text-sm text-white/70 mb-4">{t('sports.placeBetsToView')}</p>
-          </div>
+          ) : userBets && userBets.length > 0 ? (
+            <div className="max-h-[500px] overflow-y-auto">
+              <div className="flex items-center justify-between p-3 border-b border-[#1c2b3a]">
+                <span className="text-sm font-medium">{t('sports.activeBets')}</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-white/70 hover:text-white"
+                  onClick={() => refetchBets()}
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  {t('buttons.refresh')}
+                </Button>
+              </div>
+              
+              <div className="space-y-3 p-3">
+                {userBets.map(bet => (
+                  <div 
+                    key={bet.id} 
+                    className="p-3 bg-[#0e1824] rounded-md"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs text-white/70">
+                        {bet.sportTitle} • {formatEventDate(bet.createdAt)}
+                      </div>
+                      
+                      <div className={`
+                        flex items-center text-xs rounded px-2 py-0.5
+                        ${bet.status === 'pending' ? 'bg-[#1c2b3a] text-white/80' : 
+                          bet.status === 'won' ? 'bg-[#09b66d] text-white' :
+                          'bg-[#FF3E8F] text-white'}
+                      `}>
+                        {bet.status === 'pending' ? (
+                          <><Clock className="h-3 w-3 mr-1" /> {t('sports.pending')}</>
+                        ) : bet.status === 'won' ? (
+                          <><Check className="h-3 w-3 mr-1" /> {t('sports.won')}</>
+                        ) : (
+                          <><AlertCircle className="h-3 w-3 mr-1" /> {t('sports.lost')}</>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm font-medium">
+                      {bet.homeTeam} vs {bet.awayTeam}
+                    </div>
+                    
+                    <div className="flex items-center mt-1 mb-2 text-xs text-white/70">
+                      <span>
+                        {bet.type === 'parlay' ? t('sports.parlayBet') : t('sports.singleBet')}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs mt-2">
+                      <div className="px-2 py-1 bg-[#192531] rounded">
+                        {formatBetType(bet)}
+                      </div>
+                      
+                      <div className="font-semibold">
+                        {formatAmericanOdds(bet.odds)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#1c2b3a]">
+                      <div>
+                        <div className="text-xs text-white/70">{t('sports.betAmount')}</div>
+                        <div className="text-sm font-medium">${bet.betAmount.toFixed(2)}</div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="text-xs text-white/70">
+                          {bet.status === 'pending' ? t('sports.potentialWin') : t('sports.outcome')}
+                        </div>
+                        <div className={`text-sm font-medium ${bet.status === 'won' ? 'text-[#09b66d]' : ''}`}>
+                          {bet.status === 'pending' 
+                            ? `$${bet.potentialWin.toFixed(2)}` 
+                            : bet.status === 'won'
+                              ? `+$${bet.settledAmount?.toFixed(2) || bet.potentialWin.toFixed(2)}`
+                              : `-$${bet.betAmount.toFixed(2)}`
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="p-6 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
+                <ChevronDown className="h-8 w-8 text-white/30" />
+              </div>
+              <h3 className="text-lg font-medium mb-1">{t('sports.noBets')}</h3>
+              <p className="text-sm text-white/70 mb-4">{t('sports.placeBetsToView')}</p>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="history" className="p-0 m-0">
-          <div className="p-6 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
-              <ChevronDown className="h-8 w-8 text-white/30" />
+          {isLoadingHistory ? (
+            <div className="p-6 flex flex-col items-center justify-center">
+              <RefreshCw className="h-8 w-8 animate-spin text-white/50 mb-3" />
+              <p className="text-sm text-white/70">{t('common.loading')}</p>
             </div>
-            <h3 className="text-lg font-medium mb-1">{t('sports.noHistory')}</h3>
-            <p className="text-sm text-white/70 mb-4">{t('sports.betHistoryWillAppear')}</p>
-          </div>
+          ) : betHistory && betHistory.length > 0 ? (
+            <div className="max-h-[500px] overflow-y-auto">
+              <div className="flex items-center justify-between p-3 border-b border-[#1c2b3a]">
+                <span className="text-sm font-medium">{t('sports.betHistory')}</span>
+              </div>
+              
+              <div className="space-y-3 p-3">
+                {betHistory.map(bet => (
+                  <div 
+                    key={bet.id} 
+                    className="p-3 bg-[#0e1824] rounded-md"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs text-white/70">
+                        {bet.sportTitle} • {formatEventDate(bet.createdAt)}
+                      </div>
+                      
+                      <div className={`
+                        flex items-center text-xs rounded px-2 py-0.5
+                        ${bet.status === 'won' ? 'bg-[#09b66d] text-white' : 'bg-[#FF3E8F] text-white'}
+                      `}>
+                        {bet.status === 'won' ? (
+                          <><Check className="h-3 w-3 mr-1" /> {t('sports.won')}</>
+                        ) : (
+                          <><X className="h-3 w-3 mr-1" /> {t('sports.lost')}</>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm font-medium">
+                      {bet.homeTeam} vs {bet.awayTeam}
+                    </div>
+                    
+                    <div className="flex items-center mt-1 mb-2 text-xs text-white/70">
+                      <span>
+                        {bet.type === 'parlay' ? t('sports.parlayBet') : t('sports.singleBet')}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs mt-2">
+                      <div className="px-2 py-1 bg-[#192531] rounded">
+                        {formatBetType(bet)}
+                      </div>
+                      
+                      <div className="font-semibold">
+                        {formatAmericanOdds(bet.odds)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#1c2b3a]">
+                      <div>
+                        <div className="text-xs text-white/70">{t('sports.betAmount')}</div>
+                        <div className="text-sm font-medium">${bet.betAmount.toFixed(2)}</div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="text-xs text-white/70">{t('sports.outcome')}</div>
+                        <div className={`text-sm font-medium ${bet.status === 'won' ? 'text-[#09b66d]' : 'text-[#FF3E8F]'}`}>
+                          {bet.status === 'won'
+                            ? `+$${bet.settledAmount?.toFixed(2) || bet.potentialWin.toFixed(2)}`
+                            : `-$${bet.betAmount.toFixed(2)}`
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="p-6 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-[#0e1824] flex items-center justify-center mb-3">
+                <ChevronDown className="h-8 w-8 text-white/30" />
+              </div>
+              <h3 className="text-lg font-medium mb-1">{t('sports.noHistory')}</h3>
+              <p className="text-sm text-white/70 mb-4">{t('sports.betHistoryWillAppear')}</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </Card>
