@@ -8,6 +8,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
+import { UserDropdown } from "@/components/ui/user-dropdown";
+import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -362,12 +364,12 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#0F1923] text-white">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#0e1824] text-white">
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-[#0F1923] border-b border-gray-800 sticky top-0 z-10">
+        <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10">
           <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center md:hidden">
               <button type="button" className="text-gray-400 hover:text-white focus:outline-none">
@@ -376,7 +378,7 @@ export default function ProfilePage() {
                 </svg>
               </button>
               <h1 className="font-heading font-bold text-xl text-white tracking-wider ml-3">
-                <span className="text-[#00FFAA]">Crypto</span>Spin
+                <span className="text-[#09b66d]">Crypto</span>Spin
               </h1>
             </div>
             
@@ -384,11 +386,17 @@ export default function ProfilePage() {
               <h1 className="text-xl font-heading font-bold">My Profile</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="px-3 py-1.5 rounded-full bg-[#1A2634] border border-gray-700 flex items-center">
+            <div className="flex items-center space-x-3">
+              <div className="px-3 py-1.5 rounded-md bg-[#192531] border border-[#1c2b3a] flex items-center">
                 <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
                 <span className="text-sm font-semibold">{user?.balance}</span>
               </div>
+              
+              {/* User Dropdown Menu */}
+              <UserDropdown />
+              
+              {/* Notification Dropdown */}
+              <NotificationDropdown />
             </div>
           </div>
         </header>
@@ -399,16 +407,16 @@ export default function ProfilePage() {
             <div className="mb-6 md:mb-8 p-4 md:p-6 bg-[#1A2634] rounded-xl border border-gray-800">
               <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
                 <div className="relative">
-                  <Avatar className="h-24 w-24 rounded-xl border-4 border-[#00FFAA]/10">
+                  <Avatar className="h-24 w-24 rounded-xl border-4 border-[#09b66d]/10">
                     {user?.profileImage ? (
                       <AvatarImage src={user.profileImage} />
                     ) : null}
-                    <AvatarFallback className="bg-[#0F1923] text-[#00FFAA]">
+                    <AvatarFallback className="bg-[#0e1824] text-[#09b66d]">
                       {user?.username ? user.username.substring(0, 2).toUpperCase() : "CS"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute -bottom-2 -right-2 bg-[#00FFAA] rounded-full p-1.5">
-                    <User className="h-4 w-4 text-[#0F1923]" />
+                  <div className="absolute -bottom-2 -right-2 bg-[#09b66d] rounded-full p-1.5">
+                    <User className="h-4 w-4 text-[#0e1824]" />
                   </div>
                 </div>
                 
@@ -417,7 +425,7 @@ export default function ProfilePage() {
                   <div className="mt-1 text-gray-400">{user?.email}</div>
                   
                   <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
-                    <Badge variant="outline" className="bg-[#0F1923]/80 text-[#00FFAA] border-[#00FFAA]/30">
+                    <Badge variant="outline" className="bg-[#0e1824]/80 text-[#09b66d] border-[#09b66d]/30">
                       Member
                     </Badge>
                     
@@ -462,13 +470,13 @@ export default function ProfilePage() {
               <TabsList className="bg-[#0F1923] border border-gray-800 mb-6">
                 <TabsTrigger 
                   value="profile" 
-                  className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#00FFAA]"
+                  className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
                 >
                   Profile
                 </TabsTrigger>
                 <TabsTrigger 
                   value="security" 
-                  className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#00FFAA]"
+                  className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
                 >
                   Security
                 </TabsTrigger>
