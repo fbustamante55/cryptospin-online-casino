@@ -54,7 +54,7 @@ export default function FavoritesPage() {
     <div className="container mx-auto p-4 md:p-6">
       <div className="flex flex-col space-y-8">
         <div className="flex flex-col space-y-2">
-          <h1 className="text-3xl font-bold text-white">{t("my_favorites")}</h1>
+          <h1 className="text-3xl font-bold text-white">{t("navigation.favorites")}</h1>
           <p className="text-gray-400">{t("favorites_description")}</p>
         </div>
 
@@ -67,8 +67,8 @@ export default function FavoritesPage() {
           </div>
         ) : !data || data.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-            <h2 className="text-xl font-semibold text-white">{t("no_favorites")}</h2>
-            <p className="text-gray-400 max-w-md">{t("no_favorites_description")}</p>
+            <h2 className="text-xl font-semibold text-white">{t("favorites.empty_state")}</h2>
+            <p className="text-gray-400 max-w-md">{t("favorites.empty_state_description")}</p>
           </div>
         ) : (
           Object.entries(groupedFavorites).map(([gameType, favorites]) => (

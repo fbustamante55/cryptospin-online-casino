@@ -111,6 +111,18 @@
     "empty_state": "You haven't added any favorites yet",
     "empty_state_description": "Add games to your favorites for quick access"
   },
+  "my_favorites": "My Favorites",
+  "favorites_description": "Quick access to your favorite games",
+  "loading": "Loading...",
+  "no_favorites": "No favorites yet",
+  "no_favorites_description": "Start adding games to your favorites for quick access",
+  "slots": "Slots",
+  "dice": "Dice",
+  "crash": "Crash",
+  "slots_description": "Play exciting slots with unique themes and features",
+  "dice_description": "Test your luck with our dice games",
+  "crash_description": "Cash out before the multiplier crashes",
+  "failed_to_load_favorites": "Failed to load favorites",
   "games": {
     "play_now": "Play Now"
   },
