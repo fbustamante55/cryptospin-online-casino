@@ -6,11 +6,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
 
 interface FavoriteButtonProps {
   gameType: string;
   gameId?: string;
-  gameName: string;
+  gameName: string; // Will be stored as gameTitle in the database
   gameImage?: string;
   className?: string;
 }
@@ -24,6 +25,7 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [favoriteId, setFavoriteId] = useState<number | null>(null);
 
@@ -49,7 +51,7 @@ export function FavoriteButton({
   // Add to favorites
   const addFavoriteMutation = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("You must be logged in to add favorites");
+      if (!user) throw new Error(t("favorites.login_required"));
       
       return apiRequest({
         url: '/api/favorites',
@@ -58,7 +60,7 @@ export function FavoriteButton({
           userId: user.id,
           gameType,
           gameId: gameId || null,
-          gameName,
+          gameTitle: gameName, // Convert from gameName prop to gameTitle field
           gameImage: gameImage || null
         }
       });
@@ -68,14 +70,14 @@ export function FavoriteButton({
       queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
       queryClient.invalidateQueries({ queryKey: ['/api/favorites/check', gameType, gameId] });
       toast({
-        title: "Added to favorites",
-        description: `${gameName} has been added to your favorites.`,
+        title: t("favorites.added_title"),
+        description: t("favorites.added_description", { gameName }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add to favorites",
+        title: t("error"),
+        description: error.message || t("favorites.failed_add"),
         variant: "destructive"
       });
     }
@@ -84,7 +86,7 @@ export function FavoriteButton({
   // Remove from favorites
   const removeFavoriteMutation = useMutation({
     mutationFn: async (id: number) => {
-      if (!user) throw new Error("You must be logged in to remove favorites");
+      if (!user) throw new Error(t("favorites.login_required_remove"));
       
       return apiRequest({
         url: `/api/favorites/${id}`,
@@ -96,8 +98,8 @@ export function FavoriteButton({
       queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
       queryClient.invalidateQueries({ queryKey: ['/api/favorites/check', gameType, gameId] });
       toast({
-        title: "Removed from favorites",
-        description: `${gameName} has been removed from your favorites.`,
+        title: t("favorites.removed_title"),
+        description: t("favorites.removed_description", { gameName }),
       });
     },
     onError: (error: Error) => {
