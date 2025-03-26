@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { EventCard } from "@/components/sports/event-card";
+import { BetSlip, BetSelection } from "@/components/sports/bet-slip";
 
 // Import the sports API utilities
 import { 
@@ -26,6 +28,7 @@ export default function SportsBettingPage() {
   const { t } = useTranslation();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeSport, setActiveSport] = useState<string>("");
+  const [betSelections, setBetSelections] = useState<BetSelection[]>([]);
   
   // Fetch available sports
   const { 
@@ -143,6 +146,34 @@ export default function SportsBettingPage() {
   
   // Filter events for display
   const filteredEvents = displayEvents?.slice(0, 10) || [];
+  
+  // Handlers for bet slip
+  const handleAddSelection = (selection: BetSelection) => {
+    // Check if the selection already exists
+    const existingSelectionIndex = betSelections.findIndex(
+      bet => bet.eventId === selection.eventId && 
+             bet.selectedTeam === selection.selectedTeam && 
+             bet.marketType === selection.marketType
+    );
+    
+    if (existingSelectionIndex !== -1) {
+      // Remove it if it already exists (toggle behavior)
+      const newSelections = [...betSelections];
+      newSelections.splice(existingSelectionIndex, 1);
+      setBetSelections(newSelections);
+    } else {
+      // Add new selection
+      setBetSelections([...betSelections, selection]);
+    }
+  };
+  
+  const handleRemoveSelection = (id: string) => {
+    setBetSelections(betSelections.filter(bet => bet.id !== id));
+  };
+  
+  const handleClearSelections = () => {
+    setBetSelections([]);
+  };
 
   return (
     <>
