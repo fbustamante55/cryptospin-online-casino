@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
+import { Layout } from "@/components/ui/layout";
 
 export function ProtectedRoute({
   path,
@@ -20,7 +21,9 @@ export function ProtectedRoute({
       ) : !user ? (
         <Redirect to="/auth" />
       ) : (
-        <Component />
+        <Layout>
+          <Component />
+        </Layout>
       )}
     </Route>
   );
