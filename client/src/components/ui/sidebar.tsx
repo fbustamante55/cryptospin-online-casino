@@ -25,9 +25,12 @@ import {
   Headset,
   BookOpenText
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SidebarLanguageSwitcher } from "./sidebar-language-switcher";
 import { useTranslation } from 'react-i18next';
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { fetchOdds, EventOdds } from "@/lib/sports-api";
 
 interface SidebarProps {
   className?: string;
@@ -38,10 +41,47 @@ export function Sidebar({ className }: SidebarProps) {
   const { user, logoutMutation } = useAuth();
   const { t } = useTranslation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [liveEventsCount, setLiveEventsCount] = useState(0);
+  
   // Determinar el tab activo basado en la URL actual
   const [activeTab, setActiveTab] = useState(
     location.includes('/sports') ? 'deportes' : 'casino'
   );
+  
+  // Consulta para obtener eventos deportivos
+  const { data: eventsData } = useQuery({ 
+    queryKey: ['/api/sports/events'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest({
+          url: '/api/sports/events',
+          method: 'GET'
+        });
+        return response;
+      } catch (error) {
+        console.error("Error fetching sports events:", error);
+        return { events: [] };
+      }
+    },
+    refetchInterval: 60000 // Actualizar cada minuto
+  });
+  
+  // Calcular el número de eventos en vivo
+  useEffect(() => {
+    if (eventsData?.events) {
+      // Filtrar los eventos que son en vivo (comenzaron en las últimas 3 horas)
+      const now = new Date();
+      const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+      
+      // Contar eventos cuyo tiempo de inicio es antes de ahora pero después de hace 3 horas
+      const liveEvents = eventsData.events.filter((event: any) => {
+        const eventDate = new Date(event.commence_time);
+        return eventDate < now && eventDate > threeHoursAgo;
+      });
+      
+      setLiveEventsCount(liveEvents.length);
+    }
+  }, [eventsData]);
 
   const isActive = (path: string) => location === path;
 
@@ -65,7 +105,7 @@ export function Sidebar({ className }: SidebarProps) {
   
   // Elementos para la sección de deportes
   const sportsItems = [
-    { name: t('sidebar.liveEvents'), icon: <Tv className="h-4 w-4" />, badge: "24", path: "/sports", onClick: () => handleSportsFilter('live') },
+    { name: t('sidebar.liveEvents'), icon: <Tv className="h-4 w-4" />, badge: liveEventsCount.toString(), path: "/sports", onClick: () => handleSportsFilter('live') },
     { name: "Próximos Eventos", icon: <Clock className="h-4 w-4" />, path: "/sports", onClick: () => handleSportsFilter('upcoming') },
     { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
   ];

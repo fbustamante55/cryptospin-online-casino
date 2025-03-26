@@ -981,8 +981,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sportType = req.query.sportType as string | undefined;
       const status = req.query.status as string | undefined;
       
-      const events = await storage.getSportsEvents(sportType, status);
-      res.json(events);
+      // Si estamos utilizando la API externa, obtenemos los datos de ella
+      try {
+        // Importar la función desde sports-api.ts
+        const { fetchOdds } = await import('../client/src/lib/sports-api');
+        
+        // Obtener eventos de la API externa
+        const allSports = ['soccer', 'basketball', 'baseball', 'football', 'tennis', 'mma', 'hockey'];
+        const allEvents = [];
+        
+        for (const sport of allSports) {
+          if (sportType && sport !== sportType) continue;
+          
+          try {
+            const sportEvents = await fetchOdds(sport, 'upcoming', 'es');
+            allEvents.push(...sportEvents);
+          } catch (sportError) {
+            console.error(`Error fetching ${sport} events:`, sportError);
+            // Continuamos con el siguiente deporte aunque uno falle
+          }
+        }
+        
+        return res.json({ events: allEvents });
+      } catch (apiError) {
+        console.error("Error fetching from external API:", apiError);
+        
+        // Como fallback, usamos los datos almacenados localmente
+        const events = await storage.getSportsEvents(sportType, status);
+        res.json({ events });
+      }
     } catch (error) {
       console.error("Error fetching sports events:", error);
       res.status(500).json({ message: "Failed to fetch sports events" });
