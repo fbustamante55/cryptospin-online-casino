@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Trash2, X, RefreshCw, ChevronsUpDown, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatAmericanOdds } from "@/lib/sports-api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -33,8 +33,31 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [betAmount, setBetAmount] = useState<string>("10");
+  const [betAmount, setBetAmount] = useState<string>("1.00");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
+  
+  // Obtener la moneda seleccionada del localStorage cuando se monta el componente
+  useEffect(() => {
+    const savedCurrency = localStorage.getItem('selectedCurrency');
+    if (savedCurrency) {
+      setSelectedCurrency(savedCurrency);
+    }
+  }, []);
+  
+  // Escuchar cambios en la moneda seleccionada
+  useEffect(() => {
+    const handleCurrencyChange = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      setSelectedCurrency(customEvent.detail);
+    };
+    
+    document.addEventListener('currencyChanged', handleCurrencyChange as EventListener);
+    
+    return () => {
+      document.removeEventListener('currencyChanged', handleCurrencyChange as EventListener);
+    };
+  }, []);
   
   // Calculate the total odds for a parlay bet
   const calculateParlayOdds = (): number => {
@@ -78,10 +101,10 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
       return;
     }
     
-    if (parseFloat(betAmount) <= 0) {
+    if (parseFloat(betAmount) < 1.00) {
       toast({
         title: t('errors.invalidBetAmount'),
-        description: t('errors.enterPositiveBetAmount'),
+        description: t('errors.enterMinimumBetAmount', { currency: selectedCurrency, amount: "1.00" }),
         variant: "destructive"
       });
       return;
@@ -234,7 +257,23 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   variant="outline" 
                   size="sm" 
                   className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("10")}
+                  onClick={() => setBetAmount("1.00")}
+                >
+                  1
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                  onClick={() => setBetAmount("5.00")}
+                >
+                  5
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
+                  onClick={() => setBetAmount("10.00")}
                 >
                   10
                 </Button>
@@ -242,15 +281,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   variant="outline" 
                   size="sm" 
                   className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("25")}
-                >
-                  25
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("50")}
+                  onClick={() => setBetAmount("50.00")}
                 >
                   50
                 </Button>
@@ -258,15 +289,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   variant="outline" 
                   size="sm" 
                   className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("100")}
-                >
-                  100
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount((user?.balance || 0).toString())}
+                  onClick={() => setBetAmount((Math.max(user?.balance || 1, 1)).toFixed(2))}
                 >
                   Max
                 </Button>
@@ -278,16 +301,17 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   value={betAmount} 
                   onChange={(e) => setBetAmount(e.target.value)}
                   className="bg-[#0e1824] border-[#1c2b3a] text-white pr-16"
-                  placeholder="0"
+                  placeholder="1.00"
+                  min="1.00"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-white/70">
-                  USD
+                  {selectedCurrency}
                 </div>
               </div>
               
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm">{t('sports.potentialWin')}</span>
-                <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} USD</span>
+                <span className="text-sm font-bold text-[#09b66d]">{potentialWin.toFixed(2)} {selectedCurrency}</span>
               </div>
               
               <Button 
