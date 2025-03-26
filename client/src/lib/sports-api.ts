@@ -190,14 +190,15 @@ export function oddsToImpliedProbability(odds: number): number {
 }
 
 /**
- * Converts ISO date to a more readable format
+ * Converts ISO date to a more readable format in Spanish
  */
 export function formatEventDate(isoDate: string): string {
   const date = new Date(isoDate);
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
+  return new Intl.DateTimeFormat('es-ES', {
     day: 'numeric',
-    hour: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit', 
     minute: '2-digit'
   }).format(date);
 }

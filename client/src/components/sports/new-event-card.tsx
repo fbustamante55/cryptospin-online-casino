@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from "@/components/ui/button";
 import { EventOdds } from '@/lib/sports-api';
-import { formatAmericanOdds, oddsToImpliedProbability } from '@/lib/sports-api';
+import { formatAmericanOdds, oddsToImpliedProbability, formatEventDate } from '@/lib/sports-api';
 import { BetSelection } from '@/components/sports/bet-slip';
 import { nanoid } from 'nanoid';
 import { useTranslation } from 'react-i18next';
@@ -160,15 +160,8 @@ export function NewEventCard({
     return eventDate <= now;
   };
   
-  // Formatear la fecha del evento
-  const formatEventDate = () => {
-    const date = new Date(event.commence_time);
-    return date.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
+  // Eliminamos la función duplicada, ya que ahora usamos la importada
+  // desde sports-api.ts
 
   return (
     <Card className={`bg-[#121c2e] border-[#1a2e4a] overflow-hidden ${className}`}>
@@ -196,7 +189,7 @@ export function NewEventCard({
       <div className="bg-[#121c2e] px-3 py-1 border-b border-[#1a2e4a]">
         <div className="flex items-center text-xs text-gray-400">
           <Clock className="h-3 w-3 mr-1" />
-          <span>{formatEventDate()}</span>
+          <span>{formatEventDate(event.commence_time)}</span>
         </div>
       </div>
       
