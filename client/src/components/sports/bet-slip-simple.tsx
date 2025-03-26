@@ -255,49 +255,6 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 )}
               </div>
               
-              <div className="flex gap-2 mb-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("1.00")}
-                >
-                  1
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("5.00")}
-                >
-                  5
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("10.00")}
-                >
-                  10
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount("50.00")}
-                >
-                  50
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-[#0e1824] border-[#1c2b3a] text-white"
-                  onClick={() => setBetAmount((Math.max(user?.balance || 1, 1)).toFixed(2))}
-                >
-                  Max
-                </Button>
-              </div>
-              
               <div className="relative mb-4">
                 <Input 
                   type="number" 
