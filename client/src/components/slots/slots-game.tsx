@@ -84,11 +84,11 @@ export function SlotsGame() {
   const [bet, setBet] = useState<number>(100);
   const [lines, setLines] = useState<number>(9); // Líneas de pago (por defecto 9)
   const [reels, setReels] = useState<string[][]>([
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""]
+    ["WILD", "SCATTER", "STAR"],
+    ["BAR", "7", "BAR"],
+    ["CHERRY", "WILD", "LEMON"],
+    ["STAR", "BELL", "STAR"],
+    ["7", "PLUM", "WATERMELON"]
   ]);
   const [spinningReels, setSpinningReels] = useState<boolean[]>([false, false, false, false, false]);
   const [winAmount, setWinAmount] = useState<number>(0);
