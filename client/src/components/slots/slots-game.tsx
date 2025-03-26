@@ -83,19 +83,33 @@ export function SlotsGame() {
   const [location] = useLocation();
   const [bet, setBet] = useState<number>(100);
   const [lines, setLines] = useState<number>(9); // Líneas de pago (por defecto 9)
-  const [reels, setReels] = useState<string[][]>([
-    ["WILD", "SCATTER", "STAR"],
-    ["BAR", "7", "BAR"],
-    ["CHERRY", "WILD", "LEMON"],
-    ["STAR", "BELL", "STAR"],
-    ["7", "PLUM", "WATERMELON"]
-  ]);
   const [spinningReels, setSpinningReels] = useState<boolean[]>([false, false, false, false, false]);
   const [winAmount, setWinAmount] = useState<number>(0);
   const [showWin, setShowWin] = useState<boolean>(false);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
   const [gameId, setGameId] = useState<string>("fruity-fiesta");
   const [gameTitle, setGameTitle] = useState<string>(t("games.slots_fruity_title"));
+  
+  // Inicializar reels según el juego (después de definir gameId)
+  const [reels, setReels] = useState<string[][]>(() => {
+    if (gameId === 'book-of-egypt') {
+      return [
+        ["BOOK", "SCARAB", "PYRAMID"],
+        ["PHARAOH", "EYE", "ANKH"],
+        ["ANKH", "BOOK", "PHARAOH"],
+        ["PYRAMID", "PHARAOH", "BOOK"],
+        ["EYE", "PYRAMID", "SCARAB"]
+      ];
+    } else {
+      return [
+        ["WILD", "SCATTER", "STAR"],
+        ["BAR", "7", "BAR"],
+        ["CHERRY", "WILD", "LEMON"],
+        ["STAR", "BELL", "STAR"],
+        ["7", "PLUM", "WATERMELON"]
+      ];
+    }
+  });
   
   // Referencias para las líneas de pago y animaciones de victoria
   const winLinesRef = useRef<number[][]>([]);
