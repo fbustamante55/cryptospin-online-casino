@@ -36,8 +36,8 @@ export default function SportsBettingPage() {
   const [activeSport, setActiveSport] = useState<string>("");
   const [betSelections, setBetSelections] = useState<BetSelection[]>([]);
   
-  // Leer parámetros de URL para determinar filtros
-  const [location] = useLocation();
+  // Para la navegación y actualización de URL
+  const [location, setLocation] = useLocation();
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const filterParam = urlParams.get('filter');
   
@@ -56,6 +56,33 @@ export default function SportsBettingPage() {
   const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(
     filterParam === 'tomorrow' || localStorage.getItem('sportsFilter') === 'tomorrow'
   );
+  
+  // Función para aplicar filtro y actualizar la URL y el localStorage
+  const handleFilterChange = (filterType: 'live' | 'upcoming' | 'favorites' | 'tomorrow') => {
+    // Actualizar estados locales
+    setShowLiveEvents(filterType === 'live');
+    setShowUpcomingEvents(filterType === 'upcoming');
+    setShowFavorites(filterType === 'favorites');
+    setShowTomorrowEvents(filterType === 'tomorrow');
+    
+    // Guardar en localStorage
+    localStorage.setItem('sportsFilter', filterType);
+    
+    // Actualizar URL con el parámetro de filtro
+    const newParams = new URLSearchParams();
+    newParams.set('filter', filterType);
+    
+    // Mantener otros parámetros existentes (excepto filter)
+    urlParams.forEach((value, key) => {
+      if (key !== 'filter') {
+        newParams.set(key, value);
+      }
+    });
+    
+    // Construir nueva URL y navegar
+    const newPath = location.split('?')[0] + '?' + newParams.toString();
+    setLocation(newPath);
+  };
   
   const [activeTab, setActiveTab] = useState<string>("misBoletos");
   const [isWalletOpen, setIsWalletOpen] = useState(false);
@@ -599,13 +626,7 @@ export default function SportsBettingPage() {
                       ? 'bg-[#09b66d] text-white' 
                       : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
                   } transition-all duration-200`}
-                  onClick={() => {
-                    setShowFavorites(true);
-                    setShowLiveEvents(false);
-                    setShowUpcomingEvents(false);
-                    setShowTomorrowEvents(false);
-                    localStorage.setItem('sportsFilter', 'favorites');
-                  }}
+                  onClick={() => handleFilterChange('favorites')}
                 >
                   <Star className={`h-4 w-4 mr-1.5 ${showFavorites ? 'text-white' : 'text-[#f8c541]'}`} />
                   <span className="text-sm font-medium">{t('sports.favorites')}</span>
@@ -617,13 +638,7 @@ export default function SportsBettingPage() {
                       ? 'bg-[#09b66d] text-white' 
                       : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
                   } transition-all duration-200`}
-                  onClick={() => {
-                    setShowLiveEvents(true);
-                    setShowFavorites(false);
-                    setShowUpcomingEvents(false);
-                    setShowTomorrowEvents(false);
-                    localStorage.setItem('sportsFilter', 'live');
-                  }}
+                  onClick={() => handleFilterChange('live')}
                 >
                   <div className={`flex items-center justify-center h-4 w-4 mr-1.5 ${showLiveEvents ? 'text-white' : 'text-red-500'}`}>
                     <span className="relative flex h-2 w-2">
@@ -640,13 +655,7 @@ export default function SportsBettingPage() {
                       ? 'bg-[#09b66d] text-white' 
                       : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
                   } transition-all duration-200`}
-                  onClick={() => {
-                    setShowUpcomingEvents(true);
-                    setShowFavorites(false);
-                    setShowLiveEvents(false);
-                    setShowTomorrowEvents(false);
-                    localStorage.setItem('sportsFilter', 'upcoming');
-                  }}
+                  onClick={() => handleFilterChange('upcoming')}
                 >
                   <CalendarDays className={`h-4 w-4 mr-1.5 ${showUpcomingEvents ? 'text-white' : 'text-gray-400'}`} />
                   <span className="text-sm font-medium">Próximos</span>
@@ -658,13 +667,7 @@ export default function SportsBettingPage() {
                       ? 'bg-[#09b66d] text-white' 
                       : 'bg-[#192531] text-gray-300 hover:bg-[#233546]'
                   } transition-all duration-200`}
-                  onClick={() => {
-                    setShowTomorrowEvents(true);
-                    setShowFavorites(false);
-                    setShowLiveEvents(false);
-                    setShowUpcomingEvents(false);
-                    localStorage.setItem('sportsFilter', 'tomorrow');
-                  }}
+                  onClick={() => handleFilterChange('tomorrow')}
                 >
                   <Calendar className={`h-4 w-4 mr-1.5 ${showTomorrowEvents ? 'text-white' : 'text-gray-400'}`} />
                   <span className="text-sm font-medium">{t('sports.tomorrow')}</span>
