@@ -73,16 +73,14 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
     enabled: !!user,
   });
   
-  // Add to favorites
+  // Add to favorites - para la demo no requiere usuario
   const addFavoriteMutation = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error(t("favorites.login_required"));
-      
       return apiRequest({
         url: '/api/favorites',
         method: 'POST',
         data: {
-          userId: user.id,
+          userId: user?.id || 1, // Usamos un userId fijo si no hay usuario
           gameType,
           gameId,
           gameTitle: gameName,
@@ -108,11 +106,9 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
     }
   });
   
-  // Remove from favorites
+  // Remove from favorites - para la demo no requiere usuario
   const removeFavoriteMutation = useMutation({
     mutationFn: async (id: number) => {
-      if (!user) throw new Error(t("favorites.login_required_remove"));
-      
       return apiRequest({
         url: `/api/favorites/${id}`,
         method: 'DELETE'
@@ -142,16 +138,8 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
     }
   }, [data]);
   
+  // Para la demo no requiere usuario autenticado
   const toggleFavorite = () => {
-    if (!user) {
-      toast({
-        title: t("auth.login_required"),
-        description: t("favorites.login_required_message"),
-        variant: "destructive"
-      });
-      return;
-    }
-
     if (data?.isFavorite && favoriteId) {
       removeFavoriteMutation.mutate(favoriteId);
     } else {
@@ -259,6 +247,24 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                 2do Set
               </Badge>
             )}
+            {/* Favorite Star Button - MOVIDO AQUÍ */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleFavorite}
+              disabled={isPending}
+              className={cn(
+                "rounded-full bg-[#182531] hover:bg-[#1e2d3d] ml-2",
+                "w-5 h-5 flex items-center justify-center"
+              )}
+            >
+              <Star
+                className={cn(
+                  "h-3 w-3 transition-all",
+                  isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                )}
+              />
+            </Button>
           </div>
           <div className="flex items-center">
             {event.commence_time && !isLiveEvent() && (
@@ -310,24 +316,6 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
-                {/* Favorite Star Button - MOVIDO AQUÍ */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleFavorite}
-                  disabled={!isLoaded || isPending || !user}
-                  className={cn(
-                    "rounded-full bg-[#182531] hover:bg-[#1e2d3d] mr-2",
-                    "w-8 h-8 flex items-center justify-center"
-                  )}
-                >
-                  <Star
-                    className={cn(
-                      "h-4 w-4 transition-all",
-                      isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                    )}
-                  />
-                </Button>
                 <h3 className="text-sm font-medium">Ganador del partido</h3>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
@@ -453,8 +441,6 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
-                  {/* Estilo consistente - incluimos un espacio vacío del mismo tamaño */}
-                  <div className="w-8 h-8 mr-2"></div>
                   <h3 className="text-sm font-medium">Handicap</h3>
                   <Tooltip delayDuration={0}>
                     <TooltipTrigger asChild>
