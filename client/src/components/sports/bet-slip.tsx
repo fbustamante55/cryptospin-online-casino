@@ -1,16 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, X, RefreshCw, ChevronsUpDown, ChevronDown, Plus, Clock, Check, AlertCircle } from "lucide-react";
+import { Trash2, X, RefreshCw, ChevronsUpDown, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { formatAmericanOdds, formatEventDate } from "@/lib/sports-api";
+import { formatAmericanOdds } from "@/lib/sports-api";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
-import { useQuery } from "@tanstack/react-query";
 
 export interface BetSelection {
   id: string;
@@ -196,46 +194,30 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
   
   return (
     <Card className="bg-[#192531] border-[#1c2b3a] overflow-hidden">
-      <Tabs defaultValue="betslip" className="w-full">
-        <div className="border-b border-[#1c2b3a]">
-          <TabsList className="w-full flex bg-transparent rounded-none h-auto p-0 border-none">
-            <TabsTrigger 
-              value="betslip" 
-              className="flex-1 rounded-none py-3 text-sm font-medium
-                bg-transparent text-white/70 border-b-2 border-transparent
-                data-[state=active]:bg-transparent data-[state=active]:border-[#09b66d]
-                data-[state=active]:text-white transition-all duration-200
-                hover:text-white focus:text-white"
-            >
-              <span className="flex items-center justify-center">
+      <div className="w-full">
+        <div className="border-b border-[#1c2b3a] px-3 py-3">
+          <div className="flex items-center justify-between">
+            <span className="text-base font-medium">
+              <span className="flex items-center">
                 {t('sports.betSlip')} {selections.length > 0 && (
                   <span className="ml-1.5 px-1.5 py-0.5 bg-[#09b66d] text-white text-xs rounded-full">
                     {selections.length}
                   </span>
                 )}
               </span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="mybets" 
-              className="flex-1 rounded-none py-3 text-sm font-medium
-                bg-transparent text-white/70 border-b-2 border-transparent
-                data-[state=active]:bg-transparent data-[state=active]:border-[#09b66d]
-                data-[state=active]:text-white transition-all duration-200
-                hover:text-white focus:text-white"
-            >
-              {t('sports.myBets')}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="history" 
-              className="flex-1 rounded-none py-3 text-sm font-medium
-                bg-transparent text-white/70 border-b-2 border-transparent
-                data-[state=active]:bg-transparent data-[state=active]:border-[#09b66d]
-                data-[state=active]:text-white transition-all duration-200
-                hover:text-white focus:text-white"
-            >
-              {t('sports.history')}
-            </TabsTrigger>
-          </TabsList>
+            </span>
+            {selections.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs text-white/70 hover:text-white"
+                onClick={onClearSelections}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                {t('buttons.removeAll')}
+              </Button>
+            )}
+          </div>
         </div>
         
         <TabsContent value="betslip" className="p-0 m-0">

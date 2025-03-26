@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { EventCard } from "@/components/sports/event-card";
-import { BetSlip, BetSelection } from "@/components/sports/bet-slip";
+import { BetSlip, BetSelection } from "@/components/sports/bet-slip-simple";
 import { nanoid } from "nanoid";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
