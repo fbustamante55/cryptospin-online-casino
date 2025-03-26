@@ -627,6 +627,301 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Blackjack game routes
+  app.post("/api/games/blackjack/bet", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const betSchema = z.object({
+        bet: z.number().min(10).max(10000),
+      });
+
+      const { bet } = betSchema.parse(req.body);
+
+      // Check if user has enough balance
+      if (req.user.balance < bet) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Create a shuffled deck
+      const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+      const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      let deck = [];
+
+      for (const suit of suits) {
+        for (const value of values) {
+          deck.push({ suit, value });
+        }
+      }
+
+      // Fisher-Yates shuffle
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+
+      // Deal initial cards
+      const playerHand = { cards: [deck.pop(), deck.pop()], value: 0 };
+      const dealerHand = { 
+        cards: [deck.pop(), { ...deck.pop(), hidden: true }], 
+        value: 0 
+      };
+
+      // Calculate hand values
+      function calculateHandValue(cards) {
+        let value = 0;
+        let aces = 0;
+        
+        for (const card of cards) {
+          if (card.hidden) continue;
+          
+          if (card.value === 'A') {
+            value += 11;
+            aces++;
+          } else if (['K', 'Q', 'J'].includes(card.value)) {
+            value += 10;
+          } else {
+            value += parseInt(card.value);
+          }
+        }
+        
+        // Adjust for aces if needed
+        while (value > 21 && aces > 0) {
+          value -= 10;
+          aces--;
+        }
+        
+        return value;
+      }
+
+      // Calculate initial values
+      playerHand.value = calculateHandValue(playerHand.cards);
+      dealerHand.value = calculateHandValue(dealerHand.cards);
+
+      // Check for dealer blackjack possibility
+      const dealerUpCard = dealerHand.cards[0];
+      const canInsure = dealerUpCard.value === 'A';
+
+      // Update user balance (deduct bet)
+      const updatedUser = await storage.updateUserBalance(req.user.id, -bet);
+
+      // Record transaction
+      await storage.createTransaction({
+        userId: req.user.id,
+        amount: -bet,
+        type: "bet",
+        description: "Blackjack bet",
+        status: "completed",
+        createdAt: new Date(),
+      });
+
+      res.json({
+        playerHand,
+        dealerHand,
+        deck: deck.slice(0, 5), // Send a few cards for client-side operations
+        balance: updatedUser.balance,
+        canInsure,
+      });
+    } catch (error) {
+      console.error("Error placing blackjack bet:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/games/blackjack/hit", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const hitSchema = z.object({
+        handIndex: z.number().default(0),
+        currentCards: z.array(z.object({
+          suit: z.string(),
+          value: z.string(),
+          hidden: z.boolean().optional(),
+        })),
+      });
+
+      const { handIndex, currentCards } = hitSchema.parse(req.body);
+
+      // Create a new card
+      const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+      const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      
+      const suit = suits[Math.floor(Math.random() * suits.length)];
+      const value = values[Math.floor(Math.random() * values.length)];
+      
+      const newCard = { suit, value };
+
+      res.json({
+        card: newCard,
+        handIndex,
+      });
+    } catch (error) {
+      console.error("Error on blackjack hit:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/games/blackjack/stand", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const standSchema = z.object({
+        handIndex: z.number().default(0),
+      });
+
+      const { handIndex } = standSchema.parse(req.body);
+
+      res.json({
+        success: true,
+        handIndex,
+      });
+    } catch (error) {
+      console.error("Error on blackjack stand:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/games/blackjack/double", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const doubleSchema = z.object({
+        bet: z.number().min(10).max(10000),
+        handIndex: z.number().default(0),
+        currentCards: z.array(z.object({
+          suit: z.string(),
+          value: z.string(),
+          hidden: z.boolean().optional(),
+        })),
+      });
+
+      const { bet, handIndex, currentCards } = doubleSchema.parse(req.body);
+
+      // Check if user has enough balance
+      if (req.user.balance < bet) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Create a new card
+      const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+      const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      
+      const suit = suits[Math.floor(Math.random() * suits.length)];
+      const value = values[Math.floor(Math.random() * values.length)];
+      
+      const newCard = { suit, value };
+
+      // Update user balance (deduct additional bet)
+      const updatedUser = await storage.updateUserBalance(req.user.id, -bet);
+
+      // Record transaction
+      await storage.createTransaction({
+        userId: req.user.id,
+        amount: -bet,
+        type: "bet",
+        description: "Blackjack double down",
+        status: "completed",
+        createdAt: new Date(),
+      });
+
+      res.json({
+        card: newCard,
+        handIndex,
+        balance: updatedUser.balance,
+      });
+    } catch (error) {
+      console.error("Error on blackjack double down:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/games/blackjack/end", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const endSchema = z.object({
+        playerHands: z.array(z.object({
+          cards: z.array(z.object({
+            suit: z.string(),
+            value: z.string(),
+            hidden: z.boolean().optional(),
+          })),
+          value: z.number(),
+          isBusted: z.boolean().optional(),
+          isBlackjack: z.boolean().optional(),
+        })),
+        dealerHand: z.object({
+          cards: z.array(z.object({
+            suit: z.string(),
+            value: z.string(),
+            hidden: z.boolean().optional(),
+          })),
+          value: z.number(),
+          isBusted: z.boolean().optional(),
+          isBlackjack: z.boolean().optional(),
+        }),
+        bets: z.array(z.number()),
+        results: z.array(z.enum(['win', 'lose', 'push'])),
+        payouts: z.array(z.number()),
+      });
+
+      const { playerHands, dealerHand, bets, results, payouts } = endSchema.parse(req.body);
+
+      // Calculate total payout
+      const totalPayout = payouts.reduce((sum, amount) => sum + amount, 0);
+
+      // Update user balance (add winnings)
+      const updatedUser = await storage.updateUserBalance(req.user.id, totalPayout);
+
+      // Record transaction if there are winnings
+      if (totalPayout > 0) {
+        await storage.createTransaction({
+          userId: req.user.id,
+          amount: totalPayout,
+          type: "win",
+          description: "Blackjack winnings",
+          status: "completed",
+          createdAt: new Date(),
+        });
+      }
+
+      // Record game history
+      await storage.createGameHistory({
+        userId: req.user.id,
+        gameType: "blackjack",
+        bet: bets.reduce((sum, bet) => sum + bet, 0),
+        result: JSON.stringify({
+          playerHands,
+          dealerHand,
+          results,
+          payouts,
+        }),
+        win: payouts.some(payout => payout > 0),
+        winAmount: totalPayout,
+        createdAt: new Date(),
+      });
+
+      res.json({
+        balance: updatedUser.balance,
+        success: true,
+      });
+    } catch (error) {
+      console.error("Error ending blackjack game:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // Sports betting routes
   
   // Get all upcoming sports events with filters
