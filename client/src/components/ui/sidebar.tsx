@@ -23,7 +23,8 @@ import {
   MessageCircle,
   HeartHandshake,
   Headset,
-  BookOpenText
+  BookOpenText,
+  Calendar
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { SidebarLanguageSwitcher } from "./sidebar-language-switcher";
@@ -104,33 +105,48 @@ export function Sidebar({ className }: SidebarProps) {
   ];
   
   // Elementos para la sección de deportes
+  // Función para filtrar eventos deportivos
+  const [, setLocation] = useLocation();
+
+  const handleSportsFilter = (filter: 'live' | 'upcoming' | 'tomorrow' | 'favorites') => {
+    // Guardar filtro en localStorage
+    localStorage.setItem('sportsFilter', filter);
+    
+    // Navegar a la página de deportes con parámetro de filtro
+    setLocation(`/sports?filter=${filter}`);
+  };
+
   const sportsItems = [
     { 
       name: t('sidebar.liveEvents'), 
       icon: <Tv className="h-4 w-4" />, 
       badge: liveEventsCount.toString(), 
       path: "/sports", 
-      onClick: () => {
-        // Guardar filtro 'live' en localStorage
-        localStorage.setItem('sportsFilter', 'live');
-        // Navegar a la página de deportes con el filtro aplicado
-        setLocation('/sports?filter=live');
-      } 
+      onClick: () => handleSportsFilter('live')
     },
-    { name: "Próximos Eventos", icon: <Clock className="h-4 w-4" />, path: "/sports", onClick: () => handleSportsFilter('upcoming') },
-    { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
+    { 
+      name: "Próximos Eventos", 
+      icon: <Clock className="h-4 w-4" />, 
+      path: "/sports", 
+      onClick: () => handleSportsFilter('upcoming') 
+    },
+    { 
+      name: "Favoritos", 
+      icon: <Star className="h-4 w-4" />, 
+      path: "/sports", 
+      onClick: () => handleSportsFilter('favorites') 
+    },
+    { 
+      name: "Mañana", 
+      icon: <Calendar className="h-4 w-4" />, 
+      path: "/sports", 
+      onClick: () => handleSportsFilter('tomorrow') 
+    },
+    { 
+      name: t('sidebar.myBets'), 
+      icon: <BarChart className="h-4 w-4" /> 
+    },
   ];
-  
-  // Función para filtrar eventos deportivos
-  const [, setLocation] = useLocation();
-
-  const handleSportsFilter = (filter: 'live' | 'upcoming') => {
-    // Guardar filtro en localStorage
-    localStorage.setItem('sportsFilter', filter);
-    
-    // Navegar a la página de deportes
-    setLocation('/sports');
-  };
   
   // Deportes populares
   const popularSports = [
