@@ -243,8 +243,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     const betSchema = z.object({
-      bet: z.number().min(10).max(10000),
-      lines: z.number().min(1).max(9).default(9),
+      bet: z.number().min(0.5).max(10000),
+      lines: z.number().min(1).max(50).default(9), // Soporte para Book of Egypt (10 líneas) y 50 Gems (50 líneas)
       gameId: z.string().optional(),
       reels: z.number().min(3).max(5).default(5),
       rows: z.number().min(3).max(4).default(3)

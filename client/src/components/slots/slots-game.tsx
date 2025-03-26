@@ -337,7 +337,12 @@ export function SlotsGame() {
   });
 
   const handleSpin = () => {
-    if (isSpinning || !user || user.balance < bet) return;
+    // Verificar que el jugador tenga suficiente saldo
+    if (isSpinning || !user || user.balance < bet) {
+      return;
+    }
+    
+    console.log("Slots bet:", { bet, lines, gameId, reels: gameConfig.reels, rows: gameConfig.rows });
     
     setIsSpinning(true);
     setShowWin(false);
@@ -359,7 +364,13 @@ export function SlotsGame() {
     }, 100);
     
     // Enviar solicitud al servidor
-    playSlotsMutation.mutate({ bet, lines, gameId });
+    playSlotsMutation.mutate({ 
+      bet, 
+      lines, 
+      gameId,
+      reels: gameConfig.reels,
+      rows: gameConfig.rows 
+    });
     
     // Detener giro después de un retraso (escalonado para efecto visual)
     setTimeout(() => {
