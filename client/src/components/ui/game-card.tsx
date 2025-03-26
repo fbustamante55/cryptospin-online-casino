@@ -13,7 +13,7 @@ interface GameCardProps {
     color: "primary" | "secondary" | "tertiary";
   };
   rating?: number;
-  gameType: "slots" | "dice" | "crash" | "roulette" | "blackjack" | "baccarat";
+  gameType: "slots" | "dice" | "crash" | "roulette" | "blackjack" | "baccarat" | "keno";
   gameId?: string;
   className?: string;
 }
@@ -198,6 +198,60 @@ export function GameCard({
               <text x="450" y="285" textAnchor="middle" fill="#fff" fontSize="16">PLAYER</text>
               <text x="280" y="285" textAnchor="middle" fill="#fff" fontSize="16">TIE</text>
               <text x="530" y="285" textAnchor="middle" fill="#fff" fontSize="16">PAIR</text>
+            </>
+          )}
+          
+          {gameType === 'keno' && (
+            <>
+              <rect x="200" y="100" width="400" height="250" rx="10" fill="#0F1923" stroke="#333" strokeWidth="3"/>
+              
+              {/* Keno Board */}
+              <rect x="250" y="120" width="300" height="180" rx="5" fill="#222" stroke="#444" strokeWidth="2"/>
+              
+              {/* Numbers grid - 5x8 */}
+              {[...Array(40)].map((_, i) => {
+                const row = Math.floor(i / 10);
+                const col = i % 10;
+                const x = 270 + col * 26;
+                const y = 140 + row * 34;
+                const isSelected = [3, 12, 17, 24, 33, 38].includes(i);
+                const isWinner = [3, 17, 33].includes(i);
+                
+                return (
+                  <>
+                    <rect 
+                      key={`rect-${i}`}
+                      x={x} 
+                      y={y} 
+                      width="24" 
+                      height="24" 
+                      rx="2"
+                      fill={isSelected ? (isWinner ? "#09b66d" : "#F9C846") : "#333"}
+                      stroke="#444"
+                      strokeWidth="1"
+                    />
+                    <text 
+                      key={`text-${i}`}
+                      x={x + 12} 
+                      y={y + 16} 
+                      textAnchor="middle" 
+                      fill="#fff" 
+                      fontSize="12"
+                      fontWeight={isSelected ? "bold" : "normal"}
+                    >
+                      {i + 1}
+                    </text>
+                  </>
+                );
+              })}
+              
+              {/* Information panel */}
+              <rect x="250" y="310" width="300" height="30" rx="3" fill="#333" stroke="#444" strokeWidth="1"/>
+              <text x="400" y="330" textAnchor="middle" fill="#fff" fontSize="14">SELECCIONA 2-10 NÚMEROS</text>
+              
+              {/* Draw results */}
+              <rect x="270" y="100" width="260" height="30" rx="3" fill="#09b66d" stroke="#444" strokeWidth="1"/>
+              <text x="400" y="120" textAnchor="middle" fill="#fff" fontSize="14">KENO AMERICANO</text>
             </>
           )}
         </svg>

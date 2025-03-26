@@ -70,6 +70,19 @@ export default function CasinoGamesPage() {
       rating: 4.7
     },
     {
+      id: "g11",
+      title: t("games.keno_title") || "Keno Americano",
+      description: t("games.keno_description") || "Selecciona números y gana con coincidencias en este clásico juego de lotería.",
+      image: "/images/games/keno.webp",
+      gameType: "keno",
+      new: true,
+      tag: {
+        text: "NUEVO",
+        color: "tertiary"
+      },
+      rating: 4.5
+    },
+    {
       id: "g3",
       title: t("games.dice_title"),
       description: t("games.dice_description"),
@@ -133,17 +146,12 @@ export default function CasinoGamesPage() {
     },
     {
       id: "g9",
-      title: t("games.keno_title") || "American Keno",
-      description: t("games.keno_description") || "Seleccione números y obtenga premios en este clásico juego de lotería",
-      image: "/images/games/keno.webp", 
-      gameType: "keno",
-      new: true,
-      featured: true,
-      tag: {
-        text: "NUEVO",
-        color: "primary"
-      },
-      rating: 4.7
+      title: t("games.slots_oriental_title") || "Oriental Fortune",
+      description: t("games.slots_oriental_description") || "Descubre los tesoros orientales en esta tragamonedas llena de simbolismos y cultura asiática",
+      image: "/images/games/slots4.webp", 
+      gameType: "slots",
+      gameId: "oriental-fortune",
+      rating: 4.3
     }
   ];
 
@@ -178,6 +186,8 @@ export default function CasinoGamesPage() {
         return "/baccarat";
       case "slots":
         return `/slots${game.gameId ? `/${game.gameId}` : ''}`;
+      case "keno":
+        return "/keno";
       default:
         return "/";
     }
@@ -200,6 +210,8 @@ export default function CasinoGamesPage() {
         return <TrendingUp className="h-4 w-4 mr-2" />;
       case "roulette":
         return <Coins className="h-4 w-4 mr-2" />;
+      case "keno":
+        return <Star className="h-4 w-4 mr-2" />;
       default:
         return null;
     }
@@ -261,6 +273,9 @@ export default function CasinoGamesPage() {
               </TabsTrigger>
               <TabsTrigger value="roulette" className="data-[state=active]:bg-[#09b66d]">
                 {t("games.roulette")}
+              </TabsTrigger>
+              <TabsTrigger value="keno" className="data-[state=active]:bg-[#09b66d]">
+                {t("games.keno") || "Keno"}
               </TabsTrigger>
             </TabsList>
           </Tabs>
