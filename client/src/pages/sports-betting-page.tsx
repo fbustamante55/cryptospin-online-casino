@@ -311,7 +311,7 @@ export default function SportsBettingPage() {
   
   // Extract unique sport groups for the categories (use filtered or all based on filters)
   const sportGroups = Object.keys(
-    showLiveEvents || showUpcomingEvents || showTomorrowEvents || showFavorites
+    showUpcomingEvents || showTomorrowEvents || showFavorites
       ? filteredSportsByGroup
       : sportsByGroup
   ).slice(0, 8);
@@ -385,17 +385,16 @@ export default function SportsBettingPage() {
     }
   ];
   
-  // Filter events based on live/upcoming status, favorites, tomorrow's events, and selected sport
+  // Filter events based on upcoming status, favorites, tomorrow's events, and selected sport
   const filteredByStatus = displayEvents?.filter(event => {
-    // First filter by event status (live, upcoming, favorites, tomorrow)
+    // First filter by event status (upcoming, favorites, tomorrow)
     const passesStatusFilter = 
-      (showLiveEvents && isEventLive(event)) ||
       (showUpcomingEvents && !isEventLive(event)) ||
       (showFavorites && favoriteEvents?.some(favorite => 
         favorite.gameType === 'sports' && favorite.gameId === event.id
       )) ||
       (showTomorrowEvents && isEventTomorrow(event)) ||
-      (!showLiveEvents && !showUpcomingEvents && !showFavorites && !showTomorrowEvents);
+      (!showUpcomingEvents && !showFavorites && !showTomorrowEvents);
     
     // Then filter by selected sport if any
     const passesSportFilter = 
@@ -578,7 +577,6 @@ export default function SportsBettingPage() {
                   } transition-all duration-200`}
                   onClick={() => {
                     setShowFavorites(true);
-                    setShowLiveEvents(false);
                     setShowUpcomingEvents(false);
                     setShowTomorrowEvents(false);
                     localStorage.setItem('sportsFilter', 'favorites');
@@ -599,7 +597,6 @@ export default function SportsBettingPage() {
                   onClick={() => {
                     setShowUpcomingEvents(true);
                     setShowFavorites(false);
-                    setShowLiveEvents(false);
                     setShowTomorrowEvents(false);
                     localStorage.setItem('sportsFilter', 'upcoming');
                   }}
