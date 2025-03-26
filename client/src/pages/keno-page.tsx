@@ -33,26 +33,26 @@ export default function KenoPage() {
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                 <Crown className="h-5 w-5 text-[#F9C846] mr-2" />
-                {t("about_keno")}
+                {t("keno.about_keno")}
               </h3>
               <div className="space-y-4 text-gray-300">
-                <p>{t("keno_description_1")}</p>
-                <p>{t("keno_description_2")}</p>
+                <p>{t("keno.keno_description_1")}</p>
+                <p>{t("keno.keno_description_2")}</p>
                 
                 <div className="mt-4">
-                  <h4 className="font-medium text-white mb-2">{t("how_to_play")}</h4>
+                  <h4 className="font-medium text-white mb-2">{t("keno.how_to_play")}</h4>
                   <ol className="list-decimal list-inside space-y-1 text-sm text-gray-400">
-                    <li>{t("keno_how_to_1")}</li>
-                    <li>{t("keno_how_to_2")}</li>
-                    <li>{t("keno_how_to_3")}</li>
-                    <li>{t("keno_how_to_4")}</li>
+                    <li>{t("keno.keno_how_to_1")}</li>
+                    <li>{t("keno.keno_how_to_2")}</li>
+                    <li>{t("keno.keno_how_to_3")}</li>
+                    <li>{t("keno.keno_how_to_4")}</li>
                   </ol>
                 </div>
                 
                 <div>
-                  <h4 className="font-medium text-white mb-2">{t("keno_payouts")}</h4>
+                  <h4 className="font-medium text-white mb-2">{t("keno.keno_payouts")}</h4>
                   <p className="text-sm text-gray-400">
-                    {t("keno_payouts_description")}
+                    {t("keno.keno_payouts_description")}
                   </p>
                 </div>
               </div>
@@ -64,7 +64,7 @@ export default function KenoPage() {
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                 <Calendar className="h-5 w-5 text-[#F9C846] mr-2" />
-                {t("recent_games")}
+                {t("keno.recent_games")}
               </h3>
               
               {gameHistory && gameHistory.length > 0 ? (
@@ -94,7 +94,7 @@ export default function KenoPage() {
                             </div>
                             <div className="flex items-center justify-end mt-1">
                               <span className="text-xs text-gray-400 mr-2">
-                                {outcome.matches} {t("matches")}
+                                {outcome.matches} {t("keno.matches")}
                               </span>
                               <TrendingUp className={`h-3 w-3 ${game.win ? 'text-[#09B66D]' : 'text-red-500'}`} />
                             </div>
@@ -107,7 +107,7 @@ export default function KenoPage() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <Calendar className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                  <p>{t("no_recent_games")}</p>
+                  <p>{t("keno.no_recent_games")}</p>
                 </div>
               )}
             </CardContent>
