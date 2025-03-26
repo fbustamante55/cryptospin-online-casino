@@ -264,41 +264,63 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
         </Button>
         
         {/* Encabezado del evento */}
-        <div className="bg-[#0e1824] border-b border-[#1c2b3a] px-4 py-3 flex justify-between items-center">
+        <div className="bg-[#111A29] border-b border-[#1c2b3a] px-4 py-2 flex justify-between items-center">
           <div className="flex items-center">
             <span className="text-xs font-medium text-gray-400">{sportTitle || event.sport_key}</span>
             {isLiveEvent() && (
-              <Badge className="ml-2 bg-red-600 text-white text-xs">
+              <Badge className="ml-2 bg-red-600 text-white text-xs py-0 px-1.5 h-4">
                 En Vivo
               </Badge>
             )}
+            {isLiveEvent() && (
+              <Badge className="ml-2 bg-transparent text-white text-xs border-[#1c2b3a] py-0 px-1.5 h-4">
+                2do Set
+              </Badge>
+            )}
           </div>
-          {event.commence_time && !isLiveEvent() && (
-            <Badge variant="outline" className="text-xs bg-transparent">
-              {formatEventDate(event.commence_time)}
-            </Badge>
-          )}
+          <div className="flex items-center">
+            {event.commence_time && !isLiveEvent() && (
+              <Badge variant="outline" className="text-xs bg-transparent border-[#1c2b3a] py-0 px-1.5 h-5">
+                {formatEventDate(event.commence_time)}
+              </Badge>
+            )}
+            {isLiveEvent() && (
+              <Badge variant="outline" className="ml-2 text-xs bg-transparent border-[#1c2b3a] py-0 px-1.5 h-5">
+                Ganador
+              </Badge>
+            )}
+          </div>
         </div>
         
         {/* Cuerpo principal del evento */}
-        <div className="p-4">
+        <div className="p-3">
           {/* Título del partido con diseño similar a la imagen de referencia */}
           <div className="flex flex-col mb-4">
-            <div className="bg-[#182531] px-3 py-2 rounded-t mb-1">
-              <div className="flex flex-row justify-between items-center">
-                <div className="text-sm font-medium">{event.home_team}</div>
-                <div className="text-sm font-medium text-gray-400">
-                  {isLiveEvent() && <span className="text-white bg-[#282e39] px-2 py-1 rounded mr-2">1</span>}
-                </div>
+            {/* Primera fila - equipo local y puntuación */}
+            <div className="flex justify-between items-center mb-1.5">
+              <div className="flex items-center text-sm font-medium">
+                {isLiveEvent() && <span className="inline-block h-2 w-2 bg-green-500 rounded-full mr-2"></span>}
+                <span>{event.home_team}</span>
               </div>
+              {isLiveEvent() && (
+                <div className="font-mono flex items-center space-x-2">
+                  <span className="bg-[#192531] px-2 py-1 text-white text-xs rounded">5</span>
+                  <span className="bg-[#0e1824] px-2 py-1 text-white text-xs rounded">1</span>
+                </div>
+              )}
             </div>
-            <div className="bg-[#182531] px-3 py-2 rounded-b">
-              <div className="flex flex-row justify-between items-center">
-                <div className="text-sm font-medium">{event.away_team}</div>
-                <div className="text-sm font-medium text-gray-400">
-                  {isLiveEvent() && <span className="text-white bg-[#282e39] px-2 py-1 rounded mr-2">0</span>}
-                </div>
+            
+            {/* Segunda fila - equipo visitante y puntuación */}
+            <div className="flex justify-between items-center">
+              <div className="text-sm font-medium">
+                {event.away_team}
               </div>
+              {isLiveEvent() && (
+                <div className="font-mono flex items-center space-x-2">
+                  <span className="bg-[#192531] px-2 py-1 text-white text-xs rounded">6</span>
+                  <span className="bg-[#0e1824] px-2 py-1 text-white text-xs rounded">0</span>
+                </div>
+              )}
             </div>
           </div>
           
@@ -321,36 +343,38 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                 </Tooltip>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {homeOdds && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
+                      className={`rounded text-sm font-bold transition-colors relative overflow-hidden ${
                         isSelectionInBetSlip(event.home_team, 'moneyline')
                           ? 'bg-[#09b66d] text-white'
                           : 'bg-[#182531] hover:bg-[#1e2d3d]'
                       }`}
                       onClick={() => handleBetClick(event.home_team, homeOdds.price, 'moneyline')}
                     >
-                      <div className="flex justify-between">
-                        <span className="text-gray-200">{event.home_team}</span>
-                        <span className={`${homeOdds.price < 0 ? 'text-red-400' : 'text-green-400'} font-bold`}>
-                          {formatAmericanOdds(homeOdds.price)}
-                        </span>
+                      <div className="flex flex-col h-full p-2">
+                        <div className="flex justify-center items-center">
+                          <span className={`text-lg font-bold ${homeOdds.price < 0 ? 'text-red-400' : 'text-green-400'} ${isSelectionInBetSlip(event.home_team, 'moneyline') ? 'text-white' : ''}`}>
+                            {formatAmericanOdds(homeOdds.price)}
+                          </span>
+                        </div>
+                        <div className="text-center mt-1">
+                          <span className={`text-[10px] ${isSelectionInBetSlip(event.home_team, 'moneyline') ? 'text-white/80' : 'text-gray-400'}`}>
+                            {event.home_team}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-left mt-1">
-                        <span className="text-[10px] text-gray-400">
-                          Probabilidad: {(oddsToImpliedProbability(homeOdds.price) * 100).toFixed(1)}%
-                        </span>
-                      </div>
+                      <div className="absolute bottom-0 left-0 w-full h-1 bg-[#1c2b3a]"></div>
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="top">
                     <p className="text-xs">
                       {homeOdds.price > 0 
-                        ? `Ganarías $${homeOdds.price} por cada $100 apostados` 
-                        : `Necesitas apostar $${Math.abs(homeOdds.price)} para ganar $100`}
+                        ? `+${formatAmericanOdds(homeOdds.price)}: Ganarías $${homeOdds.price} por cada $100 apostados` 
+                        : `-${formatAmericanOdds(homeOdds.price)}: Necesitas apostar $${Math.abs(homeOdds.price)} para ganar $100`}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -360,31 +384,33 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
+                      className={`rounded text-sm font-bold transition-colors relative overflow-hidden ${
                         isSelectionInBetSlip(event.away_team, 'moneyline')
                           ? 'bg-[#09b66d] text-white'
                           : 'bg-[#182531] hover:bg-[#1e2d3d]'
                       }`}
                       onClick={() => handleBetClick(event.away_team, awayOdds.price, 'moneyline')}
                     >
-                      <div className="flex justify-between">
-                        <span className="text-gray-200">{event.away_team}</span>
-                        <span className={`${awayOdds.price < 0 ? 'text-red-400' : 'text-green-400'} font-bold`}>
-                          {formatAmericanOdds(awayOdds.price)}
-                        </span>
+                      <div className="flex flex-col h-full p-2">
+                        <div className="flex justify-center items-center">
+                          <span className={`text-lg font-bold ${awayOdds.price < 0 ? 'text-red-400' : 'text-green-400'} ${isSelectionInBetSlip(event.away_team, 'moneyline') ? 'text-white' : ''}`}>
+                            {formatAmericanOdds(awayOdds.price)}
+                          </span>
+                        </div>
+                        <div className="text-center mt-1">
+                          <span className={`text-[10px] ${isSelectionInBetSlip(event.away_team, 'moneyline') ? 'text-white/80' : 'text-gray-400'}`}>
+                            {event.away_team}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-left mt-1">
-                        <span className="text-[10px] text-gray-400">
-                          Probabilidad: {(oddsToImpliedProbability(awayOdds.price) * 100).toFixed(1)}%
-                        </span>
-                      </div>
+                      <div className="absolute bottom-0 left-0 w-full h-1 bg-[#1c2b3a]"></div>
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="top">
                     <p className="text-xs">
                       {awayOdds.price > 0 
-                        ? `Ganarías $${awayOdds.price} por cada $100 apostados` 
-                        : `Necesitas apostar $${Math.abs(awayOdds.price)} para ganar $100`}
+                        ? `+${formatAmericanOdds(awayOdds.price)}: Ganarías $${awayOdds.price} por cada $100 apostados` 
+                        : `-${formatAmericanOdds(awayOdds.price)}: Necesitas apostar $${Math.abs(awayOdds.price)} para ganar $100`}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -394,31 +420,33 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
+                      className={`rounded text-sm font-bold transition-colors relative overflow-hidden ${
                         isSelectionInBetSlip('Draw', 'moneyline')
                           ? 'bg-[#09b66d] text-white'
                           : 'bg-[#182531] hover:bg-[#1e2d3d]'
                       }`}
                       onClick={() => handleBetClick('Draw', drawOdds.price, 'moneyline')}
                     >
-                      <div className="flex justify-between">
-                        <span className="text-gray-200">Empate</span>
-                        <span className={`${drawOdds.price < 0 ? 'text-red-400' : 'text-yellow-400'} font-bold`}>
-                          {formatAmericanOdds(drawOdds.price)}
-                        </span>
+                      <div className="flex flex-col h-full p-2">
+                        <div className="flex justify-center items-center">
+                          <span className={`text-lg font-bold ${drawOdds.price < 0 ? 'text-red-400' : 'text-yellow-400'} ${isSelectionInBetSlip('Draw', 'moneyline') ? 'text-white' : ''}`}>
+                            {formatAmericanOdds(drawOdds.price)}
+                          </span>
+                        </div>
+                        <div className="text-center mt-1">
+                          <span className={`text-[10px] ${isSelectionInBetSlip('Draw', 'moneyline') ? 'text-white/80' : 'text-gray-400'}`}>
+                            Empate
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-left mt-1">
-                        <span className="text-[10px] text-gray-400">
-                          Probabilidad: {(oddsToImpliedProbability(drawOdds.price) * 100).toFixed(1)}%
-                        </span>
-                      </div>
+                      <div className="absolute bottom-0 left-0 w-full h-1 bg-[#1c2b3a]"></div>
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="top">
                     <p className="text-xs">
                       {drawOdds.price > 0 
-                        ? `Ganarías $${drawOdds.price} por cada $100 apostados en empate` 
-                        : `Necesitas apostar $${Math.abs(drawOdds.price)} para ganar $100 en empate`}
+                        ? `+${formatAmericanOdds(drawOdds.price)}: Ganarías $${drawOdds.price} por cada $100 apostados en empate` 
+                        : `-${formatAmericanOdds(drawOdds.price)}: Necesitas apostar $${Math.abs(drawOdds.price)} para ganar $100 en empate`}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -446,7 +474,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                   </Tooltip>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {spreadMarket.outcomes.map((outcome, index) => {
                   const isHome = outcome.name === event.home_team;
                   const point = outcome.point;
@@ -456,7 +484,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                     <Tooltip key={index}>
                       <TooltipTrigger asChild>
                         <button 
-                          className={`px-4 py-3 rounded text-sm font-bold transition-colors ${
+                          className={`rounded text-sm font-bold transition-colors relative overflow-hidden ${
                             isSelectionInBetSlip(outcome.name, 'spread')
                               ? 'bg-[#09b66d] text-white'
                               : 'bg-[#182531] hover:bg-[#1e2d3d]'
@@ -465,25 +493,29 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                             handleBetClick(outcome.name, outcome.price, 'spread', outcome.point);
                           }}
                         >
-                          <div className="flex justify-between">
-                            <span className="text-gray-200">{outcome.name}</span>
-                            <span className="text-blue-400 font-bold">{pointStr}</span>
-                          </div>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-[10px] text-gray-400">
-                              {point && point > 0 ? 'Ventaja' : 'Desventaja'}
-                            </span>
-                            <span className="text-gray-400">
+                          <div className="flex flex-col h-full p-2">
+                            <div className="flex justify-center items-center">
+                              <span className={`text-lg font-bold text-blue-400 ${isSelectionInBetSlip(outcome.name, 'spread') ? 'text-white' : ''}`}>
+                                {pointStr}
+                              </span>
+                            </div>
+                            <div className="text-center mt-1">
+                              <span className={`text-[10px] ${isSelectionInBetSlip(outcome.name, 'spread') ? 'text-white/80' : 'text-gray-400'}`}>
+                                {outcome.name}
+                              </span>
+                            </div>
+                            <div className={`text-center text-[10px] ${isSelectionInBetSlip(outcome.name, 'spread') ? 'text-white/80' : 'text-gray-400'}`}>
                               {formatAmericanOdds(outcome.price)}
-                            </span>
+                            </div>
                           </div>
+                          <div className="absolute bottom-0 left-0 w-full h-1 bg-[#1c2b3a]"></div>
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="top">
                         <p className="text-xs">
                           {point && point > 0 
-                            ? `${outcome.name} recibe ${point} puntos de ventaja` 
-                            : `${outcome.name} da ${Math.abs(point || 0)} puntos`}
+                            ? `${outcome.name} recibe ${point} puntos de ventaja (${formatAmericanOdds(outcome.price)})` 
+                            : `${outcome.name} da ${Math.abs(point || 0)} puntos (${formatAmericanOdds(outcome.price)})`}
                         </p>
                       </TooltipContent>
                     </Tooltip>
