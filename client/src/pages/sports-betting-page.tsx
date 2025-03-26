@@ -601,7 +601,16 @@ export default function SportsBettingPage() {
                     </div>
                     <span className="text-xs font-semibold">Todo</span>
                     <span className="text-xs font-bold text-white">
-                      {displayEvents?.filter(event => isEventLive(event)).length || 0}
+                      {showLiveEvents
+                        ? displayEvents?.filter(event => isEventLive(event)).length || 0
+                        : showUpcomingEvents
+                          ? displayEvents?.filter(event => !isEventLive(event)).length || 0
+                          : showTomorrowEvents
+                            ? displayEvents?.filter(event => isEventTomorrow(event)).length || 0
+                            : showFavorites
+                              ? favoriteEvents?.length || 0
+                              : displayEvents?.length || 0
+                      }
                     </span>
                   </div>
                   
@@ -612,10 +621,35 @@ export default function SportsBettingPage() {
                     const isActive = activeSport === sport.key;
                     const color = getSportColor(sport.group);
                     
-                    // Contar eventos en vivo para este deporte
-                    const liveEventsCount = displayEvents?.filter(event => 
-                      event.sport_key === sport.key && isEventLive(event)
-                    )?.length || 0;
+                    // Contar eventos para este deporte según el filtro activo
+                    let eventsCount = 0;
+                    
+                    if (showLiveEvents) {
+                      // Contar eventos en vivo para este deporte
+                      eventsCount = displayEvents?.filter(event => 
+                        event.sport_key === sport.key && isEventLive(event)
+                      )?.length || 0;
+                    } else if (showUpcomingEvents) {
+                      // Contar eventos próximos para este deporte
+                      eventsCount = displayEvents?.filter(event => 
+                        event.sport_key === sport.key && !isEventLive(event)
+                      )?.length || 0;
+                    } else if (showTomorrowEvents) {
+                      // Contar eventos de mañana para este deporte
+                      eventsCount = displayEvents?.filter(event => 
+                        event.sport_key === sport.key && isEventTomorrow(event)
+                      )?.length || 0;
+                    } else if (showFavorites) {
+                      // Contar eventos favoritos para este deporte
+                      eventsCount = favoriteEvents?.filter(event => 
+                        event.sport_key === sport.key
+                      )?.length || 0;
+                    } else {
+                      // Si no hay filtro activo, mostrar todos los eventos
+                      eventsCount = displayEvents?.filter(event => 
+                        event.sport_key === sport.key
+                      )?.length || 0;
+                    }
                     
                     return (
                       <div 
@@ -649,7 +683,7 @@ export default function SportsBettingPage() {
                           )}
                         </div>
                         <span className="text-xs font-semibold">{sport.title}</span>
-                        <span className="text-xs font-bold text-white">{liveEventsCount}</span>
+                        <span className="text-xs font-bold text-white">{eventsCount}</span>
                       </div>
                     );
                   })}
