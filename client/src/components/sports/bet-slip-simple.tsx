@@ -35,7 +35,10 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
   const { toast } = useToast();
   const [betAmount, setBetAmount] = useState<string>("1.00");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(() => {
+    // Inicializar con el valor del localStorage o usar un valor predeterminado (USDT)
+    return localStorage.getItem('selectedCurrency') || "USDT";
+  });
   
   // Obtener la moneda seleccionada del localStorage cuando se monta el componente
   useEffect(() => {

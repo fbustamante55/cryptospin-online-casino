@@ -40,7 +40,10 @@ export default function SportsBettingPage() {
   const [showTomorrowEvents, setShowTomorrowEvents] = useState<boolean>(localStorage.getItem('sportsFilter') === 'tomorrow');
   const [activeTab, setActiveTab] = useState<string>("misBoletos");
   const [isWalletOpen, setIsWalletOpen] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('USDT');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(() => {
+    // Inicializar con el valor del localStorage o usar un valor predeterminado (USDT)
+    return localStorage.getItem('selectedCurrency') || 'USDT';
+  });
   
   // Lista de criptomonedas disponibles con su valor
   const currencies = [
@@ -58,6 +61,15 @@ export default function SportsBettingPage() {
   
   // Obtener la moneda seleccionada
   const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[3]; // USDT por defecto
+  
+  // Efecto para guardar la moneda seleccionada en localStorage y emitir evento
+  useEffect(() => {
+    localStorage.setItem('selectedCurrency', selectedCurrency);
+    
+    // Emitir evento para que otros componentes se actualicen
+    const event = new CustomEvent('currencyChanged', { detail: selectedCurrency });
+    document.dispatchEvent(event);
+  }, [selectedCurrency]);
   
   // Función para formatear el estado de las apuestas para mostrar en UI
   const formatOddStatus = (status: string): string => {
