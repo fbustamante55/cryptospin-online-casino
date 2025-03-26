@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 
 interface RouletteWheelProps {
   spinning: boolean;
@@ -26,11 +26,14 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
   const [result, setResult] = useState<number | null>(null);
   const [showBall, setShowBall] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  const [glowIntensity, setGlowIntensity] = useState(0);
+  const [glowColor, setGlowColor] = useState('rgba(0, 255, 170, 0.6)');
   const wheelRef = useRef<HTMLDivElement>(null);
   const ballTrackRef = useRef<HTMLDivElement>(null);
   const ballRef = useRef<HTMLDivElement>(null);
   const spinningRef = useRef(false);
   const timerRef = useRef<NodeJS.Timeout[]>([]);
+  const glowControls = useAnimationControls();
 
   // Limpiar temporizadores al desmontar
   useEffect(() => {
@@ -39,9 +42,58 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
     };
   }, []);
 
+  // Efecto de iluminación ambiental pulsante
+  useEffect(() => {
+    // Animar el resplandor de la rueda con un efecto pulsante
+    const pulseAnimation = async () => {
+      await glowControls.start({
+        boxShadow: [
+          `0 0 30px 5px rgba(0, 255, 170, 0.4)`,
+          `0 0 70px 10px rgba(0, 255, 170, 0.6)`,
+          `0 0 50px 8px rgba(0, 255, 170, 0.5)`,
+          `0 0 30px 5px rgba(0, 255, 170, 0.4)`,
+        ],
+        transition: {
+          duration: 4,
+          ease: "easeInOut",
+          repeat: Infinity,
+          repeatType: "loop",
+        }
+      });
+    };
+    
+    pulseAnimation();
+    
+    // Cambiar color del resplandor aleatoriamente
+    const interval = setInterval(() => {
+      // Colores temáticos del casino
+      const colors = [
+        'rgba(0, 255, 170, 0.6)',    // Verde turquesa (CryptoSpin)
+        'rgba(255, 50, 50, 0.5)',    // Rojo
+        'rgba(50, 50, 255, 0.5)',    // Azul
+        'rgba(255, 180, 0, 0.5)',    // Dorado
+        'rgba(180, 0, 255, 0.5)',    // Púrpura
+      ];
+      
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      setGlowColor(randomColor);
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   // Detectar cambios en el estado de spinning
   useEffect(() => {
     if (spinning && !spinningRef.current) {
+      // Aumentar intensidad de brillo durante el giro
+      setGlowIntensity(2);
+      
+      // Restaurar brillo normal al terminar
+      const timer = setTimeout(() => {
+        setGlowIntensity(0);
+      }, 8500);
+      timerRef.current.push(timer);
+      
       spinWheel();
     }
   }, [spinning]);
@@ -154,119 +206,135 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
 
   // Obtener el color del resultado para la visualización
   const resultColor = result !== null ? getNumberColor(result) : 'black';
+  
+  // Calcular el valor del resplandor basado en la intensidad y color actuales
+  const glowValue = glowIntensity === 2 
+    ? `0 0 80px 15px ${glowColor}, 0 0 120px 30px ${glowColor.replace(')', ', 0.3)')}` 
+    : `0 0 30px 5px ${glowColor}`;
 
   return (
-    <Card className={cn("relative w-full max-w-xl aspect-square overflow-hidden rounded-full mx-auto", className)}>
-      <div className="wheel-container absolute inset-0 flex items-center justify-center">
-        {/* Borde exterior y canaleta */}
-        <div className="absolute w-[98%] h-[98%] rounded-full bg-gradient-to-br from-[#863e08] to-[#421f04] border-8 border-[#6b3100] flex items-center justify-center">
-          {/* Canaleta para la bola (parte externa) */}
-          <div className="absolute w-[93%] h-[93%] rounded-full bg-[#1e2a0e] border-4 border-[#341808] flex items-center justify-center">
-            <div className="absolute w-[99%] h-[99%] rounded-full border-b-8 border-r-8 border-l-8 border-t-4 border-black/20 opacity-40"></div>
-          </div>
-          
-          {/* Líneas de separación en la canaleta */}
-          <div className="absolute w-[94%] h-[94%] rounded-full">
-            {Array.from({ length: 37 }).map((_, i) => (
-              <div 
-                key={`divider-${i}`}
-                className="absolute w-0.5 h-[4%] bg-[#341808]/70 left-1/2 top-0 origin-bottom"
-                style={{ transform: `translateX(-50%) rotate(${i * (360 / 37)}deg)` }}
-              ></div>
-            ))}
-          </div>
-          
-          {/* Rueda principal */}
-          <div 
-            ref={wheelRef}
-            className="absolute w-[85%] h-[85%] rounded-full bg-[#172204] border-4 border-[#341808] flex items-center justify-center"
-            style={{ transform: 'rotate(0deg)' }}
-          >
-            {/* Pockets (casillas para los números) */}
-            {WHEEL_NUMBERS.map((number, index) => {
-              const angle = (index * (360 / 37)) - 90;
-              const isRed = RED_NUMBERS.includes(number);
-              const isGreen = number === 0;
+    <div className={cn("relative w-full max-w-xl aspect-square mx-auto", className)}>
+      <motion.div 
+        animate={glowControls}
+        className="w-full h-full rounded-full"
+        style={{
+          boxShadow: glowValue,
+          transition: "box-shadow 0.5s ease-in-out"
+        }}
+      >
+        <Card className="w-full h-full overflow-hidden rounded-full">
+          <div className="wheel-container absolute inset-0 flex items-center justify-center">
+            {/* Borde exterior y canaleta */}
+            <div className="absolute w-[98%] h-[98%] rounded-full bg-gradient-to-br from-[#863e08] to-[#421f04] border-8 border-[#6b3100] flex items-center justify-center">
+              {/* Canaleta para la bola (parte externa) */}
+              <div className="absolute w-[93%] h-[93%] rounded-full bg-[#1e2a0e] border-4 border-[#341808] flex items-center justify-center">
+                <div className="absolute w-[99%] h-[99%] rounded-full border-b-8 border-r-8 border-l-8 border-t-4 border-black/20 opacity-40"></div>
+              </div>
               
-              return (
-                <div 
-                  key={`pocket-${index}`}
-                  className="absolute h-[47%] origin-bottom"
-                  style={{ transform: `rotate(${angle}deg)` }}
-                >
-                  {/* Sector triangular de cada número */}
+              {/* Líneas de separación en la canaleta */}
+              <div className="absolute w-[94%] h-[94%] rounded-full">
+                {Array.from({ length: 37 }).map((_, i) => (
                   <div 
-                    className={cn(
-                      "h-full w-[15px] rounded-t-sm",
-                      isRed ? "bg-gradient-to-t from-[#d10000] to-[#ff2424]" : 
-                      isGreen ? "bg-gradient-to-t from-[#006400] to-[#009600]" : 
-                      "bg-gradient-to-t from-[#000000] to-[#333333]"
-                    )}
-                  >
-                    {/* Separadores metálicos entre números */}
-                    <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64]"></div>
-                    <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64]"></div>
-                    
-                    {/* Número */}
+                    key={`divider-${i}`}
+                    className="absolute w-0.5 h-[4%] bg-[#341808]/70 left-1/2 top-0 origin-bottom"
+                    style={{ transform: `translateX(-50%) rotate(${i * (360 / 37)}deg)` }}
+                  ></div>
+                ))}
+              </div>
+              
+              {/* Rueda principal */}
+              <div 
+                ref={wheelRef}
+                className="absolute w-[85%] h-[85%] rounded-full bg-[#172204] border-4 border-[#341808] flex items-center justify-center"
+                style={{ transform: 'rotate(0deg)' }}
+              >
+                {/* Pockets (casillas para los números) */}
+                {WHEEL_NUMBERS.map((number, index) => {
+                  const angle = (index * (360 / 37)) - 90;
+                  const isRed = RED_NUMBERS.includes(number);
+                  const isGreen = number === 0;
+                  
+                  return (
                     <div 
-                      className="absolute top-[8%] left-1/2 transform -translate-x-1/2 text-white font-bold text-sm w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ textShadow: '0px 1px 1px rgba(0,0,0,0.7)' }}
+                      key={`pocket-${index}`}
+                      className="absolute h-[47%] origin-bottom"
+                      style={{ transform: `rotate(${angle}deg)` }}
                     >
-                      {number}
+                      {/* Sector triangular de cada número */}
+                      <div 
+                        className={cn(
+                          "h-full w-[15px] rounded-t-sm",
+                          isRed ? "bg-gradient-to-t from-[#d10000] to-[#ff2424]" : 
+                          isGreen ? "bg-gradient-to-t from-[#006400] to-[#009600]" : 
+                          "bg-gradient-to-t from-[#000000] to-[#333333]"
+                        )}
+                      >
+                        {/* Separadores metálicos entre números */}
+                        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64]"></div>
+                        <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-[#b69f64] via-[#fcf3b6] to-[#b69f64]"></div>
+                        
+                        {/* Número */}
+                        <div 
+                          className="absolute top-[8%] left-1/2 transform -translate-x-1/2 text-white font-bold text-sm w-6 h-6 rounded-full flex items-center justify-center"
+                          style={{ textShadow: '0px 1px 1px rgba(0,0,0,0.7)' }}
+                        >
+                          {number}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Centro de la rueda (cono decorativo) */}
+                <div className="absolute w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#b69f64] to-[#8a7847] border-2 border-[#fcf3b6] flex items-center justify-center shadow-inner">
+                  <div className="w-[85%] h-[85%] rounded-full bg-gradient-to-br from-[#8a7847] to-[#524626] border border-[#b69f64] shadow-inner flex items-center justify-center">
+                    {/* Logo central */}
+                    <div className="w-[70%] h-[70%] rounded-full bg-gradient-to-br from-[#00FFAA]/90 to-[#00FFAA]/60 flex items-center justify-center">
+                      <span className="font-heading font-bold text-xl text-[#0F1923] tracking-wider">
+                        <span className="text-white">Crypto</span>Spin
+                      </span>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-            
-            {/* Centro de la rueda (cono decorativo) */}
-            <div className="absolute w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#b69f64] to-[#8a7847] border-2 border-[#fcf3b6] flex items-center justify-center shadow-inner">
-              <div className="w-[85%] h-[85%] rounded-full bg-gradient-to-br from-[#8a7847] to-[#524626] border border-[#b69f64] shadow-inner flex items-center justify-center">
-                {/* Logo central */}
-                <div className="w-[70%] h-[70%] rounded-full bg-gradient-to-br from-[#00FFAA]/90 to-[#00FFAA]/60 flex items-center justify-center">
-                  <span className="font-heading font-bold text-xl text-[#0F1923] tracking-wider">
-                    <span className="text-white">Crypto</span>Spin
-                  </span>
-                </div>
+              </div>
+              
+              {/* Pista de la bola */}
+              <div 
+                ref={ballTrackRef}
+                className="absolute w-[94%] h-[94%] rounded-full pointer-events-none"
+                style={{ transform: 'rotate(0deg)' }}
+              >
+                {/* Bola */}
+                <AnimatePresence>
+                  {showBall && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.2 }}
+                      ref={ballRef}
+                      className="absolute rounded-full bg-gradient-to-r from-[#e0e0e0] to-[#f5f5f5] z-20"
+                      style={{ 
+                        width: '14px',
+                        height: '14px',
+                        left: '50%', 
+                        top: '3%',
+                        transform: 'translate(-50%, -50%)',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.5), inset 0 -2px 2px rgba(0,0,0,0.2), inset 0 2px 2px rgba(255,255,255,0.8)' 
+                      }}
+                    ></motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              {/* Reflejo decorativo */}
+              <div className="absolute w-[98%] h-[98%] rounded-full overflow-hidden pointer-events-none">
+                <div className="absolute w-[200%] h-[100%] top-[-70%] left-[-50%] bg-white/5 transform rotate-[-20deg]"></div>
               </div>
             </div>
           </div>
-          
-          {/* Pista de la bola */}
-          <div 
-            ref={ballTrackRef}
-            className="absolute w-[94%] h-[94%] rounded-full pointer-events-none"
-            style={{ transform: 'rotate(0deg)' }}
-          >
-            {/* Bola */}
-            <AnimatePresence>
-              {showBall && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  transition={{ duration: 0.2 }}
-                  ref={ballRef}
-                  className="absolute rounded-full bg-gradient-to-r from-[#e0e0e0] to-[#f5f5f5] z-20"
-                  style={{ 
-                    width: '14px',
-                    height: '14px',
-                    left: '50%', 
-                    top: '3%',
-                    transform: 'translate(-50%, -50%)',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.5), inset 0 -2px 2px rgba(0,0,0,0.2), inset 0 2px 2px rgba(255,255,255,0.8)' 
-                  }}
-                ></motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          
-          {/* Reflejo decorativo */}
-          <div className="absolute w-[98%] h-[98%] rounded-full overflow-hidden pointer-events-none">
-            <div className="absolute w-[200%] h-[100%] top-[-70%] left-[-50%] bg-white/5 transform rotate-[-20deg]"></div>
-          </div>
-        </div>
-      </div>
+        </Card>
+      </motion.div>
       
       {/* Efecto de flash cuando se determina el resultado */}
       <AnimatePresence>
@@ -305,6 +373,6 @@ export function RouletteWheel({ spinning, onSpinComplete, className }: RouletteW
           </motion.div>
         )}
       </AnimatePresence>
-    </Card>
+    </div>
   );
 }
