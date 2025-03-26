@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -101,6 +101,16 @@ export const sportsBets = pgTable("sports_bets", {
   settledAt: timestamp("settled_at")
 });
 
+export const favorites = pgTable("favorites", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  gameType: text("game_type").notNull(), // slots, dice, crash, roulette, blackjack, baccarat, etc.
+  gameId: text("game_id"), // Specific game ID if needed (for multiple versions of the same game type)
+  gameTitle: text("game_title").notNull(), // Display name of the game
+  gameImage: text("game_image"), // Path to game image/thumbnail
+  addedAt: timestamp("added_at").notNull().defaultNow()
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   email: true,
@@ -167,6 +177,14 @@ export const insertSportsBetSchema = createInsertSchema(sportsBets).pick({
   status: true,
 });
 
+export const insertFavoriteSchema = createInsertSchema(favorites).pick({
+  userId: true,
+  gameType: true,
+  gameId: true,
+  gameTitle: true,
+  gameImage: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -186,6 +204,9 @@ export type SportsEvent = typeof sportsEvents.$inferSelect;
 
 export type InsertSportsBet = z.infer<typeof insertSportsBetSchema>;
 export type SportsBet = typeof sportsBets.$inferSelect;
+
+export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
+export type Favorite = typeof favorites.$inferSelect;
 
 // Auth schemas for login, password reset, etc.
 export const loginSchema = z.object({

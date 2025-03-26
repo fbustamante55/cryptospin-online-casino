@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument, sportsEvents, type SportsEvent, type InsertSportsEvent, sportsBets, type SportsBet, type InsertSportsBet } from "@shared/schema";
+import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument, sportsEvents, type SportsEvent, type InsertSportsEvent, sportsBets, type SportsBet, type InsertSportsBet, favorites, type Favorite, type InsertFavorite } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
