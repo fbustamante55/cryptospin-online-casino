@@ -1,5 +1,6 @@
 // The Odds API integration
-const API_KEY = '6f332c5566ae50fd96bdedfd4636deb2';
+// Usamos la API key de las variables de entorno
+// No accedemos directamente a process.env, sino que obtenemos la clave del servidor
 const BASE_URL = 'https://api.the-odds-api.com/v4';
 
 // Types for sports data
