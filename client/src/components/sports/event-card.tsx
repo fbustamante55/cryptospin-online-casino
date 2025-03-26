@@ -357,7 +357,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                     >
                       <div className="flex flex-col h-full p-2">
                         <div className="flex justify-center items-center">
-                          <span className={`text-lg font-bold ${homeOdds.price < 0 ? 'text-red-400' : 'text-green-400'} ${isSelectionInBetSlip(event.home_team, 'moneyline') ? 'text-white' : ''}`}>
+                          <span className={`text-lg font-bold text-green-400 ${isSelectionInBetSlip(event.home_team, 'moneyline') ? 'text-white' : ''}`}>
                             {formatAmericanOdds(homeOdds.price)}
                           </span>
                         </div>
@@ -391,7 +391,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                     >
                       <div className="flex flex-col h-full p-2">
                         <div className="flex justify-center items-center">
-                          <span className={`text-lg font-bold ${awayOdds.price < 0 ? 'text-red-400' : 'text-green-400'} ${isSelectionInBetSlip(event.away_team, 'moneyline') ? 'text-white' : ''}`}>
+                          <span className={`text-lg font-bold text-green-400 ${isSelectionInBetSlip(event.away_team, 'moneyline') ? 'text-white' : ''}`}>
                             {formatAmericanOdds(awayOdds.price)}
                           </span>
                         </div>
@@ -425,7 +425,7 @@ export function EventCard({ event, onAddSelection, selectedBets, sportTitle = ''
                     >
                       <div className="flex flex-col h-full p-2">
                         <div className="flex justify-center items-center">
-                          <span className={`text-lg font-bold ${drawOdds.price < 0 ? 'text-red-400' : 'text-yellow-400'} ${isSelectionInBetSlip('Draw', 'moneyline') ? 'text-white' : ''}`}>
+                          <span className={`text-lg font-bold text-green-400 ${isSelectionInBetSlip('Draw', 'moneyline') ? 'text-white' : ''}`}>
                             {formatAmericanOdds(drawOdds.price)}
                           </span>
                         </div>
