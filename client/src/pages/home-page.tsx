@@ -42,13 +42,13 @@ export default function HomePage() {
       gameType: "crash" as const
     },
     {
-      title: t("games.slots_50gems_title"),
-      description: t("games.slots_50gems_description"),
-      image: "/images/games/50gems.webp",
-      tag: { text: "Popular", color: "primary" as const },
-      rating: 4.8,
+      title: t("games.slots_book_of_egypt_title"),
+      description: t("games.slots_book_of_egypt_description"),
+      image: "/images/games/book-of-egypt.webp",
+      tag: { text: "HOT", color: "primary" as const },
+      rating: 4.9,
       gameType: "slots" as const,
-      gameId: "50gems"
+      gameId: "book-of-egypt"
     },
     {
       title: t("games.keno_title"),

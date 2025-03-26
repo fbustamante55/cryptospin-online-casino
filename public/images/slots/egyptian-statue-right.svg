@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="400" viewBox="0 0 120 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base de la estatua -->
+  <rect x="40" y="350" width="40" height="50" fill="#9c7e41" />
+  
+  <!-- Cuerpo de la estatua -->
+  <rect x="35" y="150" width="50" height="200" fill="#c7a95c" />
+  
+  <!-- Detalles del vestido egipcio -->
+  <path d="M35,150 L85,150 L85,350 L35,350 Z" fill="#c7a95c" stroke="#9c7e41" stroke-width="2" />
+  <path d="M35,180 L85,180" stroke="#9c7e41" stroke-width="3" />
+  <path d="M35,210 L85,210" stroke="#9c7e41" stroke-width="1" />
+  <path d="M35,240 L85,240" stroke="#9c7e41" stroke-width="1" />
+  <path d="M35,270 L85,270" stroke="#9c7e41" stroke-width="1" />
+  <path d="M35,300 L85,300" stroke="#9c7e41" stroke-width="1" />
+  <path d="M35,330 L85,330" stroke="#9c7e41" stroke-width="1" />
+  
+  <!-- Collar egipcio -->
+  <path d="M35,150 C 60,170 60,170 85,150" fill="#daa520" stroke="#b5873d" stroke-width="2" />
+  <path d="M40,155 C 60,170 60,170 80,155" fill="#daa520" stroke="#b5873d" stroke-width="1" />
+  
+  <!-- Brazos -->
+  <rect x="25" y="170" width="10" height="100" fill="#c7a95c" />
+  <rect x="85" y="170" width="10" height="100" fill="#c7a95c" />
+  
+  <!-- Cabeza de halcón -->
+  <ellipse cx="60" cy="100" rx="30" ry="40" fill="#c7a95c" />
+  <path d="M40,100 C 45,85 75,85 80,100" fill="#c7a95c" stroke="#9c7e41" stroke-width="1" />
+  
+  <!-- Máscara de halcón -->
+  <path d="M40,90 C 45,70 75,70 80,90" fill="#d4af37" stroke="#9c7e41" stroke-width="1" />
+  <path d="M40,90 L40,110 C 45,120 75,120 80,110 L80,90 C 75,100 45,100 40,90 Z" fill="#d4af37" stroke="#9c7e41" stroke-width="1" />
+  
+  <!-- Ojo de halcón -->
+  <ellipse cx="60" cy="100" rx="5" ry="7" fill="white" />
+  <ellipse cx="60" cy="100" rx="2" ry="4" fill="black" />
+  
+  <!-- Pico/Nariz -->
+  <path d="M60,107 L60,120 C 55,125 65,125 60,120 Z" fill="#9c7e41" />
+  
+  <!-- Antorchas/Iluminación -->
+  <circle cx="85" cy="170" r="8" fill="#f8df72" />
+  <circle cx="85" cy="170" r="5" fill="#f9a825" />
+  
+  <!-- Líneas de la vestimenta -->
+  <path d="M45,150 L45,350" stroke="#b5873d" stroke-width="1" stroke-dasharray="3,3" />
+  <path d="M60,150 L60,350" stroke="#b5873d" stroke-width="1" stroke-dasharray="3,3" />
+  <path d="M75,150 L75,350" stroke="#b5873d" stroke-width="1" stroke-dasharray="3,3" />
+  
+  <!-- Detalles en el tocado -->
+  <path d="M45,80 L45,90" stroke="#daa520" stroke-width="3" />
+  <path d="M75,80 L75,90" stroke="#daa520" stroke-width="3" />
+  <path d="M30,100 L35,95" stroke="#daa520" stroke-width="2" />
+  <path d="M90,100 L85,95" stroke="#daa520" stroke-width="2" />
+  
+  <!-- Detalles diferenciales (para distinguir de la estatua izquierda) -->
+  <path d="M60,130 L60,140" stroke="#d4af37" stroke-width="4" />
+  <path d="M95,180 L105,160" stroke="#c7a95c" stroke-width="5" />
+</svg>

@@ -88,12 +88,12 @@ export default function CasinoGamesPage() {
       image: "/images/games/book-of-egypt.webp",
       gameType: "slots",
       gameId: "book-of-egypt",
-      new: true,
+      featured: true,
       tag: {
-        text: t("games.new"),
-        color: "tertiary"
+        text: "HOT",
+        color: "primary"
       },
-      rating: 4.7
+      rating: 4.9
     },
     {
       id: "s4",
