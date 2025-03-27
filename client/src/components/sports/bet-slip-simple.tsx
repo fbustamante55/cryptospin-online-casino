@@ -9,6 +9,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
+// Constante para la apuesta mínima
+const APUESTA_MINIMA = 1.00;
+
 export interface BetSelection {
   id: string;
   eventId: string;
@@ -32,7 +35,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [betAmount, setBetAmount] = useState<string>("10");
+  const [betAmount, setBetAmount] = useState<string>(APUESTA_MINIMA.toFixed(2));
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState("betslip");
   
@@ -216,56 +219,25 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                   )}
                 </div>
                 
-                <div className="flex gap-2 mb-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
-                    onClick={() => setBetAmount("10")}
-                  >
-                    10
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
-                    onClick={() => setBetAmount("25")}
-                  >
-                    25
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
-                    onClick={() => setBetAmount("50")}
-                  >
-                    50
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
-                    onClick={() => setBetAmount("100")}
-                  >
-                    100
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="bg-[#1e2e4a] border-[#2a3b5a] text-white"
-                    onClick={() => setBetAmount((user?.balance || 0).toString())}
-                  >
-                    Max
-                  </Button>
-                </div>
+
                 
                 <div className="relative mb-4">
                   <Input 
                     type="number" 
                     value={betAmount} 
-                    onChange={(e) => setBetAmount(e.target.value)}
+                    onChange={(e) => {
+                      // Establecer mínimo de $1.00
+                      const value = parseFloat(e.target.value);
+                      if (value < APUESTA_MINIMA && value !== 0) {
+                        setBetAmount(APUESTA_MINIMA.toFixed(2));
+                      } else {
+                        setBetAmount(e.target.value);
+                      }
+                    }}
+                    min="1.00"
+                    step="0.01"
                     className="bg-[#1e2e4a] border-[#2a3b5a] text-white pr-16"
-                    placeholder="0"
+                    placeholder="1.00"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-white/70">
                     USD
@@ -280,7 +252,7 @@ export function BetSlip({ selections, onRemoveSelection, onClearSelections }: Be
                 <Button 
                   className="w-full bg-[#09b66d] hover:bg-[#0fda85] text-white"
                   onClick={handlePlaceBet}
-                  disabled={selections.length === 0 || isProcessing || parseFloat(betAmount) <= 0}
+                  disabled={selections.length === 0 || isProcessing || parseFloat(betAmount) < APUESTA_MINIMA}
                 >
                   {isProcessing ? t('buttons.processing') : (
                     selections.length > 1 
