@@ -221,94 +221,114 @@ export default function HomePage() {
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 {/* AGT Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">AGT</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">60 games</span>
+                <Link href="/slots/50gems">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">AGT</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">60 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Popular: 50 Gems, Fruit Queen</div>
                   </div>
-                  <div className="text-xs text-gray-400">Popular: 50 Gems, Fruit Queen</div>
-                </div>
+                </Link>
                 
                 {/* Novomatic Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">Novomatic</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">78 games</span>
+                <Link href="/slots/book-of-egypt">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">Novomatic</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">78 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Popular: Book of Ra, Fairy Queen</div>
                   </div>
-                  <div className="text-xs text-gray-400">Popular: Book of Ra, Fairy Queen</div>
-                </div>
+                </Link>
                 
                 {/* NetEnt Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">NetEnt</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">20 games</span>
+                <Link href="/slots/777">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">NetEnt</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">20 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Popular: Trolls, Fruit Shop</div>
                   </div>
-                  <div className="text-xs text-gray-400">Popular: Trolls, Fruit Shop</div>
-                </div>
+                </Link>
                 
                 {/* Playtech Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">Playtech</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">7 games</span>
+                <Link href="/slots">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">Playtech</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">7 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Popular slots from Playtech</div>
                   </div>
-                  <div className="text-xs text-gray-400">Popular slots from Playtech</div>
-                </div>
+                </Link>
                 
                 {/* IGT Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">IGT</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">5 games</span>
+                <Link href="/slots">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">IGT</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">5 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Popular: Wolf Run, Cleopatra</div>
                   </div>
-                  <div className="text-xs text-gray-400">Popular: Wolf Run, Cleopatra</div>
-                </div>
+                </Link>
                 
-                {/* Other providers can be included in a special tile */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">BetSoft</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">3 games</span>
+                {/* BetSoft Provider */}
+                <Link href="/slots">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">BetSoft</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">3 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Quality BetSoft games</div>
                   </div>
-                  <div className="text-xs text-gray-400">Quality BetSoft games</div>
-                </div>
+                </Link>
                 
                 {/* Aristocrat Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">Aristocrat</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                <Link href="/slots">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">Aristocrat</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Classic Aristocrat slots</div>
                   </div>
-                  <div className="text-xs text-gray-400">Classic Aristocrat slots</div>
-                </div>
+                </Link>
                 
                 {/* Megajack Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">Megajack</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                <Link href="/slots">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">Megajack</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Popular: Aztec Gold</div>
                   </div>
-                  <div className="text-xs text-gray-400">Popular: Aztec Gold</div>
-                </div>
+                </Link>
                 
                 {/* Play'n GO Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">Play'n GO</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">3 games</span>
+                <Link href="/slots">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">Play'n GO</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">3 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Popular: Fire Joker</div>
                   </div>
-                  <div className="text-xs text-gray-400">Popular: Fire Joker</div>
-                </div>
+                </Link>
                 
                 {/* Slotopol Provider */}
-                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-heading text-white font-medium">Slotopol</h3>
-                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                <Link href="/slots">
+                  <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading text-white font-medium">Slotopol</h3>
+                      <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                    </div>
+                    <div className="text-xs text-gray-400">Slotopol exclusive games</div>
                   </div>
-                  <div className="text-xs text-gray-400">Slotopol exclusive games</div>
-                </div>
+                </Link>
               </div>
               
               <div className="mt-4 text-center">
