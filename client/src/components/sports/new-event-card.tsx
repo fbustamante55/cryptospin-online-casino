@@ -35,21 +35,41 @@ export function NewEventCard({
   const queryClient = useQueryClient();
   const [favoriteId, setFavoriteId] = useState<number | null>(null);
   const [liveScores, setLiveScores] = useState<{home: number, away: number}>({ home: 0, away: 0 });
+  const [matchTime, setMatchTime] = useState<{minutes: number, seconds: number}>({ minutes: 0, seconds: 0 });
+  const [matchStatus, setMatchStatus] = useState<string>("Primer Tiempo");
   
-  // Simulación de actualización de puntajes en tiempo real para eventos en vivo
+  // Simulación de actualización de puntajes y tiempo en tiempo real para eventos en vivo
   useEffect(() => {
     if (isLiveEvent()) {
       // Obtener puntajes iniciales (esto podría venir de una API en un caso real)
       const initialHomeScore = Math.floor(Math.random() * 3);
       const initialAwayScore = Math.floor(Math.random() * 3);
       
+      // Establecer tiempo inicial de partido (minuto aleatorio)
+      const initialMinutes = Math.floor(Math.random() * 90);
+      const initialSeconds = Math.floor(Math.random() * 60);
+      
       setLiveScores({ 
         home: initialHomeScore, 
         away: initialAwayScore 
       });
       
+      setMatchTime({
+        minutes: initialMinutes,
+        seconds: initialSeconds
+      });
+      
+      // Determinar el estado del partido basado en el tiempo
+      if (initialMinutes < 45) {
+        setMatchStatus("Primer Tiempo");
+      } else if (initialMinutes === 45) {
+        setMatchStatus("Medio Tiempo");
+      } else {
+        setMatchStatus("Segundo Tiempo");
+      }
+      
       // Simular actualizaciones en el puntaje cada cierto tiempo
-      const interval = setInterval(() => {
+      const scoreInterval = setInterval(() => {
         // En un caso real, aquí harías una consulta a la API para obtener los puntajes actualizados
         setLiveScores(prevScores => {
           // Simulación: solo ocasionalmente actualizar los puntajes
@@ -61,9 +81,45 @@ export function NewEventCard({
             away: shouldUpdateAway ? prevScores.away + 1 : prevScores.away,
           };
         });
-      }, 20000); // Actualizar cada 20 segundos
+      }, 20000); // Actualizar puntajes cada 20 segundos
       
-      return () => clearInterval(interval);
+      // Actualizar el tiempo del partido cada segundo
+      const timeInterval = setInterval(() => {
+        setMatchTime(prevTime => {
+          let newSeconds = prevTime.seconds + 1;
+          let newMinutes = prevTime.minutes;
+          
+          if (newSeconds >= 60) {
+            newSeconds = 0;
+            newMinutes += 1;
+            
+            // Actualizar el estado del partido al cambiar de tiempo
+            if (newMinutes === 45) {
+              setMatchStatus("Medio Tiempo");
+            } else if (newMinutes === 46) {
+              setMatchStatus("Segundo Tiempo");
+            } else if (newMinutes >= 90) {
+              // Si llega a 90 minutos, podemos agregar tiempo extra o detener
+              newMinutes = 90;
+              
+              // Simular tiempo adicional con probabilidad
+              if (newMinutes === 90 && newSeconds === 0 && Math.random() > 0.5) {
+                setMatchStatus("Tiempo Adicional");
+              }
+            }
+          }
+          
+          return {
+            minutes: newMinutes,
+            seconds: newSeconds
+          };
+        });
+      }, 1000); // Actualizar cada segundo
+      
+      return () => {
+        clearInterval(scoreInterval);
+        clearInterval(timeInterval);
+      };
     }
   }, []);
   
@@ -278,7 +334,9 @@ export function NewEventCard({
               EN VIVO
             </Badge>
             <span className="text-xs text-gray-300">
-              <span className="text-xs font-bold text-white">45:00</span> Medio Tiempo
+              <span className="text-xs font-bold text-white">
+                {`${matchTime.minutes < 10 ? '0' : ''}${matchTime.minutes}:${matchTime.seconds < 10 ? '0' : ''}${matchTime.seconds}`}
+              </span> {matchStatus}
             </span>
           </div>
         )}
