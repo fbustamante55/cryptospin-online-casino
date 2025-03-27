@@ -1,17 +1,38 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { SpaceExplorerGame } from "@/components/crash/space-explorer-game";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserDropdown } from "@/components/ui/user-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
+import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { GameHistory } from "@shared/schema";
-import { Rocket, Clock, Target, Calendar, Coins } from "lucide-react";
+import { Rocket, Clock, Target, Calendar, Coins, Search, Gift, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function CrashPage() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState('USDT');
+  const currencyTriggerRef = useRef(null);
+  
+  // Lista de criptomonedas disponibles
+  const currencies = [
+    { code: 'BTC', name: 'Bitcoin', value: 0.00000000, icon: '₿', color: '#f7931a' },
+    { code: 'ETH', name: 'Ethereum', value: 0.00000000, icon: 'Ξ', color: '#627eea' },
+    { code: 'LTC', name: 'Litecoin', value: 0.00000000, icon: 'Ł', color: '#b8b8b8' },
+    { code: 'USDT', name: 'Tether', value: 0.00000000, icon: '₮', color: '#26a17b' },
+    { code: 'SOL', name: 'Solana', value: 0.00000000, icon: '◎', color: '#00ffbd' },
+    { code: 'DOGE', name: 'Dogecoin', value: 0.00000000, icon: 'Ð', color: '#c2a633' },
+    { code: 'BCH', name: 'Bitcoin Cash', value: 0.00000000, icon: '₿', color: '#8dc351' },
+    { code: 'XRP', name: 'Ripple', value: 0.00000000, icon: '✕', color: '#23292f' },
+    { code: 'TRX', name: 'TRON', value: 0.00000000, icon: '♦', color: '#ef0027' },
+    { code: 'EOS', name: 'EOS', value: 0.00000000, icon: 'ε', color: '#000000' }
+  ];
+  
+  // Obtener la moneda seleccionada
+  const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[3]; // USDT por defecto
 
   // Fetch game history specific to crash
   const { data: gameHistory } = useQuery<GameHistory[]>({
@@ -35,21 +56,83 @@ export default function CrashPage() {
             </h1>
           </div>
           
-          <div className="md:flex flex-1 px-4 justify-center">
-            <h1 className="text-xl font-heading font-bold">{t('sidebar.crash')}</h1>
+          <div className="hidden md:flex items-center">
+            <div className="flex items-center mr-6">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
+            </div>
+          </div>
+          
+          {/* Selector de divisas y botón de depósito */}
+          <div className="flex-1 flex justify-center items-center">
+            <div className="flex items-center space-x-3 relative">
+              {/* Caja única con selector y botón de depósito */}
+              <div className="flex items-center bg-[#0e1824] rounded-full border border-[#1c2b3a] overflow-hidden">
+                {/* Selector de divisas */}
+                <div 
+                  ref={currencyTriggerRef}
+                  className="flex items-center px-3 py-1.5 cursor-pointer hover:bg-[#192531]/70 transition-all duration-200"
+                  onClick={() => setIsWalletOpen(!isWalletOpen)}
+                >
+                  <div className="h-5 w-5 rounded-full mr-2 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: currentCurrency.color }}>
+                    {currentCurrency.icon}
+                  </div>
+                  <span className="text-white text-sm font-bold">{currentCurrency.value.toFixed(8)}</span>
+                  <ChevronDown className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`} />
+                </div>
+                
+                {/* Línea vertical separadora */}
+                <div className="h-6 w-px bg-[#1c2b3a]"></div>
+                
+                {/* Botón de depósito */}
+                <button className="flex items-center px-5 py-1.5 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold text-sm transition-all duration-200">
+                  Depositar
+                </button>
+              </div>
+              
+              {/* Usando nuestro componente de portal de monedas */}
+              <CurrencyDropdown 
+                isOpen={isWalletOpen}
+                onClose={() => setIsWalletOpen(false)}
+                currencies={currencies}
+                selectedCurrency={selectedCurrency}
+                onCurrencySelect={setSelectedCurrency}
+                triggerRef={currencyTriggerRef}
+              />
+            </div>
           </div>
           
           <div className="flex items-center space-x-3">
-            <div className="px-3 py-1.5 rounded-md bg-[#192531] border border-[#1c2b3a] flex items-center">
-              <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
-              <span className="text-sm font-semibold">{user?.balance}</span>
+            <div className="flex items-center space-x-3">
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
+                <Search className="h-5 w-5" />
+              </button>
+              
+              <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
+                <Gift className="h-5 w-5" />
+              </button>
+              
+              <div className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/50 transition-all duration-200">
+                <NotificationDropdown />
+              </div>
+              
+              <div className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-1 py-1 cursor-pointer hover:border-[#09b66d]/50 transition-all duration-200">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-[#09b66d] flex items-center justify-center text-white font-bold">
+                    {user?.username?.substring(0, 1) || 'U'}
+                  </div>
+                  <div className="px-2">
+                    <div className="text-xs text-white font-medium max-w-[80px] truncate">
+                      {user?.username || 'Usuario'}
+                    </div>
+                    <div className="flex items-center">
+                      <div className="h-2 w-2 bg-[#09b66d] rounded-full mr-1"></div>
+                      <span className="text-[10px] text-gray-400">VIP</span>
+                    </div>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-white mr-1" />
+                </div>
+              </div>
             </div>
-            
-            {/* User Dropdown Menu */}
-            <UserDropdown />
-            
-            {/* Notification Dropdown */}
-            <NotificationDropdown />
           </div>
         </div>
       </header>
