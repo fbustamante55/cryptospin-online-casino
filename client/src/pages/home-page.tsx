@@ -180,18 +180,76 @@ export default function HomePage() {
             <div className="hidden md:block absolute top-0 right-0 w-1/3 h-full">
               <div className="w-full h-full opacity-25 bg-gradient-to-l from-[#09b66d]/30 to-transparent"></div>
               <svg 
-                className="absolute top-1/2 right-16 transform -translate-y-1/2 opacity-30" 
-                width="200" 
-                height="200" 
-                viewBox="0 0 200 200" 
+                className="absolute top-1/2 right-16 transform -translate-y-1/2" 
+                width="300" 
+                height="240" 
+                viewBox="0 0 300 240" 
                 fill="none" 
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <circle cx="100" cy="100" r="80" stroke="#09b66d" strokeWidth="4" />
-                <path d="M100 20 L100 180" stroke="#09b66d" strokeWidth="4" strokeDasharray="10 10" />
-                <path d="M20 100 L180 100" stroke="#09b66d" strokeWidth="4" strokeDasharray="10 10" />
-                <circle cx="100" cy="100" r="40" stroke="#fff" strokeWidth="4" fill="#0e1824" />
-                <path d="M70 100 L130 100 M100 70 L100 130" stroke="#fff" strokeWidth="4" />
+                {/* Fondo con brillo */}
+                <defs>
+                  <radialGradient id="casinoGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                    <stop offset="0%" stopColor="#09b66d" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#0e1824" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <circle cx="150" cy="120" r="120" fill="url(#casinoGlow)" />
+                
+                {/* Dado 1 - Rotado */}
+                <g transform="translate(90, 120) rotate(-15)">
+                  <rect x="-40" y="-40" width="80" height="80" rx="10" fill="#ffffff" stroke="#0e1824" strokeWidth="2" />
+                  {/* Puntos del dado */}
+                  <circle cx="-20" cy="-20" r="8" fill="#0e1824" />
+                  <circle cx="0" cy="0" r="8" fill="#0e1824" />
+                  <circle cx="20" cy="20" r="8" fill="#0e1824" />
+                  <circle cx="-20" cy="20" r="8" fill="#0e1824" />
+                  <circle cx="20" cy="-20" r="8" fill="#0e1824" />
+                </g>
+                
+                {/* Dado 2 - Más pequeño */}
+                <g transform="translate(200, 80) rotate(12)">
+                  <rect x="-30" y="-30" width="60" height="60" rx="8" fill="#f9c846" stroke="#0e1824" strokeWidth="2" />
+                  {/* Puntos del dado */}
+                  <circle cx="-15" cy="-15" r="6" fill="#0e1824" />
+                  <circle cx="15" cy="15" r="6" fill="#0e1824" />
+                </g>
+                
+                {/* Fichas de casino apiladas */}
+                <g transform="translate(180, 160)">
+                  <circle cx="0" cy="0" r="25" fill="#f95258" stroke="#0e1824" strokeWidth="2" />
+                  <circle cx="0" cy="0" r="20" fill="#f95258" stroke="#ffffff" strokeWidth="1" strokeDasharray="2 2" />
+                  <text x="0" y="5" textAnchor="middle" fill="#ffffff" fontSize="16" fontWeight="bold">$100</text>
+                </g>
+                <g transform="translate(190, 170)">
+                  <circle cx="0" cy="0" r="25" fill="#09b66d" stroke="#0e1824" strokeWidth="2" />
+                  <circle cx="0" cy="0" r="20" fill="#09b66d" stroke="#ffffff" strokeWidth="1" strokeDasharray="2 2" />
+                  <text x="0" y="5" textAnchor="middle" fill="#ffffff" fontSize="16" fontWeight="bold">$500</text>
+                </g>
+                
+                {/* Carta de póker */}
+                <g transform="translate(120, 60) rotate(-5)">
+                  <rect x="-25" y="-35" width="50" height="70" rx="5" fill="#ffffff" stroke="#0e1824" strokeWidth="2" />
+                  <rect x="-20" y="-30" width="40" height="60" rx="3" fill="#ffffff" stroke="#f95258" strokeWidth="1" />
+                  <text x="-15" y="-15" fill="#f95258" fontSize="18" fontWeight="bold">A♥</text>
+                  <text x="15" y="20" fill="#f95258" fontSize="18" fontWeight="bold" transform="rotate(180 15,20)">A♥</text>
+                  <path d="M0,-5 C-5,-10 -10,-5 -5,0 C-10,5 -5,10 0,5 C5,10 10,5 5,0 C10,-5 5,-10 0,-5 Z" fill="#f95258" />
+                </g>
+                
+                {/* Ruleta */}
+                <g transform="translate(230, 120)">
+                  <circle cx="0" cy="0" r="35" fill="#0e1824" stroke="#ffffff" strokeWidth="2" />
+                  <circle cx="0" cy="0" r="32" fill="#0e1824" stroke="#f9c846" strokeWidth="1" />
+                  <path d="M0,0 L0,-30" stroke="#f95258" strokeWidth="2" />
+                  <path d="M0,0 L26,15" stroke="#09b66d" strokeWidth="2" />
+                  <path d="M0,0 L-15,-26" stroke="#f9c846" strokeWidth="2" />
+                  <circle cx="0" cy="0" r="5" fill="#ffffff" />
+                </g>
+                
+                {/* Estrellas/Destellos de brillo */}
+                <path d="M65,40 L70,50 L80,55 L70,60 L65,70 L60,60 L50,55 L60,50 Z" fill="#f9c846" opacity="0.8" />
+                <path d="M240,40 L245,50 L255,55 L245,60 L240,70 L235,60 L225,55 L235,50 Z" fill="#09b66d" opacity="0.8" />
+                <path d="M150,200 L155,210 L165,215 L155,220 L150,230 L145,220 L135,215 L145,210 Z" fill="#f95258" opacity="0.8" />
               </svg>
             </div>
           </div>
