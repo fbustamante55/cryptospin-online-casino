@@ -489,8 +489,127 @@ export function SlotsGame() {
           </div>
         </div>
       );
-    } else {
-      // Estilo estándar para otros juegos
+    } 
+    // Estilo para Mega Fortune (símbolos de lujo)
+    else if (gameId === 'mega_fortune') {
+      // Definir iconos SVG para los símbolos de lujo
+      const luxuryIcons: Record<string, string> = {
+        "WATCH": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="1"/>
+          <circle cx="20" cy="20" r="12" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="20" cy="20" r="10" fill="none" stroke="#d4af37" stroke-width="1"/>
+          <line x1="20" y1="12" x2="20" y2="14" stroke="#d4af37" stroke-width="1"/>
+          <line x1="20" y1="26" x2="20" y2="28" stroke="#d4af37" stroke-width="1"/>
+          <line x1="12" y1="20" x2="14" y2="20" stroke="#d4af37" stroke-width="1"/>
+          <line x1="26" y1="20" x2="28" y2="20" stroke="#d4af37" stroke-width="1"/>
+          <rect x="18" y="6" width="4" height="2" rx="1" fill="#d4af37"/>
+          <rect x="18" y="32" width="4" height="2" rx="1" fill="#d4af37"/>
+          <path d="M20,20 L25,15" stroke="#d4af37" stroke-width="1"/>
+          <path d="M20,20 L18,24" stroke="#d4af37" stroke-width="1"/>
+        </svg>`,
+        "YACHT": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="1"/>
+          <path d="M10,30 C15,25 25,25 30,30" fill="#0077b6" stroke="#0077b6"/>
+          <path d="M8,23 L32,23 L28,30 L12,30 Z" fill="#fff" stroke="#d4af37" stroke-width="1"/>
+          <path d="M20,10 L20,23" stroke="#d4af37" stroke-width="2"/>
+          <path d="M20,10 Q25,15 28,23" fill="none" stroke="#d4af37" stroke-width="1"/>
+          <path d="M13,16 L20,16" stroke="#d4af37" stroke-width="1"/>
+          <path d="M12,19 L20,19" stroke="#d4af37" stroke-width="1"/>
+        </svg>`,
+        "LIMOUSINE": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="1"/>
+          <rect x="6" y="21" width="28" height="6" rx="2" fill="#111111" stroke="#d4af37" stroke-width="1"/>
+          <rect x="9" y="17" width="22" height="4" rx="1" fill="#1e1e1e" stroke="#d4af37" stroke-width="1"/>
+          <rect x="12" y="14" width="16" height="3" rx="1" fill="#2a2a2a" stroke="#d4af37" stroke-width="1"/>
+          <circle cx="11" cy="27" r="2" fill="#333" stroke="#999" stroke-width="1"/>
+          <circle cx="29" cy="27" r="2" fill="#333" stroke="#999" stroke-width="1"/>
+          <rect x="10" y="18" width="2" height="3" fill="#d4af37"/>
+          <rect x="14" y="18" width="2" height="3" fill="#d4af37"/>
+          <rect x="18" y="18" width="2" height="3" fill="#d4af37"/>
+          <rect x="22" y="18" width="2" height="3" fill="#d4af37"/>
+          <rect x="26" y="18" width="2" height="3" fill="#d4af37"/>
+        </svg>`,
+        "CHAMPAGNE": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="1"/>
+          <path d="M16,10 L16,20 C16,22 24,22 24,20 L24,10 Z" fill="#f9e076" stroke="#d4af37" stroke-width="1"/>
+          <path d="M16,10 L24,10 L23,8 L17,8 Z" fill="#d4af37" stroke="#d4af37" stroke-width="1"/>
+          <path d="M20,20 L20,30" stroke="#d4af37" stroke-width="1"/>
+          <path d="M17,30 L23,30" stroke="#d4af37" stroke-width="1"/>
+          <ellipse cx="20" cy="13" rx="2" ry="1" fill="#ffffff" opacity="0.6"/>
+          <ellipse cx="20" cy="15" rx="1.5" ry="0.75" fill="#ffffff" opacity="0.6"/>
+          <ellipse cx="20" cy="17" rx="1" ry="0.5" fill="#ffffff" opacity="0.6"/>
+        </svg>`,
+        "RING": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="1"/>
+          <circle cx="20" cy="20" r="8" fill="none" stroke="#d4af37" stroke-width="3"/>
+          <circle cx="20" cy="20" r="6" fill="none" stroke="#f9e076" stroke-width="1"/>
+          <circle cx="20" cy="15" r="2" fill="#d4af37" stroke="#f9e076" stroke-width="1"/>
+          <path d="M18,13 L16,10 M22,13 L24,10" stroke="#d4af37" stroke-width="1"/>
+        </svg>`,
+        "MONEY": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="1"/>
+          <rect x="8" y="14" width="24" height="12" rx="1" fill="#004d40" stroke="#00695c" stroke-width="1"/>
+          <circle cx="20" cy="20" r="5" fill="#004d40" stroke="#d4af37" stroke-width="1"/>
+          <text x="20" y="23" font-size="8" text-anchor="middle" fill="#d4af37">$</text>
+          <rect x="10" y="16" width="4" height="2" rx="1" fill="#d4af37"/>
+          <rect x="26" y="16" width="4" height="2" rx="1" fill="#d4af37"/>
+          <rect x="10" y="22" width="4" height="2" rx="1" fill="#d4af37"/>
+          <rect x="26" y="22" width="4" height="2" rx="1" fill="#d4af37"/>
+        </svg>`,
+        "WILD": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#ffd700" stroke-width="2"/>
+          <circle cx="20" cy="20" r="15" fill="none" stroke="#ffd700" stroke-width="1"/>
+          <text x="20" y="24" font-size="10" font-weight="bold" text-anchor="middle" fill="#ffd700">WILD</text>
+          <path d="M14,12 L18,16 M22,16 L26,12" stroke="#ffd700" stroke-width="1"/>
+          <path d="M14,28 L18,24 M22,24 L26,28" stroke="#ffd700" stroke-width="1"/>
+        </svg>`,
+        "WHEEL": `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="1"/>
+          <circle cx="20" cy="20" r="12" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="20" cy="20" r="2" fill="#d4af37"/>
+          <path d="M20,8 L20,12" stroke="#d4af37" stroke-width="2"/>
+          <path d="M20,28 L20,32" stroke="#d4af37" stroke-width="2"/>
+          <path d="M8,20 L12,20" stroke="#d4af37" stroke-width="2"/>
+          <path d="M28,20 L32,20" stroke="#d4af37" stroke-width="2"/>
+          <path d="M12,12 L15,15" stroke="#d4af37" stroke-width="2"/>
+          <path d="M25,25 L28,28" stroke="#d4af37" stroke-width="2"/>
+          <path d="M12,28 L15,25" stroke="#d4af37" stroke-width="2"/>
+          <path d="M25,15 L28,12" stroke="#d4af37" stroke-width="2"/>
+        </svg>`
+      };
+
+      // Obtener el color según los datos de gameConfig si está disponible
+      let textColor = "#FFFFFF";
+      if (gameConfig?.symbolColors && gameConfig.symbolColors[symbol]) {
+        textColor = gameConfig.symbolColors[symbol];
+      }
+
+      // Ver si tenemos un icono para este símbolo
+      const iconSvg = luxuryIcons[symbol];
+      
+      if (iconSvg) {
+        return (
+          <div className="h-[40px] flex items-center justify-center">
+            <div 
+              className="w-[32px] h-[32px]"
+              dangerouslySetInnerHTML={{ __html: iconSvg }}
+            />
+          </div>
+        );
+      } else {
+        // Si no tenemos un ícono, mostrar el texto con un estilo elegante
+        return (
+          <div 
+            className="h-[40px] flex items-center justify-center font-bold text-sm bg-slate-800 rounded-md border border-amber-500/20 mx-1"
+            style={{ color: textColor }}
+          >
+            {symbol}
+          </div>
+        );
+      }
+    }
+    // Estilo estándar para otros juegos
+    else {
       let color = "#FFFFFF";
       if (gameId === "fruity-fiesta") {
         if (symbol === "7") { color = "#00FFAA"; }
@@ -503,6 +622,9 @@ export function SlotsGame() {
         else if (symbol === "WATERMELON") { color = "#FF5E5E"; }
         else if (symbol === "WILD") { color = "#1E88E5"; }
         else if (symbol === "SCATTER") { color = "#FF9800"; }
+      } else if (gameConfig?.symbolColors && gameConfig.symbolColors[symbol]) {
+        // Usar colores del gameConfig si están disponibles
+        color = gameConfig.symbolColors[symbol];
       }
       
       return (
