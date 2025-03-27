@@ -63,7 +63,7 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
       // Call API to update language preference
       await apiRequest({
         method: "POST",
-        url: "/api/update-language",
+        url: "/api/user/update-language",
         data: { language: languageCode }
       });
       

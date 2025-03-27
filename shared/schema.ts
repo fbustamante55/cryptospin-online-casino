@@ -2,6 +2,11 @@ import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, js
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Esquema para actualizar el idioma del usuario
+export const updateLanguageSchema = z.object({
+  language: z.string().min(2).max(5)
+});
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),

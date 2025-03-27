@@ -51,6 +51,7 @@ interface SidebarItem {
   hasChildren?: boolean;
   badge?: number | string;
   children?: SidebarItem[];
+  customComponent?: React.ReactNode;
 }
 
 export function Sidebar({ className }: SidebarProps) {
@@ -270,7 +271,8 @@ export function Sidebar({ className }: SidebarProps) {
         <Globe className="w-4 h-4 text-white" />
       </div>,
       path: "#",
-      hasChildren: true
+      hasChildren: false,
+      customComponent: <SidebarLanguageSwitcher collapsed={sidebarCollapsed} />
     }
   ];
 
@@ -301,6 +303,15 @@ export function Sidebar({ className }: SidebarProps) {
   const renderSidebarItem = (item: SidebarItem, index: number | string, isChild = false) => {
     const isExpanded = expandedItems[index];
     const hasActiveChild = item.children?.some(child => child.active);
+    
+    // Si el ítem tiene un componente personalizado, renderizarlo
+    if (item.customComponent) {
+      return (
+        <div key={`${index}-${item.name}`}>
+          {item.customComponent}
+        </div>
+      );
+    }
     
     return (
       <div key={`${index}-${item.name}`}>

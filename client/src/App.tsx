@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { Route } from "wouter";
+// Importar i18n (esto inicializa la configuración de i18n)
+import "@/lib/i18n";
 
 // Pages
 import NotFound from "@/pages/not-found";

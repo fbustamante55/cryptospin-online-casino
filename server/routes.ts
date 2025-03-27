@@ -203,6 +203,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
   
+  // User profile and settings routes
+  app.post('/api/user/update-language', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    
+    try {
+      const { language } = req.body;
+      
+      // Validar el formato del idioma
+      const { success } = await import("@shared/schema").then(
+        module => module.updateLanguageSchema.safeParse({ language })
+      );
+      
+      if (!success) {
+        return res.status(400).json({ message: "Invalid language format" });
+      }
+      
+      // Actualizar el idioma en la base de datos
+      await storage.updateLanguage(req.user.id, language);
+      
+      // Actualizar la sesión del usuario
+      req.user.language = language;
+      
+      return res.status(200).json({ message: "Language updated successfully", language });
+    } catch (error) {
+      console.error("Error updating language:", error);
+      return res.status(500).json({ message: "Failed to update language" });
+    }
+  });
+  
   // Initialize default slot games
   await initializeDefaultSlotGames();
   
