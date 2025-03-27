@@ -242,11 +242,15 @@ function MobileDrawer({ open, onClose, children }: DrawerProps) {
   );
 }
 
-export function MobileNav() {
+interface MobileNavProps {
+  isOpen?: boolean;
+}
+
+export function MobileNav({ isOpen = false }: MobileNavProps) {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
   const { t } = useTranslation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(isOpen);
   const [liveEventsCount, setLiveEventsCount] = useState(0);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   
@@ -254,6 +258,11 @@ export function MobileNav() {
   const [activeTab, setActiveTab] = useState(
     location.includes('/sports') ? 'deportes' : 'casino'
   );
+  
+  // Actualizar el estado del sidebar cuando cambia la prop isOpen
+  useEffect(() => {
+    setSidebarOpen(isOpen);
+  }, [isOpen]);
   
   // Toggle para expandir/colapsar subcategorías
   const toggleMenu = (menuName: string) => {
