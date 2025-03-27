@@ -98,7 +98,7 @@ export default function HomePage() {
                     {currentCurrency.icon}
                   </div>
                   <span className="text-white text-sm font-bold">{currentCurrency.value.toFixed(8)}</span>
-                  <ChevronDown className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`} />
+                  {ChevronDown && <ChevronDown className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`} />}
                 </div>
                 
                 {/* Línea vertical separadora */}
@@ -150,7 +150,8 @@ export default function HomePage() {
                       <span className="text-[10px] text-gray-400">VIP</span>
                     </div>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-white mr-1" />
+                  {/* Using ChevronDown component for dropdown indicator */}
+                  {ChevronDown && <ChevronDown className="h-4 w-4 text-white mr-1" />}
                 </div>
               </div>
             </div>
