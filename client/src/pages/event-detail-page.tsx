@@ -9,7 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { apiRequest } from '@/lib/queryClient';
 import { Clock, ArrowLeft } from 'lucide-react';
 import { formatEventDate } from '@/lib/sports-api';
-import { Layout } from '@/components/ui/layout';
+import { Sidebar } from "@/components/ui/sidebar";
+import { MobileNav } from "@/components/ui/mobile-nav";
+import { Footer } from "@/components/ui/footer";
 
 export default function EventDetailPage() {
   const [, setLocation] = useLocation();
@@ -49,9 +51,9 @@ export default function EventDetailPage() {
     setLocation('/sports');
   };
 
-  if (apiKeyLoading || eventLoading) {
-    return (
-      <Layout>
+  const renderContent = () => {
+    if (apiKeyLoading || eventLoading) {
+      return (
         <div className="container mx-auto p-4">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="sm" onClick={goBack} className="mr-2">
@@ -70,15 +72,13 @@ export default function EventDetailPage() {
             </div>
           </Card>
         </div>
-      </Layout>
-    );
-  }
+      );
+    }
 
-  const event = eventData?.event;
-  
-  if (!event) {
-    return (
-      <Layout>
+    const event = eventData?.event;
+    
+    if (!event) {
+      return (
         <div className="container mx-auto p-4">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="sm" onClick={goBack} className="mr-2">
@@ -99,19 +99,17 @@ export default function EventDetailPage() {
             </div>
           </Card>
         </div>
-      </Layout>
-    );
-  }
+      );
+    }
 
-  // Verificar si el evento está en vivo
-  const isLiveEvent = () => {
-    const now = new Date();
-    const eventDate = new Date(event.commence_time);
-    return eventDate <= now;
-  };
+    // Verificar si el evento está en vivo
+    const isLiveEvent = () => {
+      const now = new Date();
+      const eventDate = new Date(event.commence_time);
+      return eventDate <= now;
+    };
 
-  return (
-    <Layout>
+    return (
       <div className="container mx-auto p-4">
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="sm" onClick={goBack} className="mr-2">
@@ -175,6 +173,22 @@ export default function EventDetailPage() {
           </div>
         </Card>
       </div>
-    </Layout>
+    );
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#0e1824] text-white">
+      <Sidebar />
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Main content */}
+        {renderContent()}
+        
+        {/* Footer appears at the bottom of the container */}
+        <Footer />
+      </div>
+      
+      <MobileNav />
+    </div>
   );
 }
