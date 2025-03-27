@@ -57,16 +57,7 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
     if (user?.language) {
       setCurrentLangCode(user.language);
     }
-    
-    // Log para depuración del estado del idioma
-    console.log("Estado actual de i18n:", {
-      i18nLanguage: i18n.language,
-      currentLangCode,
-      userLanguage: user?.language,
-      storedLanguage: localStorage.getItem('i18nextLng'),
-      forcedLanguage: localStorage.getItem('forceLang')
-    });
-  }, [user?.language, currentLangCode]);
+  }, [user?.language]);
   
   const currentLanguage = LANGUAGES.find(lang => lang.code === currentLangCode) || LANGUAGES[0];
   
@@ -81,9 +72,7 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
       
       try {
         // Cambiar el idioma en i18next y guardarlo en localStorage
-        console.log(`Cambiando idioma a: ${languageCode}`);
         await i18n.changeLanguage(languageCode);
-        console.log(`Idioma cambiado en i18n, ahora es: ${i18n.language}`);
         setCurrentLangCode(languageCode);
         
         // Si el usuario está autenticado, intentar actualizar la preferencia en el servidor
@@ -94,9 +83,7 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
               url: "/api/user/update-language",
               data: { language: languageCode }
             });
-            console.log(`Idioma actualizado en el servidor para el usuario ${user.username}`);
           } catch (apiError) {
-            console.log("No se pudo actualizar el idioma en el servidor, pero se cambió localmente");
             // Falló la API pero el idioma ya se cambió localmente, así que no mostramos error
           }
         }

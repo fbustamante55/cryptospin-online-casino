@@ -77,7 +77,7 @@ const initI18n = () => {
       resources,
       fallbackLng: 'en',
       lng: forcedLang || undefined, // Usar el idioma forzado si existe
-      debug: true, // Habilitamos debug temporalmente para resolver problemas
+      debug: false, // Desactivamos el debug mode
       interpolation: {
         escapeValue: false, // no necesario para React
       },
