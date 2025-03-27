@@ -314,32 +314,123 @@ export function SpaceExplorerGameSync() {
 
   // Manejador de apuesta
   const handleBet = () => {
-    if (!user || user.balance < bet) return;
+    if (!user || user.balance < bet) {
+      toast({
+        title: "No puedes apostar",
+        description: "No tienes suficiente saldo para esta apuesta.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Si el juego está en progreso o ha crasheado, no permitir apostar
-    if (missionState === 'exploring' || missionState === 'crashed') return;
+    if (missionState === 'exploring' || missionState === 'crashed') {
+      toast({
+        title: "No puedes apostar ahora",
+        description: "Debes esperar al siguiente juego para apostar.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Si ya apostamos en este juego, no permitir apostar de nuevo
-    if (hasBet) return;
+    if (hasBet) {
+      toast({
+        title: "Ya has apostado",
+        description: "Ya has colocado una apuesta en esta ronda.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     console.log("Colocando apuesta:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
     
-    // Realizar apuesta
-    if (isAutoCashoutEnabled) {
-      betMutation.mutate({ bet, autoCashout });
-    } else {
-      betMutation.mutate({ bet });
+    // Notificar al usuario que su apuesta ha sido colocada
+    toast({
+      title: "Apuesta colocada",
+      description: `Has apostado ${bet} en esta misión espacial.`,
+    });
+    
+    // Establecer estado de apuesta localmente para inmediata retroalimentación visual
+    setHasBet(true);
+    
+    // Realizar apuesta en el servidor
+    try {
+      if (isAutoCashoutEnabled) {
+        betMutation.mutate({ bet, autoCashout });
+      } else {
+        betMutation.mutate({ bet });
+      }
+    } catch (error) {
+      console.error("Error al apostar:", error);
+      // En caso de error, revertir el estado de hasBet
+      setHasBet(false);
+      toast({
+        title: "Error al apostar",
+        description: "Ha ocurrido un error al procesar tu apuesta. Inténtalo de nuevo.",
+        variant: "destructive"
+      });
     }
   };
   
   // Manejador de cashout
   const handleCashout = () => {
-    // Si el juego no está en progreso o ya hicimos cashout, no permitir cashout
-    if (missionState !== 'exploring' || hasReturned) return;
+    // Validaciones para el cashout
+    if (!hasBet) {
+      toast({
+        title: "No puedes recoger",
+        description: "No has colocado ninguna apuesta en esta ronda.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (missionState !== 'exploring') {
+      toast({
+        title: "No puedes recoger ahora",
+        description: "Solo puedes recoger mientras la nave está en exploración.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (hasReturned) {
+      toast({
+        title: "Ya has recogido",
+        description: "Ya has recogido tus ganancias en esta ronda.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     console.log("Realizando cashout con multiplicador:", currentMultiplier);
     
-    cashoutMutation.mutate();
+    // Calcular las ganancias para mostrar al usuario
+    const calculatedWin = Math.floor(bet * currentMultiplier);
+    setWinAmount(calculatedWin);
+    
+    // Establecer el estado como recogido para reflejar inmediatamente en la UI
+    setHasReturned(true);
+    
+    // Notificar al usuario
+    toast({
+      title: "¡Cashout exitoso!",
+      description: `Has recogido ${calculatedWin} (${currentMultiplier.toFixed(2)}x)`,
+    });
+    
+    // Enviar la solicitud al servidor
+    try {
+      cashoutMutation.mutate();
+    } catch (error) {
+      console.error("Error al hacer cashout:", error);
+      // En caso de error, revertimos el estado
+      setHasReturned(false);
+      toast({
+        title: "Error al recoger",
+        description: "Ha ocurrido un error al procesar tu cashout. Inténtalo de nuevo.",
+        variant: "destructive"
+      });
+    }
   };
   
   // Manejador de pantalla completa
@@ -566,18 +657,9 @@ export function SpaceExplorerGameSync() {
                 variant="default"
                 disabled={betMutation.isPending || (!canBet && missionState === 'crashed')}
                 onClick={() => {
-                  // Simular apuesta para demo (ya que tenemos error 401)
-                  console.log("Simulando apuesta:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
-                  toast({
-                    title: "Apuesta colocada",
-                    description: `Has apostado ${bet} en esta misión espacial.`,
-                  });
-                  
-                  // Intentar hacer la apuesta real
+                  // Solo llamamos a handleBet, que se encargará de manejar la lógica de apuesta
+                  console.log("Iniciando apuesta con:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
                   handleBet();
-                  
-                  // Establecer estado de apuesta para la demostración
-                  setHasBet(true);
                 }}
                 className={`w-full h-20 text-2xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
                   betMutation.isPending || (missionState === 'exploring' && !hasBet)
@@ -602,21 +684,9 @@ export function SpaceExplorerGameSync() {
                   !hasBet // Deshabilitar si no se ha colocado una apuesta
                 }
                 onClick={() => {
-                  // Simular cashout para demo (ya que tenemos error 401)
-                  console.log("Simulando cashout con multiplicador:", currentMultiplier);
-                  const simulatedWin = Math.floor(bet * currentMultiplier);
-                  
-                  toast({
-                    title: "¡Cashout exitoso!",
-                    description: `Has recogido ${simulatedWin} (${currentMultiplier.toFixed(2)}x)`,
-                  });
-                  
-                  // Intentar hacer el cashout real
+                  // Usamos la función handleCashout que ya maneja todos los casos
+                  console.log("Iniciando cashout con multiplicador:", currentMultiplier);
                   handleCashout();
-                  
-                  // Establecer estado de cashout para la demostración
-                  setHasReturned(true);
-                  setWinAmount(simulatedWin);
                 }}
                 className={`w-full h-20 text-2xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
                   missionState !== 'exploring' || hasReturned || cashoutMutation.isPending || !hasBet
