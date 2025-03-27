@@ -129,19 +129,288 @@ export function SlotopolCasinoGamesSection() {
                     />
                   );
                 } else {
-                  // Use a specific game-based default
+                  // Create themed SVG images for each game type
                   return (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#192531] to-[#0e1824]">
-                      <div className="text-center p-4">
-                        <h3 className="text-white font-medium text-lg mb-2">{game.name}</h3>
-                        <div className="flex items-center justify-center gap-2 mb-3">
-                          <span className="text-sm bg-[#0e1824] px-2 py-1 rounded text-[#09b66d]">{game.rtp}% RTP</span>
-                          <span className="text-sm bg-[#0e1824] px-2 py-1 rounded text-white capitalize">{game.volatility}</span>
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          {game.reels} reels • {game.paylines} lines
-                        </div>
-                      </div>
+                      {game.gameId.includes('book') || game.name.toLowerCase().includes('egypt') || game.provider.toLowerCase().includes('egypt') ? (
+                        // Egyptian themed game
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 200 200" 
+                          className="w-full h-full"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          {/* Egyptian theme with pyramids and book */}
+                          <defs>
+                            <linearGradient id="pyramidGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#d4af37" />
+                              <stop offset="100%" stopColor="#aa8a29" />
+                            </linearGradient>
+                            <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stopColor="#192531" />
+                              <stop offset="100%" stopColor="#0e1824" />
+                            </linearGradient>
+                            <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#8b4513" />
+                              <stop offset="100%" stopColor="#6b3100" />
+                            </linearGradient>
+                            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#ffd700" />
+                              <stop offset="100%" stopColor="#b8860b" />
+                            </linearGradient>
+                          </defs>
+                          {/* Sky/Background */}
+                          <rect x="0" y="0" width="200" height="200" fill="url(#skyGradient)" />
+                          {/* Stars */}
+                          <circle cx="30" cy="30" r="1" fill="#ffffff" />
+                          <circle cx="50" cy="20" r="1" fill="#ffffff" />
+                          <circle cx="70" cy="15" r="1" fill="#ffffff" />
+                          <circle cx="100" cy="25" r="1" fill="#ffffff" />
+                          <circle cx="130" cy="15" r="1" fill="#ffffff" />
+                          <circle cx="150" cy="30" r="1" fill="#ffffff" />
+                          <circle cx="170" cy="25" r="1" fill="#ffffff" />
+                          {/* Pyramids */}
+                          <polygon points="50,130 110,70 170,130" fill="url(#pyramidGradient)" />
+                          <polygon points="20,130 60,90 100,130" fill="url(#pyramidGradient)" opacity="0.7" />
+                          {/* Desert sand */}
+                          <rect x="0" y="130" width="200" height="70" fill="#d2b48c" />
+                          {/* Book of treasures */}
+                          <g transform="translate(80, 90) rotate(-10)">
+                            <rect x="-25" y="-20" width="50" height="40" rx="2" fill="url(#bookGradient)" />
+                            <rect x="-20" y="-15" width="40" height="30" rx="1" fill="#f5f5dc" />
+                            <path d="M-10,-5 L10,-5 L10,5 L-10,5 Z" fill="url(#goldGradient)" />
+                            <circle cx="0" cy="0" r="8" fill="#09b66d" />
+                            <text x="0" y="3" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">$</text>
+                          </g>
+                          {/* Game info at bottom */}
+                          <rect x="10" y="160" width="180" height="30" rx="3" fill="rgba(0,0,0,0.7)" />
+                          <text x="100" y="175" textAnchor="middle" fill="#ffffff" fontSize="10">{game.name}</text>
+                          <text x="100" y="185" textAnchor="middle" fill="#09b66d" fontSize="8">{game.rtp}% RTP • {game.volatility}</text>
+                        </svg>
+                      ) : game.gameId.includes('jewel') || game.name.toLowerCase().includes('jewel') || game.name.toLowerCase().includes('gem') ? (
+                        // Jewel/Gemstone themed game
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 200 200" 
+                          className="w-full h-full"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          <defs>
+                            <linearGradient id="rubyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#e0115f" />
+                              <stop offset="100%" stopColor="#a00a41" />
+                            </linearGradient>
+                            <linearGradient id="sapphireGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#0f52ba" />
+                              <stop offset="100%" stopColor="#082c64" />
+                            </linearGradient>
+                            <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#50c878" />
+                              <stop offset="100%" stopColor="#228b22" />
+                            </linearGradient>
+                            <linearGradient id="amberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#ffbf00" />
+                              <stop offset="100%" stopColor="#cc9900" />
+                            </linearGradient>
+                            <linearGradient id="diamondGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#b9f2ff" />
+                              <stop offset="100%" stopColor="#a4d8e6" />
+                            </linearGradient>
+                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                              <feComposite in="blur" in2="SourceGraphic" operator="over" />
+                            </filter>
+                          </defs>
+                          {/* Background */}
+                          <rect x="0" y="0" width="200" height="200" fill="#0e1824" />
+                          {/* Jewels */}
+                          <polygon points="60,50 75,70 60,90 45,70" fill="url(#rubyGradient)" filter="url(#glow)" />
+                          <polygon points="100,40 115,60 100,80 85,60" fill="url(#emeraldGradient)" filter="url(#glow)" />
+                          <polygon points="140,50 155,70 140,90 125,70" fill="url(#sapphireGradient)" filter="url(#glow)" />
+                          <polygon points="80,100 95,120 80,140 65,120" fill="url(#amberGradient)" filter="url(#glow)" />
+                          <polygon points="120,100 135,120 120,140 105,120" fill="url(#diamondGradient)" filter="url(#glow)" />
+                          
+                          {/* Shine effects */}
+                          <circle cx="60" cy="70" r="2" fill="white" opacity="0.8" />
+                          <circle cx="100" cy="60" r="2" fill="white" opacity="0.8" />
+                          <circle cx="140" cy="70" r="2" fill="white" opacity="0.8" />
+                          <circle cx="80" cy="120" r="2" fill="white" opacity="0.8" />
+                          <circle cx="120" cy="120" r="2" fill="white" opacity="0.8" />
+                          
+                          {/* Game info */}
+                          <rect x="10" y="160" width="180" height="30" rx="3" fill="rgba(0,0,0,0.7)" />
+                          <text x="100" y="175" textAnchor="middle" fill="#ffffff" fontSize="10">{game.name}</text>
+                          <text x="100" y="185" textAnchor="middle" fill="#09b66d" fontSize="8">{game.rtp}% RTP • {game.volatility}</text>
+                        </svg>
+                      ) : game.gameId.includes('fruit') || game.name.toLowerCase().includes('fruit') ? (
+                        // Fruit themed slot
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 200 200" 
+                          className="w-full h-full"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          <rect x="0" y="0" width="200" height="200" fill="#0e1824" />
+                          
+                          {/* Cherry */}
+                          <circle cx="50" cy="60" r="15" fill="#d2042d" />
+                          <circle cx="65" cy="55" r="15" fill="#d2042d" />
+                          <path d="M55,40 C55,40 60,25 65,20" stroke="#006400" strokeWidth="2" fill="none" />
+                          
+                          {/* Lemon */}
+                          <ellipse cx="110" cy="60" rx="20" ry="15" fill="#ffd700" />
+                          <circle cx="110" cy="60" r="1" fill="#0e1824" />
+                          
+                          {/* Watermelon */}
+                          <path d="M150,50 a25,25 0 0,1 0,50 a25,25 0 0,1 0,-50" fill="#ff6347" />
+                          <path d="M150,55 a20,20 0 0,1 0,40 a20,20 0 0,1 0,-40" fill="#f02a2a" />
+                          <path d="M150,60 a15,15 0 0,1 0,30 a15,15 0 0,1 0,-30" fill="#dc143c" />
+                          <circle cx="143" cy="65" r="1" fill="black" />
+                          <circle cx="155" cy="67" r="1" fill="black" />
+                          <circle cx="148" cy="70" r="1" fill="black" />
+                          <circle cx="157" cy="75" r="1" fill="black" />
+                          <circle cx="145" cy="80" r="1" fill="black" />
+                          <circle cx="153" cy="83" r="1" fill="black" />
+                          
+                          {/* Orange */}
+                          <circle cx="50" cy="120" r="15" fill="#ffa500" />
+                          <path d="M50,110 C55,115 45,115 50,120" stroke="#0e1824" strokeWidth="0.5" fill="none" />
+                          <path d="M50,110 C45,115 55,115 50,120" stroke="#0e1824" strokeWidth="0.5" fill="none" />
+                          
+                          {/* 7 Symbol */}
+                          <circle cx="110" cy="120" r="15" fill="#f9c846" />
+                          <text x="110" y="125" textAnchor="middle" fill="#0e1824" fontSize="18" fontWeight="bold">7</text>
+                          
+                          {/* Bar Symbol */}
+                          <rect x="135" y="105" width="30" height="30" rx="3" fill="#1c2b3a" />
+                          <rect x="140" y="110" width="20" height="6" rx="1" fill="#f9c846" />
+                          <rect x="140" y="118" width="20" height="4" rx="1" fill="#f9c846" />
+                          <rect x="140" y="124" width="20" height="6" rx="1" fill="#f9c846" />
+                          
+                          {/* Game info */}
+                          <rect x="10" y="160" width="180" height="30" rx="3" fill="rgba(0,0,0,0.7)" />
+                          <text x="100" y="175" textAnchor="middle" fill="#ffffff" fontSize="10">{game.name}</text>
+                          <text x="100" y="185" textAnchor="middle" fill="#09b66d" fontSize="8">{game.rtp}% RTP • {game.volatility}</text>
+                        </svg>
+                      ) : game.gameId.includes('fortune') || game.name.toLowerCase().includes('fortune') || game.name.toLowerCase().includes('jackpot') ? (
+                        // Jackpot/Fortune themed slot
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 200 200" 
+                          className="w-full h-full"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          <defs>
+                            <linearGradient id="goldCoinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#ffd700" />
+                              <stop offset="100%" stopColor="#b8860b" />
+                            </linearGradient>
+                            <filter id="moneyGlow" x="-100%" y="-100%" width="300%" height="300%">
+                              <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+                              <feComposite in="blur" in2="SourceGraphic" operator="over" />
+                            </filter>
+                          </defs>
+                          {/* Background */}
+                          <rect x="0" y="0" width="200" height="200" fill="#0e1824" />
+                          
+                          {/* Jackpot title */}
+                          <text x="100" y="40" textAnchor="middle" fill="#f9c846" fontSize="20" fontWeight="bold" filter="url(#moneyGlow)">JACKPOT</text>
+                          
+                          {/* Treasure chest */}
+                          <rect x="70" y="100" width="60" height="40" rx="5" fill="#8b4513" />
+                          <rect x="70" y="95" width="60" height="10" rx="2" fill="#a0522d" />
+                          <rect x="75" y="105" width="50" height="30" fill="#daa520" />
+                          <circle cx="100" cy="100" r="3" fill="#cd7f32" />
+                          
+                          {/* Gold coins spilling out */}
+                          <circle cx="95" cy="95" r="8" fill="url(#goldCoinGradient)" />
+                          <circle cx="110" cy="90" r="7" fill="url(#goldCoinGradient)" />
+                          <circle cx="85" cy="90" r="6" fill="url(#goldCoinGradient)" />
+                          <circle cx="100" cy="85" r="7" fill="url(#goldCoinGradient)" />
+                          <circle cx="120" cy="95" r="6" fill="url(#goldCoinGradient)" />
+                          <circle cx="75" cy="95" r="5" fill="url(#goldCoinGradient)" />
+                          
+                          {/* Dollar signs on coins */}
+                          <text x="95" y="98" textAnchor="middle" fill="#0e1824" fontSize="8" fontWeight="bold">$</text>
+                          <text x="110" y="93" textAnchor="middle" fill="#0e1824" fontSize="8" fontWeight="bold">$</text>
+                          <text x="85" y="93" textAnchor="middle" fill="#0e1824" fontSize="7" fontWeight="bold">$</text>
+                          <text x="100" y="88" textAnchor="middle" fill="#0e1824" fontSize="8" fontWeight="bold">$</text>
+                          <text x="120" y="98" textAnchor="middle" fill="#0e1824" fontSize="7" fontWeight="bold">$</text>
+                          <text x="75" y="98" textAnchor="middle" fill="#0e1824" fontSize="6" fontWeight="bold">$</text>
+                          
+                          {/* Sparkle effects */}
+                          <path d="M80,70 L85,75 L80,80 L75,75 Z" fill="white" opacity="0.8" />
+                          <path d="M120,60 L125,65 L120,70 L115,65 Z" fill="white" opacity="0.8" />
+                          <path d="M140,85 L145,90 L140,95 L135,90 Z" fill="white" opacity="0.8" />
+                          <path d="M60,85 L65,90 L60,95 L55,90 Z" fill="white" opacity="0.8" />
+                          
+                          {/* Game info */}
+                          <rect x="10" y="160" width="180" height="30" rx="3" fill="rgba(0,0,0,0.7)" />
+                          <text x="100" y="175" textAnchor="middle" fill="#ffffff" fontSize="10">{game.name}</text>
+                          <text x="100" y="185" textAnchor="middle" fill="#09b66d" fontSize="8">{game.rtp}% RTP • {game.volatility}</text>
+                        </svg>
+                      ) : (
+                        // Default/Classic slot theme for any other game
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 200 200" 
+                          className="w-full h-full"
+                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
+                        >
+                          {/* Slot machine cabinet */}
+                          <rect x="40" y="30" width="120" height="140" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2" />
+                          
+                          {/* Display screen */}
+                          <rect x="50" y="40" width="100" height="70" rx="3" fill="#192531" stroke="#1c2b3a" strokeWidth="1" />
+                          
+                          {/* Slot reels */}
+                          <rect x="55" y="45" width="28" height="60" fill="#0e1824" stroke="#1c2b3a" strokeWidth="1" />
+                          <rect x="86" y="45" width="28" height="60" fill="#0e1824" stroke="#1c2b3a" strokeWidth="1" />
+                          <rect x="117" y="45" width="28" height="60" fill="#0e1824" stroke="#1c2b3a" strokeWidth="1" />
+                          
+                          {/* Reel symbols */}
+                          <circle cx="69" cy="60" r="10" fill="#f9c846" />
+                          <text x="69" y="64" textAnchor="middle" fontSize="12" fill="#0e1824" fontWeight="bold">7</text>
+                          
+                          <circle cx="100" cy="60" r="10" fill="#09b66d" />
+                          <text x="100" y="64" textAnchor="middle" fontSize="12" fill="#0e1824" fontWeight="bold">$</text>
+                          
+                          <circle cx="131" cy="60" r="10" fill="#f95258" />
+                          <text x="131" y="64" textAnchor="middle" fontSize="14" fill="#0e1824">♦</text>
+                          
+                          <rect x="59" cy="85" width="20" height="10" rx="1" fill="#f9c846" />
+                          <text x="69" y="93" textAnchor="middle" fontSize="8" fill="#0e1824" fontWeight="bold">BAR</text>
+                          
+                          <circle cx="100" cy="90" r="10" fill="#f95258" />
+                          <text x="100" y="94" textAnchor="middle" fontSize="14" fill="#0e1824">♥</text>
+                          
+                          <circle cx="131" cy="90" r="10" fill="#2f80ed" />
+                          <text x="131" y="94" textAnchor="middle" fontSize="14" fill="#0e1824">♠</text>
+                          
+                          {/* Control panel */}
+                          <rect x="50" y="120" width="100" height="40" rx="3" fill="#192531" stroke="#1c2b3a" strokeWidth="1" />
+                          
+                          {/* Spin button */}
+                          <circle cx="100" cy="140" r="15" fill="#09b66d" />
+                          <circle cx="100" cy="140" r="12" fill="#098b54" />
+                          <text x="100" y="144" textAnchor="middle" fill="#ffffff" fontSize="8" fontWeight="bold">SPIN</text>
+                          
+                          {/* Coin slot */}
+                          <rect x="135" y="130" width="10" height="20" rx="2" fill="#1c2b3a" />
+                          <line x1="135" y1="140" x2="145" y2="140" stroke="#344254" strokeWidth="1" />
+                          
+                          {/* Bet buttons */}
+                          <rect x="55" y="130" width="30" height="10" rx="2" fill="#1c2b3a" />
+                          <text x="70" y="137" textAnchor="middle" fill="#ffffff" fontSize="6">BET MAX</text>
+                          
+                          <rect x="55" y="145" width="30" height="10" rx="2" fill="#1c2b3a" />
+                          <text x="70" y="152" textAnchor="middle" fill="#ffffff" fontSize="6">BET ONE</text>
+                          
+                          {/* Game info */}
+                          <rect x="10" y="175" width="180" height="20" rx="3" fill="rgba(0,0,0,0.7)" />
+                          <text x="100" y="188" textAnchor="middle" fill="#ffffff" fontSize="9">{game.name} • {game.rtp}% RTP</text>
+                        </svg>
+                      )}
                     </div>
                   );
                 }
