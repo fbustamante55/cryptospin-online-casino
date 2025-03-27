@@ -165,7 +165,7 @@ export default function HomePage() {
           {/* Casino Slots from Slotopol */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="font-heading text-xl font-bold text-white">{t('home.casinoSlots')}</h2>
+              <h2 className="font-heading text-xl font-bold text-white">CryptoSpin Originals</h2>
               <Link href="/slots" className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">{t('buttons.viewAll')}</Link>
             </div>
             
