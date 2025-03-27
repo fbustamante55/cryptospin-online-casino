@@ -34,6 +34,38 @@ export function NewEventCard({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [favoriteId, setFavoriteId] = useState<number | null>(null);
+  const [liveScores, setLiveScores] = useState<{home: number, away: number}>({ home: 0, away: 0 });
+  
+  // Simulación de actualización de puntajes en tiempo real para eventos en vivo
+  useEffect(() => {
+    if (isLiveEvent()) {
+      // Obtener puntajes iniciales (esto podría venir de una API en un caso real)
+      const initialHomeScore = Math.floor(Math.random() * 3);
+      const initialAwayScore = Math.floor(Math.random() * 3);
+      
+      setLiveScores({ 
+        home: initialHomeScore, 
+        away: initialAwayScore 
+      });
+      
+      // Simular actualizaciones en el puntaje cada cierto tiempo
+      const interval = setInterval(() => {
+        // En un caso real, aquí harías una consulta a la API para obtener los puntajes actualizados
+        setLiveScores(prevScores => {
+          // Simulación: solo ocasionalmente actualizar los puntajes
+          const shouldUpdateHome = Math.random() > 0.8;
+          const shouldUpdateAway = Math.random() > 0.8;
+          
+          return {
+            home: shouldUpdateHome ? prevScores.home + 1 : prevScores.home,
+            away: shouldUpdateAway ? prevScores.away + 1 : prevScores.away,
+          };
+        });
+      }, 20000); // Actualizar cada 20 segundos
+      
+      return () => clearInterval(interval);
+    }
+  }, []);
   
   const gameType = 'sports';
   const gameId = event.id;
@@ -260,7 +292,7 @@ export function NewEventCard({
                 <span className="text-xs font-bold text-white">🏠</span>
               </div>
               <span className="text-xs font-medium text-center line-clamp-1">{event.home_team}</span>
-              {isLiveEvent() && <span className="text-sm font-bold text-[#09b66d]">0</span>}
+              {isLiveEvent() && <span className="text-sm font-bold text-[#09b66d]">{liveScores.home}</span>}
             </div>
             
             <div className="flex flex-col items-center w-2/12">
@@ -273,7 +305,7 @@ export function NewEventCard({
                 <span className="text-xs font-bold text-white">✈️</span>
               </div>
               <span className="text-xs font-medium text-center line-clamp-1">{event.away_team}</span>
-              {isLiveEvent() && <span className="text-sm font-bold text-[#09b66d]">0</span>}
+              {isLiveEvent() && <span className="text-sm font-bold text-[#09b66d]">{liveScores.away}</span>}
             </div>
           </div>
           
