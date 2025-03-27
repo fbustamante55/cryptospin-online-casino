@@ -122,7 +122,7 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
   ];
 
   // Dirección de ejemplo para el depósito (en un caso real esto vendría de un backend)
-  const [walletAddress, setWalletAddress] = useState<string>("bc1qGhclo0xz3z0ledmx4yqrdqrju0ui6nerv7p9amfx5h");
+  const [walletAddress, setWalletAddress] = useState<string>("bc1qGhclo0xz3z0ledmx4yqrdqrju0ui6nerv7p9amfx5h9tmStBqycqav");
 
   // Función para copiar la dirección al portapapeles
   const copyAddressToClipboard = () => {
@@ -241,7 +241,7 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
                           <span className="text-white text-sm font-bold">{crypto.code.charAt(0)}</span>
                         </div>
                         <div>
-                          <span className="text-white font-medium">Bitcoin</span>
+                          <span className="text-white font-medium">{crypto.name}</span>
                           <span className="text-gray-400 text-sm ml-1">{crypto.code}</span>
                         </div>
                       </div>
@@ -255,12 +255,21 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
                 </div>
                 
                 <div className="flex mt-3 justify-end">
-                  <button className="bg-[#2a1b5d] text-white text-xs py-1.5 px-3 rounded-xl mr-2">
-                    Red Bitcoin
-                  </button>
-                  <button className="bg-[#6d28d9] text-white text-xs py-1.5 px-3 rounded-xl flex items-center">
-                    <span className="mr-1">1 confirmación</span>
-                  </button>
+                  {(() => {
+                    const crypto = cryptoOptions.find(c => c.id === selectedCrypto);
+                    if (!crypto) return null;
+                    
+                    return (
+                      <>
+                        <button className="bg-[#2a1b5d] text-white text-xs py-1.5 px-3 rounded-xl mr-2">
+                          Red {crypto.name}
+                        </button>
+                        <button className="bg-[#6d28d9] text-white text-xs py-1.5 px-3 rounded-xl flex items-center">
+                          <span className="mr-1">1 confirmación</span>
+                        </button>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
