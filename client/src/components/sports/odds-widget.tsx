@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 
 interface OddsWidgetProps {
   sportKey: string;
@@ -24,7 +25,7 @@ export function OddsWidget({
   height = '500px',
   className = '',
 }: OddsWidgetProps) {
-  const [widgetUrl, setWidgetUrl] = useState<string>('');
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Obtener la API key desde el backend
   const { data: apiKeyData, isLoading } = useQuery({
@@ -38,14 +39,40 @@ export function OddsWidget({
   });
   
   useEffect(() => {
-    if (apiKeyData?.widgetKey) {
-      // Usar la Widget Key especialmente para el widget (formato wk_XXXX)
-      const url = `https://widget.the-odds-api.com/v1/sports/${sportKey}/events/?accessKey=${apiKeyData.widgetKey}&bookmakerKeys=${bookmakerKeys}&oddsFormat=${oddsFormat}&markets=${markets}&marketNames=${marketNames}`;
-      setWidgetUrl(url);
-    }
-  }, [apiKeyData, sportKey, bookmakerKeys, oddsFormat, markets, marketNames]);
+    if (!apiKeyData?.widgetKey || !containerRef.current) return;
+    
+    // Limpiar cualquier contenido previo
+    containerRef.current.innerHTML = '';
+    
+    // Crear el script del widget dinámicamente
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://widget.the-odds-api.com/v1/js/odds-widget.js';
+    script.setAttribute('data-api-key', apiKeyData.widgetKey);
+    script.setAttribute('data-sport-key', sportKey);
+    script.setAttribute('data-bookmaker-keys', bookmakerKeys);
+    script.setAttribute('data-odds-format', oddsFormat);
+    script.setAttribute('data-market-keys', markets);
+    script.setAttribute('data-market-names', marketNames);
+    script.setAttribute('data-theme', 'dark');
+    script.setAttribute('data-style-width', width);
+    script.setAttribute('data-style-height', height);
+    script.setAttribute('data-style-border-radius', '8px');
+    script.setAttribute('data-style-font-family', 'inherit');
+    script.setAttribute('data-style-background-color', '#152233');
+    
+    // Añadir el script al contenedor
+    containerRef.current.appendChild(script);
+    
+    // Limpieza cuando el componente se desmonte
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+    };
+  }, [apiKeyData, sportKey, bookmakerKeys, oddsFormat, markets, marketNames, width, height]);
   
-  if (isLoading || !widgetUrl) {
+  if (isLoading) {
     return (
       <div className={`odds-widget-container ${className}`} style={{ width, height }}>
         <Skeleton className="w-full h-full rounded-lg" />
@@ -53,14 +80,23 @@ export function OddsWidget({
     );
   }
   
+  if (!apiKeyData?.widgetKey) {
+    return (
+      <Card className="p-4 text-center">
+        <p className="text-gray-400">
+          No se pudo cargar el widget de apuestas. La clave del widget no está disponible.
+        </p>
+      </Card>
+    );
+  }
+  
   return (
-    <div className={`odds-widget-container ${className}`}>
-      <iframe
-        src={widgetUrl}
-        style={{ width, height, border: '1px solid #192531', borderRadius: '8px' }}
-        title={`Odds Widget - ${sportKey}`}
-        loading="lazy"
-      />
+    <div 
+      ref={containerRef} 
+      className={`odds-widget-container ${className}`}
+      style={{ minHeight: height }}
+    >
+      {/* El widget se cargará aquí */}
     </div>
   );
 }

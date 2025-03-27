@@ -155,8 +155,8 @@ export default function EventDetailPage() {
                 oddsFormat="decimal"
                 markets="h2h,spreads,totals"
                 width="100%"
-                height="800px"
-                className="bg-[#1a2e4a] p-1 rounded-md"
+                height="700px"
+                className="bg-transparent rounded-md"
               />
             </div>
           ) : (
