@@ -381,10 +381,15 @@ export const crashCashoutSchema = z.object({
   gameId: z.string()
 });
 
+export const crashCreateSchema = z.object({
+  // Sin datos de entrada necesarios para crear un juego nuevo
+});
+
 export type CrashGame = typeof crashGameSchema.$inferSelect;
 export type CrashBet = typeof crashBetsSchema.$inferSelect;
 export type CrashBetInput = z.infer<typeof crashBetSchema>;
 export type CrashCashout = z.infer<typeof crashCashoutSchema>;
+export type CrashCreate = z.infer<typeof crashCreateSchema>;
 
 export type SlotSpin = z.infer<typeof slotSpinSchema>;
 export type SlotDoubleUp = z.infer<typeof slotDoubleUpSchema>;

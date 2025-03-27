@@ -13,13 +13,17 @@ import {
   insertFavoriteSchema,
   slotSpinSchema,
   slotDoubleUpSchema,
-  slotCollectSchema
+  slotCollectSchema,
+  crashCreateSchema
 } from "@shared/schema";
 
 // Import types for type safety
 import type { 
   SlotGame,
-  SlotSession 
+  SlotSession,
+  CrashGame,
+  CrashBet,
+  CrashCreate
 } from "@shared/schema";
 
 // Middleware to check if user is admin
@@ -206,6 +210,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize default slot games
   await initializeDefaultSlotGames();
   
+  /**
+   * @route GET /api/crash/current
+   * @desc Obtiene el juego de crash actual
+   * @response { id: string, status: string, crashPoint: number, startedAt: string, multiplier: number }
+   */
+  app.get('/api/crash/current', async (_req: Request, res: Response) => {
+    try {
+      // Obtener el juego de crash actual
+      const currentGame = await storage.getCurrentCrashGame();
+      
+      if (!currentGame) {
+        return res.status(404).json({
+          success: false,
+          message: 'No hay juego de crash en curso'
+        });
+      }
+      
+      // Calcular el multiplicador actual basado en el tiempo transcurrido
+      // desde que el juego comenzó
+      let currentMultiplier = 1.0;
+      
+      if (currentGame.status === 'in_progress' && currentGame.startedAt) {
+        const elapsedTimeMs = Date.now() - currentGame.startedAt.getTime();
+        const elapsedTimeSec = elapsedTimeMs / 1000;
+        
+        // Usando la fórmula del multiplicador: multiplier = e^(0.06*t)
+        currentMultiplier = Math.exp(0.06 * elapsedTimeSec);
+        
+        // No permitir que el multiplicador supere el punto de crash
+        if (currentMultiplier > currentGame.crashPoint) {
+          currentMultiplier = currentGame.crashPoint;
+        }
+      }
+      
+      return res.json({
+        id: currentGame.id,
+        status: currentGame.status,
+        crashPoint: currentGame.status === 'crashed' ? currentGame.crashPoint : undefined,
+        startedAt: currentGame.startedAt ? currentGame.startedAt.toISOString() : null,
+        multiplier: Number(currentMultiplier.toFixed(2))
+      });
+    } catch (error) {
+      console.error('Error al obtener juego de crash actual:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error al obtener juego de crash actual'
+      });
+    }
+  });
+
+  /**
+   * @route POST /api/crash/crear
+   * @desc Crear un nuevo juego de crash con multiplicador inicial 1.0
+   * @body {} - No se requieren datos de entrada
+   * @response { id_ronda: string, multiplicador: number, estado: string } 
+   */
+  app.post('/api/crash/crear', async (req: Request, res: Response) => {
+    try {
+      // Generar el punto de crash (cuándo va a explotar la nave)
+      const crashPoint = generateCrashPoint();
+      
+      // Generar semillas para la ronda
+      const serverSeed = generateRandomHash();
+      const clientSeed = generateRandomHash();
+      const hash = generateRandomHash(); // Este será nuestro ID de ronda
+      
+      // Crear un nuevo juego de crash en el almacenamiento
+      const newGame = await storage.createCrashGame(
+        crashPoint,
+        serverSeed,
+        clientSeed,
+        hash
+      );
+      
+      // Cambiar el estado a "in_progress" para iniciar el incremento del multiplicador
+      await storage.updateCrashGameStatus(hash, 'in_progress');
+      
+      // En un escenario real, estableceríamos un temporizador para incrementar el multiplicador
+      // y eventualmente hacer que el juego "explote" en el punto crashPoint
+      
+      // Planificar la explosión del juego después del tiempo calculado
+      const timeToExplosion = calculateTimeToReachMultiplier(crashPoint);
+      setTimeout(async () => {
+        // Marcar el juego como explotado
+        await storage.setCrashGameCrashed(hash);
+        
+        // Procesar cualquier apuesta que no haya sido retirada antes de la explosión
+        // Esto se haría en una implementación completa
+      }, timeToExplosion);
+      
+      // Responder con el ID de la ronda creada
+      return res.status(201).json({
+        id_ronda: hash, 
+        multiplicador: 1.0, // Comenzamos con multiplicador 1.0
+        estado: 'en_curso'
+      });
+    } catch (error) {
+      console.error('Error al crear juego de crash:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error al crear nuevo juego de crash'
+      });
+    }
+  });
+
   // Rutas para Space Explorer (crash game con temática espacial)
   app.post('/api/games/crash/bet', async (req: Request, res: Response) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);

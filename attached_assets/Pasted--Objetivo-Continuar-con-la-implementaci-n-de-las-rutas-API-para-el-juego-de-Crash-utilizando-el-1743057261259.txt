@@ -1,0 +1,21 @@
+**Objetivo:** Continuar con la implementación de las rutas API para el juego de Crash, utilizando el almacenamiento local simulado. El usuario ha confirmado que vamos por buen camino.
+
+**Por favor, ayúdame a implementar la primera ruta API:**
+
+1.  **Crea una función para la ruta `/api/crash/crear` que acepte solicitudes `POST`.**
+2.  **Dentro de esta función:**
+    * Genera un identificador único (ID) para la nueva ronda de Crash. Puedes usar una librería para generar UUIDs o un método simple como un contador incrementado.
+    * Inicializa el multiplicador de la ronda en `1.0`.
+    * Crea una estructura de datos en el almacenamiento local simulado (por ejemplo, un diccionario global) para almacenar la información de esta ronda. La clave debería ser el ID de la ronda y el valor debería ser un objeto o diccionario que contenga al menos el `multiplicador_actual` y el `estado` (inicialmente 'en_curso'). También podría incluir una lista o diccionario para almacenar las apuestas de los usuarios en esta ronda (inicialmente vacío).
+    * Simula el inicio del incremento del multiplicador. Para simplificar, en lugar de un proceso en segundo plano complejo, podemos tener una función separada que se encargue de incrementar el multiplicador de forma gradual y aleatoria. Llama a esta función (o planifica cómo se llamará) después de crear la ronda. Esta función necesitará acceder al almacenamiento local para actualizar el multiplicador de la ronda específica.
+    * La ruta `/api/crash/crear` debería devolver una respuesta JSON que contenga el `id_ronda` generado.
+
+**Consideraciones para el Almacenamiento Local (simulado):**
+
+* Utiliza un diccionario Python global para simular el almacenamiento local.
+* La clave del diccionario será el `id_ronda`.
+* El valor será otro diccionario con la información de la ronda (ej: `{'multiplicador_actual': 1.0, 'estado': 'en_curso', 'apuestas': {}}`).
+
+**Por favor, proporciona el código Python (usando Flask o FastAPI, según el proyecto actual) para implementar esta ruta `/api/crash/crear` y la estructura inicial del almacenamiento local simulado.**
+
+**Nota:** No es necesario implementar la lógica completa del incremento del multiplicador en este paso, solo la creación de la ronda y la planificación de cómo se gestionará el multiplicador.
