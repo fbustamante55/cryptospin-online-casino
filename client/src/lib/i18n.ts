@@ -61,6 +61,12 @@ const resources = {
 
 // Definir la función para inicializar i18n
 const initI18n = () => {
+  // Primero verificamos si hay un idioma forzado
+  const forcedLang = localStorage.getItem('forceLang');
+  if (forcedLang) {
+    console.log(`Usando idioma forzado: ${forcedLang}`);
+  }
+  
   i18n
     // Detectar el idioma del navegador
     .use(LanguageDetector)
@@ -70,7 +76,8 @@ const initI18n = () => {
     .init({
       resources,
       fallbackLng: 'en',
-      debug: false,
+      lng: forcedLang || undefined, // Usar el idioma forzado si existe
+      debug: true, // Habilitamos debug temporalmente para resolver problemas
       interpolation: {
         escapeValue: false, // no necesario para React
       },
@@ -79,6 +86,7 @@ const initI18n = () => {
         order: ['localStorage', 'cookie', 'navigator'],
         // Clave para localStorage/cookie
         lookupLocalStorage: 'i18nextLng',
+        caches: ['localStorage'],
       },
       react: {
         useSuspense: false,

@@ -57,7 +57,16 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
     if (user?.language) {
       setCurrentLangCode(user.language);
     }
-  }, [user?.language]);
+    
+    // Log para depuración del estado del idioma
+    console.log("Estado actual de i18n:", {
+      i18nLanguage: i18n.language,
+      currentLangCode,
+      userLanguage: user?.language,
+      storedLanguage: localStorage.getItem('i18nextLng'),
+      forcedLanguage: localStorage.getItem('forceLang')
+    });
+  }, [user?.language, currentLangCode]);
   
   const currentLanguage = LANGUAGES.find(lang => lang.code === currentLangCode) || LANGUAGES[0];
   
@@ -70,36 +79,43 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
     try {
       setIsChangingLanguage(true);
       
-      // Cambiar el idioma en i18next y guardarlo en localStorage
-      await i18n.changeLanguage(languageCode);
-      setCurrentLangCode(languageCode);
-      
-      // Si el usuario está autenticado, intentar actualizar la preferencia en el servidor
-      if (user) {
-        try {
-          await apiRequest({
-            method: "POST",
-            url: "/api/user/update-language",
-            data: { language: languageCode }
-          });
-        } catch (apiError) {
-          console.log("No se pudo actualizar el idioma en el servidor, pero se cambió localmente");
-          // Falló la API pero el idioma ya se cambió localmente, así que no mostramos error
+      try {
+        // Cambiar el idioma en i18next y guardarlo en localStorage
+        console.log(`Cambiando idioma a: ${languageCode}`);
+        await i18n.changeLanguage(languageCode);
+        console.log(`Idioma cambiado en i18n, ahora es: ${i18n.language}`);
+        setCurrentLangCode(languageCode);
+        
+        // Si el usuario está autenticado, intentar actualizar la preferencia en el servidor
+        if (user) {
+          try {
+            await apiRequest({
+              method: "POST",
+              url: "/api/user/update-language",
+              data: { language: languageCode }
+            });
+            console.log(`Idioma actualizado en el servidor para el usuario ${user.username}`);
+          } catch (apiError) {
+            console.log("No se pudo actualizar el idioma en el servidor, pero se cambió localmente");
+            // Falló la API pero el idioma ya se cambió localmente, así que no mostramos error
+          }
         }
-      }
-      
-      toast({
-        title: t('languageSelector.languageUpdated'),
-        description: t('languageSelector.languageUpdateDescription'),
-      });
-      
-      // Cerrar el diálogo
-      setIsOpen(false);
-      
-      // Recargar la página para aplicar el nuevo idioma completamente
-      setTimeout(() => {
+        
+        // Cerrar el diálogo y mostrar toast de éxito
+        setIsOpen(false);
+        toast({
+          title: t('languageSelector.languageUpdated'),
+          description: t('languageSelector.languageUpdateDescription'),
+        });
+        
+        // Forzar recarga para aplicar todos los cambios
+        localStorage.setItem('i18nextLng', languageCode);
+        localStorage.setItem('forceLang', languageCode);
         window.location.reload();
-      }, 1500);
+      } catch (langError) {
+        console.error("Error al cambiar el idioma:", langError);
+        // No cerramos el diálogo en caso de error
+      }
     } catch (error) {
       toast({
         title: t('languageSelector.errorUpdating'),

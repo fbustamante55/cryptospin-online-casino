@@ -55,12 +55,17 @@ function Router() {
   );
 }
 
+// Importamos el componente de debug
+import { LanguageDebug } from "@/components/language-debug";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router />
         <Toaster />
+        {/* Componente de debug para ver el estado del idioma */}
+        <LanguageDebug />
       </AuthProvider>
     </QueryClientProvider>
   );
