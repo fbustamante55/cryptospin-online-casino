@@ -38,6 +38,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { fetchOdds, EventOdds } from "@/lib/sports-api";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarProps {
   className?: string;
@@ -386,12 +387,12 @@ export function Sidebar({ className }: SidebarProps) {
     const iconSizeClass = isChild && nestLevel > 1 ? "w-3 h-3" : "w-4 h-4";
     
     return (
-      <div key={`${index}-${item.name}`}>
+      <motion.div key={`${index}-${item.name}`}>
         {/* Ítem principal */}
-        <div 
+        <motion.div 
           className={cn(
-            "group flex items-center justify-between px-3 py-2 mx-2 rounded-lg text-white transition-colors cursor-pointer",
-            (item.active || hasActiveChild) ? "bg-[#192531]" : "hover:bg-[#192531]",
+            "group flex items-center justify-between px-3 py-2 mx-2 rounded-lg text-white cursor-pointer",
+            (item.active || hasActiveChild) ? "bg-[#192531]" : "",
             isChild && "py-1.5 mx-3 my-0.5 rounded-md",
             indentationClasses
           )}
@@ -402,108 +403,206 @@ export function Sidebar({ className }: SidebarProps) {
               window.location.href = item.path;
             }
           }}
+          whileHover={{ 
+            backgroundColor: "#192531",
+            scale: 1.01,
+            transition: { duration: 0.2 }
+          }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.2 }}
+          animate={
+            (item.active || hasActiveChild) 
+              ? { backgroundColor: "#192531" } 
+              : { backgroundColor: "rgba(0,0,0,0)" }
+          }
         >
-          <div className="flex items-center space-x-3">
-            <div className={cn(isChild && iconSizeClass)}>
+          <motion.div className="flex items-center space-x-3">
+            <motion.div 
+              className={cn(isChild && iconSizeClass)}
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
               {item.icon}
-            </div>
+            </motion.div>
             {(!sidebarCollapsed || isChild) && (
-              <span className={cn(
-                `font-medium ${textSizeClass}`,
-                (item.active || hasActiveChild) ? "text-white" : "text-gray-300 group-hover:text-white"
-              )}>
+              <motion.span 
+                className={cn(
+                  `font-medium ${textSizeClass}`,
+                  (item.active || hasActiveChild) ? "text-white" : "text-gray-300 group-hover:text-white"
+                )}
+                animate={{ 
+                  color: (item.active || hasActiveChild) ? "#ffffff" : "#94a3b8" 
+                }}
+                whileHover={{ color: "#ffffff" }}
+              >
                 {item.name}
-              </span>
+              </motion.span>
             )}
-          </div>
+          </motion.div>
           
           {(!sidebarCollapsed || isChild) && (
             <div className="flex items-center">
               {item.badge !== undefined && (
-                <div className={cn(
-                  "h-5 w-auto min-w-5 px-1 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center",
-                  nestLevel > 1 && "h-4 min-w-4 text-[10px]"
-                )}>
+                <motion.div 
+                  className={cn(
+                    "h-5 w-auto min-w-5 px-1 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center",
+                    nestLevel > 1 && "h-4 min-w-4 text-[10px]"
+                  )}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
                   {item.badge}
-                </div>
+                </motion.div>
               )}
               {item.hasChildren && (
-                isExpanded ? 
-                <ChevronDown className={cn("h-4 w-4 text-gray-300 ml-1", nestLevel > 1 && "h-3 w-3")} /> : 
-                <ChevronRight className={cn("h-4 w-4 text-gray-300 ml-1", nestLevel > 1 && "h-3 w-3")} />
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChevronRight className={cn("h-4 w-4 text-gray-300 ml-1", nestLevel > 1 && "h-3 w-3")} />
+                </motion.div>
               )}
             </div>
           )}
-        </div>
+        </motion.div>
         
         {/* Subitems si está expandido */}
-        {item.hasChildren && isExpanded && !sidebarCollapsed && (
-          <div className={cn(
-            "mt-1 space-y-1",
-            nestLevel === 0 ? "ml-4 border-l border-[#1c2b3a] pl-2" : 
-            nestLevel === 1 ? "ml-2 pl-1" : "ml-1"
-          )}>
-            {item.children?.map((child, childIndex) => (
-              renderSidebarItem(child, `${index}-${childIndex}`, true, nestLevel + 1)
-            ))}
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {item.hasChildren && isExpanded && !sidebarCollapsed && (
+            <motion.div 
+              className={cn(
+                "mt-1 space-y-1",
+                nestLevel === 0 ? "ml-4 border-l border-[#1c2b3a] pl-2" : 
+                nestLevel === 1 ? "ml-2 pl-1" : "ml-1"
+              )}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              {item.children?.map((child, childIndex) => (
+                renderSidebarItem(child, `${index}-${childIndex}`, true, nestLevel + 1)
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     );
   };
 
   return (
-    <div className={cn(
-      "hidden md:flex flex-col bg-[#0e1824] border-r border-[#1c2b3a] transition-all duration-300",
-      sidebarCollapsed ? "w-16" : "w-64",
-      className
-    )}>
+    <motion.div 
+      className={cn(
+        "hidden md:flex flex-col bg-[#0e1824] border-r border-[#1c2b3a]",
+        className
+      )}
+      animate={{
+        width: sidebarCollapsed ? "4rem" : "16rem"
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 200,
+        damping: 25
+      }}
+    >
       {/* Sidebar Header with Logo */}
       <div className="px-4 py-3 flex items-center justify-between border-b border-[#1c2b3a]">
-        {!sidebarCollapsed && (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center">
-                <span className="text-white font-bold text-sm">CS</span>
+        <AnimatePresence mode="wait">
+          {!sidebarCollapsed ? (
+            <motion.div 
+              className="flex items-center justify-between w-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              key="expanded-header"
+            >
+              <div className="flex items-center">
+                <motion.div 
+                  className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center"
+                  whileHover={{ scale: 1.05, backgroundColor: "#0fda85" }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="text-white font-bold text-sm">CS</span>
+                </motion.div>
+                <motion.span 
+                  className="ml-2 font-bold text-white"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  CryptoSpin
+                </motion.span>
               </div>
-              <span className="ml-2 font-bold text-white">CryptoSpin</span>
-            </div>
-            <button 
-              onClick={() => setSidebarCollapsed(true)}
-              className="text-gray-400 hover:text-white p-1"
+              <motion.button 
+                onClick={() => setSidebarCollapsed(true)}
+                className="text-gray-400 p-1 rounded-full"
+                whileHover={{ 
+                  scale: 1.1, 
+                  backgroundColor: "#192531",
+                  color: "#ffffff" 
+                }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Menu className="h-5 w-5" />
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div 
+              className="w-full flex justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              key="collapsed-header"
             >
-              <Menu className="h-5 w-5" />
-            </button>
-          </div>
-        )}
-        {sidebarCollapsed && (
-          <div className="w-full flex justify-center">
-            <button
-              onClick={() => setSidebarCollapsed(false)}
-              className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center hover:bg-[#0fda85] transition-colors"
-            >
-              <span className="text-white font-bold text-sm">CS</span>
-            </button>
-          </div>
-        )}
+              <motion.button
+                onClick={() => setSidebarCollapsed(false)}
+                className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center"
+                whileHover={{ 
+                  scale: 1.1, 
+                  backgroundColor: "#0fda85"
+                }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <span className="text-white font-bold text-sm">CS</span>
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Balance Widget */}
-      {!sidebarCollapsed && (
-        <div className="px-4 py-3 m-2 rounded-lg bg-[#192531] border border-[#1c2b3a]">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs text-gray-300">Balance</div>
-              <div className="text-md font-medium text-white">{user?.balance || "0.00"} €</div>
+      <AnimatePresence>
+        {!sidebarCollapsed && (
+          <motion.div 
+            className="px-4 py-3 m-2 rounded-lg bg-[#192531] border border-[#1c2b3a]"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs text-gray-300">Balance</div>
+                <div className="text-md font-medium text-white">{user?.balance || "0.00"} €</div>
+              </div>
+              <motion.div className="flex space-x-1">
+                <motion.button 
+                  className="py-1 px-2 text-xs bg-[#09b66d] text-white rounded-md"
+                  whileHover={{ 
+                    scale: 1.05, 
+                    backgroundColor: "#0fda85" 
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Depositar
+                </motion.button>
+              </motion.div>
             </div>
-            <div className="flex space-x-1">
-              <button className="py-1 px-2 text-xs bg-[#09b66d] hover:bg-[#0fda85] text-white rounded-md transition-colors">
-                Depositar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Sidebar Items */}
       <div className="flex-1 overflow-y-auto pb-4">
@@ -515,12 +614,20 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
 
       {/* Total Bets Counter */}
-      {!sidebarCollapsed && (
-        <div className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#192531] border border-[#1c2b3a]">
-          <div className="text-xs text-gray-300 mb-1">Total apuestas</div>
-          <div className="text-sm font-medium text-white">{totalBets}</div>
-        </div>
-      )}
-    </div>
+      <AnimatePresence>
+        {!sidebarCollapsed && (
+          <motion.div 
+            className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#192531] border border-[#1c2b3a]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="text-xs text-gray-300 mb-1">Total apuestas</div>
+            <div className="text-sm font-medium text-white">{totalBets}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

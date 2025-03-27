@@ -34,6 +34,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { SidebarLanguageSwitcher } from "./sidebar-language-switcher";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Componente para cada ítem del drawer menu
 interface DrawerItemProps {
@@ -60,56 +61,110 @@ function DrawerItem({
   isSubmenuOpen
 }: DrawerItemProps) {
   return (
-    <div 
+    <motion.div 
       className={cn(
-        "flex items-center justify-between px-4 py-3 hover:bg-[#192531] cursor-pointer",
+        "flex items-center justify-between px-4 py-3 cursor-pointer",
         active ? "bg-[#192531]" : ""
       )}
       onClick={onClick || (hasSubmenu ? toggleSubmenu : () => path && (window.location.href = path))}
+      whileHover={{ 
+        backgroundColor: "#192531",
+        scale: 1.01
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      animate={
+        active 
+          ? { backgroundColor: "#192531" } 
+          : { backgroundColor: "rgba(0,0,0,0)" }
+      }
     >
-      <div className="flex items-center space-x-3">
-        <div className="text-gray-300">{icon}</div>
-        <span className="text-gray-100">{label}</span>
-      </div>
+      <motion.div className="flex items-center space-x-3">
+        <motion.div 
+          className="text-gray-300"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        >
+          {icon}
+        </motion.div>
+        <motion.span 
+          className="text-gray-100"
+          animate={{ 
+            color: active ? "#ffffff" : "#e5e7eb" 
+          }}
+          whileHover={{ color: "#ffffff" }}
+        >
+          {label}
+        </motion.span>
+      </motion.div>
       <div className="flex items-center">
         {badge && (
-          <div className="h-5 w-auto min-w-5 px-1 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center mr-2">
+          <motion.div 
+            className="h-5 w-auto min-w-5 px-1 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center mr-2"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
             {badge}
-          </div>
+          </motion.div>
         )}
         {hasSubmenu && (
-          <div className="w-5 h-5 flex items-center justify-center text-gray-400">
-            {isSubmenuOpen ? (
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : (
-              <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 9L5 5L1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-          </div>
+          <motion.div 
+            className="w-5 h-5 flex items-center justify-center text-gray-400"
+            animate={{ rotate: isSubmenuOpen ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 9L5 5L1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 // Componente para cada ítem del submenu
 function DrawerSubmenuItem({ icon, label, path, active }: { icon: React.ReactNode; label: string; path: string; active?: boolean }) {
   return (
-    <div 
+    <motion.div 
       className={cn(
-        "flex items-center pl-10 pr-4 py-2 hover:bg-[#1c2b3a] cursor-pointer",
+        "flex items-center pl-10 pr-4 py-2 cursor-pointer",
         active ? "bg-[#1c2b3a]" : ""
       )}
       onClick={() => window.location.href = path}
+      whileHover={{ 
+        backgroundColor: "#1c2b3a",
+        x: 3,
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      animate={
+        active 
+          ? { backgroundColor: "#1c2b3a" } 
+          : { backgroundColor: "rgba(0,0,0,0)" }
+      }
     >
-      <div className="flex items-center space-x-3">
-        <div className="text-gray-400">{icon}</div>
-        <span className="text-gray-300">{label}</span>
-      </div>
-    </div>
+      <motion.div className="flex items-center space-x-3">
+        <motion.div 
+          className="text-gray-400"
+          whileHover={{ 
+            scale: 1.2,
+            color: "#ffffff",
+            transition: { type: "spring", stiffness: 300, damping: 10 }
+          }}
+        >
+          {icon}
+        </motion.div>
+        <motion.span 
+          className="text-gray-300"
+          whileHover={{ color: "#ffffff" }}
+          animate={{ color: active ? "#ffffff" : "#94a3b8" }}
+        >
+          {label}
+        </motion.span>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -146,32 +201,44 @@ function MobileDrawer({ open, onClose, children }: DrawerProps) {
   }, [open, onClose]);
 
   return (
-    <div 
-      className={cn(
-        "fixed inset-0 z-50 transform transition-all duration-300 ease-in-out md:hidden",
-        open ? "translate-x-0" : "-translate-x-full"
+    <AnimatePresence>
+      {open && (
+        <motion.div 
+          className="fixed inset-0 z-50 md:hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {/* Backdrop */}
+          <motion.div 
+            ref={backdropRef}
+            className="absolute inset-0 bg-black/50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            aria-hidden="true"
+          />
+          
+          {/* Drawer */}
+          <motion.div 
+            ref={drawerRef}
+            className="absolute top-0 left-0 h-full w-[280px] bg-[#0e1824] border-r border-[#1c2b3a] shadow-xl"
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              duration: 0.3 
+            }}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
       )}
-      style={{ visibility: open ? 'visible' : 'hidden' }}
-    >
-      {/* Backdrop */}
-      <div 
-        ref={backdropRef}
-        className={cn(
-          "absolute inset-0 bg-black/50 transition-opacity duration-300",
-          open ? "opacity-100" : "opacity-0"
-        )}
-        aria-hidden="true"
-      />
-      
-      {/* Drawer */}
-      <div 
-        ref={drawerRef}
-        className="absolute top-0 left-0 h-full w-[280px] bg-[#0e1824] border-r border-[#1c2b3a] shadow-xl transform transition-transform duration-300 ease-in-out"
-        style={{ transform: open ? 'translateX(0)' : 'translateX(-100%)' }}
-      >
-        {children}
-      </div>
-    </div>
+    </AnimatePresence>
   );
 }
 
@@ -321,42 +388,50 @@ export function MobileNav() {
             isSubmenuOpen={expandedMenus['casino']}
             active={!location.includes('/sports') && location === "/"}
           />
-          {expandedMenus['casino'] && (
-            <div className="bg-[#0a111a]">
-              <DrawerSubmenuItem 
-                icon={<Home className="h-4 w-4" />}
-                label="Casino Lobby"
-                path="/"
-                active={location === "/"}
-              />
-              <DrawerSubmenuItem 
-                icon={<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8zm0 2h8v16H8V4zm6 13a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                </svg>}
-                label="Tragamonedas"
-                path="/slots"
-              />
-              <DrawerSubmenuItem 
-                icon={<Rocket className="h-4 w-4" />}
-                label="Crash"
-                path="/crash"
-              />
-              <DrawerSubmenuItem 
-                icon={<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-13a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>}
-                label="Ruleta"
-                path="/roulette"
-              />
-              <DrawerSubmenuItem 
-                icon={<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 2v16H7V4h10z"/>
-                </svg>}
-                label="Blackjack"
-                path="/blackjack"
-              />
-            </div>
-          )}
+          <AnimatePresence>
+            {expandedMenus['casino'] && (
+              <motion.div 
+                className="bg-[#0a111a]"
+                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                animate={{ opacity: 1, height: 'auto', overflow: 'hidden' }}
+                exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <DrawerSubmenuItem 
+                  icon={<Home className="h-4 w-4" />}
+                  label="Casino Lobby"
+                  path="/"
+                  active={location === "/"}
+                />
+                <DrawerSubmenuItem 
+                  icon={<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8zm0 2h8v16H8V4zm6 13a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                  </svg>}
+                  label="Tragamonedas"
+                  path="/slots"
+                />
+                <DrawerSubmenuItem 
+                  icon={<Rocket className="h-4 w-4" />}
+                  label="Crash"
+                  path="/crash"
+                />
+                <DrawerSubmenuItem 
+                  icon={<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-13a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                  </svg>}
+                  label="Ruleta"
+                  path="/roulette"
+                />
+                <DrawerSubmenuItem 
+                  icon={<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 2v16H7V4h10z"/>
+                  </svg>}
+                  label="Blackjack"
+                  path="/blackjack"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {/* Sportsbook Section */}
           <DrawerItem 
@@ -367,32 +442,40 @@ export function MobileNav() {
             isSubmenuOpen={expandedMenus['sportsbook']}
             active={location.includes('/sports')}
           />
-          {expandedMenus['sportsbook'] && (
-            <div className="bg-[#0a111a]">
-              <DrawerSubmenuItem 
-                icon={<Zap className="h-4 w-4" />}
-                label="En vivo"
-                path="/sports/vivo"
-                active={location.includes('/sports/vivo')}
-              />
-              <DrawerSubmenuItem 
-                icon={<Calendar className="h-4 w-4" />}
-                label="Próximos"
-                path="/sports"
-                active={location === "/sports"}
-              />
-              <DrawerSubmenuItem 
-                icon={<Star className="h-4 w-4" />}
-                label="Populares"
-                path="/sports/popular"
-              />
-              <DrawerSubmenuItem 
-                icon={<FileText className="h-4 w-4" />}
-                label="Mis apuestas"
-                path="/sports/bets"
-              />
-            </div>
-          )}
+          <AnimatePresence>
+            {expandedMenus['sportsbook'] && (
+              <motion.div 
+                className="bg-[#0a111a]"
+                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                animate={{ opacity: 1, height: 'auto', overflow: 'hidden' }}
+                exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <DrawerSubmenuItem 
+                  icon={<Zap className="h-4 w-4" />}
+                  label="En vivo"
+                  path="/sports/vivo"
+                  active={location.includes('/sports/vivo')}
+                />
+                <DrawerSubmenuItem 
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Próximos"
+                  path="/sports"
+                  active={location === "/sports"}
+                />
+                <DrawerSubmenuItem 
+                  icon={<Star className="h-4 w-4" />}
+                  label="Populares"
+                  path="/sports/popular"
+                />
+                <DrawerSubmenuItem 
+                  icon={<FileText className="h-4 w-4" />}
+                  label="Mis apuestas"
+                  path="/sports/bets"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {/* Otros menús */}
           <DrawerItem 
@@ -439,20 +522,28 @@ export function MobileNav() {
             toggleSubmenu={() => toggleMenu('support')}
             isSubmenuOpen={expandedMenus['support']}
           />
-          {expandedMenus['support'] && (
-            <div className="bg-[#0a111a]">
-              <DrawerSubmenuItem 
-                icon={<Headset className="h-4 w-4" />}
-                label="Centro de ayuda"
-                path="/support"
-              />
-              <DrawerSubmenuItem 
-                icon={<MessageCircle className="h-4 w-4" />}
-                label="Chat en vivo"
-                path="/support/chat"
-              />
-            </div>
-          )}
+          <AnimatePresence>
+            {expandedMenus['support'] && (
+              <motion.div 
+                className="bg-[#0a111a]"
+                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                animate={{ opacity: 1, height: 'auto', overflow: 'hidden' }}
+                exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <DrawerSubmenuItem 
+                  icon={<Headset className="h-4 w-4" />}
+                  label="Centro de ayuda"
+                  path="/support"
+                />
+                <DrawerSubmenuItem 
+                  icon={<MessageCircle className="h-4 w-4" />}
+                  label="Chat en vivo"
+                  path="/support/chat"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {/* Idioma - Reemplazamos el componente fijo por el selector de idioma reutilizable */}
           <div className="bg-[#0a111a] pl-1">
@@ -463,96 +554,191 @@ export function MobileNav() {
       
       {/* Top mobile header */}
       <div className="md:hidden fixed top-0 left-0 right-0 bg-[#0e1824] border-b border-[#1c2b3a] z-20 px-4 py-2 flex items-center justify-between">
-        <button 
+        <motion.button 
           onClick={() => setSidebarOpen(true)}
           className="text-gray-400 hover:text-white"
+          whileHover={{ scale: 1.1, rotate: 10 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Menu className="h-5 w-5" />
-        </button>
+        </motion.button>
         
-        <h1 className="text-lg font-bold text-white">CryptoSpin</h1>
+        <motion.h1 
+          className="text-lg font-bold text-white"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+        >
+          CryptoSpin
+        </motion.h1>
         
         <div className="flex">
-          <button 
-            className={`px-4 py-2 rounded-md text-white font-medium text-sm ${activeTab === 'casino' ? 'bg-[#09b66d]' : 'bg-[#192531] hover:bg-[#243442]'}`}
+          <motion.button 
+            className={`px-4 py-2 rounded-md text-white font-medium text-sm ${activeTab === 'casino' ? 'bg-[#09b66d]' : 'bg-[#192531]'}`}
             onClick={() => {
               setActiveTab('casino');
               window.location.href = '/';
             }}
+            whileHover={{ backgroundColor: activeTab === 'casino' ? "#0fda85" : "#243442", scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            animate={{ 
+              backgroundColor: activeTab === 'casino' ? "#09b66d" : "#192531",
+              y: activeTab === 'casino' ? [0, -2, 0] : 0
+            }}
+            transition={{ duration: 0.3, y: { repeat: activeTab === 'casino' ? 2 : 0, repeatType: "reverse" } }}
           >
             CASINO
-          </button>
-          <button 
-            className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#192531] hover:bg-[#243442]'}`}
+          </motion.button>
+          <motion.button 
+            className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#192531]'}`}
             onClick={() => {
               setActiveTab('deportes');
               window.location.href = '/sports';
             }}
+            whileHover={{ backgroundColor: activeTab === 'deportes' ? "#0fda85" : "#243442", scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            animate={{ 
+              backgroundColor: activeTab === 'deportes' ? "#09b66d" : "#192531",
+              y: activeTab === 'deportes' ? [0, -2, 0] : 0
+            }}
+            transition={{ duration: 0.3, y: { repeat: activeTab === 'deportes' ? 2 : 0, repeatType: "reverse" } }}
           >
             DEPORTES
-          </button>
+          </motion.button>
         </div>
         
-        <button 
+        <motion.button 
           className="text-gray-400 hover:text-white" 
           onClick={() => window.location.href = '/profile'}
+          whileHover={{ scale: 1.1, color: "#ffffff" }}
+          whileTap={{ scale: 0.9 }}
         >
           <User className="h-5 w-5" />
-        </button>
+        </motion.button>
       </div>
 
       {/* Bottom navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0e1824] border-t border-[#1c2b3a] z-10">
         <div className="flex justify-around">
-          <Link href="/" className={cn(
-            "flex flex-col items-center py-3 px-4",
-            isActive("/") ? "text-white" : "text-gray-300"
-          )}>
-            <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gradient-to-r from-[#9400d3] to-[#e100ff]">
-              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm14 8h-4v6h4v-6z"/>
-              </svg>
-            </div>
-            <span className="text-xs mt-1">Casino</span>
-          </Link>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/" className={cn(
+              "flex flex-col items-center py-3 px-4",
+              isActive("/") ? "text-white" : "text-gray-300"
+            )}>
+              <motion.div 
+                className="w-5 h-5 flex items-center justify-center rounded-full bg-gradient-to-r from-[#9400d3] to-[#e100ff]"
+                animate={isActive("/") ? { scale: [1, 1.1, 1] } : {}}
+                transition={{ duration: 0.5, repeat: isActive("/") ? Infinity : 0, repeatType: "reverse" }}
+              >
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm14 8h-4v6h4v-6z"/>
+                </svg>
+              </motion.div>
+              <motion.span 
+                className="text-xs mt-1"
+                animate={{ color: isActive("/") ? "#ffffff" : "#d1d5db" }}
+              >
+                Casino
+              </motion.span>
+            </Link>
+          </motion.div>
           
-          <Link href="/sports" className={cn(
-            "flex flex-col items-center py-3 px-4",
-            isActive("/sports") ? "text-white" : "text-gray-300"
-          )}>
-            <Trophy className="h-5 w-5" />
-            <span className="text-xs mt-1">Deportes</span>
-          </Link>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/sports" className={cn(
+              "flex flex-col items-center py-3 px-4",
+              isActive("/sports") ? "text-white" : "text-gray-300"
+            )}>
+              <motion.div
+                animate={isActive("/sports") ? { rotate: [0, 10, 0, -10, 0] } : {}}
+                transition={{ duration: 1, repeat: isActive("/sports") ? 1 : 0 }}
+              >
+                <Trophy className="h-5 w-5" />
+              </motion.div>
+              <motion.span 
+                className="text-xs mt-1"
+                animate={{ color: isActive("/sports") ? "#ffffff" : "#d1d5db" }}
+              >
+                Deportes
+              </motion.span>
+            </Link>
+          </motion.div>
           
-          <Link href="/wallet" className={cn(
-            "flex flex-col items-center py-3 px-4",
-            isActive("/wallet") ? "text-white" : "text-gray-300"
-          )}>
-            <Wallet className="h-5 w-5" />
-            <span className="text-xs mt-1">Billetera</span>
-          </Link>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/wallet" className={cn(
+              "flex flex-col items-center py-3 px-4",
+              isActive("/wallet") ? "text-white" : "text-gray-300"
+            )}>
+              <motion.div
+                animate={isActive("/wallet") ? { y: [0, -2, 0, -2, 0] } : {}}
+                transition={{ duration: 0.5, repeat: isActive("/wallet") ? Infinity : 0, repeatType: "reverse" }}
+              >
+                <Wallet className="h-5 w-5" />
+              </motion.div>
+              <motion.span 
+                className="text-xs mt-1"
+                animate={{ color: isActive("/wallet") ? "#ffffff" : "#d1d5db" }}
+              >
+                Billetera
+              </motion.span>
+            </Link>
+          </motion.div>
           
-          <Link href="/rewards" className={cn(
-            "flex flex-col items-center py-3 px-4 relative",
-            isActive("/rewards") ? "text-white" : "text-gray-300"
-          )}>
-            <Gift className="h-5 w-5" />
-            <div className="absolute top-2 right-2 h-4 w-4 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center">
-              1
-            </div>
-            <span className="text-xs mt-1">Recompensas</span>
-          </Link>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/rewards" className={cn(
+              "flex flex-col items-center py-3 px-4 relative",
+              isActive("/rewards") ? "text-white" : "text-gray-300"
+            )}>
+              <motion.div
+                animate={isActive("/rewards") ? { scale: [1, 1.2, 1] } : {}}
+                transition={{ duration: 0.5, repeat: isActive("/rewards") ? Infinity : 0, repeatType: "reverse" }}
+              >
+                <Gift className="h-5 w-5" />
+                <motion.div 
+                  className="absolute top-2 right-2 h-4 w-4 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 0.7, repeat: Infinity, repeatType: "reverse" }}
+                >
+                  1
+                </motion.div>
+              </motion.div>
+              <motion.span 
+                className="text-xs mt-1"
+                animate={{ color: isActive("/rewards") ? "#ffffff" : "#d1d5db" }}
+              >
+                Recompensas
+              </motion.span>
+            </Link>
+          </motion.div>
           
-          <button 
+          <motion.button 
             onClick={() => setSidebarOpen(true)} 
             className={cn(
               "flex flex-col items-center py-3 px-4",
               "text-gray-300"
             )}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Menu className="h-5 w-5" />
+            <motion.div
+              whileHover={{ rotate: 90 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Menu className="h-5 w-5" />
+            </motion.div>
             <span className="text-xs mt-1">Menú</span>
-          </button>
+          </motion.button>
         </div>
       </div>
     </>
