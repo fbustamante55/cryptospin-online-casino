@@ -57,6 +57,73 @@ export default function CrashPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
+          {/* Hero Banner */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#192531] to-[#0e1824] mb-8">
+            <div className="relative z-10 p-6 md:p-8">
+              <h2 className="font-heading text-xl md:text-3xl font-bold text-white mb-2">SPACE EXPLORER <span className="text-[#09b66d]">Crash Game</span></h2>
+              <p className="text-gray-300 max-w-lg mb-4">{t('crash_description', 'Watch the UFO fly to the stars! Cash out before it crashes for big wins!')}</p>
+              <div className="flex flex-wrap gap-3">
+                <button className="px-4 py-2 bg-[#09b66d] hover:bg-[#0fda85] text-white font-medium rounded-md transition-all duration-200">
+                  {t('buttons.startPlaying', 'Start Playing')}
+                </button>
+                <button className="px-4 py-2 bg-[#313d4a] hover:bg-[#2a3441] text-white font-medium rounded-md transition-all duration-200">
+                  {t('buttons.learnMore', 'Learn More')}
+                </button>
+              </div>
+            </div>
+            <div className="hidden md:block absolute top-0 right-0 w-1/3 h-full">
+              <div className="w-full h-full opacity-25 bg-gradient-to-l from-[#09b66d]/30 to-transparent"></div>
+              <svg 
+                className="absolute top-1/2 right-16 transform -translate-y-1/2" 
+                width="300" 
+                height="240" 
+                viewBox="0 0 300 240" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Fondo con brillo */}
+                <defs>
+                  <radialGradient id="crashGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                    <stop offset="0%" stopColor="#09b66d" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#0e1824" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <circle cx="150" cy="120" r="120" fill="url(#crashGlow)" />
+                
+                {/* UFO */}
+                <g transform="translate(150, 120)">
+                  <ellipse cx="0" cy="0" rx="45" ry="15" fill="#313d4a" stroke="#1c2b3a" strokeWidth="2" />
+                  <ellipse cx="0" cy="-5" rx="25" ry="10" fill="#192531" stroke="#1c2b3a" strokeWidth="2" />
+                  <circle cx="0" cy="-15" r="15" fill="#09b66d" stroke="#1c2b3a" strokeWidth="2" />
+                  
+                  {/* Luces de la nave */}
+                  <circle cx="-25" cy="0" r="3" fill="#f9c846" />
+                  <circle cx="-15" cy="0" r="3" fill="#f95258" />
+                  <circle cx="-5" cy="0" r="3" fill="#09b66d" />
+                  <circle cx="5" cy="0" r="3" fill="#f9c846" />
+                  <circle cx="15" cy="0" r="3" fill="#f95258" />
+                  <circle cx="25" cy="0" r="3" fill="#09b66d" />
+                  
+                  {/* Rayo tractor */}
+                  <path d="M0,5 L-20,25 L20,25 Z" fill="#09b66d" opacity="0.5" />
+                </g>
+                
+                {/* Estrellas */}
+                <path d="M65,40 L70,50 L80,55 L70,60 L65,70 L60,60 L50,55 L60,50 Z" fill="#f9c846" opacity="0.8" />
+                <path d="M240,40 L245,50 L255,55 L245,60 L240,70 L235,60 L225,55 L235,50 Z" fill="#09b66d" opacity="0.8" />
+                <path d="M150,200 L155,210 L165,215 L155,220 L150,230 L145,220 L135,215 L145,210 Z" fill="#f95258" opacity="0.8" />
+                
+                {/* Pequeñas estrellas/puntos */}
+                <circle cx="50" cy="90" r="2" fill="#ffffff" />
+                <circle cx="80" cy="190" r="2" fill="#ffffff" />
+                <circle cx="200" cy="150" r="2" fill="#ffffff" />
+                <circle cx="230" cy="60" r="2" fill="#ffffff" />
+                <circle cx="280" cy="100" r="2" fill="#ffffff" />
+                <circle cx="120" cy="40" r="2" fill="#ffffff" />
+              </svg>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2">
               <SpaceExplorerGame />

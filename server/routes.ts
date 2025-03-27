@@ -868,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: -bet,
         type: "bet",
         gameType: "keno",
-        description: `Keno - ${gameId}`
+        gameData: { action: 'bet', game: `Keno - ${gameId}` }
       });
 
       if (isWin) {
@@ -877,7 +877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: winAmount,
           type: "win",
           gameType: "keno",
-          description: `Keno - ${gameId}`
+          gameData: { action: 'win', game: `Keno - ${gameId}` }
         });
       }
 
@@ -1362,9 +1362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user.id,
         amount: -bet,
         type: "bet",
-        description: "Blackjack bet",
-        status: "completed",
-        createdAt: new Date(),
+        gameData: { action: 'bet', game: 'Blackjack' }
       });
 
       res.json({
@@ -1478,9 +1476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user.id,
         amount: -bet,
         type: "bet",
-        description: "Blackjack double down",
-        status: "completed",
-        createdAt: new Date(),
+        gameData: { action: 'double_down', game: 'Blackjack' }
       });
 
       res.json({
@@ -1540,9 +1536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: req.user.id,
           amount: totalPayout,
           type: "win",
-          description: "Blackjack winnings",
-          status: "completed",
-          createdAt: new Date(),
+          gameData: { action: 'win', game: 'Blackjack' }
         });
       }
 
@@ -1551,7 +1545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user.id,
         gameType: "blackjack",
         bet: bets.reduce((sum, bet) => sum + bet, 0),
-        result: JSON.stringify({
+        outcome: JSON.stringify({
           playerHands,
           dealerHand,
           results,
@@ -3405,24 +3399,7 @@ function calculateOldSlotsWin(reels: string[], bet: number): { win: boolean; mul
   return { win: false, multiplier: 0, winAmount: 0 };
 }
 
-function generateCrashPoint(): number {
-  // Generate a random crash point with house edge
-  // Using a distribution where:
-  // - Most rounds crash at low multipliers (1x-3x)
-  // - Some rounds go to medium multipliers (3x-10x)
-  // - Rarely goes to high multipliers (10x+)
-  
-  // Random number between 0 and 1
-  const r = Math.random();
-  
-  // House edge factor (lower means more house edge)
-  const houseEdgeFactor = 0.97;
-  
-  // Formula based on a modified exponential distribution
-  const crashPoint = Math.max(1, Math.floor((100 * houseEdgeFactor / (1 - r * houseEdgeFactor)) / 100 * 100) / 100);
-  
-  return parseFloat(crashPoint.toFixed(2));
-}
+// Esta función fue reemplazada por la versión mejorada al final del archivo
 
 // Casino games utilities
 /**
