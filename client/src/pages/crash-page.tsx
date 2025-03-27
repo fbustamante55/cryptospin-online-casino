@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { CrashGame } from "@/components/crash/crash-game";
+import { SpaceExplorerGame } from "@/components/crash/space-explorer-game";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserDropdown } from "@/components/ui/user-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { GameHistory } from "@shared/schema";
-import { TrendingUp, Clock, Target, Calendar, Coins } from "lucide-react";
+import { Rocket, Clock, Target, Calendar, Coins } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function CrashPage() {
@@ -59,7 +59,7 @@ export default function CrashPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2">
-              <CrashGame />
+              <SpaceExplorerGame />
             </div>
             
             <div className="space-y-6">
@@ -67,7 +67,7 @@ export default function CrashPage() {
               <Card className="bg-[#192531] border-[#1c2b3a]">
                 <CardContent className="p-4">
                   <h3 className="text-lg font-heading font-semibold mb-3 flex items-center">
-                    <TrendingUp className="h-5 w-5 mr-2 text-[#F9C846]" />
+                    <Rocket className="h-5 w-5 mr-2 text-[#F9C846]" />
                     How to Play
                   </h3>
                   <div className="space-y-2 text-sm text-gray-300">
@@ -143,7 +143,7 @@ export default function CrashPage() {
                             <div className="flex items-center">
                               {game.win ? (
                                 <span className="text-[#09b66d] flex items-center text-sm">
-                                  <TrendingUp className="h-3 w-3 mr-1" />
+                                  <Rocket className="h-3 w-3 mr-1" />
                                   +{game.winAmount}
                                 </span>
                               ) : (

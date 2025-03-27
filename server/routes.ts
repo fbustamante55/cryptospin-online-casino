@@ -205,6 +205,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize default slot games
   await initializeDefaultSlotGames();
+  
+  // Rutas para Space Explorer (crash game con temática espacial)
+  app.post('/api/games/crash/bet', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const { bet, autoCashout } = req.body;
+      
+      // Validación básica
+      if (!bet || isNaN(bet) || bet <= 0) {
+        return res.status(400).json({ success: false, error: 'Apuesta inválida' });
+      }
+      
+      // Obtener usuario
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+      }
+      
+      // Verificar balance
+      if (user.balance < bet) {
+        return res.status(400).json({ success: false, error: 'Balance insuficiente' });
+      }
+      
+      // Generar punto de crash aleatorio (entre 1.00 y 20.00)
+      // Usar algoritmo simple para demo
+      const crashPoint = generateCrashPoint();
+      
+      // Deducir apuesta del saldo del usuario
+      await storage.updateUserBalance(user.id, -bet);
+      
+      // Crear transacción
+      await storage.createTransaction({
+        userId: user.id,
+        type: 'bet',
+        amount: bet,
+        gameType: 'crash',
+        gameData: { action: 'bet', game: 'Space Explorer' }
+      });
+      
+      // Devolver resultado
+      return res.json({
+        success: true,
+        bet,
+        crashPoint,
+        autoCashout: autoCashout || null,
+        balance: user.balance
+      });
+    } catch (error) {
+      console.error('Error en apuesta de crash:', error);
+      return res.status(500).json({ success: false, error: 'Error en el servidor' });
+    }
+  });
+
+  app.post('/api/games/crash/cashout', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const { bet, crashPoint, cashoutPoint } = req.body;
+      
+      // Validación básica
+      if (!bet || !crashPoint || !cashoutPoint) {
+        return res.status(400).json({ success: false, error: 'Datos incompletos' });
+      }
+      
+      // Verificar que el cashout sea válido (antes del crash)
+      if (cashoutPoint >= crashPoint) {
+        return res.status(400).json({ success: false, error: 'Cashout inválido' });
+      }
+      
+      // Calcular ganancia
+      const winAmount = Math.floor(bet * cashoutPoint);
+      
+      // Obtener usuario
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+      }
+      
+      // Actualizar balance
+      const updatedUser = await storage.updateUserBalance(user.id, winAmount);
+      
+      // Crear transacción
+      await storage.createTransaction({
+        userId: user.id,
+        type: 'win',
+        amount: winAmount,
+        gameType: 'crash',
+        gameData: { 
+          action: 'win', 
+          game: 'Space Explorer', 
+          multiplier: cashoutPoint.toFixed(2) 
+        }
+      });
+      
+      // Crear historial de juego
+      await storage.createGameHistory({
+        userId: user.id,
+        gameType: 'crash',
+        bet: bet,
+        winAmount: winAmount,
+        outcome: JSON.stringify({ 
+          crashPoint, 
+          cashoutPoint, 
+          bet 
+        }),
+        win: true,
+        multiplier: cashoutPoint
+      });
+      
+      // Devolver resultado
+      return res.json({
+        success: true,
+        cashoutPoint,
+        winAmount,
+        balance: user.balance
+      });
+    } catch (error) {
+      console.error('Error en cashout de crash:', error);
+      return res.status(500).json({ success: false, error: 'Error en el servidor' });
+    }
+  });
+
+  app.post('/api/games/crash/bust', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const { bet, crashPoint } = req.body;
+      
+      // Validación básica
+      if (!bet || !crashPoint) {
+        return res.status(400).json({ success: false, error: 'Datos incompletos' });
+      }
+      
+      // Crear historial de juego (pérdida)
+      await storage.createGameHistory({
+        userId: req.user!.id,
+        gameType: 'crash',
+        bet: bet,
+        winAmount: 0,
+        outcome: JSON.stringify({ 
+          crashPoint, 
+          cashoutPoint: 0, 
+          bet 
+        }),
+        win: false,
+        multiplier: crashPoint
+      });
+      
+      // Devolver resultado
+      return res.json({
+        success: true
+      });
+    } catch (error) {
+      console.error('Error en bust de crash:', error);
+      return res.status(500).json({ success: false, error: 'Error en el servidor' });
+    }
+  });
 
   // Special admin setup route
   app.post("/api/setup-admin", async (req, res) => {
@@ -624,7 +779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: -bet,
           type: "bet",
           gameType: "slots",
-          description: gameId ? `Slots - ${gameId}` : "Slots"
+          gameData: { action: 'bet', game: gameId ? `Slots - ${gameId}` : "Slots" }
         });
 
         if (isWin) {
@@ -633,7 +788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             amount: winAmount,
             type: "win",
             gameType: "slots",
-            description: gameId ? `Slots - ${gameId}` : "Slots"
+            gameData: { action: 'win', game: gameId ? `Slots - ${gameId}` : "Slots" }
           });
         }
 
@@ -3507,4 +3662,36 @@ function calculateKenoWin(matchCount: number, selectedCount: number, bet: number
     isWin: winAmount > 0,
     winAmount: Math.round(winAmount * 100) / 100 // Redondear a 2 decimales
   };
+}
+
+// Función para generar punto de crash para Space Explorer
+function generateCrashPoint(): number {
+  // Algoritmo simple para fines demostrativos
+  // En producción, se usaría un algoritmo criptográficamente seguro
+  
+  // Generar un número aleatorio entre 0 y 1
+  const r = Math.random();
+  
+  // Para tener una buena distribución con sesgo exponencial
+  let point;
+  
+  if (r < 0.01) {
+    // 1% probabilidad de crash inmediato (1.00x)
+    point = 1.00;
+  } else if (r < 0.65) {
+    // 64% probabilidad de crash entre 1.00x y 2.00x
+    point = 1.00 + Math.random();
+  } else if (r < 0.90) {
+    // 25% probabilidad de crash entre 2.00x y 5.00x
+    point = 2.00 + Math.random() * 3;
+  } else if (r < 0.98) {
+    // 8% probabilidad de crash entre 5.00x y 10.00x
+    point = 5.00 + Math.random() * 5;
+  } else {
+    // 2% probabilidad de crash entre 10.00x y 20.00x
+    point = 10.00 + Math.random() * 10;
+  }
+  
+  // Redondear a 2 decimales
+  return Math.round(point * 100) / 100;
 }
