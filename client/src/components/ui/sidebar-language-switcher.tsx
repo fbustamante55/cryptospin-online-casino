@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Globe } from "lucide-react";
 import {
@@ -45,11 +45,24 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
   const { t } = useTranslation();
   const [isChangingLanguage, setIsChangingLanguage] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [currentLangCode, setCurrentLangCode] = useState(() => {
+    // Obtener el idioma del localStorage o del usuario si está autenticado
+    const storedLang = localStorage.getItem('i18nextLng');
+    // A veces i18next guarda el idioma con formato 'es-ES', necesitamos solo 'es'
+    return storedLang ? storedLang.split('-')[0] : (user?.language || "en");
+  });
   
-  const currentLanguage = LANGUAGES.find(lang => lang.code === (user?.language || "en")) || LANGUAGES[0];
+  // Actualizar el idioma actual cuando cambia el idioma del usuario
+  useEffect(() => {
+    if (user?.language) {
+      setCurrentLangCode(user.language);
+    }
+  }, [user?.language]);
+  
+  const currentLanguage = LANGUAGES.find(lang => lang.code === currentLangCode) || LANGUAGES[0];
   
   const handleLanguageChange = async (languageCode: string) => {
-    if (!user || isChangingLanguage || languageCode === user.language) {
+    if (isChangingLanguage || languageCode === currentLangCode) {
       setIsOpen(false);
       return;
     }
@@ -57,15 +70,23 @@ export function SidebarLanguageSwitcher({ collapsed = false }: { collapsed?: boo
     try {
       setIsChangingLanguage(true);
       
-      // Cambiar el idioma en i18next inmediatamente para una mejor experiencia
+      // Cambiar el idioma en i18next y guardarlo en localStorage
       await i18n.changeLanguage(languageCode);
+      setCurrentLangCode(languageCode);
       
-      // Call API to update language preference
-      await apiRequest({
-        method: "POST",
-        url: "/api/user/update-language",
-        data: { language: languageCode }
-      });
+      // Si el usuario está autenticado, intentar actualizar la preferencia en el servidor
+      if (user) {
+        try {
+          await apiRequest({
+            method: "POST",
+            url: "/api/user/update-language",
+            data: { language: languageCode }
+          });
+        } catch (apiError) {
+          console.log("No se pudo actualizar el idioma en el servidor, pero se cambió localmente");
+          // Falló la API pero el idioma ya se cambió localmente, así que no mostramos error
+        }
+      }
       
       toast({
         title: t('languageSelector.languageUpdated'),

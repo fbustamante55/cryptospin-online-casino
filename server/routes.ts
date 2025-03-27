@@ -205,8 +205,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // User profile and settings routes
   app.post('/api/user/update-language', async (req: Request, res: Response) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
-    
     try {
       const { language } = req.body;
       
@@ -219,12 +217,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid language format" });
       }
       
-      // Actualizar el idioma en la base de datos
-      await storage.updateLanguage(req.user.id, language);
+      // Si el usuario está autenticado, actualizar en la base de datos
+      if (req.isAuthenticated() && req.user) {
+        // Actualizar el idioma en la base de datos
+        await storage.updateLanguage(req.user.id, language);
+        
+        // Actualizar la sesión del usuario
+        req.user.language = language;
+      }
       
-      // Actualizar la sesión del usuario
-      req.user.language = language;
-      
+      // En cualquier caso, devolvemos éxito ya que el cliente puede usar localStorage
       return res.status(200).json({ message: "Language updated successfully", language });
     } catch (error) {
       console.error("Error updating language:", error);
