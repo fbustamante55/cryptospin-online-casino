@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e6b980" />
+      <stop offset="100%" stop-color="#eacda3" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Background with Egyptian style -->
+  <rect width="300" height="200" fill="#0c3b5e" />
+  <path d="M0,0 L300,0 L300,200 L0,200 z" fill="#0c3b5e" />
+  
+  <!-- Egyptian temple columns -->
+  <rect x="20" y="30" width="30" height="150" fill="url(#gold-gradient)" />
+  <rect x="250" y="30" width="30" height="150" fill="url(#gold-gradient)" />
+  
+  <!-- Book of Treasures -->
+  <rect x="75" y="50" width="150" height="100" rx="5" fill="#5c3825" filter="url(#shadow)" />
+  <rect x="80" y="55" width="140" height="90" rx="3" fill="url(#gold-gradient)" filter="url(#shadow)" />
+  
+  <!-- Book symbol (ankh) -->
+  <path d="M150,70 C145,70 140,75 140,80 C140,85 145,90 150,95 C155,90 160,85 160,80 C160,75 155,70 150,70 z M150,95 L150,120" stroke="#0c3b5e" stroke-width="5" fill="none" />
+  
+  <!-- Title -->
+  <text x="150" y="170" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">Book of Treasures</text>
+  <text x="150" y="188" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#eacda3">96.5% RTP - High Volatility</text>
+</svg>

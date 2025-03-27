@@ -1,0 +1,37 @@
+**Goal:** Enhance the display of slot games on the homepage of my Replit project by adding relevant pictures (which can be AI-generated placeholders initially) to each game listing. The current display shows game titles and some information, similar to the "Casino Slots" section in the image I provided.
+
+**Context:** I have integrated the Slotopol server games onto my homepage. I am currently fetching and displaying game information (like title, potentially provider, RTP, etc.). Now, I want to make the display more visually appealing by adding images to represent each game.
+
+**Please provide guidance and code modifications for the following:**
+
+1.  **Determine Image Sources:**
+    * Assuming the Slotopol server's "get games" API endpoint provides a thumbnail URL or some identifier that could be used to fetch an image, what field name might I look for in the API response?
+    * If the API doesn't provide image URLs directly, how can I implement a system to associate images with specific game IDs or titles? (Consider using a local JSON file or a simple dictionary in my JavaScript code for this mapping, especially for AI-generated placeholders initially).
+
+2.  **AI-Generated Placeholder Images (Conceptual):**
+    * Since I might not have actual game assets readily available, how can I conceptually use AI image generation tools (either external or potentially integrated into Replit if available) to create placeholder images that are relevant to common slot game themes (e.g., fruits for a "Fruity Multipliers" game, jewels for "Jewel Cascade," a classic "777" image for a classic reel game, etc.)?
+    * Suggest some keywords or prompts I could use with an AI image generator to create these relevant placeholder images.
+    * Where should I store these placeholder images within my Replit project (e.g., in an `assets/images/slots` folder)?
+
+3.  **Updating Frontend JavaScript to Display Images:**
+    * Assuming I have a way to get an image source (either from the API or a local mapping), how do I modify my JavaScript code that dynamically generates the HTML for each game to include an `<img>` tag to display the image?
+    * Provide an example of the JavaScript code that iterates through the game data and creates the HTML, including how to set the `src` attribute of the `<img>` tag based on the image source.
+    * What considerations should I keep in mind for image sizing and responsiveness within the game listings on the homepage? (e.g., using CSS to control image dimensions).
+
+4.  **Example Image Mapping (if API doesn't provide URLs):**
+    * Provide an example of a JavaScript object that maps a few example game IDs (e.g., `mega_fortune`, `book_of_egypt`, `fruity_multipliers`, `jewel_cascade`, `classic_3reel`) to either:
+        * Placeholder image file paths within my Replit project (e.g., `/assets/images/slots/mega_fortune.png`).
+        * Relevant keywords that I could later use to generate AI images.
+
+5.  **Integration into Existing Display Logic:**
+    * Assuming I have a JavaScript function `displayGames(games)` that currently takes an array of game objects and renders them on the homepage, show how I would modify this function to incorporate the image display logic.
+
+**Please provide specific code examples and guidance that I can implement in my Replit project to add relevant images to the slot game listings on my homepage.**
+
+**Important Information:**
+
+* The Slotopol server is running and accessible.
+* I can fetch a list of games.
+* I want to enhance the visual presentation of these games on the homepage.
+
+By following this prompt, Replit AI will help you create a more visually appealing display of your slot games, even if you initially use AI-generated placeholders. You can later replace these with actual game assets if they become available.

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="metal-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8e9eab" />
+      <stop offset="100%" stop-color="#eef2f3" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Slot machine background -->
+  <rect width="300" height="200" fill="#690e15" />
+  
+  <!-- Slot machine body -->
+  <rect x="50" y="30" width="200" height="140" rx="10" fill="url(#metal-gradient)" filter="url(#shadow)" />
+  
+  <!-- Reels background -->
+  <rect x="70" y="50" width="160" height="80" rx="5" fill="#222" />
+  
+  <!-- Three reels -->
+  <rect x="75" y="55" width="45" height="70" rx="2" fill="white" />
+  <rect x="127.5" y="55" width="45" height="70" rx="2" fill="white" />
+  <rect x="180" y="55" width="45" height="70" rx="2" fill="white" />
+  
+  <!-- Symbols -->
+  <!-- Reel 1 -->
+  <text x="97.5" y="95" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" fill="red">7</text>
+  
+  <!-- Reel 2 -->
+  <rect x="137.5" y="75" width="25" height="30" rx="2" fill="#333" />
+  <text x="150" y="95" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white">BAR</text>
+  
+  <!-- Reel 3 -->
+  <circle cx="202.5" cy="90" r="15" fill="#ffcc00" />
+  <text x="202.5" y="95" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#800000">🍒</text>
+  
+  <!-- Pull lever -->
+  <rect x="265" y="60" width="10" height="70" rx="5" fill="#cc0000" />
+  <circle cx="270" cy="140" r="10" fill="#cc0000" />
+  
+  <!-- Title -->
+  <text x="150" y="170" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">Classic 3-Reel</text>
+  <text x="150" y="188" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#ddd">95% RTP - Medium Volatility</text>
+</svg>

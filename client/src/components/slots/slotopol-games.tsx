@@ -5,6 +5,18 @@ import { useQuery } from "@tanstack/react-query";
 import { SlotGame } from "@shared/schema";
 import { motion } from "framer-motion";
 
+// Helper function to check if a file exists
+const imageExists = (url: string) => {
+  const http = new XMLHttpRequest();
+  http.open('HEAD', url, false);
+  try {
+    http.send();
+    return http.status !== 404;
+  } catch(e) {
+    return false;
+  }
+};
+
 interface SlotProvider {
   name: string;
   logo?: string;
@@ -130,42 +142,67 @@ function GameCard({ game }: { game: SlotGame }) {
         className="rounded-lg overflow-hidden bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer h-full flex flex-col"
       >
         <div className="aspect-square bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
-          {game.thumbnail ? (
-            <img 
-              src={game.thumbnail} 
-              alt={game.name} 
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // If image fails to load, use a default SVG
-                (e.target as HTMLImageElement).style.display = 'none';
-                const parent = (e.target as HTMLImageElement).parentElement;
-                if (parent) {
-                  parent.classList.add('fallback-image');
-                }
-              }} 
-            />
-          ) : (
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="w-full h-full opacity-70"
-              viewBox="0 0 200 200"
-              style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
-            >
-              {/* Slots graphic */}
-              <rect x="40" y="50" width="120" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
-              {/* Slots reels */}
-              <rect x="50" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
-              <rect x="85" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
-              <rect x="120" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
-              {/* Slots symbols */}
-              <circle cx="65" cy="75" r="10" fill="#f9c846" />
-              <text x="65" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">7</text>
-              <circle cx="100" cy="75" r="10" fill="#09b66d" />
-              <text x="100" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">$</text>
-              <circle cx="135" cy="75" r="10" fill="#f95258" />
-              <text x="135" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">♦</text>
-            </svg>
-          )}
+          {/* Check if we have an SVG version first, PNG fallback, then default SVG */}
+          {(() => {
+            // Try to use the SVG version first (which we created)
+            const svgPath = game.thumbnail?.replace('.png', '.svg');
+            
+            // We'll check if the thumbnail exists or if we should use our fallback
+            if (game.thumbnail) {
+              return (
+                <img 
+                  src={svgPath || game.thumbnail} 
+                  alt={game.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // If SVG fails, try PNG
+                    const target = e.target as HTMLImageElement;
+                    
+                    if (svgPath && target.src.endsWith('.svg')) {
+                      // SVG failed, try PNG
+                      target.src = game.thumbnail as string;
+                    } else {
+                      // PNG also failed, show fallback
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.classList.add('fallback-image');
+                        // Insert our custom game-specific fallback
+                        parent.innerHTML = `
+                          <div class="w-full h-full flex items-center justify-center">
+                            <svg 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              class="w-4/5 h-4/5 opacity-70"
+                              viewBox="0 0 200 200"
+                            >
+                              <text x="100" y="100" text-anchor="middle" font-size="16" fill="#ffffff" font-weight="bold">${game.name}</text>
+                              <text x="100" y="120" text-anchor="middle" font-size="12" fill="#09b66d">${game.rtp}% RTP</text>
+                            </svg>
+                          </div>
+                        `;
+                      }
+                    }
+                  }} 
+                />
+              );
+            } else {
+              // Use a specific game-based default
+              return (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#192531] to-[#0e1824]">
+                  <div className="text-center p-4">
+                    <h3 className="text-white font-medium text-lg mb-2">{game.name}</h3>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <span className="text-sm bg-[#0e1824] px-2 py-1 rounded text-[#09b66d]">{game.rtp}% RTP</span>
+                      <span className="text-sm bg-[#0e1824] px-2 py-1 rounded text-white capitalize">{game.volatility}</span>
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {game.reels} reels • {game.paylines} lines
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+          })()}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0e1824] to-transparent"></div>
           
           {/* Provider tag */}
