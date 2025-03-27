@@ -317,7 +317,7 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ missions }) => {
   return (
     <SciFiHud className="p-3">
       <h3 className="font-mono text-xs uppercase text-blue-300 mb-2">Historial de Misiones</h3>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-3">
         {missions.map((mission) => {
           // Determinar color basado en multiplier
           const getMultiplierColor = (value: number) => {
@@ -332,9 +332,9 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ missions }) => {
           return (
             <div 
               key={mission.id}
-              className={`rounded-sm px-2 py-1 text-center ${getMultiplierColor(mission.multiplier)}`}
+              className={`rounded-sm px-3 py-1.5 text-center ${getMultiplierColor(mission.multiplier)}`}
             >
-              <span className="font-digital text-lg">{mission.multiplier.toFixed(2)}x</span>
+              <span className="font-digital text-base tracking-wider">{mission.multiplier.toFixed(2)}x</span>
             </div>
           );
         })}
