@@ -149,9 +149,9 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
               <Search className="h-5 w-5" />
             </button>
             
-            <button className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
+            <Link href="/rewards" className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] text-white hover:border-[#09b66d]/50 transition-all duration-200">
               <Gift className="h-5 w-5" />
-            </button>
+            </Link>
             
             <div className="flex items-center justify-center w-10 h-10 rounded-md bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/50 transition-all duration-200">
               <NotificationDropdown />
