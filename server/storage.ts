@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument, sportsEvents, type SportsEvent, type InsertSportsEvent, sportsBets, type SportsBet, type InsertSportsBet, favorites, type Favorite, type InsertFavorite } from "@shared/schema";
+import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument, sportsEvents, type SportsEvent, type InsertSportsEvent, sportsBets, type SportsBet, type InsertSportsBet, favorites, type Favorite, type InsertFavorite, slotGames, type SlotGame, type InsertSlotGame, slotSessions, type SlotSession, type InsertSlotSession } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -66,6 +66,18 @@ export interface IStorage {
   removeFavorite(id: number): Promise<boolean>;
   isFavorite(userId: number, gameType: string, gameId?: string): Promise<boolean>;
   
+  // Slot game operations
+  createSlotGame(game: InsertSlotGame): Promise<SlotGame>;
+  getSlotGame(gameId: string): Promise<SlotGame | undefined>;
+  getAllSlotGames(provider?: string): Promise<SlotGame[]>;
+  updateSlotGame(gameId: string, updates: Partial<SlotGame>): Promise<SlotGame | undefined>;
+  
+  // Slot session operations
+  createSlotSession(session: InsertSlotSession): Promise<SlotSession>;
+  getSlotSession(id: number): Promise<SlotSession | undefined>;
+  getUserSlotSessions(userId: number): Promise<SlotSession[]>;
+  updateSlotSession(id: number, updates: Partial<SlotSession>): Promise<SlotSession | undefined>;
+  
   // Session store
   sessionStore: ReturnType<typeof createMemoryStore>;
 }
@@ -78,6 +90,8 @@ export class MemStorage implements IStorage {
   private sportsEvents: Map<number, SportsEvent>;
   private sportsBets: Map<number, SportsBet>;
   private favorites: Map<number, Favorite>;
+  private slotGames: Map<string, SlotGame>;
+  private slotSessions: Map<number, SlotSession>;
   public sessionStore: ReturnType<typeof createMemoryStore>;
   private currentUserId: number;
   private currentTransactionId: number;
@@ -86,6 +100,7 @@ export class MemStorage implements IStorage {
   private currentSportsEventId: number;
   private currentSportsBetId: number;
   private currentFavoriteId: number;
+  private currentSlotSessionId: number;
 
   constructor() {
     this.users = new Map();
@@ -95,6 +110,8 @@ export class MemStorage implements IStorage {
     this.sportsEvents = new Map();
     this.sportsBets = new Map();
     this.favorites = new Map();
+    this.slotGames = new Map();
+    this.slotSessions = new Map();
     this.currentUserId = 1;
     this.currentTransactionId = 1;
     this.currentGameHistoryId = 1;
@@ -102,6 +119,7 @@ export class MemStorage implements IStorage {
     this.currentSportsEventId = 1;
     this.currentSportsBetId = 1;
     this.currentFavoriteId = 1;
+    this.currentSlotSessionId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
@@ -577,6 +595,90 @@ export class MemStorage implements IStorage {
         favorite.gameType === gameType && 
         (gameId ? favorite.gameId === gameId : true)
     );
+  }
+  
+  // Slot game methods
+  async createSlotGame(game: InsertSlotGame): Promise<SlotGame> {
+    const now = new Date();
+    
+    const slotGame: SlotGame = {
+      ...game,
+      id: 0, // Auto-increment field, but we use gameId as primary identifier
+      isActive: game.isActive !== undefined ? game.isActive : true,
+      createdAt: now
+    };
+    
+    this.slotGames.set(game.gameId, slotGame);
+    return slotGame;
+  }
+  
+  async getSlotGame(gameId: string): Promise<SlotGame | undefined> {
+    return this.slotGames.get(gameId);
+  }
+  
+  async getAllSlotGames(provider?: string): Promise<SlotGame[]> {
+    let games = Array.from(this.slotGames.values());
+    
+    if (provider) {
+      games = games.filter(game => game.provider === provider);
+    }
+    
+    return games.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  
+  async updateSlotGame(gameId: string, updates: Partial<SlotGame>): Promise<SlotGame | undefined> {
+    const game = this.slotGames.get(gameId);
+    if (!game) return undefined;
+    
+    const updatedGame = { ...game, ...updates };
+    this.slotGames.set(gameId, updatedGame);
+    return updatedGame;
+  }
+  
+  // Slot session methods
+  async createSlotSession(session: InsertSlotSession): Promise<SlotSession> {
+    const id = this.currentSlotSessionId++;
+    const now = new Date();
+    
+    const slotSession: SlotSession = {
+      ...session,
+      id,
+      lastWin: 0,
+      lastOutcome: null,
+      totalWagered: 0,
+      totalWon: 0,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.slotSessions.set(id, slotSession);
+    return slotSession;
+  }
+  
+  async getSlotSession(id: number): Promise<SlotSession | undefined> {
+    return this.slotSessions.get(id);
+  }
+  
+  async getUserSlotSessions(userId: number): Promise<SlotSession[]> {
+    return Array.from(this.slotSessions.values())
+      .filter(session => session.userId === userId && session.isActive)
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+  }
+  
+  async updateSlotSession(id: number, updates: Partial<SlotSession>): Promise<SlotSession | undefined> {
+    const session = this.slotSessions.get(id);
+    if (!session) return undefined;
+    
+    const now = new Date();
+    const updatedSession = { 
+      ...session, 
+      ...updates,
+      updatedAt: now
+    };
+    
+    this.slotSessions.set(id, updatedSession);
+    return updatedSession;
   }
 }
 

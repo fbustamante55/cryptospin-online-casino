@@ -68,6 +68,40 @@ export const gameHistory = pgTable("game_history", {
   createdAt: timestamp("created_at").notNull().defaultNow()
 });
 
+export const slotGames = pgTable("slot_games", {
+  id: serial("id").primaryKey(),
+  gameId: text("game_id").notNull().unique(), // Unique identifier for the slot game
+  provider: text("provider").notNull(), // AGT, Novomatic, NetEnt, etc.
+  name: text("name").notNull(), // Display name
+  description: text("description"),
+  thumbnail: text("thumbnail"), // Path to thumbnail image
+  paylines: integer("paylines").notNull(), // Number of paylines
+  reels: integer("reels").notNull(), // Number of reels
+  minBet: integer("min_bet").notNull(),
+  maxBet: integer("max_bet").notNull(),
+  rtp: doublePrecision("rtp").notNull(), // Return to player percentage
+  volatility: text("volatility").notNull(), // low, medium, high
+  features: jsonb("features"), // Array of special features like free spins, wilds, etc.
+  symbols: jsonb("symbols"), // Information about symbols and payouts
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
+
+export const slotSessions = pgTable("slot_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  gameId: text("game_id").notNull().references(() => slotGames.gameId),
+  currentBet: integer("current_bet").notNull(),
+  selectedLines: integer("selected_lines").notNull(),
+  lastWin: integer("last_win").default(0),
+  lastOutcome: jsonb("last_outcome"), // Last spin result
+  totalWagered: integer("total_wagered").default(0),
+  totalWon: integer("total_won").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
 export const sportsEvents = pgTable("sports_events", {
   id: serial("id").primaryKey(),
   sportType: text("sport_type").notNull(), // mma, mlb, nfl, tennis, soccer, hockey
@@ -187,6 +221,30 @@ export const insertFavoriteSchema = createInsertSchema(favorites).pick({
   gameImage: true,
 });
 
+export const insertSlotGameSchema = createInsertSchema(slotGames).pick({
+  gameId: true,
+  provider: true,
+  name: true,
+  description: true,
+  thumbnail: true,
+  paylines: true,
+  reels: true,
+  minBet: true,
+  maxBet: true,
+  rtp: true,
+  volatility: true,
+  features: true,
+  symbols: true,
+  isActive: true,
+});
+
+export const insertSlotSessionSchema = createInsertSchema(slotSessions).pick({
+  userId: true,
+  gameId: true,
+  currentBet: true,
+  selectedLines: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -209,6 +267,12 @@ export type SportsBet = typeof sportsBets.$inferSelect;
 
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+
+export type InsertSlotGame = z.infer<typeof insertSlotGameSchema>;
+export type SlotGame = typeof slotGames.$inferSelect;
+
+export type InsertSlotSession = z.infer<typeof insertSlotSessionSchema>;
+export type SlotSession = typeof slotSessions.$inferSelect;
 
 // Auth schemas for login, password reset, etc.
 export const loginSchema = z.object({
@@ -261,3 +325,26 @@ export type PhoneVerification = z.infer<typeof phoneVerificationSchema>;
 export type ProfileUpdate = z.infer<typeof profileUpdateSchema>;
 export type TwoFactorSetup = z.infer<typeof twoFactorSetupSchema>;
 export type KycUpload = z.infer<typeof kycUploadSchema>;
+
+// Slot game-specific schemas
+export const slotSpinSchema = z.object({
+  gameId: z.string(),
+  bet: z.number().min(1),
+  lines: z.number().min(1),
+});
+
+export const slotDoubleUpSchema = z.object({
+  gameId: z.string(),
+  sessionId: z.number(),
+  multiplier: z.number().min(2).max(10),
+  choice: z.enum(['red', 'black']),
+});
+
+export const slotCollectSchema = z.object({
+  gameId: z.string(),
+  sessionId: z.number(),
+});
+
+export type SlotSpin = z.infer<typeof slotSpinSchema>;
+export type SlotDoubleUp = z.infer<typeof slotDoubleUpSchema>;
+export type SlotCollect = z.infer<typeof slotCollectSchema>;
