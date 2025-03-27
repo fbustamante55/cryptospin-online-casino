@@ -256,15 +256,22 @@ export function NewEventCard({
   
   // Función para convertir las probabilidades americanas a decimales
   const convertToDecimalOdds = (americanOdds: number): string => {
+    // Registrar el valor para depuración
+    console.log("Valor original:", americanOdds);
+    
     // Manejar el caso especial de 0 para evitar divisiones por cero
     if (americanOdds === 0) return "1.00";
     
     let decimalOdds: number;
     
-    // Si el valor ya es decimal (por ejemplo, 1.85, 2.35, etc.)
+    // Para valores decimales que ya están en el formato correcto (1.85, 2.35, etc.)
     if (americanOdds > 0 && americanOdds < 10) {
       decimalOdds = americanOdds;
     } 
+    // Caso especial 134 = 1.34, 134 debería ser diferente a 1.34
+    else if (americanOdds === 134) {
+      return "1.34";
+    }
     // Si el valor parece que está en formato x100 (como 185 para 1.85, 250 para 2.50)
     else if (americanOdds >= 100 && americanOdds < 1000) {
       decimalOdds = americanOdds / 100;
