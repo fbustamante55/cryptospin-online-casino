@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useState, useRef } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
+import { LiveActivityTable } from "@/components/ui/live-activity-table";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -707,6 +708,14 @@ export default function HomePage() {
                 }} />
               </div>
             </div>
+          </div>
+          
+          {/* Actividad de juegos en tiempo real */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-white text-xl font-bold">Actividad en Tiempo Real</h2>
+            </div>
+            <LiveActivityTable />
           </div>
         </div>
       </main>
