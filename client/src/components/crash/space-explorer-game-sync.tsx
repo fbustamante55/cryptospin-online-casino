@@ -596,7 +596,8 @@ export function SpaceExplorerGameSync() {
                   disabled={
                     missionState !== 'exploring' || 
                     hasReturned || 
-                    cashoutMutation.isPending
+                    cashoutMutation.isPending ||
+                    !hasPlacedBetInCurrentGame.current // Deshabilitar si no se ha colocado una apuesta
                   }
                   onClick={() => {
                     // Simular cashout para demo (ya que tenemos error 401)
@@ -616,7 +617,7 @@ export function SpaceExplorerGameSync() {
                     setWinAmount(simulatedWin);
                   }}
                   className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
-                    missionState !== 'exploring' || hasReturned || cashoutMutation.isPending
+                    missionState !== 'exploring' || hasReturned || cashoutMutation.isPending || !hasPlacedBetInCurrentGame.current
                       ? "bg-green-800/50 text-green-300/80" 
                       : "bg-green-600 hover:bg-green-500 text-white hover:shadow-green-500/50"
                   }`}
@@ -625,7 +626,9 @@ export function SpaceExplorerGameSync() {
                     ? "RECOGIENDO..." 
                     : hasReturned 
                       ? "RECOGIDO"
-                      : "RECOGER"
+                      : !hasPlacedBetInCurrentGame.current
+                        ? "SIN APUESTA"
+                        : "RECOGER"
                   }
                 </Button>
               </div>
