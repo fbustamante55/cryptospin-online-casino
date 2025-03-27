@@ -314,13 +314,13 @@ export const SciFiHud: React.FC<HudProps> = ({ children, className = '' }) => {
 
 // Mission History Component
 export const MissionHistory: React.FC<MissionHistoryProps> = ({ missions }) => {
-  // Get only the last 10 missions
-  const latestMissions = missions.slice(0, 10);
+  // Get only the last 10 missions, ordered from newest to oldest
+  const latestMissions = [...missions].sort((a, b) => b.id - a.id).slice(0, 10);
   
   return (
     <SciFiHud className="p-3">
       <h3 className="font-mono text-xs uppercase text-blue-300 mb-2">Historial de Misiones</h3>
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 max-h-[250px] overflow-y-auto">
         {latestMissions.map((mission) => {
           // Determinar color basado en multiplier
           const getMultiplierColor = (value: number) => {
@@ -332,11 +332,15 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ missions }) => {
             return 'bg-red-900/40 text-red-500';
           };
           
+          // Formato de hora a partir del timestamp (id)
+          const time = new Date(Number(mission.id)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          
           return (
             <div 
               key={mission.id}
-              className={`rounded-sm px-3 py-1.5 text-center ${getMultiplierColor(mission.multiplier)}`}
+              className={`rounded-sm px-3 py-2 flex justify-between items-center ${getMultiplierColor(mission.multiplier)}`}
             >
+              <span className="font-mono text-xs opacity-70">{time}</span>
               <span className="font-digital text-base tracking-wider">{mission.multiplier.toFixed(2)}x</span>
             </div>
           );

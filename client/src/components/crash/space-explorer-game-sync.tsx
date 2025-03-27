@@ -316,8 +316,8 @@ export function SpaceExplorerGameSync() {
   const handleBet = () => {
     if (!user || user.balance < bet) return;
     
-    // Si el juego no está en estado de espera o countdown, no permitir apostar
-    if (missionState !== 'ready' && missionState !== 'countdown') return;
+    // Si el juego está en progreso o ha crasheado, no permitir apostar
+    if (missionState === 'exploring' || missionState === 'crashed') return;
     
     // Si ya apostamos en este juego, no permitir apostar de nuevo
     if (hasBet) return;
@@ -495,13 +495,16 @@ export function SpaceExplorerGameSync() {
                     <motion.div
                       initial={{ opacity: 1 }}
                       animate={{ opacity: 1 }}
-                      className="text-center"
+                      className="text-center relative"
                     >
                       <UfoSvg scale={3.8} className="mx-auto animate-crash" isExploding />
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <div className="w-20 h-20 bg-orange-500 rounded-full animate-explosion opacity-60 filter blur-md"></div>
+                      </div>
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
+                        transition={{ delay: 0.5 }}
                         className="font-digital text-red-500 text-7xl font-bold mt-8 text-shadow-lg"
                       >
                         CRASH @ {crashPoint.toFixed(2)}x
@@ -561,7 +564,7 @@ export function SpaceExplorerGameSync() {
             <div className="grid grid-cols-2 gap-8 mt-4">
               <Button
                 variant="default"
-                disabled={!canBet || betMutation.isPending}
+                disabled={betMutation.isPending || (!canBet && missionState === 'crashed')}
                 onClick={() => {
                   // Simular apuesta para demo (ya que tenemos error 401)
                   console.log("Simulando apuesta:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
@@ -577,15 +580,15 @@ export function SpaceExplorerGameSync() {
                   setHasBet(true);
                 }}
                 className={`w-full h-20 text-2xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
-                  !canBet || betMutation.isPending
+                  betMutation.isPending || (missionState === 'exploring' && !hasBet)
                     ? "bg-blue-800/70 text-blue-300/80" 
                     : "bg-blue-600 hover:bg-blue-500 text-white hover:shadow-blue-500/50"
                 }`}
               >
                 {betMutation.isPending 
                   ? "APOSTANDO..." 
-                  : countdown && countdown < 5
-                    ? "LANZAR"
+                  : hasBet && missionState !== 'crashed'
+                    ? "APOSTADO"
                     : "LANZAR"
                 }
               </Button>
