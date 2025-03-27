@@ -296,7 +296,7 @@ export function NewEventCard({
               >
                 <span className="text-xs font-semibold mb-1">1</span>
                 <span className="text-sm font-bold">{convertToDecimalOdds(homeOdds.price)}</span>
-                <span className="text-xs mt-1 line-clamp-1">Local</span>
+                <span className="text-xs mt-1 line-clamp-1">{event.home_team}</span>
               </button>
             )}
             
@@ -328,7 +328,7 @@ export function NewEventCard({
               >
                 <span className="text-xs font-semibold mb-1">2</span>
                 <span className="text-sm font-bold">{convertToDecimalOdds(awayOdds.price)}</span>
-                <span className="text-xs mt-1 line-clamp-1">Visitante</span>
+                <span className="text-xs mt-1 line-clamp-1">{event.away_team}</span>
               </button>
             )}
           </div>
