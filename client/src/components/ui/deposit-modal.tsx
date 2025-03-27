@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronLeft, Copy } from "lucide-react";
 
 interface DepositModalProps {
   isOpen: boolean;
@@ -121,12 +121,40 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
     },
   ];
 
+  // Dirección de ejemplo para el depósito (en un caso real esto vendría de un backend)
+  const [walletAddress, setWalletAddress] = useState<string>("bc1qGhclo0xz3z0ledmx4yqrdqrju0ui6nerv7p9amfx5h");
+
+  // Función para copiar la dirección al portapapeles
+  const copyAddressToClipboard = () => {
+    navigator.clipboard.writeText(walletAddress)
+      .then(() => {
+        // Aquí podrías mostrar una notificación de éxito
+        console.log('Dirección copiada al portapapeles');
+      })
+      .catch(err => {
+        console.error('Error al copiar la dirección: ', err);
+      });
+  };
+
+  // Función para generar una nueva dirección
+  const generateNewAddress = () => {
+    // En una implementación real, esto haría una petición al backend
+    setWalletAddress("bc1q" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+  };
+
+  // Función para volver atrás desde la pantalla de depósito específica
+  const goBack = () => {
+    setSelectedCrypto(null);
+  };
+
   // Desactivar scroll del body cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
+      // Resetear la moneda seleccionada cuando se cierra el modal
+      setSelectedCrypto(null);
     }
 
     return () => {
@@ -168,12 +196,13 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
 
         {/* Contenido */}
         <div className="p-4">
-          {activeTab === "Depositar" && (
+          {activeTab === "Depositar" && !selectedCrypto && (
             <div className="grid grid-cols-3 gap-4">
               {cryptoOptions.map((crypto) => (
                 <div 
                   key={crypto.id}
                   className="flex flex-col items-center p-3 bg-[#192531] rounded-lg hover:bg-[#1c2b3a] transition-colors cursor-pointer"
+                  onClick={() => setSelectedCrypto(crypto.id)}
                 >
                   {crypto.icon}
                   <div className="mt-2 text-center">
@@ -182,6 +211,98 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Vista específica de depósito de criptomoneda */}
+          {activeTab === "Depositar" && selectedCrypto && (
+            <div className="space-y-4">
+              {/* Botón de regresar y selección de moneda */}
+              <div className="flex items-center">
+                <button 
+                  className="p-2 text-gray-400 hover:text-white transition-colors flex items-center"
+                  onClick={goBack}
+                >
+                  <ChevronLeft className="h-5 w-5 mr-1" />
+                  <span>Atrás</span>
+                </button>
+              </div>
+
+              {/* Selector de moneda y red */}
+              <div className="bg-[#192531] rounded-xl p-3">
+                <div className="flex items-center justify-between">
+                  {(() => {
+                    const crypto = cryptoOptions.find(c => c.id === selectedCrypto);
+                    if (!crypto) return null;
+                    
+                    return (
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full mr-2 flex items-center justify-center" style={{ backgroundColor: crypto.color }}>
+                          <span className="text-white text-sm font-bold">{crypto.code.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <span className="text-white font-medium">Bitcoin</span>
+                          <span className="text-gray-400 text-sm ml-1">{crypto.code}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  
+                  <div className="flex items-center">
+                    <span className="text-green-500 font-medium mr-2">$0.00</span>
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+                
+                <div className="flex mt-3 justify-end">
+                  <button className="bg-[#2a1b5d] text-white text-xs py-1.5 px-3 rounded-xl mr-2">
+                    Red Bitcoin
+                  </button>
+                  <button className="bg-[#6d28d9] text-white text-xs py-1.5 px-3 rounded-xl flex items-center">
+                    <span className="mr-1">1 confirmación</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Dirección de wallet */}
+              <div className="bg-[#192531] rounded-xl p-4">
+                <div className="text-white font-medium mb-3">Tu Dirección</div>
+                <div className="flex items-center">
+                  <div className="bg-white p-2 rounded-xl mr-3">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${walletAddress}`} 
+                      alt="QR Code" 
+                      className="w-20 h-20"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-gray-300 text-sm break-all mb-2">{walletAddress}</div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <button 
+                    className="bg-[#192531] border border-[#1c2b3a] text-white py-2 px-4 rounded-lg hover:bg-[#1c2b3a] transition-colors text-sm flex items-center justify-center"
+                    onClick={generateNewAddress}
+                  >
+                    Solicitar nueva dirección
+                  </button>
+                  <button 
+                    className="bg-[#192531] border border-[#1c2b3a] text-white py-2 px-4 rounded-lg hover:bg-[#1c2b3a] transition-colors text-sm flex items-center justify-center"
+                    onClick={copyAddressToClipboard}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar dirección
+                  </button>
+                </div>
+              </div>
+
+              {/* Ayuda */}
+              <div className="text-center mt-4">
+                <button className="text-gray-400 text-sm hover:text-white transition-colors">
+                  ¿Algún problema con tu depósito?
+                </button>
+              </div>
             </div>
           )}
 
