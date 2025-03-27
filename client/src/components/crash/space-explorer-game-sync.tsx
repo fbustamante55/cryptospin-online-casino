@@ -123,7 +123,7 @@ export function SpaceExplorerGameSync() {
   // Referencias y estado de juego
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null);
-  const hasPlacedBetInCurrentGame = useRef<boolean>(false);
+  const [hasBet, setHasBet] = useState<boolean>(false);  // Usamos state en lugar de ref para que actualice la UI
 
   // Consultar estado del juego desde el servidor
   const gameStateQuery = useQuery({
@@ -152,7 +152,7 @@ export function SpaceExplorerGameSync() {
       }));
       
       // Marcar que ya apostamos en este juego
-      hasPlacedBetInCurrentGame.current = true;
+      setHasBet(true);
       
       // Notificar al usuario que la apuesta fue exitosa
       setHasReturned(false);
@@ -245,7 +245,7 @@ export function SpaceExplorerGameSync() {
       
       // Reiniciar el estado de apuesta cuando comienza un nuevo juego
       if (gameState.status === 'waiting' || gameState.status === 'countdown') {
-        hasPlacedBetInCurrentGame.current = false;
+        setHasBet(false);
         setHasReturned(false);
       }
       
@@ -320,7 +320,7 @@ export function SpaceExplorerGameSync() {
     if (missionState !== 'ready' && missionState !== 'countdown') return;
     
     // Si ya apostamos en este juego, no permitir apostar de nuevo
-    if (hasPlacedBetInCurrentGame.current) return;
+    if (hasBet) return;
     
     console.log("Colocando apuesta:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
     
@@ -575,7 +575,7 @@ export function SpaceExplorerGameSync() {
                     handleBet();
                     
                     // Establecer estado de apuesta para la demostración
-                    hasPlacedBetInCurrentGame.current = true;
+                    setHasBet(true);
                   }}
                   className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
                     !canBet || betMutation.isPending
@@ -597,7 +597,7 @@ export function SpaceExplorerGameSync() {
                     missionState !== 'exploring' || 
                     hasReturned || 
                     cashoutMutation.isPending ||
-                    !hasPlacedBetInCurrentGame.current // Deshabilitar si no se ha colocado una apuesta
+                    !hasBet // Deshabilitar si no se ha colocado una apuesta
                   }
                   onClick={() => {
                     // Simular cashout para demo (ya que tenemos error 401)
@@ -617,7 +617,7 @@ export function SpaceExplorerGameSync() {
                     setWinAmount(simulatedWin);
                   }}
                   className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
-                    missionState !== 'exploring' || hasReturned || cashoutMutation.isPending || !hasPlacedBetInCurrentGame.current
+                    missionState !== 'exploring' || hasReturned || cashoutMutation.isPending || !hasBet
                       ? "bg-green-800/50 text-green-300/80" 
                       : "bg-green-600 hover:bg-green-500 text-white hover:shadow-green-500/50"
                   }`}
@@ -626,7 +626,7 @@ export function SpaceExplorerGameSync() {
                     ? "RECOGIENDO..." 
                     : hasReturned 
                       ? "RECOGIDO"
-                      : !hasPlacedBetInCurrentGame.current
+                      : !hasBet
                         ? "SIN APUESTA"
                         : "RECOGER"
                   }
