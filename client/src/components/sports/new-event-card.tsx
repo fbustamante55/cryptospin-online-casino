@@ -13,6 +13,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
 
 interface EventCardProps {
   event: EventOdds;
@@ -33,6 +34,7 @@ export function NewEventCard({
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [favoriteId, setFavoriteId] = useState<number | null>(null);
   const [liveScores, setLiveScores] = useState<{home: number, away: number}>({ home: 0, away: 0 });
   const [matchTime, setMatchTime] = useState<{minutes: number, seconds: number}>({ minutes: 0, seconds: 0 });
@@ -309,20 +311,26 @@ export function NewEventCard({
           </div>
           <span className="text-xs font-medium text-white">{sportTitle || event.sport_key}</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleFavorite}
-          className="h-6 w-6 p-0 hover:bg-[#1e2e4a]"
-          title="Añadir a favoritos"
-        >
-          <Star
-            className={cn(
-              "h-4 w-4",
-              favoriteData?.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
-            )}
-          />
-        </Button>
+        <div className="flex items-center">
+          <div className="text-xs text-gray-400 flex items-center mr-2">
+            <Clock className="h-3 w-3 mr-1" />
+            <span>{formatEventDate(event.commence_time)}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleFavorite}
+            className="h-6 w-6 p-0 hover:bg-[#1e2e4a]"
+            title="Añadir a favoritos"
+          >
+            <Star
+              className={cn(
+                "h-4 w-4",
+                favoriteData?.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
+              )}
+            />
+          </Button>
+        </div>
       </div>
       
       {/* Contenido principal - diseño mejorado */}
@@ -429,7 +437,10 @@ export function NewEventCard({
               <Clock className="h-3 w-3 mr-1" />
               <span>{formatEventDate(event.commence_time)}</span>
             </div>
-            <div className="flex items-center">
+            <div 
+              onClick={() => setLocation(`/sports/event/${event.id}`)}
+              className="flex items-center cursor-pointer hover:text-white transition-colors"
+            >
               <span>Más mercados</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 h-3 w-3">
                 <polyline points="9 18 15 12 9 6"></polyline>

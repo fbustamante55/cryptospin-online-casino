@@ -1119,6 +1119,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Ruta para obtener información detallada de un evento específico
+  app.get('/api/sports/event/:eventId', async (req, res) => {
+    try {
+      const eventId = req.params.eventId;
+      const { generateDemoEvents } = await import('../client/src/lib/sports-api');
+      
+      // Obtenemos todos los eventos para buscar el que coincida con el ID
+      const demoEvents = generateDemoEvents();
+      const event = demoEvents.find(event => event.id === eventId);
+      
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+      
+      res.json({ event });
+    } catch (error) {
+      console.error('Error fetching event details:', error);
+      res.status(500).json({ error: 'Failed to fetch event details' });
+    }
+  });
+  
   // Get all upcoming sports events with filters
   app.get("/api/sports/events", async (req, res) => {
     try {
