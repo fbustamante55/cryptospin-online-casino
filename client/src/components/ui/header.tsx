@@ -1,11 +1,12 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
-import { Search, Gift, Bell, ChevronDown, Menu, X } from "lucide-react";
+import { Search, Gift, Bell, ChevronDown, Menu, X, User, Wallet, History, Trophy, Settings, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { DepositModal } from "@/components/ui/deposit-modal";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -29,6 +30,7 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('USDT');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   
   // Lista de criptomonedas disponibles con su valor (todos a 0)
   const currencies = [
@@ -57,6 +59,21 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  // Ref para el menú de usuario
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  
+  // Cerrar el menú de usuario cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
   return (
@@ -140,23 +157,91 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
               <NotificationDropdown />
             </div>
             
-            <div className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-1 py-1 cursor-pointer hover:border-[#09b66d]/50 transition-all duration-200">
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-[#09b66d] flex items-center justify-center text-white font-bold">
-                  {user?.username?.substring(0, 1) || 'U'}
-                </div>
-                <div className="px-2">
-                  <div className="text-xs text-white font-medium max-w-[80px] truncate">
-                    {user?.username || 'Usuario'}
+            <div className="relative">
+              <div 
+                className="flex items-center bg-[#192531] border border-[#1c2b3a] rounded-md px-1 py-1 cursor-pointer hover:border-[#09b66d]/50 transition-all duration-200"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              >
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-[#09b66d] flex items-center justify-center text-white font-bold">
+                    {user?.username?.substring(0, 1) || 'U'}
                   </div>
-                  <div className="flex items-center">
-                    <div className="h-2 w-2 bg-[#09b66d] rounded-full mr-1"></div>
-                    <span className="text-[10px] text-gray-400">VIP</span>
+                  <div className="px-2">
+                    <div className="text-xs text-white font-medium max-w-[80px] truncate">
+                      {user?.username || 'Usuario'}
+                    </div>
+                    <div className="flex items-center">
+                      <div className="h-2 w-2 bg-[#09b66d] rounded-full mr-1"></div>
+                      <span className="text-[10px] text-gray-400">VIP</span>
+                    </div>
                   </div>
+                  {/* Using ChevronDown component for dropdown indicator */}
+                  <ChevronDown className={`h-4 w-4 text-white mr-1 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </div>
-                {/* Using ChevronDown component for dropdown indicator */}
-                {ChevronDown && <ChevronDown className="h-4 w-4 text-white mr-1" />}
               </div>
+              
+              {/* Dropdown menu */}
+              {isUserMenuOpen && (
+                <div ref={userMenuRef} className="absolute right-0 mt-2 w-56 bg-[#192531] border border-[#1c2b3a] rounded-md shadow-lg py-1 z-50">
+                  <div className="px-4 py-3 border-b border-[#1c2b3a]">
+                    <p className="text-sm text-white font-semibold">{user?.username || 'Usuario'}</p>
+                    <p className="text-xs text-gray-400 mt-1">Balance: {currentCurrency.value.toFixed(8)} {currentCurrency.code}</p>
+                  </div>
+                  
+                  <Link href="/profile" className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0e1824] hover:text-white">
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-2" />
+                      <span>Mi Perfil</span>
+                    </div>
+                  </Link>
+                  
+                  <Link href="/wallet" className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0e1824] hover:text-white">
+                    <div className="flex items-center">
+                      <Wallet className="h-4 w-4 mr-2" />
+                      <span>Mi Billetera</span>
+                    </div>
+                  </Link>
+                  
+                  <Link href="/history" className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0e1824] hover:text-white">
+                    <div className="flex items-center">
+                      <History className="h-4 w-4 mr-2" />
+                      <span>Historial de Apuestas</span>
+                    </div>
+                  </Link>
+                  
+                  <Link href="/vip" className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0e1824] hover:text-white">
+                    <div className="flex items-center">
+                      <Trophy className="h-4 w-4 mr-2" />
+                      <span>Programa VIP</span>
+                      <Badge className="ml-auto bg-[#09b66d] text-[10px]">Nivel 2</Badge>
+                    </div>
+                  </Link>
+                  
+                  <Link href="/bonuses" className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0e1824] hover:text-white">
+                    <div className="flex items-center">
+                      <Gift className="h-4 w-4 mr-2" />
+                      <span>Mis Bonos</span>
+                      <Badge className="ml-auto bg-[#f8c541] text-[10px] text-black">2</Badge>
+                    </div>
+                  </Link>
+                  
+                  <div className="border-t border-[#1c2b3a] mt-1"></div>
+                  
+                  <Link href="/settings" className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0e1824] hover:text-white">
+                    <div className="flex items-center">
+                      <Settings className="h-4 w-4 mr-2" />
+                      <span>Configuración</span>
+                    </div>
+                  </Link>
+                  
+                  <button className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-[#0e1824]">
+                    <div className="flex items-center">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      <span>Cerrar Sesión</span>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
