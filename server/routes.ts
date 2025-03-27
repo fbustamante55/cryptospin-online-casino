@@ -8,7 +8,10 @@ import {
   insertGameHistorySchema, 
   insertSportsBetSchema, 
   insertSportsEventSchema,
-  insertFavoriteSchema
+  insertFavoriteSchema,
+  slotSpinSchema,
+  slotDoubleUpSchema,
+  slotCollectSchema
 } from "@shared/schema";
 
 // Middleware to check if user is admin
@@ -2296,6 +2299,317 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Roulette game error:", error);
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+    }
+  });
+
+  // ========== SLOTOPOL SLOT MACHINE API ROUTES ==========
+  
+  /**
+   * @route GET /api/slots/games
+   * @desc Get all available slot games
+   */
+  app.get("/api/slots/games", async (req, res) => {
+    try {
+      const provider = req.query.provider as string | undefined;
+      const games = await storage.getAllSlotGames(provider);
+      return res.json({ games });
+    } catch (error) {
+      console.error("Error getting slot games:", error);
+      return res.status(500).json({ error: "Failed to retrieve slot games" });
+    }
+  });
+
+  /**
+   * @route GET /api/slots/games/:id
+   * @desc Get details of a specific slot game
+   */
+  app.get("/api/slots/games/:id", async (req, res) => {
+    try {
+      const gameId = req.params.id;
+      const game = await storage.getSlotGame(gameId);
+      
+      if (!game) {
+        return res.status(404).json({ error: "Slot game not found" });
+      }
+      
+      return res.json({ game });
+    } catch (error) {
+      console.error("Error getting slot game:", error);
+      return res.status(500).json({ error: "Failed to retrieve slot game details" });
+    }
+  });
+
+  /**
+   * @route POST /api/slots/spin
+   * @desc Spin a slot machine and get the result
+   * @body { gameId: string, bet: number, lines: number }
+   */
+  app.post("/api/slots/spin", async (req, res) => {
+    try {
+      // For authenticated users use their real ID, otherwise use test ID
+      const userId = req.isAuthenticated() ? req.user.id : 999;
+      
+      // Get user (authenticated or test)
+      let user = null;
+      if (userId === 999) {
+        // Test user for demo purposes
+        user = {
+          id: 999,
+          username: "test_user",
+          balance: 10000
+        };
+        console.log("Using test user for slots:", user.username);
+      } else {
+        user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+      }
+      
+      const spinData = slotSpinSchema.parse(req.body);
+      const { gameId, bet, lines } = spinData;
+      
+      // Get the game
+      const game = await storage.getSlotGame(gameId);
+      if (!game) {
+        return res.status(404).json({ error: "Slot game not found" });
+      }
+      
+      // Check if the bet is valid
+      const totalBet = bet * lines;
+      if (bet < game.minBet || bet > game.maxBet) {
+        return res.status(400).json({ 
+          error: `Invalid bet amount. Must be between ${game.minBet} and ${game.maxBet}.` 
+        });
+      }
+      
+      // Check if the user has enough balance
+      if (user.balance < totalBet) {
+        return res.status(400).json({ error: "Insufficient balance" });
+      }
+
+      // Get or create user session for this game
+      let session = null;
+      if (userId !== 999) {
+        const userSessions = await storage.getUserSlotSessions(userId);
+        session = userSessions.find(s => s.gameId === gameId && s.isActive);
+        
+        if (!session) {
+          // Create new session
+          session = await storage.createSlotSession({
+            userId,
+            gameId,
+            currentBet: bet,
+            selectedLines: lines,
+          });
+        } else {
+          // Update existing session
+          session = await storage.updateSlotSession(session.id, {
+            currentBet: bet,
+            selectedLines: lines,
+          }) as SlotSession;
+        }
+      }
+
+      // Define symbols, probabilities, and payout structure for our 3-reel slot machine
+      const symbols = ["cherry", "lemon", "orange", "plum", "bell", "bar", "seven"];
+      
+      // Weights/probabilities for each symbol (higher number = higher probability)
+      const symbolWeights = {
+        "cherry": 20, // most common
+        "lemon": 15,
+        "orange": 15,
+        "plum": 12,
+        "bell": 10,
+        "bar": 5,
+        "seven": 3   // least common
+      };
+
+      // Payout multipliers for winning combinations
+      const payouts = {
+        "cherry-cherry-cherry": 10,
+        "lemon-lemon-lemon": 14,
+        "orange-orange-orange": 15,
+        "plum-plum-plum": 18,
+        "bell-bell-bell": 20,
+        "bar-bar-bar": 50,
+        "seven-seven-seven": 100, // jackpot
+        // Special combinations
+        "cherry-cherry-any": 5,
+        "seven-any-any": 2,
+        "bar-any-any": 1
+      };
+
+      // Function to select a random symbol based on weights
+      const selectRandomSymbol = () => {
+        const totalWeight = Object.values(symbolWeights).reduce((a, b) => a + b, 0);
+        let random = Math.random() * totalWeight;
+        
+        for (const symbol of symbols) {
+          const weight = symbolWeights[symbol as keyof typeof symbolWeights];
+          if (random < weight) {
+            return symbol;
+          }
+          random -= weight;
+        }
+        
+        // Fallback (should never reach here)
+        return symbols[0];
+      };
+
+      // Spin the reels
+      const reels = [
+        selectRandomSymbol(),
+        selectRandomSymbol(), 
+        selectRandomSymbol()
+      ];
+      
+      // Determine winnings based on the reels combination
+      let winAmount = 0;
+      const combination = reels.join('-');
+      
+      // Check for exact 3-symbol combinations
+      if (payouts[combination as keyof typeof payouts]) {
+        winAmount = bet * payouts[combination as keyof typeof payouts];
+      } 
+      // Check for cherry-cherry-any combinations
+      else if (reels[0] === 'cherry' && reels[1] === 'cherry') {
+        winAmount = bet * payouts["cherry-cherry-any"];
+      }
+      // Check for seven-any-any combinations
+      else if (reels[0] === 'seven') {
+        winAmount = bet * payouts["seven-any-any"];
+      }
+      // Check for bar-any-any combinations
+      else if (reels[0] === 'bar') {
+        winAmount = bet * payouts["bar-any-any"];
+      }
+      
+      // Calculate multiplier (for game history)
+      const multiplier = winAmount > 0 ? winAmount / totalBet : 0;
+      
+      // Update user balance
+      const balanceChange = winAmount - totalBet;
+      let updatedUser;
+      
+      if (userId !== 999) {
+        // Real authenticated user - save to DB
+        updatedUser = await storage.updateUserBalance(userId, balanceChange);
+        
+        if (!updatedUser) {
+          return res.status(500).json({ error: "Failed to update balance" });
+        }
+        
+        // Create transaction records
+        await storage.createTransaction({
+          userId,
+          type: "bet",
+          amount: totalBet,
+          gameType: "slot",
+          gameData: { gameId, bet, lines }
+        });
+        
+        if (winAmount > 0) {
+          await storage.createTransaction({
+            userId,
+            type: "win",
+            amount: winAmount,
+            gameType: "slot",
+            gameData: { gameId, reels, bet, lines }
+          });
+        }
+        
+        // Create a game history record
+        await storage.createGameHistory({
+          userId,
+          gameType: "slot",
+          gameId,
+          bet: totalBet,
+          outcome: JSON.stringify(reels),
+          win: winAmount > 0,
+          winAmount,
+          multiplier
+        });
+        
+        // Update session with results
+        if (session) {
+          await storage.updateSlotSession(session.id, {
+            lastOutcome: JSON.stringify(reels),
+            lastWin: winAmount,
+            totalWagered: (session.totalWagered || 0) + totalBet,
+            totalWon: (session.totalWon || 0) + winAmount
+          });
+        }
+      } else {
+        // Test user - don't save to DB
+        user.balance += balanceChange;
+        updatedUser = user;
+      }
+
+      // Return response
+      return res.json({
+        reels,
+        bet,
+        lines,
+        totalBet,
+        winAmount,
+        balance: updatedUser.balance,
+        isWin: winAmount > 0,
+        sessionId: session?.id || null,
+        multiplier
+      });
+      
+    } catch (error) {
+      console.error("Error spinning slot machine:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request data", details: error.issues });
+      }
+      return res.status(500).json({ error: "Failed to process slot spin" });
+    }
+  });
+
+  /**
+   * @route POST /api/slots/collect
+   * @desc Collect winnings from a slot session
+   * @body { gameId: string, sessionId: number }
+   */
+  app.post("/api/slots/collect", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const userId = req.user.id;
+      const collectData = slotCollectSchema.parse(req.body);
+      const { gameId, sessionId } = collectData;
+      
+      // Get the session
+      const session = await storage.getSlotSession(sessionId);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+      
+      // Verify session belongs to user and matches the game
+      if (session.userId !== userId || session.gameId !== gameId) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      
+      // Close the session
+      await storage.updateSlotSession(sessionId, { isActive: false });
+      
+      return res.json({
+        success: true,
+        message: "Winnings collected successfully",
+        totalWon: session.totalWon,
+        totalWagered: session.totalWagered
+      });
+      
+    } catch (error) {
+      console.error("Error collecting slot winnings:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request data", details: error.issues });
+      }
+      return res.status(500).json({ error: "Failed to collect winnings" });
     }
   });
 
