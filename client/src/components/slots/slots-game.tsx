@@ -167,29 +167,29 @@ export function SlotsGame() {
     let normalizedGameId;
     
     if (pathGameId === 'book-of-egypt') {
-      normalizedGameId = 'bookofegypt';
+      normalizedGameId = 'book_of_treasures';
       setGameTitle(t("games.slots_book_of_egypt_title"));
     } else if (pathGameId === '50gems') {
-      normalizedGameId = '50gems';
+      normalizedGameId = 'jewel_cascade';
       setGameTitle(t("games.slots_50gems_title"));
     } else if (pathGameId === '777') {
       normalizedGameId = 'classic3reel';
       setGameTitle(t("games.slots_777_title"));
     } else if (pathGameId === 'fruity-fiesta') {
-      normalizedGameId = 'fruitymultipliers';
+      normalizedGameId = 'fruity_multipliers';
       setGameTitle(t("games.slots_fruity_title"));
     } else if (pathGameId === 'crystal-fortune') {
-      normalizedGameId = 'crystalmines';
+      normalizedGameId = 'crystal_mines';
       setGameTitle("Crystal Fortune");
     } else if (pathGameId === 'mega-fortune') {
-      normalizedGameId = 'megafortune';
+      normalizedGameId = 'mega_fortune';
       setGameTitle("Mega Fortune");
     } else if (pathGameId === 'avalanche') {
-      normalizedGameId = 'avalanche';
+      normalizedGameId = 'avalanche_wins';
       setGameTitle("Avalanche");
     } else {
       // Si el ID no coincide con ninguno conocido, usar el predeterminado
-      normalizedGameId = 'fruitymultipliers';
+      normalizedGameId = 'fruity_multipliers';
       setGameTitle(t("games.slots_fruity_title"));
     }
     
