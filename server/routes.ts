@@ -38,10 +38,9 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
 // Initialize default slot games for testing
 async function initializeDefaultSlotGames() {
   try {
-    // Check if classic3reel game already exists
-    const existingGame = await storage.getSlotGame("classic3reel");
-    if (!existingGame) {
-      // Create the classic 3-reel slot game
+    // 1. Classic 3-reel slot game
+    const existingClassic = await storage.getSlotGame("classic3reel");
+    if (!existingClassic) {
       await storage.createSlotGame({
         gameId: "classic3reel",
         name: "Classic 3-Reel",
@@ -67,9 +66,134 @@ async function initializeDefaultSlotGames() {
         isActive: true
       });
       console.log("Created default classic3reel slot game");
-    } else {
-      console.log("Classic3reel slot game already exists");
     }
+
+    // 2. Egyptian-themed slot game
+    const existingEgyptian = await storage.getSlotGame("book_of_treasures");
+    if (!existingEgyptian) {
+      await storage.createSlotGame({
+        gameId: "book_of_treasures",
+        name: "Book of Treasures",
+        provider: "AGT",
+        description: "Journey through ancient Egypt and discover the mysterious Book of Treasures with expanding symbols and free spins.",
+        thumbnail: "/images/slots/book_of_treasures.png",
+        paylines: 10,
+        reels: 5,
+        minBet: 10,
+        maxBet: 500,
+        rtp: 96.5,
+        volatility: "high",
+        features: ["free_spins", "expanding_symbols", "scatter"],
+        symbols: {
+          "BOOK": { payout: { 3: 20, 4: 100, 5: 500 }, isScatter: true, triggersFeature: "free_spins" },
+          "PHARAOH": { payout: { 2: 5, 3: 50, 4: 250, 5: 1000 }, isExpanding: true },
+          "ANKH": { payout: { 3: 20, 4: 80, 5: 400 } },
+          "EYE": { payout: { 3: 15, 4: 70, 5: 300 } },
+          "SCARAB": { payout: { 3: 15, 4: 70, 5: 300 } },
+          "PYRAMID": { payout: { 3: 10, 4: 50, 5: 200 } },
+          "HIEROGLYPH": { payout: { 3: 10, 4: 40, 5: 150 } },
+          "SPHINX": { payout: { 3: 5, 4: 30, 5: 100 } },
+          "DEITY": { payout: { 3: 5, 4: 25, 5: 80 } },
+          "SUN": { payout: { 3: 5, 4: 25, 5: 80 } }
+        },
+        isActive: true
+      });
+      console.log("Created Book of Treasures Egyptian slot game");
+    }
+
+    // 3. Fruit slot with multipliers
+    const existingFruit = await storage.getSlotGame("fruity_multipliers");
+    if (!existingFruit) {
+      await storage.createSlotGame({
+        gameId: "fruity_multipliers",
+        name: "Fruity Multipliers",
+        provider: "NetEnt",
+        description: "Classic fruit symbols with modern multiplier mechanics for potentially massive wins.",
+        thumbnail: "/images/slots/fruity_multipliers.png",
+        paylines: 20,
+        reels: 5,
+        minBet: 5,
+        maxBet: 200,
+        rtp: 96.0,
+        volatility: "medium",
+        features: ["multipliers", "wilds", "respins"],
+        symbols: {
+          "WILD": { payout: { 3: 30, 4: 100, 5: 500 }, isWild: true, multiplier: 2 },
+          "STAR": { payout: { 3: 25, 4: 75, 5: 300 }, isScatter: true, triggersFeature: "respins" },
+          "WATERMELON": { payout: { 3: 15, 4: 50, 5: 250 } },
+          "GRAPES": { payout: { 3: 15, 4: 45, 5: 200 } },
+          "ORANGE": { payout: { 3: 10, 4: 40, 5: 150 } },
+          "LEMON": { payout: { 3: 10, 4: 35, 5: 125 } },
+          "CHERRY": { payout: { 3: 5, 4: 25, 5: 100 } },
+          "PLUM": { payout: { 3: 5, 4: 20, 5: 75 } }
+        },
+        isActive: true
+      });
+      console.log("Created Fruity Multipliers slot game");
+    }
+
+    // 4. Jackpot game
+    const existingJackpot = await storage.getSlotGame("mega_fortune");
+    if (!existingJackpot) {
+      await storage.createSlotGame({
+        gameId: "mega_fortune", 
+        name: "Mega Fortune",
+        provider: "BetSoft",
+        description: "Luxury-themed slot with progressive jackpots and free spins. Spin the Wheel of Fortune to win one of three jackpots!",
+        thumbnail: "/images/slots/mega_fortune.png",
+        paylines: 25,
+        reels: 5,
+        minBet: 25,
+        maxBet: 1000,
+        rtp: 94.0,
+        volatility: "very high",
+        features: ["jackpot", "free_spins", "wheel_bonus"],
+        symbols: {
+          "WHEEL": { payout: { 3: 20, 4: 100, 5: 300 }, isScatter: true, triggersFeature: "wheel_bonus" },
+          "YACHT": { payout: { 2: 5, 3: 30, 4: 150, 5: 750 } },
+          "LIMOUSINE": { payout: { 3: 25, 4: 100, 5: 500 } },
+          "CHAMPAGNE": { payout: { 3: 20, 4: 75, 5: 300 } },
+          "RING": { payout: { 3: 15, 4: 50, 5: 200 } },
+          "WATCH": { payout: { 3: 10, 4: 40, 5: 150 } },
+          "MONEY": { payout: { 3: 5, 4: 25, 5: 100 } },
+          "WILD": { payout: { 3: 50, 4: 500, 5: 2500 }, isWild: true }
+        },
+        isActive: true
+      });
+      console.log("Created Mega Fortune jackpot slot game");
+    }
+
+    // 5. Gemstone-themed slot
+    const existingGems = await storage.getSlotGame("jewel_cascade");
+    if (!existingGems) {
+      await storage.createSlotGame({
+        gameId: "jewel_cascade",
+        name: "Jewel Cascade",
+        provider: "AGT",
+        description: "Sparkling jewels cascade down the reels, creating multiple winning opportunities with each spin.",
+        thumbnail: "/images/slots/jewel_cascade.png",
+        paylines: 50,
+        reels: 5,
+        minBet: 10,
+        maxBet: 300,
+        rtp: 97.0,
+        volatility: "medium",
+        features: ["cascading_reels", "multipliers", "wilds"],
+        symbols: {
+          "DIAMOND": { payout: { 3: 20, 4: 75, 5: 300 } },
+          "RUBY": { payout: { 3: 15, 4: 60, 5: 250 } },
+          "EMERALD": { payout: { 3: 15, 4: 50, 5: 200 } },
+          "SAPPHIRE": { payout: { 3: 10, 4: 40, 5: 150 } },
+          "TOPAZ": { payout: { 3: 10, 4: 35, 5: 125 } },
+          "AMETHYST": { payout: { 3: 5, 4: 25, 5: 100 } },
+          "PEARL": { payout: { 3: 5, 4: 20, 5: 75 } },
+          "WILD_GEM": { payout: { 3: 25, 4: 100, 5: 500 }, isWild: true }
+        },
+        isActive: true
+      });
+      console.log("Created Jewel Cascade slot game");
+    }
+
   } catch (error) {
     console.error("Failed to initialize default slot games:", error);
   }

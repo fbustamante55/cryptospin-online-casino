@@ -4,14 +4,39 @@ import { useQuery } from "@tanstack/react-query";
 import { SlotGame } from "@shared/schema";
 import { motion } from "framer-motion";
 
+// Featured game IDs - specifically chosen for profitability and player engagement
+const FEATURED_GAME_IDS = [
+  "mega_fortune",      // Jackpot game with high potential rewards
+  "book_of_treasures", // Egyptian-themed game with high RTP
+  "fruity_multipliers", // Fruit game with multipliers
+  "jewel_cascade",     // Gemstone theme with cascading reels
+  "classic3reel"       // Simple classic slot for beginners
+];
+
 export function SlotopolCasinoGamesSection() {
   // Fetch all available slot games from the Slotopol server
   const { data: slotGames, isLoading, error } = useQuery<{games: SlotGame[]}>({
     queryKey: ["/api/slots/games"],
   });
   
-  // Display a max of 5 games on the homepage
-  const displayedGames = slotGames?.games?.slice(0, 5) || [];
+  // Prioritize displaying our curated selection of profitable games
+  const displayedGames = slotGames?.games 
+    ? slotGames.games
+        // First, try to find and sort by our featured games list
+        .sort((a, b) => {
+          const aIndex = FEATURED_GAME_IDS.indexOf(a.gameId);
+          const bIndex = FEATURED_GAME_IDS.indexOf(b.gameId);
+          // If both games are in our featured list, sort by their position in the list
+          if (aIndex >= 0 && bIndex >= 0) return aIndex - bIndex;
+          // If only one game is in our featured list, prioritize it
+          if (aIndex >= 0) return -1;
+          if (bIndex >= 0) return 1;
+          // If neither game is in our featured list, maintain their original order
+          return 0;
+        })
+        // Limit to 5 games for the homepage display
+        .slice(0, 5)
+    : [];
   
   if (isLoading) {
     return (
@@ -41,7 +66,11 @@ export function SlotopolCasinoGamesSection() {
           <motion.div
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.2 }}
-            className="rounded-lg overflow-hidden bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer h-full flex flex-col"
+            className={`rounded-lg overflow-hidden ${
+              game.gameId === 'book_of_treasures'  // This is our most profitable game (highest RTP)
+                ? 'bg-gradient-to-br from-[#192531] to-[#0d2e1a] border border-[#09b66d]/30 hover:border-[#09b66d]/60' 
+                : 'bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/30'
+            } transition-all duration-300 cursor-pointer h-full flex flex-col`}
           >
             <div className="aspect-square bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
               {game.thumbnail ? (
@@ -87,6 +116,30 @@ export function SlotopolCasinoGamesSection() {
                 <span className="px-2 py-1 rounded-md text-xs font-medium bg-[#192531]/80 text-white border border-[#1c2b3a]">
                   {game.provider}
                 </span>
+              </div>
+              
+              {/* Special features badges */}
+              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                {/* High RTP Badge - for games with RTP > 96% */}
+                {game.rtp > 96 && (
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-[#09b66d]/90 text-white">
+                    {game.rtp}% RTP
+                  </span>
+                )}
+                
+                {/* Jackpot Badge */}
+                {Array.isArray(game.features) && game.features.includes('jackpot') && (
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-[#f9c846]/90 text-black">
+                    Jackpot
+                  </span>
+                )}
+                
+                {/* Free Spins Badge */}
+                {Array.isArray(game.features) && game.features.includes('free_spins') && (
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-[#2f80ed]/90 text-white">
+                    Free Spins
+                  </span>
+                )}
               </div>
             </div>
             

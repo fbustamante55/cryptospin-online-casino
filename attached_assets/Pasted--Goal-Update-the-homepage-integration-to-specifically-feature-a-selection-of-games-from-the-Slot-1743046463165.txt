@@ -1,0 +1,37 @@
+**Goal:** Update the homepage integration to specifically feature a selection of games from the Slotopol server that are likely to be both profitable and highly playable, and to guide me on how to ensure these specific games are integrated.
+
+**Context:** The Slotopol server is running, and I have a basic understanding of how to fetch and display games on the homepage (as per the previous prompt). Now, I want to curate a selection of a few specific games from the server to highlight.
+
+**Please perform the following actions and provide guidance:**
+
+1.  **Based on common knowledge of popular and potentially profitable slot game types, suggest a selection of 3-5 specific game types that are likely to be available within a typical slot game server like Slotopol.** Consider game types known for:
+    * **High Player Engagement:** Games with engaging themes, interesting bonus features, or unique mechanics.
+    * **Potential for Profitability (for the casino):** Games with balanced payout structures and a reasonable house edge.
+    * **Common Availability:** Game types that are frequently offered by various slot game providers.
+
+    Examples of game types to consider (but feel free to suggest others):
+    * Classic 3-reel slots
+    * Video slots with multiple paylines and bonus rounds (e.g., free spins, mini-games)
+    * Games with progressive jackpots
+    * Popular themes (e.g., ancient Egypt, fruit machines, adventure)
+
+2.  **Assuming the Slotopol server provides some information about each game (either through the "get games" API or elsewhere), what specific details should I look for to identify the game types you suggest?** (e.g., keywords in the game name, specific features listed in the game data).
+
+3.  **Once I have identified the specific game IDs (e.g., `classic3reel`, `egyptian_adventure`, `fruit_mania`) for the selected games from the Slotopol server, how do I modify my homepage JavaScript to:**
+    * **Specifically fetch details for these games?** (If the "get all games" endpoint provides enough information, I can filter client-side. If there's a way to fetch details for specific game IDs, please provide an example).
+    * **Display these selected games prominently on the homepage?** Provide an example of how to create HTML elements for these specific games, potentially including their names and thumbnail images (if available from the server).
+
+4.  **Regarding ensuring the games work:**
+    * What are the key steps to verify that these specific games are indeed playable through the integration I'm building? (e.g., checking for proper loading, bet placement, spin functionality, and payout handling - even if the wallet integration isn't fully implemented yet).
+    * What kind of errors should I look out for in the browser's developer console when trying to play these games?
+
+5.  **Regarding wallet integration for these specific games (conceptual):**
+    * For each of the game types you suggested, are there any specific considerations for how bet amounts or payouts might work that I should be aware of when planning the wallet integration? (e.g., progressive jackpots having different bet requirements or payout mechanisms).
+
+**Please provide example JavaScript code snippets, suggestions for identifying game types from server data, and key steps for testing the functionality of these specific Slotopol games on my homepage.**
+
+**Important Information:**
+
+* The Slotopol server is running and accessible.
+* I can fetch a list of games (though it might currently be empty or I need to refine how I'm doing it).
+* I want to focus on integrating a curated selection of profitable and playable games onto the homepage.
