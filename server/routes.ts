@@ -14,6 +14,12 @@ import {
   slotCollectSchema
 } from "@shared/schema";
 
+// Import types for type safety
+import type { 
+  SlotGame,
+  SlotSession 
+} from "@shared/schema";
+
 // Middleware to check if user is admin
 function isAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.isAuthenticated()) {
@@ -2318,6 +2324,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ error: "Failed to retrieve slot games" });
     }
   });
+  
+  /**
+   * @route POST /api/slots/games
+   * @desc Create a new slot game
+   */
+  app.post("/api/slots/games", async (req, res) => {
+    try {
+      // Define the slot game creation schema
+      const createSlotGameSchema = z.object({
+        gameId: z.string().min(3),
+        name: z.string().min(3),
+        provider: z.string(),
+        description: z.string().optional(),
+        thumbnail: z.string().optional(),
+        paylines: z.number().int().min(1),
+        reels: z.number().int().min(3).max(5),
+        minBet: z.number().min(1),
+        maxBet: z.number().min(1),
+        rtp: z.number().min(80).max(99),
+        volatility: z.enum(["low", "medium", "high"]),
+        features: z.any().optional(),
+        symbols: z.any().optional(),
+        isActive: z.boolean().optional()
+      });
+      
+      const gameData = createSlotGameSchema.parse(req.body);
+      const game = await storage.createSlotGame(gameData);
+      
+      return res.status(201).json({ 
+        message: "Slot game created successfully", 
+        game 
+      });
+    } catch (error) {
+      console.error("Error creating slot game:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid slot game data", 
+          details: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          }))
+        });
+      }
+      return res.status(500).json({ 
+        error: "Failed to create slot game",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   /**
    * @route GET /api/slots/games/:id
@@ -2366,8 +2421,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Validate input data
       const spinData = slotSpinSchema.parse(req.body);
       const { gameId, bet, lines } = spinData;
+      
+      // Additional validation for bet amount
+      if (bet <= 0) {
+        return res.status(400).json({ error: "Bet amount must be greater than zero" });
+      }
       
       // Get the game
       const game = await storage.getSlotGame(gameId);
@@ -2379,7 +2440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalBet = bet * lines;
       if (bet < game.minBet || bet > game.maxBet) {
         return res.status(400).json({ 
-          error: `Invalid bet amount. Must be between ${game.minBet} and ${game.maxBet}.` 
+          error: `Invalid bet amount. Must be between ${game.minBet} and ${game.maxBet}` 
         });
       }
       
@@ -2411,50 +2472,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // ======== GAME CONFIGURATION ========
       // Define symbols, probabilities, and payout structure for our 3-reel slot machine
       const symbols = ["cherry", "lemon", "orange", "plum", "bell", "bar", "seven"];
       
       // Weights/probabilities for each symbol (higher number = higher probability)
       const symbolWeights = {
-        "cherry": 20, // most common
+        "cherry": 15, // Match Python implementation weight
         "lemon": 15,
-        "orange": 15,
-        "plum": 12,
+        "orange": 10,
+        "plum": 10,
         "bell": 10,
-        "bar": 5,
-        "seven": 3   // least common
+        "bar": 10,
+        "seven": 5   // least common (jackpot symbol)
       };
 
       // Payout multipliers for winning combinations
       const payouts = {
+        // Exact matches (all three symbols the same)
         "cherry-cherry-cherry": 10,
-        "lemon-lemon-lemon": 14,
-        "orange-orange-orange": 15,
-        "plum-plum-plum": 18,
-        "bell-bell-bell": 20,
-        "bar-bar-bar": 50,
-        "seven-seven-seven": 100, // jackpot
-        // Special combinations
-        "cherry-cherry-any": 5,
-        "seven-any-any": 2,
-        "bar-any-any": 1
+        "lemon-lemon-lemon": 20,   // Match Python implementation
+        "orange-orange-orange": 30, // Match Python implementation
+        "plum-plum-plum": 40,      // Match Python implementation 
+        "bell-bell-bell": 50,
+        "bar-bar-bar": 100,        // Match Python implementation
+        "seven-seven-seven": 500,  // Match Python implementation (jackpot)
+        
+        // Partial matches (first two symbols the same, third can be any)
+        "bar-bar-any": 50,
+        "seven-seven-any": 100
       };
+
+      // Create a cumulative distribution for weighted random selection
+      const populateSymbolsArray = () => {
+        const population: string[] = [];
+        for (const symbol of symbols) {
+          const weight = symbolWeights[symbol as keyof typeof symbolWeights];
+          for (let i = 0; i < weight; i++) {
+            population.push(symbol);
+          }
+        }
+        return population;
+      };
+
+      // Population array for random selection
+      const symbolsPopulation = populateSymbolsArray();
 
       // Function to select a random symbol based on weights
       const selectRandomSymbol = () => {
-        const totalWeight = Object.values(symbolWeights).reduce((a, b) => a + b, 0);
-        let random = Math.random() * totalWeight;
-        
-        for (const symbol of symbols) {
-          const weight = symbolWeights[symbol as keyof typeof symbolWeights];
-          if (random < weight) {
-            return symbol;
-          }
-          random -= weight;
-        }
-        
-        // Fallback (should never reach here)
-        return symbols[0];
+        const randomIndex = Math.floor(Math.random() * symbolsPopulation.length);
+        return symbolsPopulation[randomIndex];
       };
 
       // Spin the reels
@@ -2464,25 +2531,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         selectRandomSymbol()
       ];
       
+      // ======== PAYOUT CALCULATION ========
       // Determine winnings based on the reels combination
       let winAmount = 0;
-      const combination = reels.join('-');
+      const reelsCombination = reels.join('-');
       
-      // Check for exact 3-symbol combinations
-      if (payouts[combination as keyof typeof payouts]) {
-        winAmount = bet * payouts[combination as keyof typeof payouts];
+      // Check for exact 3-symbol combinations first
+      if (payouts[reelsCombination as keyof typeof payouts]) {
+        winAmount = bet * payouts[reelsCombination as keyof typeof payouts];
       } 
-      // Check for cherry-cherry-any combinations
-      else if (reels[0] === 'cherry' && reels[1] === 'cherry') {
-        winAmount = bet * payouts["cherry-cherry-any"];
-      }
-      // Check for seven-any-any combinations
-      else if (reels[0] === 'seven') {
-        winAmount = bet * payouts["seven-any-any"];
-      }
-      // Check for bar-any-any combinations
-      else if (reels[0] === 'bar') {
-        winAmount = bet * payouts["bar-any-any"];
+      // Check for partial match combinations (first two symbols match)
+      else if (reels[0] === reels[1]) {
+        const partialMatchKey = `${reels[0]}-${reels[0]}-any` as keyof typeof payouts;
+        if (payouts[partialMatchKey]) {
+          winAmount = bet * payouts[partialMatchKey];
+        }
       }
       
       // Calculate multiplier (for game history)
@@ -2546,13 +2609,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedUser = user;
       }
 
-      // Return response
+      // Return response (format similar to Python implementation)
       return res.json({
         reels,
         bet,
         lines,
         totalBet,
-        winAmount,
+        winnings: winAmount, // Using "winnings" to match Python implementation
+        winAmount, // Keep existing field for backward compatibility
         balance: updatedUser.balance,
         isWin: winAmount > 0,
         sessionId: session?.id || null,
@@ -2562,9 +2626,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error spinning slot machine:", error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid request data", details: error.issues });
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          }))
+        });
       }
-      return res.status(500).json({ error: "Failed to process slot spin" });
+      // Better error handling similar to Python implementation
+      return res.status(500).json({ 
+        error: "An unexpected error occurred while processing your slot spin",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
@@ -2591,7 +2665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verify session belongs to user and matches the game
       if (session.userId !== userId || session.gameId !== gameId) {
-        return res.status(403).json({ error: "Unauthorized" });
+        return res.status(403).json({ error: "Unauthorized - This session does not belong to you" });
       }
       
       // Close the session
@@ -2607,9 +2681,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error collecting slot winnings:", error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid request data", details: error.issues });
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          }))
+        });
       }
-      return res.status(500).json({ error: "Failed to collect winnings" });
+      return res.status(500).json({ 
+        error: "An unexpected error occurred while processing your collection request",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
