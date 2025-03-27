@@ -274,6 +274,42 @@ export function SpaceExplorerGameSync() {
     }
   }, [currentMultiplier, missionState, hasReturned, autoCashout, isAutoCashoutEnabled]);
   
+  // Contador para tiempo desde que inició la exploración
+  const [explorationTime, setExplorationTime] = useState<number>(0);
+  const explorationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Efecto para manejar el contador de tiempo desde que inició la exploración
+  useEffect(() => {
+    // Si estamos explorando y no hemos hecho cashout, iniciar contador
+    if (missionState === 'exploring' && !hasReturned) {
+      // Limpiar timer anterior si existe
+      if (explorationTimerRef.current) {
+        clearInterval(explorationTimerRef.current);
+      }
+      
+      // Reiniciar contador
+      setExplorationTime(0);
+      
+      // Iniciar nuevo timer
+      explorationTimerRef.current = setInterval(() => {
+        setExplorationTime(prev => prev + 0.1);
+      }, 100); // Actualizar cada 100ms
+    } else {
+      // Detener timer si no estamos explorando o ya hicimos cashout
+      if (explorationTimerRef.current) {
+        clearInterval(explorationTimerRef.current);
+        explorationTimerRef.current = null;
+      }
+    }
+    
+    // Cleanup
+    return () => {
+      if (explorationTimerRef.current) {
+        clearInterval(explorationTimerRef.current);
+      }
+    };
+  }, [missionState, hasReturned]);
+
   // Manejador de apuesta
   const handleBet = () => {
     if (!user || user.balance < bet) return;
@@ -283,6 +319,8 @@ export function SpaceExplorerGameSync() {
     
     // Si ya apostamos en este juego, no permitir apostar de nuevo
     if (hasPlacedBetInCurrentGame.current) return;
+    
+    console.log("Colocando apuesta:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
     
     // Realizar apuesta
     if (isAutoCashoutEnabled) {
@@ -296,6 +334,8 @@ export function SpaceExplorerGameSync() {
   const handleCashout = () => {
     // Si el juego no está en progreso o ya hicimos cashout, no permitir cashout
     if (missionState !== 'exploring' || hasReturned) return;
+    
+    console.log("Realizando cashout con multiplicador:", currentMultiplier);
     
     cashoutMutation.mutate();
   };
@@ -528,7 +568,8 @@ export function SpaceExplorerGameSync() {
                   disabled={
                     missionState !== 'exploring' || 
                     hasReturned || 
-                    cashoutMutation.isPending
+                    cashoutMutation.isPending ||
+                    explorationTime < 5 // Deshabilitar durante los primeros 5 segundos
                   }
                   onClick={handleCashout}
                   className="bg-green-600 hover:bg-green-700 text-white font-bold"
@@ -537,7 +578,9 @@ export function SpaceExplorerGameSync() {
                     ? "Recogiendo..." 
                     : hasReturned 
                       ? "RECOGIDO"
-                      : "RECOGER"
+                      : explorationTime < 5
+                        ? `ESPERA (${Math.max(0, Math.ceil(5 - explorationTime))}s)`
+                        : "RECOGER"
                   }
                 </Button>
               </div>
