@@ -279,7 +279,7 @@ export function NewEventCard({
           
           {/* Título de apuestas */}
           <div className="bg-[#0e1624] py-1 px-2 rounded-t-md border-b border-[#1a2e4a]">
-            <span className="text-xs font-semibold text-white">GANADOR DEL PARTIDO (1X2)</span>
+            <span className="text-xs font-semibold text-white">GANADOR DEL PARTIDO</span>
           </div>
           
           {/* Botones de apuestas en formato horizontal con etiquetas claras */}
