@@ -138,29 +138,28 @@ export function SlotopolCasinoGamesSection() {
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 200 200" 
                           className="w-full h-full"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
                         >
                           {/* Egyptian theme with pyramids and book */}
                           <defs>
-                            <linearGradient id="pyramidGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`pyramidGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#d4af37" />
                               <stop offset="100%" stopColor="#aa8a29" />
                             </linearGradient>
-                            <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <linearGradient id={`skyGradient-${game.gameId}`} x1="0%" y1="0%" x2="0%" y2="100%">
                               <stop offset="0%" stopColor="#192531" />
                               <stop offset="100%" stopColor="#0e1824" />
                             </linearGradient>
-                            <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`bookGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#8b4513" />
                               <stop offset="100%" stopColor="#6b3100" />
                             </linearGradient>
-                            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`goldGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#ffd700" />
                               <stop offset="100%" stopColor="#b8860b" />
                             </linearGradient>
                           </defs>
                           {/* Sky/Background */}
-                          <rect x="0" y="0" width="200" height="200" fill="url(#skyGradient)" />
+                          <rect x="0" y="0" width="200" height="200" fill={`url(#skyGradient-${game.gameId})`} />
                           {/* Stars */}
                           <circle cx="30" cy="30" r="1" fill="#ffffff" />
                           <circle cx="50" cy="20" r="1" fill="#ffffff" />
@@ -170,15 +169,15 @@ export function SlotopolCasinoGamesSection() {
                           <circle cx="150" cy="30" r="1" fill="#ffffff" />
                           <circle cx="170" cy="25" r="1" fill="#ffffff" />
                           {/* Pyramids */}
-                          <polygon points="50,130 110,70 170,130" fill="url(#pyramidGradient)" />
-                          <polygon points="20,130 60,90 100,130" fill="url(#pyramidGradient)" opacity="0.7" />
+                          <polygon points="50,130 110,70 170,130" fill={`url(#pyramidGradient-${game.gameId})`} />
+                          <polygon points="20,130 60,90 100,130" fill={`url(#pyramidGradient-${game.gameId})`} opacity="0.7" />
                           {/* Desert sand */}
                           <rect x="0" y="130" width="200" height="70" fill="#d2b48c" />
                           {/* Book of treasures */}
                           <g transform="translate(80, 90) rotate(-10)">
-                            <rect x="-25" y="-20" width="50" height="40" rx="2" fill="url(#bookGradient)" />
+                            <rect x="-25" y="-20" width="50" height="40" rx="2" fill={`url(#bookGradient-${game.gameId})`} />
                             <rect x="-20" y="-15" width="40" height="30" rx="1" fill="#f5f5dc" />
-                            <path d="M-10,-5 L10,-5 L10,5 L-10,5 Z" fill="url(#goldGradient)" />
+                            <path d="M-10,-5 L10,-5 L10,5 L-10,5 Z" fill={`url(#goldGradient-${game.gameId})`} />
                             <circle cx="0" cy="0" r="8" fill="#09b66d" />
                             <text x="0" y="3" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">$</text>
                           </g>
@@ -193,30 +192,29 @@ export function SlotopolCasinoGamesSection() {
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 200 200" 
                           className="w-full h-full"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
                         >
                           <defs>
-                            <linearGradient id="rubyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`rubyGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#e0115f" />
                               <stop offset="100%" stopColor="#a00a41" />
                             </linearGradient>
-                            <linearGradient id="sapphireGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`sapphireGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#0f52ba" />
                               <stop offset="100%" stopColor="#082c64" />
                             </linearGradient>
-                            <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`emeraldGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#50c878" />
                               <stop offset="100%" stopColor="#228b22" />
                             </linearGradient>
-                            <linearGradient id="amberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`amberGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#ffbf00" />
                               <stop offset="100%" stopColor="#cc9900" />
                             </linearGradient>
-                            <linearGradient id="diamondGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`diamondGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#b9f2ff" />
                               <stop offset="100%" stopColor="#a4d8e6" />
                             </linearGradient>
-                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <filter id={`glow-${game.gameId}`} x="-50%" y="-50%" width="200%" height="200%">
                               <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
                               <feComposite in="blur" in2="SourceGraphic" operator="over" />
                             </filter>
@@ -224,11 +222,11 @@ export function SlotopolCasinoGamesSection() {
                           {/* Background */}
                           <rect x="0" y="0" width="200" height="200" fill="#0e1824" />
                           {/* Jewels */}
-                          <polygon points="60,50 75,70 60,90 45,70" fill="url(#rubyGradient)" filter="url(#glow)" />
-                          <polygon points="100,40 115,60 100,80 85,60" fill="url(#emeraldGradient)" filter="url(#glow)" />
-                          <polygon points="140,50 155,70 140,90 125,70" fill="url(#sapphireGradient)" filter="url(#glow)" />
-                          <polygon points="80,100 95,120 80,140 65,120" fill="url(#amberGradient)" filter="url(#glow)" />
-                          <polygon points="120,100 135,120 120,140 105,120" fill="url(#diamondGradient)" filter="url(#glow)" />
+                          <polygon points="60,50 75,70 60,90 45,70" fill={`url(#rubyGradient-${game.gameId})`} filter={`url(#glow-${game.gameId})`} />
+                          <polygon points="100,40 115,60 100,80 85,60" fill={`url(#emeraldGradient-${game.gameId})`} filter={`url(#glow-${game.gameId})`} />
+                          <polygon points="140,50 155,70 140,90 125,70" fill={`url(#sapphireGradient-${game.gameId})`} filter={`url(#glow-${game.gameId})`} />
+                          <polygon points="80,100 95,120 80,140 65,120" fill={`url(#amberGradient-${game.gameId})`} filter={`url(#glow-${game.gameId})`} />
+                          <polygon points="120,100 135,120 120,140 105,120" fill={`url(#diamondGradient-${game.gameId})`} filter={`url(#glow-${game.gameId})`} />
                           
                           {/* Shine effects */}
                           <circle cx="60" cy="70" r="2" fill="white" opacity="0.8" />
@@ -248,7 +246,6 @@ export function SlotopolCasinoGamesSection() {
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 200 200" 
                           className="w-full h-full"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
                         >
                           <rect x="0" y="0" width="200" height="200" fill="#0e1824" />
                           
@@ -298,14 +295,13 @@ export function SlotopolCasinoGamesSection() {
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 200 200" 
                           className="w-full h-full"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
                         >
                           <defs>
-                            <linearGradient id="goldCoinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={`goldCoinGradient-${game.gameId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#ffd700" />
                               <stop offset="100%" stopColor="#b8860b" />
                             </linearGradient>
-                            <filter id="moneyGlow" x="-100%" y="-100%" width="300%" height="300%">
+                            <filter id={`moneyGlow-${game.gameId}`} x="-100%" y="-100%" width="300%" height="300%">
                               <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
                               <feComposite in="blur" in2="SourceGraphic" operator="over" />
                             </filter>
@@ -314,7 +310,7 @@ export function SlotopolCasinoGamesSection() {
                           <rect x="0" y="0" width="200" height="200" fill="#0e1824" />
                           
                           {/* Jackpot title */}
-                          <text x="100" y="40" textAnchor="middle" fill="#f9c846" fontSize="20" fontWeight="bold" filter="url(#moneyGlow)">JACKPOT</text>
+                          <text x="100" y="40" textAnchor="middle" fill="#f9c846" fontSize="20" fontWeight="bold" filter={`url(#moneyGlow-${game.gameId})`}>JACKPOT</text>
                           
                           {/* Treasure chest */}
                           <rect x="70" y="100" width="60" height="40" rx="5" fill="#8b4513" />
@@ -323,12 +319,12 @@ export function SlotopolCasinoGamesSection() {
                           <circle cx="100" cy="100" r="3" fill="#cd7f32" />
                           
                           {/* Gold coins spilling out */}
-                          <circle cx="95" cy="95" r="8" fill="url(#goldCoinGradient)" />
-                          <circle cx="110" cy="90" r="7" fill="url(#goldCoinGradient)" />
-                          <circle cx="85" cy="90" r="6" fill="url(#goldCoinGradient)" />
-                          <circle cx="100" cy="85" r="7" fill="url(#goldCoinGradient)" />
-                          <circle cx="120" cy="95" r="6" fill="url(#goldCoinGradient)" />
-                          <circle cx="75" cy="95" r="5" fill="url(#goldCoinGradient)" />
+                          <circle cx="95" cy="95" r="8" fill={`url(#goldCoinGradient-${game.gameId})`} />
+                          <circle cx="110" cy="90" r="7" fill={`url(#goldCoinGradient-${game.gameId})`} />
+                          <circle cx="85" cy="90" r="6" fill={`url(#goldCoinGradient-${game.gameId})`} />
+                          <circle cx="100" cy="85" r="7" fill={`url(#goldCoinGradient-${game.gameId})`} />
+                          <circle cx="120" cy="95" r="6" fill={`url(#goldCoinGradient-${game.gameId})`} />
+                          <circle cx="75" cy="95" r="5" fill={`url(#goldCoinGradient-${game.gameId})`} />
                           
                           {/* Dollar signs on coins */}
                           <text x="95" y="98" textAnchor="middle" fill="#0e1824" fontSize="8" fontWeight="bold">$</text>
@@ -355,7 +351,6 @@ export function SlotopolCasinoGamesSection() {
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 200 200" 
                           className="w-full h-full"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
                         >
                           {/* Slot machine cabinet */}
                           <rect x="40" y="30" width="120" height="140" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2" />
