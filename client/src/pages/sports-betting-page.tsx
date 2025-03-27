@@ -1176,7 +1176,7 @@ export default function SportsBettingPage() {
                   }`}
                   onClick={() => setActiveTab('misBoletos')}
                 >
-                  Mis Boletos
+                  Boleto Actual
                   {activeTab === 'misBoletos' && (
                     <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#09b66d]"></div>
                   )}
@@ -1189,7 +1189,7 @@ export default function SportsBettingPage() {
                   }`}
                   onClick={() => setActiveTab('misApuestas')}
                 >
-                  Mis Apuestas
+                  Apuestas Activas
                   {activeTab === 'misApuestas' && (
                     <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#09b66d]"></div>
                   )}
@@ -1202,7 +1202,7 @@ export default function SportsBettingPage() {
                   }`}
                   onClick={() => setActiveTab('historial')}
                 >
-                  Historial
+                  Resultados
                   {activeTab === 'historial' && (
                     <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#09b66d]"></div>
                   )}
@@ -1222,7 +1222,7 @@ export default function SportsBettingPage() {
                 
                 {activeTab === 'misApuestas' && (
                   <div className="p-3">
-                    <h3 className="text-sm font-medium mb-2">Apuestas pendientes</h3>
+                    <h3 className="text-sm font-medium mb-2">Apuestas en Juego</h3>
                     {userBets.length > 0 ? (
                       <div className="space-y-3">
                         {userBets.filter(bet => bet.status === 'pending').map((bet) => (
@@ -1254,7 +1254,7 @@ export default function SportsBettingPage() {
                       </div>
                     ) : (
                       <div className="text-center py-5">
-                        <p className="text-sm text-gray-400">No tienes apuestas pendientes</p>
+                        <p className="text-sm text-gray-400">No tienes apuestas activas en este momento</p>
                       </div>
                     )}
                   </div>
@@ -1262,7 +1262,7 @@ export default function SportsBettingPage() {
                 
                 {activeTab === 'historial' && (
                   <div className="p-3">
-                    <h3 className="text-sm font-medium mb-2">Historial de apuestas</h3>
+                    <h3 className="text-sm font-medium mb-2">Apuestas Finalizadas</h3>
                     {betHistory.length > 0 ? (
                       <div className="space-y-3">
                         {betHistory.map((bet) => (
@@ -1306,7 +1306,7 @@ export default function SportsBettingPage() {
                       </div>
                     ) : (
                       <div className="text-center py-5">
-                        <p className="text-sm text-gray-400">No tienes historial de apuestas</p>
+                        <p className="text-sm text-gray-400">No tienes apuestas finalizadas aún</p>
                       </div>
                     )}
                   </div>
