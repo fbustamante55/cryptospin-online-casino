@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -99,6 +100,7 @@ const mapServerPlayerToUIPlayer = (player: ServerPlayer, status: string) => {
 
 export function SpaceExplorerGameSync() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [bet, setBet] = useState<number>(100);
   const [autoCashout, setAutoCashout] = useState<number>(2.00);
   const [isAutoCashoutEnabled, setIsAutoCashoutEnabled] = useState<boolean>(false);
