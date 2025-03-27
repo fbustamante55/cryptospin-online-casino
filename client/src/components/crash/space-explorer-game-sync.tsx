@@ -107,6 +107,7 @@ export function SpaceExplorerGameSync() {
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(1.00);
   const [missionState, setMissionState] = useState<string>('ready');
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [explorationTime, setExplorationTime] = useState<number>(0);
   const [recentMissions, setRecentMissions] = useState<MissionHistoryItem[]>([]);
   const [crashPoint, setCrashPoint] = useState<number>(0);
   const [winAmount, setWinAmount] = useState<number>(0);
@@ -277,7 +278,6 @@ export function SpaceExplorerGameSync() {
   }, [currentMultiplier, missionState, hasReturned, autoCashout, isAutoCashoutEnabled]);
   
   // Contador para tiempo desde que inició la exploración
-  const [explorationTime, setExplorationTime] = useState<number>(0);
   const explorationTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Efecto para manejar el contador de tiempo desde que inició la exploración
@@ -562,7 +562,7 @@ export function SpaceExplorerGameSync() {
               <div className="grid grid-cols-2 gap-6 mt-2">
                 <Button
                   variant="default"
-                  disabled={!canBet || betMutation.isPending}
+                  disabled={!canBet || betMutation.isPending || countdown < 5}
                   onClick={() => {
                     // Simular apuesta para demo (ya que tenemos error 401)
                     console.log("Simulando apuesta:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
@@ -578,12 +578,17 @@ export function SpaceExplorerGameSync() {
                     hasPlacedBetInCurrentGame.current = true;
                   }}
                   className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
-                    !canBet || betMutation.isPending 
+                    !canBet || betMutation.isPending || countdown < 5
                       ? "bg-blue-800/70 text-blue-300/80" 
                       : "bg-blue-600 hover:bg-blue-500 text-white hover:shadow-blue-500/50"
                   }`}
                 >
-                  {betMutation.isPending ? "APOSTANDO..." : "APOSTAR"}
+                  {betMutation.isPending 
+                    ? "APOSTANDO..." 
+                    : countdown && countdown < 5
+                      ? `ESPERA (${countdown}s)`
+                      : "APOSTAR"
+                  }
                 </Button>
                 
                 <Button
@@ -591,8 +596,7 @@ export function SpaceExplorerGameSync() {
                   disabled={
                     missionState !== 'exploring' || 
                     hasReturned || 
-                    cashoutMutation.isPending ||
-                    explorationTime < 5 // Deshabilitar durante los primeros 5 segundos
+                    cashoutMutation.isPending
                   }
                   onClick={() => {
                     // Simular cashout para demo (ya que tenemos error 401)
@@ -612,7 +616,7 @@ export function SpaceExplorerGameSync() {
                     setWinAmount(simulatedWin);
                   }}
                   className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
-                    missionState !== 'exploring' || hasReturned || cashoutMutation.isPending || explorationTime < 5
+                    missionState !== 'exploring' || hasReturned || cashoutMutation.isPending
                       ? "bg-green-800/50 text-green-300/80" 
                       : "bg-green-600 hover:bg-green-500 text-white hover:shadow-green-500/50"
                   }`}
@@ -621,9 +625,7 @@ export function SpaceExplorerGameSync() {
                     ? "RECOGIENDO..." 
                     : hasReturned 
                       ? "RECOGIDO"
-                      : explorationTime < 5
-                        ? `ESPERA (${Math.max(0, Math.ceil(5 - explorationTime))}s)`
-                        : "RECOGER"
+                      : "RECOGER"
                   }
                 </Button>
               </div>
