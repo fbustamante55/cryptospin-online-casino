@@ -33,6 +33,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from 'react-i18next';
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { SidebarLanguageSwitcher } from "./sidebar-language-switcher";
 
 // Componente para cada ítem del drawer menu
 interface DrawerItemProps {
@@ -453,33 +454,10 @@ export function MobileNav() {
             </div>
           )}
           
-          <DrawerItem 
-            icon={<Globe className="h-5 w-5" />}
-            label="Idioma"
-            hasSubmenu={true}
-            toggleSubmenu={() => toggleMenu('language')}
-            isSubmenuOpen={expandedMenus['language']}
-          />
-          {expandedMenus['language'] && (
-            <div className="bg-[#0a111a] py-2 px-4 grid grid-cols-2 gap-2">
-              <div className="flex items-center space-x-2 p-2 hover:bg-[#192531] rounded cursor-pointer">
-                <span className="text-lg">🇪🇸</span>
-                <span className="text-sm text-gray-300">Español</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 hover:bg-[#192531] rounded cursor-pointer">
-                <span className="text-lg">🇺🇸</span>
-                <span className="text-sm text-gray-300">English</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 hover:bg-[#192531] rounded cursor-pointer">
-                <span className="text-lg">🇫🇷</span>
-                <span className="text-sm text-gray-300">Français</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 hover:bg-[#192531] rounded cursor-pointer">
-                <span className="text-lg">🇩🇪</span>
-                <span className="text-sm text-gray-300">Deutsch</span>
-              </div>
-            </div>
-          )}
+          {/* Idioma - Reemplazamos el componente fijo por el selector de idioma reutilizable */}
+          <div className="bg-[#0a111a] pl-1">
+            <SidebarLanguageSwitcher collapsed={false} />
+          </div>
         </div>
       </MobileDrawer>
       

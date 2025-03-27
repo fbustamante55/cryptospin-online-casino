@@ -112,6 +112,7 @@ export function Sidebar({ className }: SidebarProps) {
   };
 
   const sidebarItems: SidebarItem[] = [
+    // Sección principal de juegos
     {
       name: "Casino",
       icon: <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gradient-to-r from-[#9400d3] to-[#e100ff]">
@@ -120,7 +121,7 @@ export function Sidebar({ className }: SidebarProps) {
         </svg>
       </div>,
       path: "/",
-      active: !location.includes('/sports') && location === "/",
+      active: !location.includes('/sports') && !location.includes('/rewards') && !location.includes('/support') && !location.includes('/wallet'),
       hasChildren: true,
       children: [
         {
@@ -136,12 +137,32 @@ export function Sidebar({ className }: SidebarProps) {
               <path d="M8 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8zm0 2h8v16H8V4zm6 13a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
             </svg>
           </div>,
-          path: "/slots"
+          path: "/slots",
+          active: location.includes('/slots'),
+          hasChildren: true,
+          children: [
+            {
+              name: "Popular",
+              icon: <Star className="w-3 h-3 text-gray-300" />,
+              path: "/slots/popular",
+            },
+            {
+              name: "Nuevos",
+              icon: <Zap className="w-3 h-3 text-gray-300" />,
+              path: "/slots/new",
+            },
+            {
+              name: "Jackpots",
+              icon: <DollarSign className="w-3 h-3 text-gray-300" />,
+              path: "/slots/jackpots",
+            }
+          ]
         },
         {
           name: "Crash",
           icon: <Rocket className="w-4 h-4 text-gray-300" />,
-          path: "/crash"
+          path: "/crash",
+          active: location.includes('/crash')
         },
         {
           name: "Ruleta",
@@ -150,7 +171,8 @@ export function Sidebar({ className }: SidebarProps) {
               <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-13a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
             </svg>
           </div>,
-          path: "/roulette"
+          path: "/roulette",
+          active: location.includes('/roulette')
         },
         {
           name: "Blackjack",
@@ -159,10 +181,12 @@ export function Sidebar({ className }: SidebarProps) {
               <path d="M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 2v16H7V4h10z"/>
             </svg>
           </div>,
-          path: "/blackjack"
+          path: "/blackjack",
+          active: location.includes('/blackjack')
         }
       ]
     },
+    // Sección de deportes
     {
       name: "Sportsbook",
       icon: <div className="w-5 h-5 flex items-center justify-center">
@@ -188,21 +212,61 @@ export function Sidebar({ className }: SidebarProps) {
         {
           name: "Populares",
           icon: <Star className="w-4 h-4 text-gray-300" />,
-          path: "/sports/popular"
+          path: "/sports/popular",
+          active: location.includes('/sports/popular'),
+          hasChildren: true,
+          children: [
+            {
+              name: "Fútbol",
+              icon: <span className="text-gray-300 text-xs">⚽</span>,
+              path: "/sports/popular/football",
+            },
+            {
+              name: "Baloncesto",
+              icon: <span className="text-gray-300 text-xs">🏀</span>,
+              path: "/sports/popular/basketball",
+            },
+            {
+              name: "Tenis",
+              icon: <span className="text-gray-300 text-xs">🎾</span>,
+              path: "/sports/popular/tennis",
+            }
+          ]
         },
         {
           name: "Mis apuestas",
           icon: <FileText className="w-4 h-4 text-gray-300" />,
-          path: "/sports/bets"
+          path: "/sports/bets",
+          active: location.includes('/sports/bets')
         }
       ]
     },
+    // Sección de Promociones y Recompensas
     {
       name: "Promociones",
       icon: <div className="w-5 h-5 flex items-center justify-center">
         <Target className="w-4 h-4 text-white" />
       </div>,
-      path: "#"
+      path: "/promotions",
+      active: location.includes('/promotions'),
+      hasChildren: true,
+      children: [
+        {
+          name: "Ofertas Especiales",
+          icon: <Gift className="w-4 h-4 text-gray-300" />,
+          path: "/promotions/special",
+        },
+        {
+          name: "Torneos",
+          icon: <Trophy className="w-4 h-4 text-gray-300" />,
+          path: "/promotions/tournaments",
+        },
+        {
+          name: "Calendario",
+          icon: <Calendar className="w-4 h-4 text-gray-300" />,
+          path: "/promotions/calendar",
+        }
+      ]
     },
     {
       name: "Recompensas",
@@ -210,58 +274,112 @@ export function Sidebar({ className }: SidebarProps) {
         <Gift className="w-4 h-4 text-white" />
       </div>,
       path: "/rewards",
-      badge: 1
+      badge: 1,
+      active: location.includes('/rewards')
     },
+    // Sección de Herramientas y Utilidades
     {
-      name: "RTP en vivo",
+      name: "Utilidades",
       icon: <div className="w-5 h-5 flex items-center justify-center">
-        <Clock className="w-4 h-4 text-white" />
+        <BarChart className="w-4 h-4 text-white" />
       </div>,
-      path: "#"
+      path: "#",
+      hasChildren: true,
+      children: [
+        {
+          name: "RTP en vivo",
+          icon: <Clock className="w-4 h-4 text-gray-300" />,
+          path: "/rtp-live",
+        },
+        {
+          name: "Estadísticas",
+          icon: <BarChart className="w-4 h-4 text-gray-300" />,
+          path: "/statistics",
+        },
+        {
+          name: "Resultados",
+          icon: <FileText className="w-4 h-4 text-gray-300" />,
+          path: "/results",
+        }
+      ]
     },
+    // Sección de Programas y Comunidad
     {
-      name: "Recomienda y gana",
+      name: "Comunidad",
       icon: <div className="w-5 h-5 flex items-center justify-center">
         <Users className="w-4 h-4 text-white" />
       </div>,
-      path: "#"
+      path: "#",
+      hasChildren: true,
+      children: [
+        {
+          name: "Recomienda y gana",
+          icon: <Users className="w-4 h-4 text-gray-300" />,
+          path: "/refer",
+        },
+        {
+          name: "Club VIP",
+          icon: <Award className="w-4 h-4 text-gray-300" />,
+          path: "/vip",
+        }
+      ]
     },
+    // Sección de Pagos
     {
-      name: "Canjear",
+      name: "Pagos",
       icon: <div className="w-5 h-5 flex items-center justify-center">
         <Wallet className="w-4 h-4 text-white" />
       </div>,
-      path: "#"
+      path: "/wallet",
+      active: location.includes('/wallet'),
+      hasChildren: true,
+      children: [
+        {
+          name: "Depositar",
+          icon: <DollarSign className="w-4 h-4 text-gray-300" />,
+          path: "/wallet/deposit",
+        },
+        {
+          name: "Retirar",
+          icon: <Wallet className="w-4 h-4 text-gray-300" />,
+          path: "/wallet/withdraw",
+        },
+        {
+          name: "Canjear",
+          icon: <Gift className="w-4 h-4 text-gray-300" />,
+          path: "/wallet/redeem",
+        },
+        {
+          name: "Historial",
+          icon: <FileText className="w-4 h-4 text-gray-300" />,
+          path: "/wallet/history",
+        }
+      ]
     },
-    {
-      name: "Club VIP",
-      icon: <div className="w-5 h-5 flex items-center justify-center">
-        <Award className="w-4 h-4 text-white" />
-      </div>,
-      path: "#"
-    },
+    // Sección de Soporte e Idioma
     {
       name: "Soporte",
       icon: <div className="w-5 h-5 flex items-center justify-center">
         <Headset className="w-4 h-4 text-white" />
       </div>,
       path: "/support",
+      active: location.includes('/support'),
       hasChildren: true,
       children: [
         {
           name: "Centro de ayuda",
           icon: <HelpCircle className="w-4 h-4 text-gray-300" />,
-          path: "/support"
+          path: "/support",
         },
         {
           name: "Chat en vivo",
           icon: <MessageCircle className="w-4 h-4 text-gray-300" />,
-          path: "/support/chat"
+          path: "/support/chat",
         },
         {
           name: "Contacto",
           icon: <HeartHandshake className="w-4 h-4 text-gray-300" />,
-          path: "/support/contact"
+          path: "/support/contact",
         }
       ]
     },
@@ -300,9 +418,11 @@ export function Sidebar({ className }: SidebarProps) {
   }, [sidebarCollapsed]);
 
   // Render de un ítem del sidebar
-  const renderSidebarItem = (item: SidebarItem, index: number | string, isChild = false) => {
+  const renderSidebarItem = (item: SidebarItem, index: number | string, isChild = false, nestLevel = 0) => {
     const isExpanded = expandedItems[index];
-    const hasActiveChild = item.children?.some(child => child.active);
+    const hasActiveChild = item.children?.some(child => 
+      child.active || child.children?.some(subchild => subchild.active)
+    );
     
     // Si el ítem tiene un componente personalizado, renderizarlo
     if (item.customComponent) {
@@ -313,6 +433,19 @@ export function Sidebar({ className }: SidebarProps) {
       );
     }
     
+    // Calcular indentación basada en el nivel de anidado
+    const indentationClasses = isChild 
+      ? nestLevel === 1 
+        ? "pl-8 pr-3" 
+        : nestLevel === 2 
+          ? "pl-12 pr-3" 
+          : "pl-16 pr-3"
+      : "";
+    
+    // Ajustar tamaño del texto e iconos basado en nivel de anidado
+    const textSizeClass = isChild && nestLevel > 1 ? "text-xs" : "text-sm";
+    const iconSizeClass = isChild && nestLevel > 1 ? "w-3 h-3" : "w-4 h-4";
+    
     return (
       <div key={`${index}-${item.name}`}>
         {/* Ítem principal */}
@@ -320,7 +453,8 @@ export function Sidebar({ className }: SidebarProps) {
           className={cn(
             "group flex items-center justify-between px-3 py-2 mx-2 rounded-lg text-white transition-colors cursor-pointer",
             (item.active || hasActiveChild) ? "bg-[#192531]" : "hover:bg-[#192531]",
-            isChild && "pl-8 pr-3 py-1.5 mx-3 my-0.5 rounded-md"
+            isChild && "py-1.5 mx-3 my-0.5 rounded-md",
+            indentationClasses
           )}
           onClick={() => {
             if (item.hasChildren && !sidebarCollapsed) {
@@ -331,10 +465,12 @@ export function Sidebar({ className }: SidebarProps) {
           }}
         >
           <div className="flex items-center space-x-3">
-            {item.icon}
+            <div className={cn(isChild && iconSizeClass)}>
+              {item.icon}
+            </div>
             {(!sidebarCollapsed || isChild) && (
               <span className={cn(
-                "font-medium text-sm",
+                `font-medium ${textSizeClass}`,
                 (item.active || hasActiveChild) ? "text-white" : "text-gray-300 group-hover:text-white"
               )}>
                 {item.name}
@@ -343,26 +479,33 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
           
           {(!sidebarCollapsed || isChild) && (
-            <>
+            <div className="flex items-center">
               {item.badge !== undefined && (
-                <div className="h-5 w-auto min-w-5 px-1 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center">
+                <div className={cn(
+                  "h-5 w-auto min-w-5 px-1 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center",
+                  nestLevel > 1 && "h-4 min-w-4 text-[10px]"
+                )}>
                   {item.badge}
                 </div>
               )}
-              {item.hasChildren && !isChild && (
+              {item.hasChildren && (
                 isExpanded ? 
-                <ChevronDown className="h-4 w-4 text-gray-300" /> : 
-                <ChevronRight className="h-4 w-4 text-gray-300" />
+                <ChevronDown className={cn("h-4 w-4 text-gray-300 ml-1", nestLevel > 1 && "h-3 w-3")} /> : 
+                <ChevronRight className={cn("h-4 w-4 text-gray-300 ml-1", nestLevel > 1 && "h-3 w-3")} />
               )}
-            </>
+            </div>
           )}
         </div>
         
         {/* Subitems si está expandido */}
         {item.hasChildren && isExpanded && !sidebarCollapsed && (
-          <div className="mt-1 ml-4 space-y-1 border-l border-[#1c2b3a] pl-2">
+          <div className={cn(
+            "mt-1 space-y-1",
+            nestLevel === 0 ? "ml-4 border-l border-[#1c2b3a] pl-2" : 
+            nestLevel === 1 ? "ml-2 pl-1" : "ml-1"
+          )}>
             {item.children?.map((child, childIndex) => (
-              renderSidebarItem(child, `${index}-${childIndex}`, true)
+              renderSidebarItem(child, `${index}-${childIndex}`, true, nestLevel + 1)
             ))}
           </div>
         )}
