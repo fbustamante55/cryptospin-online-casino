@@ -2570,6 +2570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
    */
   app.post("/api/slots/spin", async (req, res) => {
     try {
+      console.log("Processing slot spin request:", req.body);
       // For authenticated users use their real ID, otherwise use test ID
       const userId = req.isAuthenticated() ? req.user.id : 999;
       
@@ -2585,36 +2586,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Using test user for slots:", user.username);
       } else {
         user = await storage.getUser(userId);
+        console.log("Found authenticated user:", user?.username);
         if (!user) {
+          console.error("User not found with ID:", userId);
           return res.status(404).json({ error: "User not found" });
         }
       }
       
       // Validate input data
-      const spinData = slotSpinSchema.parse(req.body);
+      console.log("Validating spin data...");
+      let spinData;
+      try {
+        spinData = slotSpinSchema.parse(req.body);
+      } catch (validationError) {
+        console.error("Validation error:", validationError);
+        return res.status(400).json({ 
+          error: "Invalid spin data", 
+          details: validationError instanceof z.ZodError ? 
+            validationError.issues.map(issue => ({
+              field: issue.path.join('.'),
+              message: issue.message
+            })) : 
+            "Unknown validation error"
+        });
+      }
+      
       const { gameId, bet, lines } = spinData;
+      console.log("Validated spin data:", { gameId, bet, lines });
       
       // Additional validation for bet amount
       if (bet <= 0) {
+        console.error("Invalid bet amount:", bet);
         return res.status(400).json({ error: "Bet amount must be greater than zero" });
       }
       
       // Get the game
+      console.log("Fetching game with ID:", gameId);
       const game = await storage.getSlotGame(gameId);
       if (!game) {
+        console.error("Game not found with ID:", gameId);
         return res.status(404).json({ error: "Slot game not found" });
       }
+      console.log("Found game:", game.name, "Min/Max bet:", game.minBet, game.maxBet);
       
       // Check if the bet is valid
       const totalBet = bet * lines;
+      console.log("Checking bet limits - Current bet:", bet, "Min:", game.minBet, "Max:", game.maxBet);
       if (bet < game.minBet || bet > game.maxBet) {
+        console.error("Invalid bet amount:", bet, "outside range:", game.minBet, "-", game.maxBet);
         return res.status(400).json({ 
           error: `Invalid bet amount. Must be between ${game.minBet} and ${game.maxBet}` 
         });
       }
       
       // Check if the user has enough balance
+      console.log("Checking balance - User balance:", user.balance, "Total bet:", totalBet);
       if (user.balance < totalBet) {
+        console.error("Insufficient balance:", user.balance, "< Total bet:", totalBet);
         return res.status(400).json({ error: "Insufficient balance" });
       }
 

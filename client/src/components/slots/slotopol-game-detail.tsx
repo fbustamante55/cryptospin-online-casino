@@ -37,10 +37,18 @@ export function SlotopolGameDetail({ gameId }: { gameId: string }) {
     enabled: !!gameId
   });
 
-  // Set default lines based on game data
+  // Set default values based on game data
   useEffect(() => {
     if (gameData?.game) {
+      // Set lines to default value (all paylines)
       setLines(gameData.game.paylines);
+      
+      // Set bet to minimum bet or current bet if already valid
+      if (bet < gameData.game.minBet) {
+        setBet(gameData.game.minBet);
+      } else if (bet > gameData.game.maxBet) {
+        setBet(gameData.game.maxBet);
+      }
     }
   }, [gameData]);
 
@@ -81,9 +89,18 @@ export function SlotopolGameDetail({ gameId }: { gameId: string }) {
       queryClient.invalidateQueries({ queryKey: ['/api/game-history'] });
     },
     onError: (error: any) => {
+      // Extract error message from the response if available
+      let errorMessage = 'Failed to spin. Please try again.';
+      
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: 'Error',
-        description: 'Failed to spin. Please try again.',
+        title: 'Spin Error',
+        description: errorMessage,
         variant: 'destructive',
       });
       console.error('Spin error:', error);
