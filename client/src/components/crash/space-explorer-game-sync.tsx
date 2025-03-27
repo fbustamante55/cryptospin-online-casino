@@ -585,8 +585,8 @@ export function SpaceExplorerGameSync() {
                 {betMutation.isPending 
                   ? "APOSTANDO..." 
                   : countdown && countdown < 5
-                    ? `ESPERA (${countdown}s)`
-                    : "APOSTAR"
+                    ? "LANZAR"
+                    : "LANZAR"
                 }
               </Button>
               
@@ -640,7 +640,7 @@ export function SpaceExplorerGameSync() {
               <CardHeader className="py-3 px-4 border-b border-blue-500/40">
                 <CardTitle className="text-sm font-heading text-blue-300 uppercase tracking-wider">HISTORIAL DE MISIONES</CardTitle>
               </CardHeader>
-              <CardContent className="p-3 max-h-60 overflow-auto">
+              <CardContent className="p-3 max-h-[300px] overflow-y-auto">
                 <MissionHistory missions={recentMissions} />
               </CardContent>
             </Card>

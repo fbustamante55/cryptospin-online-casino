@@ -314,11 +314,14 @@ export const SciFiHud: React.FC<HudProps> = ({ children, className = '' }) => {
 
 // Mission History Component
 export const MissionHistory: React.FC<MissionHistoryProps> = ({ missions }) => {
+  // Get only the last 10 missions
+  const latestMissions = missions.slice(0, 10);
+  
   return (
     <SciFiHud className="p-3">
       <h3 className="font-mono text-xs uppercase text-blue-300 mb-2">Historial de Misiones</h3>
-      <div className="grid grid-cols-5 gap-3">
-        {missions.map((mission) => {
+      <div className="flex flex-col space-y-2">
+        {latestMissions.map((mission) => {
           // Determinar color basado en multiplier
           const getMultiplierColor = (value: number) => {
             if (value < 1.5) return 'bg-white/20 text-white';
