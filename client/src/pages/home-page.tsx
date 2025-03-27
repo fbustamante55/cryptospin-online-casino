@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
+import { SlotopolCasinoGamesSection } from "@/components/slots/slotopol-casino-games-section";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -193,6 +194,16 @@ export default function HomePage() {
                 <path d="M70 100 L130 100 M100 70 L100 130" stroke="#fff" strokeWidth="4" />
               </svg>
             </div>
+          </div>
+          
+          {/* Casino Slots from Slotopol */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-heading text-xl font-bold text-white">{t('home.casinoSlots')}</h2>
+              <Link href="/slots" className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">{t('buttons.viewAll')}</Link>
+            </div>
+            
+            <SlotopolCasinoGamesSection />
           </div>
           
           {/* Featured Games */}
