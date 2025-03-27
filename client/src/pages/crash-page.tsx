@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { SpaceExplorerGame } from "@/components/crash/space-explorer-game";
+import { SpaceExplorerGameSync } from "@/components/crash/space-explorer-game-sync";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserDropdown } from "@/components/ui/user-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -233,7 +233,7 @@ export default function CrashPage() {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2">
-              <SpaceExplorerGame />
+              <SpaceExplorerGameSync />
             </div>
             
             <div className="space-y-6">

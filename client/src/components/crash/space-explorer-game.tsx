@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -36,6 +36,23 @@ interface CrashCashoutResult {
   balance: number;
 }
 
+// Interfaz para estado del juego desde el servidor
+interface CrashGameState {
+  gameId: number;
+  status: 'waiting' | 'countdown' | 'in_progress' | 'crashed';
+  countdown: number;
+  currentMultiplier: number;
+  startTime: number;
+  players: Player[];
+  history: {
+    id: number;
+    crashPoint: number;
+    timestamp: Date;
+  }[];
+  hash: string;
+  previousSeed: string;
+}
+
 // Interfaces para tipos de datos del juego
 interface MissionHistoryItem {
   id: number;
@@ -44,15 +61,16 @@ interface MissionHistoryItem {
 }
 
 interface Player {
-  id: number;
-  name: string;
+  userId: number;
+  username: string;
   bet: number;
-  status: 'betting' | 'exploring' | 'cashed_out' | 'crashed';
-  cashoutMultiplier?: number;
+  autoCashout?: number;
+  hasCashedOut?: boolean;
+  cashoutPoint?: number;
 }
 
 // Estados de misión
-type MissionState = 'ready' | 'countdown' | 'exploring' | 'returning' | 'crashed';
+type MissionState = 'waiting' | 'countdown' | 'in_progress' | 'returning' | 'crashed';
 
 export function SpaceExplorerGame() {
   const { user } = useAuth();

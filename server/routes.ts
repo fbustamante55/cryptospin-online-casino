@@ -993,6 +993,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Obtener el estado actual del juego de crash
+  app.get("/api/games/crash/state", (req, res) => {
+    // Calcular el multiplicador actual si el juego está en progreso
+    let currentMultiplier = 1.0;
+    
+    if (crashGameState.currentGame.status === 'in_progress') {
+      const elapsedSeconds = (Date.now() - crashGameState.currentGame.startTime) / 1000;
+      currentMultiplier = Math.pow(Math.E, 0.06 * elapsedSeconds);
+      currentMultiplier = Math.round(currentMultiplier * 100) / 100; // Redondear a 2 decimales
+    }
+    
+    // Devolver el estado actual
+    res.json({
+      gameId: crashGameState.currentGame.id,
+      status: crashGameState.currentGame.status,
+      countdown: crashGameState.currentGame.countdown,
+      currentMultiplier: currentMultiplier,
+      startTime: crashGameState.currentGame.startTime,
+      players: Object.values(crashGameState.currentGame.players),
+      history: crashGameState.history,
+      hash: crashGameState.seed,
+      previousSeed: crashGameState.previousSeed
+    });
+  });
+
   // Play crash game
   app.post("/api/games/crash/bet", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
@@ -1005,14 +1030,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { bet, autoCashout } = betSchema.parse(req.body);
       
+      // Verificar si el juego está en el estado correcto para realizar apuestas
+      if (crashGameState.currentGame.status !== 'countdown' && crashGameState.currentGame.status !== 'waiting') {
+        return res.status(400).json({ message: "Betting not available at this time" });
+      }
+      
+      // Verificar si el usuario ya ha realizado una apuesta en este juego
+      if (crashGameState.currentGame.players[req.user.id]) {
+        return res.status(400).json({ message: "You already have an active bet" });
+      }
+      
       // Check if user has enough balance
       if (req.user.balance < bet) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
-
-      // Generate crash point (will be revealed to the user later)
-      // House edge built into the algorithm
-      const crashPoint = generateCrashPoint();
       
       // Update user balance (deduct bet)
       const updatedUser = await storage.updateUserBalance(req.user.id, -bet);
@@ -1029,11 +1060,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gameType: "crash"
       });
 
-      // Don't record game history yet as we don't know the outcome
+      // Registrar al jugador en el juego actual
+      crashGameState.currentGame.players[req.user.id] = {
+        userId: req.user.id,
+        username: req.user.username || "Player",
+        bet: bet,
+        autoCashout: autoCashout
+      };
 
       res.json({
         success: true,
-        crashPoint, // This would normally be kept server-side in a real implementation
+        crashPoint: crashGameState.currentGame.crashPoint, // Este valor normalmente no se revelaría
         bet,
         autoCashout,
         balance: updatedUser.balance
@@ -1046,31 +1083,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/games/crash/cashout", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const cashoutSchema = z.object({
-      bet: z.number().min(10).max(10000),
-      crashPoint: z.number().min(1),
-      cashoutPoint: z.number().min(1),
-    });
-
     try {
-      const { bet, crashPoint, cashoutPoint } = cashoutSchema.parse(req.body);
-      
-      // Validate the cashout
-      if (cashoutPoint > crashPoint) {
-        return res.status(400).json({ message: "Invalid cashout" });
+      // Verificar si el juego está en curso
+      if (crashGameState.currentGame.status !== 'in_progress') {
+        return res.status(400).json({ message: "Cannot cash out at this time" });
       }
-
-      // Calculate winnings
-      const winAmount = Math.floor(bet * cashoutPoint);
       
-      // Update user balance
+      // Verificar si el usuario tiene una apuesta activa
+      const playerBet = crashGameState.currentGame.players[req.user.id];
+      if (!playerBet) {
+        return res.status(400).json({ message: "No active bet found" });
+      }
+      
+      // Verificar si el usuario ya ha hecho cashout
+      if (playerBet.hasCashedOut) {
+        return res.status(400).json({ message: "Already cashed out" });
+      }
+      
+      // Calcular el multiplicador actual
+      const elapsedSeconds = (Date.now() - crashGameState.currentGame.startTime) / 1000;
+      const currentMultiplier = Math.pow(Math.E, 0.06 * elapsedSeconds);
+      const cashoutPoint = Math.round(currentMultiplier * 100) / 100; // Redondear a 2 decimales
+      
+      // Calcular las ganancias
+      const winAmount = Math.floor(playerBet.bet * cashoutPoint);
+      
+      // Actualizar el estado del jugador
+      crashGameState.currentGame.players[req.user.id] = {
+        ...playerBet,
+        hasCashedOut: true,
+        cashoutPoint: cashoutPoint
+      };
+      
+      // Actualizar el balance del usuario
       const updatedUser = await storage.updateUserBalance(req.user.id, winAmount);
       
       if (!updatedUser) {
         return res.status(500).json({ message: "Failed to update balance" });
       }
 
-      // Record transaction and game history
+      // Registrar transacción y resultado del juego
       await storage.createTransaction({
         userId: req.user.id,
         amount: winAmount,
@@ -1081,8 +1133,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createGameHistory({
         userId: req.user.id,
         gameType: "crash",
-        bet,
-        outcome: JSON.stringify({ crashPoint, cashoutPoint }),
+        bet: playerBet.bet,
+        outcome: JSON.stringify({ 
+          crashPoint: crashGameState.currentGame.crashPoint, 
+          cashoutPoint: cashoutPoint 
+        }),
         multiplier: cashoutPoint,
         win: true,
         winAmount
@@ -1102,20 +1157,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/games/crash/bust", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const bustSchema = z.object({
-      bet: z.number().min(10).max(10000),
-      crashPoint: z.number().min(1),
-    });
-
     try {
-      const { bet, crashPoint } = bustSchema.parse(req.body);
+      // Verificar si el juego ya ha terminado
+      if (crashGameState.currentGame.status !== 'crashed') {
+        return res.status(400).json({ message: "Game is not in crashed state" });
+      }
+      
+      // Verificar si el usuario tenía una apuesta activa que no hizo cashout
+      const playerBet = crashGameState.currentGame.players[req.user.id];
+      if (!playerBet || playerBet.hasCashedOut) {
+        return res.status(400).json({ message: "No active bet found or already cashed out" });
+      }
 
-      // Record game history for a loss
+      // Registrar el resultado del juego como derrota
       await storage.createGameHistory({
         userId: req.user.id,
         gameType: "crash",
-        bet,
-        outcome: JSON.stringify({ crashPoint, cashoutPoint: 0 }),
+        bet: playerBet.bet,
+        outcome: JSON.stringify({ 
+          crashPoint: crashGameState.currentGame.crashPoint, 
+          cashoutPoint: 0 
+        }),
         multiplier: 0,
         win: false,
         winAmount: 0
@@ -3641,6 +3703,183 @@ function calculateKenoWin(matchCount: number, selectedCount: number, bet: number
   };
 }
 
+// Variables globales para el juego de crash
+const crashGameState = {
+  currentGame: {
+    id: Date.now(),
+    crashPoint: 0,
+    startTime: Date.now(),
+    status: 'waiting' as 'waiting' | 'countdown' | 'in_progress' | 'crashed',
+    countdown: 0,
+    players: {} as Record<number, { userId: number, username: string, bet: number, autoCashout?: number, hasCashedOut?: boolean, cashoutPoint?: number }>
+  },
+  history: [] as Array<{
+    id: number,
+    crashPoint: number,
+    timestamp: Date
+  }>,
+  seed: generateRandomHash(),
+  previousSeed: ''
+};
+
+// Iniciar un nuevo juego automáticamente
+function startNewCrashGame() {
+  // Guardar el juego anterior en el historial si hubo uno
+  if (crashGameState.currentGame.status === 'crashed') {
+    crashGameState.history.unshift({
+      id: crashGameState.currentGame.id,
+      crashPoint: crashGameState.currentGame.crashPoint,
+      timestamp: new Date(crashGameState.currentGame.startTime)
+    });
+    
+    // Limitar el historial a 10 juegos
+    if (crashGameState.history.length > 10) {
+      crashGameState.history = crashGameState.history.slice(0, 10);
+    }
+  }
+  
+  // Actualizar el seed
+  crashGameState.previousSeed = crashGameState.seed;
+  crashGameState.seed = generateRandomHash();
+  
+  // Crear un nuevo juego
+  crashGameState.currentGame = {
+    id: Date.now(),
+    crashPoint: generateCrashPoint(),
+    startTime: Date.now(),
+    status: 'countdown',
+    countdown: 5, // 5 segundos de countdown
+    players: {}
+  };
+  
+  // Iniciar el temporizador de countdown
+  let countdownInterval = setInterval(() => {
+    crashGameState.currentGame.countdown--;
+    
+    if (crashGameState.currentGame.countdown <= 0) {
+      clearInterval(countdownInterval);
+      crashGameState.currentGame.status = 'in_progress';
+      crashGameState.currentGame.startTime = Date.now();
+      
+      // Iniciar verificaciones de autoCashout
+      const autoCashoutInterval = setInterval(async () => {
+        if (crashGameState.currentGame.status !== 'in_progress') {
+          clearInterval(autoCashoutInterval);
+          return;
+        }
+        
+        // Calcular el multiplicador actual
+        const elapsedSeconds = (Date.now() - crashGameState.currentGame.startTime) / 1000;
+        const currentMultiplier = Math.pow(Math.E, 0.06 * elapsedSeconds);
+        const roundedMultiplier = Math.floor(currentMultiplier * 100) / 100; // Redondear a 2 decimales (por abajo)
+        
+        // Verificar cada jugador para autoCashout
+        for (const userId in crashGameState.currentGame.players) {
+          const player = crashGameState.currentGame.players[userId];
+          
+          // Si el jugador tiene autoCashout configurado y no ha hecho cashout aún
+          if (player.autoCashout && !player.hasCashedOut && roundedMultiplier >= player.autoCashout) {
+            // Marcar al jugador como cashed out
+            crashGameState.currentGame.players[userId] = {
+              ...player,
+              hasCashedOut: true,
+              cashoutPoint: roundedMultiplier
+            };
+            
+            try {
+              // Encontrar el usuario
+              const user = await storage.getUser(parseInt(userId));
+              if (!user) continue;
+              
+              // Calcular ganancias
+              const winAmount = Math.floor(player.bet * roundedMultiplier);
+              
+              // Actualizar balance
+              const updatedUser = await storage.updateUserBalance(parseInt(userId), winAmount);
+              
+              if (updatedUser) {
+                // Registrar transacción y resultado
+                await storage.createTransaction({
+                  userId: parseInt(userId),
+                  amount: winAmount,
+                  type: "win",
+                  gameType: "crash"
+                });
+                
+                await storage.createGameHistory({
+                  userId: parseInt(userId),
+                  gameType: "crash",
+                  bet: player.bet,
+                  outcome: JSON.stringify({ 
+                    crashPoint: crashGameState.currentGame.crashPoint, 
+                    cashoutPoint: roundedMultiplier,
+                    autoCashout: true
+                  }),
+                  multiplier: roundedMultiplier,
+                  win: true,
+                  winAmount
+                });
+              }
+            } catch (error) {
+              console.error(`Error procesando autoCashout para usuario ${userId}:`, error);
+            }
+          }
+        }
+      }, 100); // Verificar cada 100ms
+      
+      // Programar el fin del juego
+      setTimeout(() => {
+        clearInterval(autoCashoutInterval);
+        crashGameState.currentGame.status = 'crashed';
+        
+        // Procesar pérdidas automáticamente para jugadores que no hicieron cashout
+        processCrashLosses().then(() => {
+          // Iniciar un nuevo juego después de 5 segundos
+          setTimeout(startNewCrashGame, 5000);
+        });
+      }, calculateTimeToReachMultiplier(crashGameState.currentGame.crashPoint));
+    }
+  }, 1000);
+}
+
+// Procesar las pérdidas de los jugadores que no hicieron cashout
+async function processCrashLosses() {
+  for (const userId in crashGameState.currentGame.players) {
+    const player = crashGameState.currentGame.players[userId];
+    
+    // Si el jugador no hizo cashout
+    if (!player.hasCashedOut) {
+      try {
+        // Registrar el resultado del juego como pérdida
+        await storage.createGameHistory({
+          userId: parseInt(userId),
+          gameType: "crash",
+          bet: player.bet,
+          outcome: JSON.stringify({ 
+            crashPoint: crashGameState.currentGame.crashPoint, 
+            cashoutPoint: 0 
+          }),
+          multiplier: 0,
+          win: false,
+          winAmount: 0
+        });
+      } catch (error) {
+        console.error(`Error registrando pérdida para usuario ${userId}:`, error);
+      }
+    }
+  }
+}
+
+// Calcular el tiempo necesario para alcanzar un multiplicador específico
+function calculateTimeToReachMultiplier(multiplier: number): number {
+  // Usando la misma fórmula que en el frontend:
+  // multiplier = e^(0.06*t)
+  // ln(multiplier) = 0.06*t
+  // t = ln(multiplier) / 0.06
+  const timeInSeconds = Math.log(multiplier) / 0.06;
+  return timeInSeconds * 1000; // Convertir a milisegundos
+}
+
 // Función para generar punto de crash para Space Explorer
 function generateCrashPoint(): number {
   // Algoritmo simple para fines demostrativos
@@ -3672,3 +3911,16 @@ function generateCrashPoint(): number {
   // Redondear a 2 decimales
   return Math.round(point * 100) / 100;
 }
+
+// Generar hash aleatorio para simulación de fairness
+function generateRandomHash(): string {
+  const chars = '0123456789abcdef';
+  let result = '';
+  for (let i = 0; i < 32; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
+// Iniciar el primer juego cuando se carga el servidor
+startNewCrashGame();
