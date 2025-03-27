@@ -572,39 +572,6 @@ export function Sidebar({ className }: SidebarProps) {
         </AnimatePresence>
       </div>
 
-      {/* Balance Widget */}
-      <AnimatePresence>
-        {!sidebarCollapsed && (
-          <motion.div 
-            className="px-4 py-3 m-2 rounded-lg bg-[#192531] border border-[#1c2b3a]"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
-            transition={{ delay: 0.1, duration: 0.3 }}
-            aria-label="Balance del usuario"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-gray-300">Balance</div>
-                <div className="text-md font-medium text-white">{user?.balance || "0.00"} €</div>
-              </div>
-              <motion.div className="flex space-x-1">
-                <motion.button 
-                  className="py-1 px-2 text-xs bg-[#09b66d] text-white rounded-md"
-                  whileHover={{ 
-                    scale: 1.05, 
-                    backgroundColor: "#0fda85" 
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Depositar
-                </motion.button>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Sidebar Items */}
       <div className="flex-1 overflow-y-auto pb-4">
         <div className="py-2 space-y-1">
