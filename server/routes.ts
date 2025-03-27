@@ -2922,6 +2922,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         selectRandomSymbol()
       ];
       
+      console.log(`Game '${game.name}' (${game.gameId}) using symbols:`, symbols);
+      console.log(`Spin result: ${reels.join(', ')}`);
+      
       // ======== PAYOUT CALCULATION ========
       // Determine winnings based on the reels combination
       let winAmount = 0;
