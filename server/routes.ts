@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
+import path from "path";
+import fs from "fs";
 import { 
   insertTransactionSchema, 
   insertGameHistorySchema, 
