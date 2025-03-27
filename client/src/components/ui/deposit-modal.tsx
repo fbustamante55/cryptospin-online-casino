@@ -16,6 +16,7 @@ interface CryptoOption {
 
 export function DepositModal({ isOpen, onClose }: DepositModalProps) {
   const [activeTab, setActiveTab] = useState<string>("Depositar");
+  const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
   
   // Lista de criptomonedas disponibles
   const cryptoOptions: CryptoOption[] = [
