@@ -3527,18 +3527,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let gameConfig;
       
       try {
-        // Usar la ruta de configuración personalizada que acabamos de crear
-        const configResponse = await fetch(`http://localhost:5000/api/slots/config/${gameId}`);
-        
-        if (!configResponse.ok) {
-          throw new Error(`Failed to fetch game configuration: ${configResponse.statusText}`);
+        // Obtener la configuración directamente de la función interna
+        // Esto evita problemas de localhost y es más eficiente
+        const slot = await storage.getSlotGame(gameId);
+        if (!slot) {
+          throw new Error("Slot game not found");
         }
         
-        const configData = await configResponse.json();
-        gameConfig = configData.config;
-        console.log("Game configuration loaded successfully:", gameConfig.name);
+        // Generar la configuración interna compatible con el cliente
+        gameConfig = {
+          name: slot.name,
+          reels: slot.reels,
+          rows: slot.reels > 3 ? 3 : 1, // Filas basadas en el número de carretes
+          symbols: Object.keys(slot.symbols || {}),
+          payTable: slot.symbols || {},
+          symbolsInfo: slot.symbols || {},
+          symbolWeights: {}, // Esto podría personalizarse más adelante
+        };
+        
+        console.log("Game configuration loaded from database:", gameConfig.name);
       } catch (error) {
-        console.error("Error fetching game configuration:", error);
+        console.error("Error processing game configuration:", error);
         return res.status(500).json({ error: "Failed to load game configuration" });
       }
       
@@ -4258,7 +4267,7 @@ function calculateKenoWin(matchCount: number, selectedCount: number, bet: number
 const crashGameState = {
   currentGame: {
     id: Date.now(),
-    crashPoint: 0,
+    crashPoint: generateCrashPoint(), // Inicializar con un valor válido desde el principio
     startTime: Date.now(),
     status: 'waiting' as 'waiting' | 'countdown' | 'in_progress' | 'crashed',
     countdown: 0,

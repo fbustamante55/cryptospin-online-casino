@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/use-auth';
 import { Card } from '@/components/ui/card';
@@ -157,115 +157,127 @@ export function SlotsGame() {
     }
   });
 
-  // Determinar el juego en función de la ruta
+  // Extraer el ID del juego de la ruta
+  const pathSegments = location.split('/');
+  const pathGameId = pathSegments[pathSegments.length - 1] || 'fruity-fiesta';
+
+  // Establecer el gameId inicial basado en la ruta
   useEffect(() => {
-    const pathSegments = location.split('/');
-    const currentGameId = pathSegments[pathSegments.length - 1];
+    // Asegurarse de que el gameId sea válido y esté formateado correctamente para la API
+    let normalizedGameId;
     
-    let symbols: string[] = DEFAULT_SYMBOLS;
-    let symbolColors: Record<string, string> = DEFAULT_SYMBOL_COLORS;
-    let newRows = 3;
-    let newReels = 5;
-    let paylines = 9;
-    let theme = {
-      background: 'bg-gradient-to-b from-teal-900 to-green-900',
-      highlight: 'bg-teal-500',
-      reelBg: 'bg-teal-900/80',
-      buttonColor: 'bg-teal-500 hover:bg-teal-600',
-      buttonTextColor: 'text-white',
-      textColor: 'text-white'
-    };
-    
-    // Configurar el juego específico según la URL
-    if (currentGameId === 'book-of-egypt') {
-      setGameId('book-of-egypt');
+    if (pathGameId === 'book-of-egypt') {
+      normalizedGameId = 'bookofegypt';
       setGameTitle(t("games.slots_book_of_egypt_title"));
-      symbols = EGYPT_SYMBOLS;
-      symbolColors = EGYPT_SYMBOL_COLORS;
-      paylines = 10;
-      theme = {
-        background: 'bg-gradient-to-b from-amber-800 to-amber-950',
-        highlight: 'bg-amber-500',
-        reelBg: 'bg-amber-900 border-2 border-yellow-600',
-        buttonColor: 'bg-amber-600 hover:bg-amber-700',
-        buttonTextColor: 'text-white',
-        textColor: 'text-white'
-      };
-      setLines(10); // Book of Egypt usa 10 líneas
-    } else if (currentGameId === '50gems') {
-      setGameId('50gems');
+    } else if (pathGameId === '50gems') {
+      normalizedGameId = '50gems';
       setGameTitle(t("games.slots_50gems_title"));
-      symbols = GEMS_SYMBOLS;
-      symbolColors = GEMS_SYMBOL_COLORS;
-      newRows = 4;
-      paylines = 50;
-      theme = {
-        background: 'bg-gradient-to-b from-indigo-900 to-purple-900',
-        highlight: 'bg-pink-600',
-        reelBg: 'bg-indigo-900/80',
-        buttonColor: 'bg-pink-600 hover:bg-pink-700',
-        buttonTextColor: 'text-white',
-        textColor: 'text-white'
-      };
-      setLines(50); // 50 Gems usa 50 líneas
-    } else if (currentGameId === '777') {
-      setGameId('777');
+    } else if (pathGameId === '777') {
+      normalizedGameId = 'classic3reel';
       setGameTitle(t("games.slots_777_title"));
-      symbols = CLASSIC_SYMBOLS;
-      symbolColors = CLASSIC_SYMBOL_COLORS;
-      newReels = 3;
-      paylines = 5;
-      theme = {
-        background: 'bg-gradient-to-b from-red-900 to-orange-900',
-        highlight: 'bg-yellow-500',
-        reelBg: 'bg-red-900/80',
-        buttonColor: 'bg-yellow-500 hover:bg-yellow-600',
-        buttonTextColor: 'text-red-900',
-        textColor: 'text-white'
-      };
-      setLines(5); // 777 usa 5 líneas
-    } else {
-      setGameId('fruity-fiesta');
+    } else if (pathGameId === 'fruity-fiesta') {
+      normalizedGameId = 'fruitymultipliers';
       setGameTitle(t("games.slots_fruity_title"));
-      // Usar valores predeterminados
-    }
-    
-    // Actualizar la configuración del juego
-    setGameConfig({
-      reels: newReels,
-      rows: newRows,
-      symbols: symbols,
-      symbolColors: symbolColors,
-      paylines: paylines,
-      theme: theme
-    });
-    
-    // Inicializar los carretes con símbolos aleatorios al cargar
-    let initialReels;
-    
-    if (currentGameId === 'book-of-egypt') {
-      // Para Book of Egypt, usar una configuración inicial con los símbolos egipcios
-      initialReels = [
-        ["EYE", "BOOK", "PHARAOH"],
-        ["SCARAB", "PYRAMID", "ANKH"],
-        ["PYRAMID", "ANKH", "BOOK"],
-        ["ANKH", "SCARAB", "EYE"],
-        ["BOOK", "PHARAOH", "PYRAMID"],
-        ["BOOK", "PHARAOH", "PYRAMID"]
-      ];
+    } else if (pathGameId === 'crystal-fortune') {
+      normalizedGameId = 'crystalmines';
+      setGameTitle("Crystal Fortune");
+    } else if (pathGameId === 'mega-fortune') {
+      normalizedGameId = 'megafortune';
+      setGameTitle("Mega Fortune");
+    } else if (pathGameId === 'avalanche') {
+      normalizedGameId = 'avalanche';
+      setGameTitle("Avalanche");
     } else {
-      // Para los demás juegos, generar aleatoriamente
-      initialReels = Array(newReels).fill(0).map(() => 
-        Array(newRows).fill(0).map(() => {
-          const randomIndex = Math.floor(Math.random() * symbols.length);
-          return symbols[randomIndex];
-        })
-      );
+      // Si el ID no coincide con ninguno conocido, usar el predeterminado
+      normalizedGameId = 'fruitymultipliers';
+      setGameTitle(t("games.slots_fruity_title"));
     }
     
-    setReels(initialReels);
-    
-  }, [location, t]);
+    setGameId(normalizedGameId);
+  }, [pathGameId, t]);
+
+  // Consultar la configuración del juego desde el servidor
+  const { data: configData, isLoading: isLoadingConfig } = useQuery({ 
+    queryKey: ['/api/slots/config', gameId],
+    queryFn: async () => {
+      console.log(`Fetching game config for: ${gameId}`);
+      const response = await fetch(`/api/slots/config/${gameId}`);
+      if (!response.ok) {
+        throw new Error(`Error fetching game config: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    enabled: !!gameId // Solo ejecutar la consulta cuando gameId esté definido
+  });
+
+  // Actualizar la configuración del juego cuando se carguen los datos
+  useEffect(() => {
+    if (configData?.config) {
+      const config = configData.config;
+      console.log("Configuración del juego cargada:", config);
+      
+      // Extraer la configuración recibida, con valores predeterminados como fallback
+      const newConfig: GameConfig = {
+        reels: config.reels || 5,
+        rows: config.rows || 3,
+        symbols: config.symbols || DEFAULT_SYMBOLS,
+        symbolColors: config.symbolColors || DEFAULT_SYMBOL_COLORS,
+        paylines: config.paylines || 9,
+        theme: {
+          background: 'bg-gradient-to-b from-teal-900 to-green-900',
+          highlight: 'bg-teal-500',
+          reelBg: 'bg-teal-900/80',
+          buttonColor: 'bg-teal-500 hover:bg-teal-600',
+          buttonTextColor: 'text-white',
+          textColor: 'text-white'
+        }
+      };
+      
+      // Aplicar temas personalizados si están disponibles
+      if (config.theme) {
+        try {
+          newConfig.theme = {
+            background: config.theme.background ? 
+              `bg-gradient-to-b from-${config.theme.background.replace('#', '')}-900 to-${config.theme.background.replace('#', '')}-950` : 
+              'bg-gradient-to-b from-teal-900 to-green-900',
+            highlight: config.theme.highlight ? `bg-${config.theme.highlight.replace('#', '')}-500` : 'bg-teal-500',
+            reelBg: config.theme.reelBg ? `bg-${config.theme.reelBg.replace('#', '')}-900/80` : 'bg-teal-900/80',
+            buttonColor: config.theme.buttonColor ? 
+              `bg-${config.theme.buttonColor.replace('#', '')}-500 hover:bg-${config.theme.buttonColor.replace('#', '')}-600` : 
+              'bg-teal-500 hover:bg-teal-600',
+            buttonTextColor: 'text-white',
+            textColor: 'text-white'
+          };
+        } catch (e) {
+          console.error("Error parsing theme colors:", e);
+        }
+      }
+      
+      // Actualizar la configuración del juego
+      setGameConfig(newConfig);
+      
+      // Ajustar líneas si es necesario
+      setLines(Math.min(newConfig.paylines, Math.max(1, lines)));
+      
+      // Inicializar los carretes iniciales según la configuración
+      const initialReels: string[][] = [];
+      for (let i = 0; i < newConfig.reels; i++) {
+        const reel: string[] = [];
+        for (let j = 0; j < newConfig.rows; j++) {
+          const randomIndex = Math.floor(Math.random() * newConfig.symbols.length);
+          reel.push(newConfig.symbols[randomIndex]);
+        }
+        initialReels.push(reel);
+      }
+      setReels(initialReels);
+      
+      // Restablecer el estado del juego
+      setIsSpinning(false);
+      setWinAmount(0);
+      setShowWin(false);
+      setSpinningReels(Array(newConfig.reels).fill(false));
+    }
+  }, [configData, lines]);
 
   const playSlotsMutation = useMutation({
     mutationFn: async (params: { bet: number, lines: number, gameId: string }) => {
@@ -282,7 +294,7 @@ export function SlotsGame() {
       
       return apiRequest<SlotResult>({
         method: "POST", 
-        url: "/api/games/slots", 
+        url: "/api/slots/spin", 
         data: { 
           bet: params.bet,
           lines: params.lines,
