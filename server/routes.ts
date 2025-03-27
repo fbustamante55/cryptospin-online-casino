@@ -2814,35 +2814,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // ======== GAME CONFIGURATION ========
-      // Define symbols, probabilities, and payout structure for our 3-reel slot machine
-      const symbols = ["cherry", "lemon", "orange", "plum", "bell", "bar", "seven"];
-      
-      // Weights/probabilities for each symbol (higher number = higher probability)
-      const symbolWeights = {
-        "cherry": 15, // Match Python implementation weight
-        "lemon": 15,
-        "orange": 10,
-        "plum": 10,
-        "bell": 10,
-        "bar": 10,
-        "seven": 5   // least common (jackpot symbol)
-      };
+      // Define symbols, probabilities, and payout structure based on game type
+      let symbols;
+      let symbolWeights;
+
+      // Check if the game is Egypt-themed
+      if (game.name.toLowerCase().includes('egypt') || game.provider.toLowerCase().includes('egypt')) {
+        // Egypt-themed symbols
+        symbols = ["BOOK", "PHARAOH", "ANKH", "EYE", "SCARAB", "PYRAMID", "SUN", "WILD"];
+        
+        // Weights/probabilities for each symbol (higher number = higher probability)
+        symbolWeights = {
+          "ANKH": 15,
+          "EYE": 15,
+          "SCARAB": 12,
+          "PYRAMID": 12,
+          "SUN": 10,
+          "PHARAOH": 8,
+          "WILD": 5,
+          "BOOK": 5  // least common (jackpot symbol)
+        };
+      } else {
+        // Classic symbols for other games
+        symbols = ["cherry", "lemon", "orange", "plum", "bell", "bar", "seven"];
+        
+        // Weights/probabilities for each symbol
+        symbolWeights = {
+          "cherry": 15, // Match Python implementation weight
+          "lemon": 15,
+          "orange": 10,
+          "plum": 10,
+          "bell": 10,
+          "bar": 10,
+          "seven": 5   // least common (jackpot symbol)
+        };
+      }
 
       // Payout multipliers for winning combinations
-      const payouts = {
-        // Exact matches (all three symbols the same)
-        "cherry-cherry-cherry": 10,
-        "lemon-lemon-lemon": 20,   // Match Python implementation
-        "orange-orange-orange": 30, // Match Python implementation
-        "plum-plum-plum": 40,      // Match Python implementation 
-        "bell-bell-bell": 50,
-        "bar-bar-bar": 100,        // Match Python implementation
-        "seven-seven-seven": 500,  // Match Python implementation (jackpot)
-        
-        // Partial matches (first two symbols the same, third can be any)
-        "bar-bar-any": 50,
-        "seven-seven-any": 100
-      };
+      let payouts: Record<string, number> = {};
+      
+      // Set payouts based on game type
+      if (game.name.toLowerCase().includes('egypt') || game.provider.toLowerCase().includes('egypt')) {
+        // Egypt-themed payouts
+        payouts = {
+          // Exact matches (all three symbols the same)
+          "BOOK-BOOK-BOOK": 500,    // Jackpot
+          "PHARAOH-PHARAOH-PHARAOH": 100,
+          "ANKH-ANKH-ANKH": 50,
+          "EYE-EYE-EYE": 40,
+          "SCARAB-SCARAB-SCARAB": 30,
+          "PYRAMID-PYRAMID-PYRAMID": 25,
+          "SUN-SUN-SUN": 20,
+          "WILD-WILD-WILD": 75,
+          
+          // Partial matches (first two symbols the same, third can be any)
+          "BOOK-BOOK-any": 100,
+          "PHARAOH-PHARAOH-any": 30,
+          "WILD-WILD-any": 25,
+          
+          // Special combinations (for bonus features)
+          "WILD-BOOK-WILD": 50,
+          "BOOK-WILD-BOOK": 50
+        };
+      } else {
+        // Classic slot payouts
+        payouts = {
+          // Exact matches (all three symbols the same)
+          "cherry-cherry-cherry": 10,
+          "lemon-lemon-lemon": 20,
+          "orange-orange-orange": 30,
+          "plum-plum-plum": 40,
+          "bell-bell-bell": 50,
+          "bar-bar-bar": 100,
+          "seven-seven-seven": 500,  // jackpot
+          
+          // Partial matches (first two symbols the same, third can be any)
+          "bar-bar-any": 50,
+          "seven-seven-any": 100
+        };
+      }
 
       // Create a cumulative distribution for weighted random selection
       const populateSymbolsArray = () => {
@@ -2880,12 +2930,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for exact 3-symbol combinations first
       if (payouts[reelsCombination as keyof typeof payouts]) {
         winAmount = bet * payouts[reelsCombination as keyof typeof payouts];
+        console.log(`Exact match found: ${reelsCombination}, Payout: ${payouts[reelsCombination as keyof typeof payouts]}x`);
       } 
+      // Check for special combinations
+      else if (game.name.toLowerCase().includes('egypt') && 
+              ((reels[0] === 'WILD' && reels[1] === 'BOOK' && reels[2] === 'WILD') || 
+               (reels[0] === 'BOOK' && reels[1] === 'WILD' && reels[2] === 'BOOK'))) {
+        const specialKey = reels.join('-') as keyof typeof payouts;
+        if (payouts[specialKey]) {
+          winAmount = bet * payouts[specialKey];
+          console.log(`Special combination found: ${specialKey}, Payout: ${payouts[specialKey]}x`);
+        }
+      }
       // Check for partial match combinations (first two symbols match)
       else if (reels[0] === reels[1]) {
         const partialMatchKey = `${reels[0]}-${reels[0]}-any` as keyof typeof payouts;
         if (payouts[partialMatchKey]) {
           winAmount = bet * payouts[partialMatchKey];
+          console.log(`Partial match found: ${partialMatchKey}, Payout: ${payouts[partialMatchKey]}x`);
         }
       }
       

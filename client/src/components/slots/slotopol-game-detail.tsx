@@ -9,6 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { Minus, Plus, Play, RefreshCw, Loader } from 'lucide-react';
 import { SlotGame } from '@shared/schema';
+import { EGYPT_ICON_MAP, EGYPT_SYMBOL_BACKGROUNDS, EGYPT_SYMBOL_BORDERS } from './book-of-egypt-icons';
 
 interface SpinResult {
   reels: string[];
@@ -210,16 +211,29 @@ export function SlotopolGameDetail({ gameId }: { gameId: string }) {
               <div className="grid grid-cols-3 gap-4">
                 {spinResult ? (
                   // Display spin result
-                  spinResult.reels.map((symbol, index) => (
-                    <div 
-                      key={index}
-                      className={`h-20 flex items-center justify-center rounded-md ${
-                        spinResult.isWin ? 'bg-[#09b66d]/20 border border-[#09b66d]/50' : 'bg-[#0e1824]/80 border border-[#1c2b3a]'
-                      }`}
-                    >
-                      <span className="text-xl font-bold text-white uppercase">{symbol}</span>
-                    </div>
-                  ))
+                  spinResult.reels.map((symbol, index) => {
+                    // Check if the symbol has an icon mapping
+                    const hasSymbol = Object.keys(EGYPT_ICON_MAP).includes(symbol);
+                    const iconSrc = hasSymbol ? EGYPT_ICON_MAP[symbol as keyof typeof EGYPT_ICON_MAP] : EGYPT_ICON_MAP['BOOK'];
+                    // Get background and border styles if available
+                    const bgClass = hasSymbol && EGYPT_SYMBOL_BACKGROUNDS[symbol as keyof typeof EGYPT_SYMBOL_BACKGROUNDS] || 'bg-[#0e1824]/80';
+                    const borderClass = hasSymbol && EGYPT_SYMBOL_BORDERS[symbol as keyof typeof EGYPT_SYMBOL_BORDERS] || 'border-[#1c2b3a]';
+                    
+                    return (
+                      <div 
+                        key={index}
+                        className={`h-20 flex items-center justify-center rounded-md ${
+                          spinResult.isWin ? 'bg-[#09b66d]/20 border border-[#09b66d]/50' : `${bgClass} border ${borderClass}`
+                        }`}
+                      >
+                        {hasSymbol ? (
+                          <img src={iconSrc} alt={symbol} className="h-12 w-12 object-contain" />
+                        ) : (
+                          <span className="text-xl font-bold text-white uppercase">{symbol}</span>
+                        )}
+                      </div>
+                    );
+                  })
                 ) : (
                   // Display placeholder reels
                   Array(3).fill(0).map((_, index) => (
@@ -362,8 +376,16 @@ export function SlotopolGameDetail({ gameId }: { gameId: string }) {
                 return (
                   <div key={symbol} className="flex justify-between items-center py-2 border-b border-[#1c2b3a] last:border-0">
                     <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-[#0e1824] rounded-md mr-2 uppercase font-bold">
-                        {symbol}
+                      <div className="h-8 w-8 flex items-center justify-center bg-[#0e1824] rounded-md mr-2">
+                        {Object.keys(EGYPT_ICON_MAP).includes(symbol) ? (
+                          <img 
+                            src={EGYPT_ICON_MAP[symbol as keyof typeof EGYPT_ICON_MAP]} 
+                            alt={symbol} 
+                            className="h-6 w-6 object-contain" 
+                          />
+                        ) : (
+                          <span className="uppercase font-bold">{symbol}</span>
+                        )}
                       </div>
                       <span className="text-white">{symbol}</span>
                     </div>
