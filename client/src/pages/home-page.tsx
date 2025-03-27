@@ -12,11 +12,13 @@ import { useState, useRef } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { LiveActivityTable } from "@/components/ui/live-activity-table";
+import { DepositModal } from "@/components/ui/deposit-modal";
 
 export default function HomePage() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('USDT');
   
   // Lista de criptomonedas disponibles con su valor (todos a 0)
@@ -40,6 +42,12 @@ export default function HomePage() {
   
   return (
     <>
+      {/* Modal de depósito */}
+      <DepositModal 
+        isOpen={isDepositModalOpen}
+        onClose={() => setIsDepositModalOpen(false)}
+      />
+      
       {/* Header - Only visible on desktop */}
       <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10 hidden md:block">
         <div className="flex items-center justify-between h-16 px-4">
@@ -74,7 +82,10 @@ export default function HomePage() {
                 <div className="h-6 w-px bg-[#1c2b3a]"></div>
                 
                 {/* Botón de depósito */}
-                <button className="flex items-center px-5 py-1.5 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold text-sm transition-all duration-200">
+                <button 
+                  className="flex items-center px-5 py-1.5 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold text-sm transition-all duration-200"
+                  onClick={() => setIsDepositModalOpen(true)}
+                >
                   Depositar
                 </button>
               </div>
