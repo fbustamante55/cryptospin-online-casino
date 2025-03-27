@@ -562,7 +562,7 @@ export function SpaceExplorerGameSync() {
               <div className="grid grid-cols-2 gap-6 mt-2">
                 <Button
                   variant="default"
-                  disabled={!canBet || betMutation.isPending || countdown < 5}
+                  disabled={!canBet || betMutation.isPending}
                   onClick={() => {
                     // Simular apuesta para demo (ya que tenemos error 401)
                     console.log("Simulando apuesta:", { bet, autoCashout: isAutoCashoutEnabled ? autoCashout : undefined });
@@ -578,7 +578,7 @@ export function SpaceExplorerGameSync() {
                     hasPlacedBetInCurrentGame.current = true;
                   }}
                   className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
-                    !canBet || betMutation.isPending || countdown < 5
+                    !canBet || betMutation.isPending
                       ? "bg-blue-800/70 text-blue-300/80" 
                       : "bg-blue-600 hover:bg-blue-500 text-white hover:shadow-blue-500/50"
                   }`}
