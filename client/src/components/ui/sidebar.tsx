@@ -172,28 +172,36 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <div className={cn(
-      "hidden md:flex flex-col bg-[#2d0a45] border-r border-[#3d1158] transition-all duration-300",
+      "hidden md:flex flex-col bg-[#0e1824] border-r border-[#1c2b3a] transition-all duration-300",
       sidebarCollapsed ? "w-16" : "w-64",
       className
     )}>
       {/* Sidebar Header with Logo */}
-      <div className="px-4 py-3 flex items-center justify-between">
+      <div className="px-4 py-3 flex items-center justify-between border-b border-[#1c2b3a]">
         {!sidebarCollapsed && (
-          <div className="flex items-center">
-            <div className="text-xl font-bold text-white">CryptoSpin</div>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
+            </div>
+            <button 
+              onClick={() => setSidebarCollapsed(true)}
+              className="text-gray-400 hover:text-white p-1"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
         )}
         {sidebarCollapsed && (
           <div className="w-full flex justify-center">
-            <div className="h-8 w-8 rounded-full bg-[#9400d3] flex items-center justify-center">
+            <button
+              onClick={() => setSidebarCollapsed(false)}
+              className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center hover:bg-[#0fda85] transition-colors"
+            >
               <span className="text-white font-bold text-sm">CS</span>
-            </div>
+            </button>
           </div>
         )}
       </div>
-
-      {/* Divider */}
-      <div className="border-b border-[#3d1158]"></div>
 
       {/* Sidebar Items */}
       <div className="flex-1 overflow-y-auto pb-4">
@@ -204,7 +212,7 @@ export function Sidebar({ className }: SidebarProps) {
               href={item.path || "#"}
               className={cn(
                 "group flex items-center justify-between px-3 py-2 mx-2 rounded-lg text-white transition-colors",
-                item.active ? "bg-[#3d1158]" : "hover:bg-[#3d1158]/50"
+                item.active ? "bg-[#192531]" : "hover:bg-[#192531]"
               )}
             >
               <div className="flex items-center space-x-3">
@@ -221,7 +229,7 @@ export function Sidebar({ className }: SidebarProps) {
               {!sidebarCollapsed && (
                 <>
                   {item.badge && (
-                    <div className="h-5 w-5 rounded-full bg-[#f5a623] text-[#2d0a45] text-xs font-bold flex items-center justify-center">
+                    <div className="h-5 w-5 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center">
                       {item.badge}
                     </div>
                   )}
@@ -237,7 +245,7 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* Total Bets Counter */}
       {!sidebarCollapsed && (
-        <div className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#3d1158]/70">
+        <div className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#192531] border border-[#1c2b3a]">
           <div className="text-xs text-gray-300 mb-1">Total apuestas</div>
           <div className="text-sm font-medium text-white">{totalBets}</div>
         </div>
