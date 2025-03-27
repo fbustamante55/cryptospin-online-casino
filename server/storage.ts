@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument, sportsEvents, type SportsEvent, type InsertSportsEvent, sportsBets, type SportsBet, type InsertSportsBet, favorites, type Favorite, type InsertFavorite, slotGames, type SlotGame, type InsertSlotGame, slotSessions, type SlotSession, type InsertSlotSession } from "@shared/schema";
+import { users, type User, type InsertUser, transactions, type Transaction, type InsertTransaction, gameHistory, type GameHistory, type InsertGameHistory, kycDocuments, type KycDocument, type InsertKycDocument, sportsEvents, type SportsEvent, type InsertSportsEvent, sportsBets, type SportsBet, type InsertSportsBet, favorites, type Favorite, type InsertFavorite, slotGames, type SlotGame, type InsertSlotGame, slotSessions, type SlotSession, type InsertSlotSession, type CrashGame, type CrashBet } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -78,6 +78,19 @@ export interface IStorage {
   getUserSlotSessions(userId: number): Promise<SlotSession[]>;
   updateSlotSession(id: number, updates: Partial<SlotSession>): Promise<SlotSession | undefined>;
   
+  // Crash game operations
+  getCurrentCrashGame(): Promise<CrashGame | undefined>;
+  createCrashGame(crashPoint: number, serverSeed: string, clientSeed: string, hash: string): Promise<CrashGame>;
+  updateCrashGameStatus(gameId: string, status: string): Promise<CrashGame | undefined>;
+  setCrashGameCrashed(gameId: string): Promise<CrashGame | undefined>;
+  getRecentCrashGames(limit: number): Promise<CrashGame[]>;
+  
+  // Crash bet operations
+  placeCrashBet(userId: number, gameId: string, amount: number, autoCashout?: number): Promise<CrashBet | undefined>;
+  cashoutCrashBet(userId: number, gameId: string, cashoutAt: number): Promise<CrashBet | undefined>;
+  getActiveCrashBets(gameId: string): Promise<CrashBet[]>;
+  getUserActiveCrashBet(userId: number, gameId: string): Promise<CrashBet | undefined>;
+  
   // Session store
   sessionStore: ReturnType<typeof createMemoryStore>;
 }
@@ -92,6 +105,8 @@ export class MemStorage implements IStorage {
   private favorites: Map<number, Favorite>;
   private slotGames: Map<string, SlotGame>;
   private slotSessions: Map<number, SlotSession>;
+  private crashGames: Map<string, CrashGame>;
+  private crashBets: Map<number, CrashBet>;
   public sessionStore: ReturnType<typeof createMemoryStore>;
   private currentUserId: number;
   private currentTransactionId: number;
@@ -101,6 +116,7 @@ export class MemStorage implements IStorage {
   private currentSportsBetId: number;
   private currentFavoriteId: number;
   private currentSlotSessionId: number;
+  private currentCrashBetId: number;
 
   constructor() {
     this.users = new Map();
@@ -112,6 +128,8 @@ export class MemStorage implements IStorage {
     this.favorites = new Map();
     this.slotGames = new Map();
     this.slotSessions = new Map();
+    this.crashGames = new Map();
+    this.crashBets = new Map();
     this.currentUserId = 1;
     this.currentTransactionId = 1;
     this.currentGameHistoryId = 1;
@@ -120,6 +138,7 @@ export class MemStorage implements IStorage {
     this.currentSportsBetId = 1;
     this.currentFavoriteId = 1;
     this.currentSlotSessionId = 1;
+    this.currentCrashBetId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
@@ -679,6 +698,150 @@ export class MemStorage implements IStorage {
     
     this.slotSessions.set(id, updatedSession);
     return updatedSession;
+  }
+  
+  // Crash game methods
+  async getCurrentCrashGame(): Promise<CrashGame | undefined> {
+    // Find the most recent crash game that's not crashed yet
+    const activeGames = Array.from(this.crashGames.values())
+      .filter(game => game.status !== 'crashed')
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    return activeGames.length > 0 ? activeGames[0] : undefined;
+  }
+  
+  async createCrashGame(crashPoint: number, serverSeed: string, clientSeed: string, hash: string): Promise<CrashGame> {
+    const gameId = hash; // Use hash as the gameId
+    const now = new Date();
+    
+    const crashGame: CrashGame = {
+      id: gameId,
+      crashPoint,
+      serverSeed,
+      clientSeed,
+      hash,
+      status: 'waiting',
+      createdAt: now,
+      startedAt: null,
+      crashedAt: null
+    };
+    
+    this.crashGames.set(gameId, crashGame);
+    return crashGame;
+  }
+  
+  async updateCrashGameStatus(gameId: string, status: string): Promise<CrashGame | undefined> {
+    const game = this.crashGames.get(gameId);
+    if (!game) return undefined;
+    
+    const now = new Date();
+    const updatedGame: CrashGame = {
+      ...game,
+      status,
+      startedAt: status === 'in_progress' && !game.startedAt ? now : game.startedAt
+    };
+    
+    this.crashGames.set(gameId, updatedGame);
+    return updatedGame;
+  }
+  
+  async setCrashGameCrashed(gameId: string): Promise<CrashGame | undefined> {
+    const game = this.crashGames.get(gameId);
+    if (!game) return undefined;
+    
+    const now = new Date();
+    const updatedGame: CrashGame = {
+      ...game,
+      status: 'crashed',
+      crashedAt: now
+    };
+    
+    this.crashGames.set(gameId, updatedGame);
+    return updatedGame;
+  }
+  
+  async getRecentCrashGames(limit: number): Promise<CrashGame[]> {
+    return Array.from(this.crashGames.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit);
+  }
+  
+  // Crash bet methods
+  async placeCrashBet(userId: number, gameId: string, amount: number, autoCashout?: number): Promise<CrashBet | undefined> {
+    const game = this.crashGames.get(gameId);
+    if (!game || game.status !== 'waiting') return undefined;
+    
+    const user = await this.getUser(userId);
+    if (!user || user.balance < amount) return undefined;
+    
+    const id = this.currentCrashBetId++;
+    const now = new Date();
+    
+    const crashBet: CrashBet = {
+      id,
+      userId,
+      gameId,
+      amount,
+      autoCashout: autoCashout || null,
+      status: 'active',
+      cashedOut: false,
+      cashoutAt: null,
+      cashoutMultiplier: null,
+      winAmount: null,
+      createdAt: now
+    };
+    
+    this.crashBets.set(id, crashBet);
+    
+    // Deduct the bet amount from user's balance
+    await this.updateUserBalance(userId, -amount);
+    
+    return crashBet;
+  }
+  
+  async cashoutCrashBet(userId: number, gameId: string, cashoutAt: number): Promise<CrashBet | undefined> {
+    // Find the active bet for this user and game
+    const activeBet = Array.from(this.crashBets.values()).find(
+      bet => bet.userId === userId && bet.gameId === gameId && bet.status === 'active' && !bet.cashedOut
+    );
+    
+    if (!activeBet) return undefined;
+    
+    const game = this.crashGames.get(gameId);
+    if (!game || game.status !== 'in_progress') return undefined;
+    
+    // Ensure cashout multiplier is valid (less than crashPoint)
+    if (cashoutAt >= game.crashPoint) return undefined;
+    
+    const winAmount = activeBet.amount * cashoutAt;
+    const now = new Date();
+    
+    const updatedBet: CrashBet = {
+      ...activeBet,
+      status: 'completed',
+      cashedOut: true,
+      cashoutAt: now,
+      cashoutMultiplier: cashoutAt,
+      winAmount
+    };
+    
+    this.crashBets.set(activeBet.id, updatedBet);
+    
+    // Add winnings to user's balance
+    await this.updateUserBalance(userId, winAmount);
+    
+    return updatedBet;
+  }
+  
+  async getActiveCrashBets(gameId: string): Promise<CrashBet[]> {
+    return Array.from(this.crashBets.values())
+      .filter(bet => bet.gameId === gameId && bet.status === 'active');
+  }
+  
+  async getUserActiveCrashBet(userId: number, gameId: string): Promise<CrashBet | undefined> {
+    return Array.from(this.crashBets.values()).find(
+      bet => bet.userId === userId && bet.gameId === gameId && bet.status === 'active'
+    );
   }
 }
 

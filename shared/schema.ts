@@ -345,6 +345,47 @@ export const slotCollectSchema = z.object({
   sessionId: z.number(),
 });
 
+// Crash game-specific schemas
+export const crashGameSchema = pgTable("crash_games", {
+  id: text("id").primaryKey(), // Using hash as ID for consistency
+  crashPoint: doublePrecision("crash_point").notNull(),
+  status: text("status").notNull(), // "waiting", "in_progress", "crashed", "returning"
+  serverSeed: text("server_seed").notNull(),
+  clientSeed: text("client_seed").notNull(),
+  hash: text("hash").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  startedAt: timestamp("started_at"),
+  crashedAt: timestamp("crashed_at")
+});
+
+export const crashBetsSchema = pgTable("crash_bets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  gameId: text("game_id").notNull(),
+  amount: integer("amount").notNull(),
+  autoCashout: doublePrecision("auto_cashout"),
+  status: text("status").notNull().default("active"), // "active", "completed", "lost"
+  cashedOut: boolean("cashed_out").default(false),
+  cashoutAt: timestamp("cashout_at"),
+  cashoutMultiplier: doublePrecision("cashout_multiplier"),
+  winAmount: integer("win_amount"),
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
+
+export const crashBetSchema = z.object({
+  bet: z.number().min(10),
+  autoCashout: z.number().min(1.01).optional()
+});
+
+export const crashCashoutSchema = z.object({
+  gameId: z.string()
+});
+
+export type CrashGame = typeof crashGameSchema.$inferSelect;
+export type CrashBet = typeof crashBetsSchema.$inferSelect;
+export type CrashBetInput = z.infer<typeof crashBetSchema>;
+export type CrashCashout = z.infer<typeof crashCashoutSchema>;
+
 export type SlotSpin = z.infer<typeof slotSpinSchema>;
 export type SlotDoubleUp = z.infer<typeof slotDoubleUpSchema>;
 export type SlotCollect = z.infer<typeof slotCollectSchema>;
