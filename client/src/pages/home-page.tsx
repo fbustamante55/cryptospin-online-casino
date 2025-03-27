@@ -131,7 +131,7 @@ export default function HomePage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                   </svg>
-                  <span>Originales de Stake</span>
+                  <span>Originales</span>
                 </button>
                 <button className="whitespace-nowrap flex items-center space-x-2 bg-[#192531] hover:bg-[#1c2b3a] text-white py-2 px-4 rounded-md font-medium text-sm transition-colors">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -168,10 +168,10 @@ export default function HomePage() {
             </nav>
           </div>
 
-          {/* Sección de Originales de Stake */}
+          {/* Sección de Originales */}
           <div className="mb-10">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white text-xl font-bold">Originales de Stake</h2>
+              <h2 className="text-white text-xl font-bold">Originales</h2>
               <div className="flex space-x-2">
                 <button className="bg-[#192531] p-1 rounded-md hover:bg-[#1c2b3a] transition-colors">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
