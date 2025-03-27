@@ -256,24 +256,21 @@ export function NewEventCard({
   
   // Función para convertir las probabilidades americanas a decimales
   const convertToDecimalOdds = (americanOdds: number): string => {
-    // Manejar el caso especial de 100 para evitar divisiones por cero
+    // Manejar el caso especial de 0 para evitar divisiones por cero
     if (americanOdds === 0) return "1.00";
     
-    let decimalOdds;
+    let decimalOdds: number;
     
-    // En realidad, muchas de las odds vienen ya en formato decimal en la API
-    // Si el número es pequeño (menor a 10), probablemente ya está en formato decimal
-    if (Math.abs(americanOdds) < 10) {
-      return americanOdds.toFixed(2);
-    }
-    
-    // Primero probemos si ya es un formato decimal (como 1.85, 2.35, etc.)
-    if (americanOdds >= 1 && americanOdds < 10) {
-      return americanOdds.toFixed(2);
+    // Si el valor ya es decimal (por ejemplo, 1.85, 2.35, etc.)
+    if (americanOdds > 0 && americanOdds < 10) {
+      decimalOdds = americanOdds;
     } 
-    
-    // Convertir formato americano a decimal
-    if (americanOdds > 0) {
+    // Si el valor parece que está en formato x100 (como 185 para 1.85, 250 para 2.50)
+    else if (americanOdds >= 100 && americanOdds < 1000) {
+      decimalOdds = americanOdds / 100;
+    }
+    // Formato americano estándar
+    else if (americanOdds > 0) {
       // Para probabilidades positivas: (americanOdds / 100) + 1
       decimalOdds = (americanOdds / 100) + 1;
     } else {
@@ -281,13 +278,7 @@ export function NewEventCard({
       decimalOdds = (100 / Math.abs(americanOdds)) + 1;
     }
     
-    // Directamente mostramos los odds proporcionados por la API como valores decimales
-    // Aquí asumimos que 185 significa 1.85, 250 significa 2.50, etc.
-    if (Math.abs(americanOdds) >= 100 && Math.abs(americanOdds) < 1000) {
-      decimalOdds = Math.abs(americanOdds) / 100;
-    }
-    
-    // Devolvemos el valor como string con exactamente dos decimales
+    // Aseguramos exactamente 2 decimales
     return decimalOdds.toFixed(2);
   };
   
