@@ -89,17 +89,7 @@ export function Sidebar({ className }: SidebarProps) {
     }
   }, [eventsData]);
 
-  // Define la interfaz para los elementos de la barra lateral
-  interface SidebarItem {
-    name: string;
-    icon: React.ReactNode;
-    path?: string;
-    active?: boolean;
-    hasChildren?: boolean;
-    badge?: string | number;
-  }
-  
-  const sidebarItems: SidebarItem[] = [
+  const sidebarItems = [
     {
       name: "Casino",
       icon: <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gradient-to-r from-[#9400d3] to-[#e100ff]">
@@ -182,24 +172,19 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <div className={cn(
-      "hidden md:flex flex-col bg-[#673ab7] border-r border-[#7e57c2] transition-all duration-300",
+      "hidden md:flex flex-col bg-[#0e1824] border-r border-[#1c2b3a] transition-all duration-300",
       sidebarCollapsed ? "w-16" : "w-64",
       className
     )}>
       {/* Sidebar Header with Logo */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-[#7e57c2]">
+      <div className="px-4 py-3 flex items-center justify-between border-b border-[#1c2b3a]">
         {!sidebarCollapsed && (
-          <div className="flex items-center justify-between w-full">
-            <div className="text-white font-bold">
-              <span className="text-xl">Casino</span>
-            </div>
+          <div className="flex items-center justify-end w-full">
             <button 
               onClick={() => setSidebarCollapsed(true)}
-              className="text-white hover:text-gray-200 p-1"
+              className="text-gray-400 hover:text-white p-1"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         )}
@@ -207,9 +192,9 @@ export function Sidebar({ className }: SidebarProps) {
           <div className="w-full flex justify-center">
             <button
               onClick={() => setSidebarCollapsed(false)}
-              className="h-8 w-8 rounded-full bg-[#9c27b0] flex items-center justify-center hover:bg-[#ba68c8] transition-colors"
+              className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center hover:bg-[#0fda85] transition-colors"
             >
-              <span className="text-white font-bold text-sm">C</span>
+              <span className="text-white font-bold text-sm">CS</span>
             </button>
           </div>
         )}
@@ -224,7 +209,7 @@ export function Sidebar({ className }: SidebarProps) {
               href={item.path || "#"}
               className={cn(
                 "group flex items-center justify-between px-3 py-2 mx-2 rounded-lg text-white transition-colors",
-                item.active ? "bg-[#5e35b1]" : "hover:bg-[#5e35b1]/60"
+                item.active ? "bg-[#192531]" : "hover:bg-[#192531]"
               )}
             >
               <div className="flex items-center space-x-3">
@@ -232,7 +217,7 @@ export function Sidebar({ className }: SidebarProps) {
                 {!sidebarCollapsed && (
                   <span className={cn(
                     "font-medium text-sm",
-                    item.active ? "text-white" : "text-white opacity-90 group-hover:opacity-100"
+                    item.active ? "text-white" : "text-gray-300 group-hover:text-white"
                   )}>
                     {item.name}
                   </span>
@@ -241,14 +226,12 @@ export function Sidebar({ className }: SidebarProps) {
               {!sidebarCollapsed && (
                 <>
                   {item.badge && (
-                    <div className="px-1.5 py-0.5 bg-white text-[#673ab7] text-xs font-bold rounded">
+                    <div className="h-5 w-5 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center">
                       {item.badge}
                     </div>
                   )}
                   {item.hasChildren && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white opacity-80">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
+                    <ChevronDown className="h-4 w-4 text-gray-300" />
                   )}
                 </>
               )}
@@ -259,8 +242,8 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* Total Bets Counter */}
       {!sidebarCollapsed && (
-        <div className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#5e35b1] border border-[#7e57c2]">
-          <div className="text-xs text-white opacity-75 mb-1">Total apuestas</div>
+        <div className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#192531] border border-[#1c2b3a]">
+          <div className="text-xs text-gray-300 mb-1">Total apuestas</div>
           <div className="text-sm font-medium text-white">{totalBets}</div>
         </div>
       )}
