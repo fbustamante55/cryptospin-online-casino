@@ -373,12 +373,12 @@ export const crashBetsSchema = pgTable("crash_bets", {
 });
 
 export const crashBetSchema = z.object({
-  bet: z.number().min(10),
+  amount: z.number().min(10).max(10000),
   autoCashout: z.number().min(1.01).optional()
 });
 
 export const crashCashoutSchema = z.object({
-  gameId: z.string()
+  gameId: z.string().optional()
 });
 
 export type CrashGame = typeof crashGameSchema.$inferSelect;

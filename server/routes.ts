@@ -994,132 +994,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Obtener el estado actual del juego de crash
-  app.get("/api/games/crash/state", (req, res) => {
-    // Calcular el multiplicador actual si el juego está en progreso
-    let currentMultiplier = 1.0;
-    
-    if (crashGameState.currentGame.status === 'in_progress') {
-      const elapsedSeconds = (Date.now() - crashGameState.currentGame.startTime) / 1000;
-      currentMultiplier = Math.pow(Math.E, 0.06 * elapsedSeconds);
-      currentMultiplier = Math.round(currentMultiplier * 100) / 100; // Redondear a 2 decimales
+  app.get("/api/games/crash/state", async (req, res) => {
+    try {
+      // Obtener el juego actual desde la base de datos
+      const currentGame = await storage.getCurrentCrashGame();
+      if (!currentGame) {
+        return res.status(404).json({ message: "No hay juego activo" });
+      }
+      
+      // Calcular el multiplicador actual si el juego está en progreso
+      let currentMultiplier = 1.0;
+      
+      if (currentGame.status === 'in_progress' && currentGame.startedAt) {
+        const elapsedSeconds = (Date.now() - currentGame.startedAt.getTime()) / 1000;
+        currentMultiplier = Math.pow(Math.E, 0.06 * elapsedSeconds);
+        currentMultiplier = Math.round(currentMultiplier * 100) / 100; // Redondear a 2 decimales
+      }
+      
+      // Obtener las apuestas activas para este juego
+      const activeBets = await storage.getActiveCrashBets(currentGame.id);
+      
+      // Formatear las apuestas para la respuesta
+      const players = activeBets.map(bet => ({
+        userId: bet.userId,
+        username: "Player", // Podríamos obtener los nombres de usuario, pero simplificaremos por ahora
+        bet: bet.amount,
+        autoCashout: bet.autoCashout,
+        hasCashedOut: bet.cashedOut,
+        cashoutPoint: bet.cashoutMultiplier
+      }));
+      
+      // Obtener historial de juegos recientes
+      const recentGames = await storage.getRecentCrashGames(10);
+      const history = recentGames.map(game => ({
+        id: game.id,
+        crashPoint: game.crashPoint,
+        timestamp: game.createdAt
+      }));
+      
+      // Devolver el estado actual
+      res.json({
+        gameId: currentGame.id,
+        status: currentGame.status,
+        countdown: currentGame.status === 'waiting' ? 5 : 0, // Countdown fijo de 5 segundos para simplificar
+        currentMultiplier: currentMultiplier,
+        startTime: currentGame.startedAt?.getTime() || Date.now(),
+        players: players,
+        history: history,
+        hash: currentGame.hash,
+        serverSeed: currentGame.serverSeed,
+        clientSeed: currentGame.clientSeed
+      });
+    } catch (error) {
+      console.error("Error al obtener el estado del juego:", error);
+      res.status(500).json({ message: "Error al obtener el estado del juego" });
     }
-    
-    // Devolver el estado actual
-    res.json({
-      gameId: crashGameState.currentGame.id,
-      status: crashGameState.currentGame.status,
-      countdown: crashGameState.currentGame.countdown,
-      currentMultiplier: currentMultiplier,
-      startTime: crashGameState.currentGame.startTime,
-      players: Object.values(crashGameState.currentGame.players),
-      history: crashGameState.history,
-      hash: crashGameState.seed,
-      previousSeed: crashGameState.previousSeed
-    });
   });
 
   // Play crash game
   app.post("/api/games/crash/bet", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated() || !req.user) return res.sendStatus(401);
     
-    const betSchema = z.object({
-      bet: z.number().min(10).max(10000),
-      autoCashout: z.number().optional()
-    });
+    const betSchema = crashBetSchema;
 
     try {
-      const { bet, autoCashout } = betSchema.parse(req.body);
+      const { amount, autoCashout } = betSchema.parse(req.body);
+      
+      // Obtener el juego actual
+      const currentGame = await storage.getCurrentCrashGame();
+      if (!currentGame) {
+        return res.status(400).json({ message: "No hay juego activo" });
+      }
       
       // Verificar si el juego está en el estado correcto para realizar apuestas
-      if (crashGameState.currentGame.status !== 'countdown' && crashGameState.currentGame.status !== 'waiting') {
-        return res.status(400).json({ message: "Betting not available at this time" });
+      if (currentGame.status !== 'waiting' && currentGame.status !== 'countdown') {
+        return res.status(400).json({ message: "No se pueden realizar apuestas en este momento" });
       }
       
       // Verificar si el usuario ya ha realizado una apuesta en este juego
-      if (crashGameState.currentGame.players[req.user.id]) {
-        return res.status(400).json({ message: "You already have an active bet" });
+      const existingBet = await storage.getUserActiveCrashBet(req.user.id, currentGame.id);
+      if (existingBet) {
+        return res.status(400).json({ message: "Ya tienes una apuesta activa en este juego" });
       }
       
-      // Check if user has enough balance
-      if (req.user.balance < bet) {
-        return res.status(400).json({ message: "Insufficient balance" });
+      // Verificar si el usuario tiene suficiente saldo
+      if (req.user.balance < amount) {
+        return res.status(400).json({ message: "Saldo insuficiente" });
       }
       
-      // Update user balance (deduct bet)
-      const updatedUser = await storage.updateUserBalance(req.user.id, -bet);
+      // Actualizar el saldo del usuario (deducir apuesta)
+      const updatedUser = await storage.updateUserBalance(req.user.id, -amount);
       
       if (!updatedUser) {
-        return res.status(500).json({ message: "Failed to update balance" });
+        return res.status(500).json({ message: "Error al actualizar el saldo" });
       }
 
-      // Record transaction
+      // Registrar transacción
       await storage.createTransaction({
         userId: req.user.id,
-        amount: -bet,
+        amount: -amount,
         type: "bet",
         gameType: "crash"
       });
 
-      // Registrar al jugador en el juego actual
-      crashGameState.currentGame.players[req.user.id] = {
-        userId: req.user.id,
-        username: req.user.username || "Player",
-        bet: bet,
-        autoCashout: autoCashout
-      };
+      // Registrar la apuesta en la base de datos
+      const bet = await storage.placeCrashBet(req.user.id, currentGame.id, amount, autoCashout);
+      
+      if (!bet) {
+        return res.status(500).json({ message: "Error al registrar la apuesta" });
+      }
 
       res.json({
         success: true,
-        crashPoint: crashGameState.currentGame.crashPoint, // Este valor normalmente no se revelaría
-        bet,
+        gameId: currentGame.id,
+        bet: amount,
         autoCashout,
         balance: updatedUser.balance
       });
     } catch (error) {
-      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+      const errorMessage = error instanceof Error ? error.message : "Solicitud inválida";
+      console.error("Error al realizar apuesta en crash:", errorMessage);
+      res.status(400).json({ message: errorMessage });
     }
   });
 
   app.post("/api/games/crash/cashout", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated() || !req.user) return res.sendStatus(401);
     
+    const cashoutSchema = crashCashoutSchema;
+
     try {
+      // Obtener el juego actual
+      const currentGame = await storage.getCurrentCrashGame();
+      if (!currentGame) {
+        return res.status(400).json({ message: "No hay juego activo" });
+      }
+      
       // Verificar si el juego está en curso
-      if (crashGameState.currentGame.status !== 'in_progress') {
-        return res.status(400).json({ message: "Cannot cash out at this time" });
+      if (currentGame.status !== 'in_progress') {
+        return res.status(400).json({ message: "No se puede retirar en este momento" });
       }
       
       // Verificar si el usuario tiene una apuesta activa
-      const playerBet = crashGameState.currentGame.players[req.user.id];
-      if (!playerBet) {
-        return res.status(400).json({ message: "No active bet found" });
+      const bet = await storage.getUserActiveCrashBet(req.user.id, currentGame.id);
+      if (!bet) {
+        return res.status(400).json({ message: "No se encontró apuesta activa" });
       }
       
       // Verificar si el usuario ya ha hecho cashout
-      if (playerBet.hasCashedOut) {
-        return res.status(400).json({ message: "Already cashed out" });
+      if (bet.cashedOut) {
+        return res.status(400).json({ message: "Ya has retirado tus ganancias" });
       }
       
       // Calcular el multiplicador actual
-      const elapsedSeconds = (Date.now() - crashGameState.currentGame.startTime) / 1000;
+      const elapsedTime = Date.now() - (currentGame.startedAt?.getTime() || Date.now());
+      const elapsedSeconds = elapsedTime / 1000;
       const currentMultiplier = Math.pow(Math.E, 0.06 * elapsedSeconds);
-      const cashoutPoint = Math.round(currentMultiplier * 100) / 100; // Redondear a 2 decimales
+      const cashoutAt = Math.round(currentMultiplier * 100) / 100; // Redondear a 2 decimales
+      
+      // Hacer cashout en la base de datos
+      const updatedBet = await storage.cashoutCrashBet(req.user.id, currentGame.id, cashoutAt);
+      if (!updatedBet) {
+        return res.status(500).json({ message: "Error al procesar el retiro" });
+      }
       
       // Calcular las ganancias
-      const winAmount = Math.floor(playerBet.bet * cashoutPoint);
-      
-      // Actualizar el estado del jugador
-      crashGameState.currentGame.players[req.user.id] = {
-        ...playerBet,
-        hasCashedOut: true,
-        cashoutPoint: cashoutPoint
-      };
+      const winAmount = Math.floor(bet.amount * cashoutAt);
       
       // Actualizar el balance del usuario
       const updatedUser = await storage.updateUserBalance(req.user.id, winAmount);
       
       if (!updatedUser) {
-        return res.status(500).json({ message: "Failed to update balance" });
+        return res.status(500).json({ message: "Error al actualizar el saldo" });
       }
 
       // Registrar transacción y resultado del juego
@@ -1133,49 +1179,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createGameHistory({
         userId: req.user.id,
         gameType: "crash",
-        bet: playerBet.bet,
+        bet: bet.amount,
         outcome: JSON.stringify({ 
-          crashPoint: crashGameState.currentGame.crashPoint, 
-          cashoutPoint: cashoutPoint 
+          crashPoint: currentGame.crashPoint, 
+          cashoutPoint: cashoutAt 
         }),
-        multiplier: cashoutPoint,
+        multiplier: cashoutAt,
         win: true,
         winAmount
       });
 
       res.json({
         success: true,
-        cashoutPoint,
+        cashoutPoint: cashoutAt,
         winAmount,
         balance: updatedUser.balance
       });
     } catch (error) {
-      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+      const errorMessage = error instanceof Error ? error.message : "Solicitud inválida";
+      console.error("Error al realizar cashout en crash:", errorMessage);
+      res.status(400).json({ message: errorMessage });
     }
   });
 
   app.post("/api/games/crash/bust", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated() || !req.user) return res.sendStatus(401);
     
     try {
+      // Obtener el juego actual
+      const currentGame = await storage.getCurrentCrashGame();
+      if (!currentGame) {
+        return res.status(400).json({ message: "No hay juego activo" });
+      }
+      
       // Verificar si el juego ya ha terminado
-      if (crashGameState.currentGame.status !== 'crashed') {
-        return res.status(400).json({ message: "Game is not in crashed state" });
+      if (currentGame.status !== 'crashed') {
+        return res.status(400).json({ message: "El juego no ha terminado aún" });
       }
       
       // Verificar si el usuario tenía una apuesta activa que no hizo cashout
-      const playerBet = crashGameState.currentGame.players[req.user.id];
-      if (!playerBet || playerBet.hasCashedOut) {
-        return res.status(400).json({ message: "No active bet found or already cashed out" });
+      const bet = await storage.getUserActiveCrashBet(req.user.id, currentGame.id);
+      if (!bet || bet.cashedOut) {
+        return res.status(400).json({ message: "No se encontró apuesta activa o ya realizaste cashout" });
       }
 
       // Registrar el resultado del juego como derrota
       await storage.createGameHistory({
         userId: req.user.id,
         gameType: "crash",
-        bet: playerBet.bet,
+        bet: bet.amount,
         outcome: JSON.stringify({ 
-          crashPoint: crashGameState.currentGame.crashPoint, 
+          crashPoint: currentGame.crashPoint, 
           cashoutPoint: 0 
         }),
         multiplier: 0,
@@ -1185,7 +1239,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true });
     } catch (error) {
-      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid request" });
+      const errorMessage = error instanceof Error ? error.message : "Solicitud inválida";
+      console.error("Error al registrar derrota en crash:", errorMessage);
+      res.status(400).json({ message: errorMessage });
     }
   });
 
@@ -2917,6 +2973,447 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ error: "Failed to retrieve slot game details" });
     }
   });
+  
+  /**
+   * @route GET /api/slots/themes
+   * @desc Get the list of available slot game themes for the frontend
+   */
+  app.get("/api/slots/themes", async (req, res) => {
+    try {
+      // Lista de temas disponibles
+      const themes = [
+        {
+          id: "classic3reel",
+          name: "Classic 3-Reel",
+          description: "A classic 3-reel slot machine with traditional fruit symbols.",
+          category: "classic",
+          thumbnail: "/images/slots/classic3reel.png",
+          difficulty: "beginner",
+          maxLines: 1,
+          minBet: 1,
+          maxBet: 100
+        },
+        {
+          id: "book_of_treasures",
+          name: "Book of Treasures",
+          description: "Journey through ancient Egypt and discover the mysterious Book of Treasures with expanding symbols and free spins.",
+          category: "adventure",
+          thumbnail: "/images/slots/book_of_treasures.png",
+          difficulty: "intermediate",
+          maxLines: 10,
+          minBet: 10,
+          maxBet: 500
+        },
+        {
+          id: "fruitymultipliers",
+          name: "Fruity Multipliers",
+          description: "Fresh fruit symbols with exciting multipliers can lead to juicy wins!",
+          category: "fruit",
+          thumbnail: "/images/slots/fruitymultipliers.png",
+          difficulty: "beginner",
+          maxLines: 5,
+          minBet: 5,
+          maxBet: 200
+        },
+        {
+          id: "megafortune",
+          name: "Mega Fortune",
+          description: "Luxury themed slot with progressive jackpots and glamorous symbols.",
+          category: "luxury",
+          thumbnail: "/images/slots/megafortune.png",
+          difficulty: "advanced",
+          maxLines: 25,
+          minBet: 20,
+          maxBet: 1000
+        },
+        {
+          id: "jewelcascade",
+          name: "Jewel Cascade",
+          description: "Sparkling gems cascade down the reels with multiplier trails and free falls.",
+          category: "gems",
+          thumbnail: "/images/slots/jewelcascade.png",
+          difficulty: "intermediate",
+          maxLines: 20,
+          minBet: 10,
+          maxBet: 500
+        }
+      ];
+      
+      return res.json({ themes });
+    } catch (error) {
+      console.error("Error fetching slot themes:", error);
+      return res.status(500).json({ error: "Failed to retrieve slot themes" });
+    }
+  });
+
+  /**
+   * @route GET /api/slots/config/:id
+   * @desc Get configuration of a specific slot game for rendering in the frontend
+   */
+  app.get("/api/slots/config/:id", async (req, res) => {
+    try {
+      const gameId = req.params.id;
+      
+      // Find the slot game in the database
+      const game = await storage.getSlotGame(gameId);
+      
+      if (!game) {
+        return res.status(404).json({ message: "Slot game not found" });
+      }
+      
+      // Definir la configuración básica del juego
+      const baseConfig = {
+        name: game.name,
+        gameId: game.gameId,
+        reels: game.reels,
+        rows: 3, // La mayoría de las tragamonedas tienen 3 filas
+        paylines: game.paylines,
+        minBet: game.minBet,
+        maxBet: game.maxBet,
+        provider: game.provider,
+        rtp: game.rtp,
+        volatility: game.volatility,
+        description: game.description,
+        features: game.features || [],
+      };
+      
+      // Configuraciones específicas según el tipo de juego
+      let config = { ...baseConfig };
+      
+      switch (gameId) {
+        case 'classic3reel': {
+          // Configuración para el juego clásico de 3 rodillos
+          config = {
+            ...baseConfig,
+            symbols: ['7', 'BAR', '2xBAR', '3xBAR', 'CHERRY', 'LEMON', 'ORANGE', 'PLUM'],
+            symbolColors: {
+              '7': '#d4af37', // Gold
+              'BAR': '#c0c0c0', // Silver
+              '2xBAR': '#cd7f32', // Bronze
+              '3xBAR': '#b87333', // Copper
+              'CHERRY': '#ff0000', // Red
+              'LEMON': '#ffff00', // Yellow
+              'ORANGE': '#ffa500', // Orange
+              'PLUM': '#8e4585', // Purple
+            },
+            payTable: {
+              '7-7-7': 150,
+              'BAR-BAR-BAR': 50,
+              '2xBAR-2xBAR-2xBAR': 20,
+              '3xBAR-3xBAR-3xBAR': 10,
+              'CHERRY-CHERRY-CHERRY': 8,
+              'LEMON-LEMON-LEMON': 6,
+              'ORANGE-ORANGE-ORANGE': 5,
+              'PLUM-PLUM-PLUM': 4,
+              'CHERRY-CHERRY-any': 2,
+              'CHERRY-any-any': 1,
+            },
+            theme: {
+              background: '#121212',
+              highlight: '#d4af37',
+              reelBg: '#1e1e1e',
+              buttonColor: '#d4af37',
+              buttonTextColor: '#000000',
+              textColor: '#ffffff',
+            }
+          };
+          break;
+        }
+        case 'bookofegypt': {
+          // Configuración para el juego Book of Egypt
+          config = {
+            ...baseConfig,
+            symbols: ['BOOK', 'PHARAOH', 'ANKH', 'SCARAB', 'EYE', 'A', 'K', 'Q', 'J', '10'],
+            symbolColors: {
+              'BOOK': '#d4af37', // Gold
+              'PHARAOH': '#c19a6b', // Desert tan
+              'ANKH': '#add8e6', // Light blue
+              'SCARAB': '#006400', // Dark green
+              'EYE': '#000080', // Navy blue
+              'A': '#ff7f50', // Coral
+              'K': '#4682b4', // Steel blue
+              'Q': '#6a5acd', // Slate blue
+              'J': '#ff69b4', // Hot pink
+              '10': '#ffff00', // Yellow
+            },
+            payTable: {
+              'BOOK-BOOK-BOOK': { 3: 25, 4: 100, 5: 500 },
+              'PHARAOH-PHARAOH-PHARAOH': { 3: 20, 4: 80, 5: 400 },
+              'ANKH-ANKH-ANKH': { 3: 15, 4: 60, 5: 300 },
+              'SCARAB-SCARAB-SCARAB': { 3: 10, 4: 40, 5: 200 },
+              'EYE-EYE-EYE': { 3: 8, 4: 30, 5: 150 },
+              'A-A-A': { 3: 5, 4: 15, 5: 100 },
+              'K-K-K': { 3: 5, 4: 15, 5: 100 },
+              'Q-Q-Q': { 3: 2, 4: 10, 5: 50 },
+              'J-J-J': { 3: 2, 4: 10, 5: 50 },
+              '10-10-10': { 3: 2, 4: 10, 5: 50 },
+            },
+            specialSymbols: {
+              'BOOK': {
+                type: 'scatter',
+                description: 'Book symbols trigger 10 free spins when 3 or more appear. Acts as wild and substitutes for all symbols.',
+              },
+              'PHARAOH': {
+                type: 'expandingWild',
+                description: 'During free spins, Pharaoh symbol expands to cover the entire reel when appearing.',
+              },
+            },
+            bonusFeatures: [
+              {
+                name: 'Free Spins',
+                description: 'Get 3 or more Book symbols to trigger 10 free spins. A special expanding symbol is randomly selected for the duration of free spins.',
+                trigger: 'BOOK-BOOK-BOOK',
+              },
+              {
+                name: 'Gamble Feature',
+                description: 'After any win, you can gamble your winnings by guessing the color of the next card. Correct guess doubles your win, wrong guess loses your win.',
+              },
+            ],
+            theme: {
+              background: '#2d1b00',
+              highlight: '#ffd700',
+              reelBg: '#3d2b10',
+              buttonColor: '#ffd700',
+              buttonTextColor: '#000000',
+              textColor: '#ffd700',
+            }
+          };
+          break;
+        }
+        case 'fruitymultipliers': {
+          // Configuración para el juego Fruity Multipliers
+          config = {
+            ...baseConfig,
+            symbols: ['WILD', 'SEVEN', 'BELL', 'WATERMELON', 'GRAPES', 'ORANGE', 'LEMON', 'CHERRY'],
+            symbolColors: {
+              'WILD': '#ff0000', // Red
+              'SEVEN': '#d4af37', // Gold
+              'BELL': '#ffd700', // Yellow gold
+              'WATERMELON': '#228B22', // Forest green
+              'GRAPES': '#800080', // Purple
+              'ORANGE': '#ffa500', // Orange
+              'LEMON': '#ffff00', // Yellow
+              'CHERRY': '#ff0000', // Red
+            },
+            payTable: {
+              'WILD-WILD-WILD': { 3: 50, 4: 200, 5: 1000 },
+              'SEVEN-SEVEN-SEVEN': { 3: 30, 4: 120, 5: 600 },
+              'BELL-BELL-BELL': { 3: 20, 4: 80, 5: 400 },
+              'WATERMELON-WATERMELON-WATERMELON': { 3: 15, 4: 60, 5: 300 },
+              'GRAPES-GRAPES-GRAPES': { 3: 10, 4: 40, 5: 200 },
+              'ORANGE-ORANGE-ORANGE': { 3: 5, 4: 20, 5: 100 },
+              'LEMON-LEMON-LEMON': { 3: 3, 4: 15, 5: 75 },
+              'CHERRY-CHERRY-CHERRY': { 3: 2, 4: 10, 5: 50 },
+            },
+            specialSymbols: {
+              'WILD': {
+                type: 'wild',
+                description: 'Substitutes for all symbols and adds a 2x multiplier to any win it contributes to.',
+              },
+            },
+            multipliers: {
+              basic: 1,
+              wild: 2,
+              multiple_wilds: [2, 4, 8], // 1 wild = 2x, 2 wilds = 4x, 3 wilds = 8x
+            },
+            theme: {
+              background: '#006400', // Dark green
+              highlight: '#ffd700', // Gold
+              reelBg: '#004d00', // Darker green
+              buttonColor: '#ff4500', // Orange-red
+              buttonTextColor: '#ffffff',
+              textColor: '#ffffff',
+            }
+          };
+          break;
+        }
+        case 'megafortune': {
+          // Configuración para el juego Mega Fortune
+          config = {
+            ...baseConfig,
+            symbols: ['MEGA', 'MAJOR', 'MINOR', 'YACHT', 'LIMOUSINE', 'CHAMPAGNE', 'RING', 'WATCH', 'DOLLAR', 'A', 'K', 'Q', 'J', '10'],
+            symbolColors: {
+              'MEGA': '#d4af37', // Gold
+              'MAJOR': '#c0c0c0', // Silver
+              'MINOR': '#cd7f32', // Bronze
+              'YACHT': '#add8e6', // Light blue
+              'LIMOUSINE': '#000000', // Black
+              'CHAMPAGNE': '#f8f8ff', // White
+              'RING': '#ffd700', // Gold
+              'WATCH': '#808080', // Gray
+              'DOLLAR': '#006400', // Dark green
+              'A': '#ff0000', // Red
+              'K': '#ff0000', // Red
+              'Q': '#ff0000', // Red
+              'J': '#ff0000', // Red
+              '10': '#ff0000', // Red
+            },
+            payTable: {
+              'MEGA-MEGA-MEGA': { 3: 100, 4: 1000, 5: 10000 },
+              'MAJOR-MAJOR-MAJOR': { 3: 50, 4: 500, 5: 5000 },
+              'MINOR-MINOR-MINOR': { 3: 25, 4: 250, 5: 2500 },
+              'YACHT-YACHT-YACHT': { 3: 20, 4: 100, 5: 500 },
+              'LIMOUSINE-LIMOUSINE-LIMOUSINE': { 3: 15, 4: 75, 5: 350 },
+              'CHAMPAGNE-CHAMPAGNE-CHAMPAGNE': { 3: 10, 4: 50, 5: 250 },
+              'RING-RING-RING': { 3: 7, 4: 35, 5: 200 },
+              'WATCH-WATCH-WATCH': { 3: 5, 4: 25, 5: 150 },
+              'DOLLAR-DOLLAR-DOLLAR': { 3: 3, 4: 15, 5: 100 },
+              'A-A-A': { 3: 2, 4: 10, 5: 50 },
+              'K-K-K': { 3: 2, 4: 10, 5: 50 },
+              'Q-Q-Q': { 3: 1, 4: 5, 5: 25 },
+              'J-J-J': { 3: 1, 4: 5, 5: 25 },
+              '10-10-10': { 3: 1, 4: 5, 5: 25 },
+            },
+            specialSymbols: {
+              'MEGA': {
+                type: 'jackpot',
+                description: 'Three or more MEGA symbols trigger the Mega Jackpot bonus wheel.',
+              },
+              'MAJOR': {
+                type: 'jackpot',
+                description: 'Three or more MAJOR symbols trigger the Major Jackpot bonus wheel.',
+              },
+              'MINOR': {
+                type: 'jackpot',
+                description: 'Three or more MINOR symbols trigger the Minor Jackpot bonus wheel.',
+              },
+              'DOLLAR': {
+                type: 'wild',
+                description: 'Substitutes for all symbols except jackpot symbols.',
+              },
+            },
+            bonusFeatures: [
+              {
+                name: 'Jackpot Wheel',
+                description: 'Spin the wheel to win one of three progressive jackpots: Mega, Major, or Minor.',
+                trigger: 'Three or more jackpot symbols.',
+              },
+              {
+                name: 'Free Spins',
+                description: '3 or more DOLLAR symbols award 10, 15, or 20 free spins with a 3x multiplier.',
+                trigger: 'DOLLAR-DOLLAR-DOLLAR',
+              },
+            ],
+            jackpots: {
+              'MEGA': 'Progressive starting at 100,000',
+              'MAJOR': 'Progressive starting at 10,000',
+              'MINOR': 'Progressive starting at 1,000',
+            },
+            theme: {
+              background: '#00008b', // Dark blue
+              highlight: '#ffd700', // Gold
+              reelBg: '#000080', // Navy blue
+              buttonColor: '#ffd700', // Gold
+              buttonTextColor: '#000000',
+              textColor: '#ffffff',
+            }
+          };
+          break;
+        }
+        case 'jewelcascade': {
+          // Configuración para el juego Jewel Cascade
+          config = {
+            ...baseConfig,
+            symbols: ['WILD', 'DIAMOND', 'RUBY', 'EMERALD', 'SAPPHIRE', 'AMETHYST', 'TOPAZ', 'PEARL'],
+            symbolColors: {
+              'WILD': '#ff0000', // Red
+              'DIAMOND': '#b9f2ff', // Diamond blue
+              'RUBY': '#e0115f', // Ruby red
+              'EMERALD': '#50c878', // Emerald green
+              'SAPPHIRE': '#0f52ba', // Sapphire blue
+              'AMETHYST': '#9966cc', // Amethyst purple
+              'TOPAZ': '#ffc87c', // Topaz
+              'PEARL': '#f5f5f5', // Pearl white
+            },
+            payTable: {
+              'WILD-WILD-WILD': { 3: 50, 4: 200, 5: 1000 },
+              'DIAMOND-DIAMOND-DIAMOND': { 3: 30, 4: 150, 5: 750 },
+              'RUBY-RUBY-RUBY': { 3: 25, 4: 125, 5: 625 },
+              'EMERALD-EMERALD-EMERALD': { 3: 20, 4: 100, 5: 500 },
+              'SAPPHIRE-SAPPHIRE-SAPPHIRE': { 3: 15, 4: 75, 5: 375 },
+              'AMETHYST-AMETHYST-AMETHYST': { 3: 10, 4: 50, 5: 250 },
+              'TOPAZ-TOPAZ-TOPAZ': { 3: 5, 4: 25, 5: 125 },
+              'PEARL-PEARL-PEARL': { 3: 3, 4: 15, 5: 75 },
+            },
+            specialSymbols: {
+              'WILD': {
+                type: 'wild',
+                description: 'Substitutes for all symbols.',
+              },
+            },
+            bonusFeatures: [
+              {
+                name: 'Cascading Reels',
+                description: 'Winning combinations disappear, allowing new symbols to fall in, potentially creating new wins in a chain reaction.',
+              },
+              {
+                name: 'Multiplier Trail',
+                description: 'Each consecutive cascade increases the win multiplier: 1x, 2x, 3x, 5x, up to 10x maximum.',
+              },
+              {
+                name: 'Free Falls',
+                description: 'Collect 3 or more DIAMOND symbols to trigger 10 Free Falls (free spins) with enhanced multipliers.',
+                trigger: 'DIAMOND-DIAMOND-DIAMOND',
+              },
+            ],
+            theme: {
+              background: '#2e0854', // Deep purple
+              highlight: '#ffd700', // Gold
+              reelBg: '#3a0e6a', // Lighter purple
+              buttonColor: '#e0115f', // Ruby red
+              buttonTextColor: '#ffffff',
+              textColor: '#ffffff',
+            }
+          };
+          break;
+        }
+        default:
+          // Configuración genérica para cualquier otro juego
+          config = {
+            ...baseConfig,
+            symbols: ['WILD', 'SCATTER', 'HIGH1', 'HIGH2', 'HIGH3', 'HIGH4', 'LOW1', 'LOW2', 'LOW3', 'LOW4'],
+            symbolColors: {
+              'WILD': '#ffd700', // Gold
+              'SCATTER': '#ff0000', // Red
+              'HIGH1': '#9370db', // Medium purple
+              'HIGH2': '#3cb371', // Medium sea green
+              'HIGH3': '#4169e1', // Royal blue
+              'HIGH4': '#ff4500', // Orange red
+              'LOW1': '#ff69b4', // Hot pink
+              'LOW2': '#00ced1', // Dark turquoise
+              'LOW3': '#ffff00', // Yellow
+              'LOW4': '#32cd32', // Lime green
+            },
+            payTable: {
+              'WILD-WILD-WILD': { 3: 50, 4: 200, 5: 1000 },
+              'SCATTER-SCATTER-SCATTER': { 3: 5, 4: 20, 5: 100 },
+              'HIGH1-HIGH1-HIGH1': { 3: 15, 4: 50, 5: 200 },
+              'HIGH2-HIGH2-HIGH2': { 3: 10, 4: 40, 5: 150 },
+              'HIGH3-HIGH3-HIGH3': { 3: 8, 4: 30, 5: 125 },
+              'HIGH4-HIGH4-HIGH4': { 3: 6, 4: 25, 5: 100 },
+              'LOW1-LOW1-LOW1': { 3: 4, 4: 15, 5: 75 },
+              'LOW2-LOW2-LOW2': { 3: 3, 4: 10, 5: 50 },
+              'LOW3-LOW3-LOW3': { 3: 2, 4: 8, 5: 40 },
+              'LOW4-LOW4-LOW4': { 3: 1, 4: 5, 5: 25 },
+            },
+            theme: {
+              background: '#1a1a2e', // Dark blue
+              highlight: '#ffd700', // Gold
+              reelBg: '#16213e', // Darker blue
+              buttonColor: '#ff4500', // Orange red
+              buttonTextColor: '#ffffff',
+              textColor: '#ffffff',
+            }
+          };
+          break;
+      }
+      
+      res.json({ config });
+    } catch (error) {
+      console.error("Error fetching slot configuration:", error);
+      res.status(500).json({ message: "Error fetching slot configuration" });
+    }
+  });
 
   /**
    * @route POST /api/slots/spin
@@ -3025,143 +3522,195 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // ======== GAME CONFIGURATION ========
-      // Define symbols, probabilities, and payout structure based on game type
-      let symbols;
-      let symbolWeights;
-
-      // Check if the game is Egypt-themed
-      if (game.name.toLowerCase().includes('egypt') || game.provider.toLowerCase().includes('egypt')) {
-        // Egypt-themed symbols
-        symbols = ["BOOK", "PHARAOH", "ANKH", "EYE", "SCARAB", "PYRAMID", "SUN", "WILD"];
-        
-        // Weights/probabilities for each symbol (higher number = higher probability)
-        symbolWeights = {
-          "ANKH": 15,
-          "EYE": 15,
-          "SCARAB": 12,
-          "PYRAMID": 12,
-          "SUN": 10,
-          "PHARAOH": 8,
-          "WILD": 5,
-          "BOOK": 5  // least common (jackpot symbol)
-        };
-      } else {
-        // Classic symbols for other games
-        symbols = ["cherry", "lemon", "orange", "plum", "bell", "bar", "seven"];
-        
-        // Weights/probabilities for each symbol
-        symbolWeights = {
-          "cherry": 15, // Match Python implementation weight
-          "lemon": 15,
-          "orange": 10,
-          "plum": 10,
-          "bell": 10,
-          "bar": 10,
-          "seven": 5   // least common (jackpot symbol)
-        };
-      }
-
-      // Payout multipliers for winning combinations
-      let payouts: Record<string, number> = {};
+      // Obtener la configuración del juego para determinar símbolos y pagos
+      console.log("Fetching game configuration for:", gameId);
+      let gameConfig;
       
-      // Set payouts based on game type
-      if (game.name.toLowerCase().includes('egypt') || game.provider.toLowerCase().includes('egypt')) {
-        // Egypt-themed payouts
-        payouts = {
-          // Exact matches (all three symbols the same)
-          "BOOK-BOOK-BOOK": 500,    // Jackpot
-          "PHARAOH-PHARAOH-PHARAOH": 100,
-          "ANKH-ANKH-ANKH": 50,
-          "EYE-EYE-EYE": 40,
-          "SCARAB-SCARAB-SCARAB": 30,
-          "PYRAMID-PYRAMID-PYRAMID": 25,
-          "SUN-SUN-SUN": 20,
-          "WILD-WILD-WILD": 75,
-          
-          // Partial matches (first two symbols the same, third can be any)
-          "BOOK-BOOK-any": 100,
-          "PHARAOH-PHARAOH-any": 30,
-          "WILD-WILD-any": 25,
-          
-          // Special combinations (for bonus features)
-          "WILD-BOOK-WILD": 50,
-          "BOOK-WILD-BOOK": 50
-        };
-      } else {
-        // Classic slot payouts
-        payouts = {
-          // Exact matches (all three symbols the same)
-          "cherry-cherry-cherry": 10,
-          "lemon-lemon-lemon": 20,
-          "orange-orange-orange": 30,
-          "plum-plum-plum": 40,
-          "bell-bell-bell": 50,
-          "bar-bar-bar": 100,
-          "seven-seven-seven": 500,  // jackpot
-          
-          // Partial matches (first two symbols the same, third can be any)
-          "bar-bar-any": 50,
-          "seven-seven-any": 100
-        };
+      try {
+        // Usar la ruta de configuración personalizada que acabamos de crear
+        const configResponse = await fetch(`http://localhost:5000/api/slots/config/${gameId}`);
+        
+        if (!configResponse.ok) {
+          throw new Error(`Failed to fetch game configuration: ${configResponse.statusText}`);
+        }
+        
+        const configData = await configResponse.json();
+        gameConfig = configData.config;
+        console.log("Game configuration loaded successfully:", gameConfig.name);
+      } catch (error) {
+        console.error("Error fetching game configuration:", error);
+        return res.status(500).json({ error: "Failed to load game configuration" });
       }
-
-      // Create a cumulative distribution for weighted random selection
+      
+      // Utilizar símbolos de la configuración
+      const symbols = gameConfig.symbols || [];
+      
+      if (symbols.length === 0) {
+        console.error("No symbols defined in game configuration");
+        return res.status(500).json({ error: "Invalid game configuration: no symbols defined" });
+      }
+      
+      console.log("Game symbols:", symbols);
+      
+      // Crear pesos de símbolos - usaremos distribución uniforme si no hay pesos personalizados
+      const symbolWeights: Record<string, number> = {};
+      
+      // Asignar pesos predeterminados basados en la jerarquía del símbolo en la matriz
+      // Los símbolos al principio aparecen con menos frecuencia (son más valiosos)
+      symbols.forEach((symbol, index) => {
+        // Invertir la probabilidad: los primeros símbolos (normalmente los de mayor valor)
+        // tienen menor probabilidad de aparecer
+        symbolWeights[symbol] = 5 + Math.floor((symbols.length - index) * 2);
+      });
+      
+      // Sobrescribir con pesos personalizados si están definidos en la configuración
+      if (gameConfig.symbolWeights) {
+        Object.assign(symbolWeights, gameConfig.symbolWeights);
+      }
+      
+      console.log("Symbol weights:", symbolWeights);
+      
+      // Obtener tabla de pagos de la configuración o crear una predeterminada
+      let payTable = gameConfig.payTable || {};
+      
+      // Si no hay tabla de pagos definida, crear una simple basada en los símbolos
+      if (Object.keys(payTable).length === 0) {
+        symbols.forEach((symbol, index) => {
+          // Los primeros símbolos pagan más (inversamente proporcional al índice)
+          const multiplier = symbols.length - index;
+          const baseValue = 5 * multiplier;
+          
+          // Para juegos de 5 carretes, crear pagos para 3, 4 y 5 símbolos iguales
+          if (game.reels === 5) {
+            payTable[`${symbol}-${symbol}-${symbol}`] = { 3: baseValue, 4: baseValue * 2, 5: baseValue * 10 };
+          } else {
+            // Para juegos de 3 carretes, un pago simple
+            payTable[`${symbol}-${symbol}-${symbol}`] = baseValue * 3;
+          }
+        });
+      }
+      
+      console.log("Pay table:", payTable);
+      
+      // Crear una distribución acumulativa para selección aleatoria ponderada
       const populateSymbolsArray = () => {
         const population: string[] = [];
         for (const symbol of symbols) {
-          const weight = symbolWeights[symbol as keyof typeof symbolWeights];
+          const weight = symbolWeights[symbol] || 10; // Peso predeterminado si no está definido
           for (let i = 0; i < weight; i++) {
             population.push(symbol);
           }
         }
         return population;
       };
-
-      // Population array for random selection
+      
+      // Array de población para selección aleatoria
       const symbolsPopulation = populateSymbolsArray();
-
-      // Function to select a random symbol based on weights
+      
+      // Función para seleccionar un símbolo aleatorio basado en pesos
       const selectRandomSymbol = () => {
         const randomIndex = Math.floor(Math.random() * symbolsPopulation.length);
         return symbolsPopulation[randomIndex];
       };
-
-      // Spin the reels
-      const reels = [
-        selectRandomSymbol(),
-        selectRandomSymbol(), 
-        selectRandomSymbol()
-      ];
       
-      console.log(`Game '${game.name}' (${game.gameId}) using symbols:`, symbols);
-      console.log(`Spin result: ${reels.join(', ')}`);
+      // Girar los carretes - generamos el número correcto de carretes y filas según la configuración
+      const reelCount = gameConfig.reels || 3;
+      const rowCount = gameConfig.rows || 3;
+      
+      // Generar resultado de los carretes
+      let reelsGrid: string[][] = [];
+      
+      for (let i = 0; i < reelCount; i++) {
+        const reel: string[] = [];
+        for (let j = 0; j < rowCount; j++) {
+          reel.push(selectRandomSymbol());
+        }
+        reelsGrid.push(reel);
+      }
+      
+      console.log("Generated reels grid:", reelsGrid);
+      
+      // Para compatibilidad con el código existente, si es un juego de 3 carretes, 
+      // usamos un array simple en lugar de la matriz
+      const reels = reelCount === 3 && rowCount === 1 
+        ? reelsGrid.map(reel => reel[0])  // Juego simple de 3 carretes y 1 fila
+        : reelsGrid;                       // Juego completo con matriz de símbolos
+      
+      console.log(`Game '${game.name}' (${game.gameId}) spin result:`, reels);
       
       // ======== PAYOUT CALCULATION ========
-      // Determine winnings based on the reels combination
+      // Determinar las ganancias basadas en la combinación de carretes
       let winAmount = 0;
-      const reelsCombination = reels.join('-');
+      let win = false;
+      let winLines: number[][] = [];
       
-      // Check for exact 3-symbol combinations first
-      if (payouts[reelsCombination as keyof typeof payouts]) {
-        winAmount = bet * payouts[reelsCombination as keyof typeof payouts];
-        console.log(`Exact match found: ${reelsCombination}, Payout: ${payouts[reelsCombination as keyof typeof payouts]}x`);
-      } 
-      // Check for special combinations
-      else if (game.name.toLowerCase().includes('egypt') && 
-              ((reels[0] === 'WILD' && reels[1] === 'BOOK' && reels[2] === 'WILD') || 
-               (reels[0] === 'BOOK' && reels[1] === 'WILD' && reels[2] === 'BOOK'))) {
-        const specialKey = reels.join('-') as keyof typeof payouts;
-        if (payouts[specialKey]) {
-          winAmount = bet * payouts[specialKey];
-          console.log(`Special combination found: ${specialKey}, Payout: ${payouts[specialKey]}x`);
+      // Lógica de cálculo de ganancias según el tipo de juego
+      if (Array.isArray(reels[0])) {
+        // Juego de matriz completa (varios carretes y filas)
+        // Implementar la lógica de líneas de pago (simplificada)
+        
+        // Verificar líneas horizontales
+        for (let row = 0; row < rowCount; row++) {
+          const symbols = reelsGrid.map(reel => reel[row]);
+          const firstSymbol = symbols[0];
+          
+          // Contar cuántos símbolos consecutivos coinciden con el primero
+          let count = 1;
+          for (let i = 1; i < symbols.length; i++) {
+            if (symbols[i] === firstSymbol || symbols[i] === 'WILD') {
+              count++;
+            } else {
+              break;
+            }
+          }
+          
+          // Verificar si hay suficientes símbolos iguales para un premio (mínimo 3)
+          if (count >= 3) {
+            const symbolKey = `${firstSymbol}-${firstSymbol}-${firstSymbol}`;
+            
+            // Buscar en la tabla de pagos
+            if (payTable[symbolKey]) {
+              const payoutValue = typeof payTable[symbolKey] === 'object' 
+                ? payTable[symbolKey][count] || 0
+                : payTable[symbolKey];
+                
+              const lineWin = bet * payoutValue;
+              winAmount += lineWin;
+              win = true;
+              
+              // Registrar la línea ganadora
+              winLines.push(Array(count).fill(row * reelCount + 1));
+              
+              console.log(`Win on row ${row+1}: ${count} ${firstSymbol} symbols, pays ${payoutValue}x`);
+            }
+          }
         }
-      }
-      // Check for partial match combinations (first two symbols match)
-      else if (reels[0] === reels[1]) {
-        const partialMatchKey = `${reels[0]}-${reels[0]}-any` as keyof typeof payouts;
-        if (payouts[partialMatchKey]) {
-          winAmount = bet * payouts[partialMatchKey];
-          console.log(`Partial match found: ${partialMatchKey}, Payout: ${payouts[partialMatchKey]}x`);
+      } else {
+        // Juego clásico de 3 carretes
+        const reelsCombination = reels.join('-');
+        
+        // Verificar combinaciones exactas primero
+        if (payTable[reelsCombination]) {
+          const payoutValue = typeof payTable[reelsCombination] === 'object'
+            ? payTable[reelsCombination][3] || payTable[reelsCombination]
+            : payTable[reelsCombination];
+            
+          winAmount = bet * payoutValue;
+          win = true;
+          console.log(`Exact match found: ${reelsCombination}, Payout: ${payoutValue}x`);
+        }
+        // Verificar combinaciones parciales (dos primeros símbolos iguales)
+        else if (reels[0] === reels[1]) {
+          const partialMatchKey = `${reels[0]}-${reels[0]}-any`;
+          if (payTable[partialMatchKey]) {
+            const payoutValue = typeof payTable[partialMatchKey] === 'object'
+              ? payTable[partialMatchKey][2] || payTable[partialMatchKey]
+              : payTable[partialMatchKey];
+              
+            winAmount = bet * payoutValue;
+            win = true;
+            console.log(`Partial match found: ${partialMatchKey}, Payout: ${payoutValue}x`);
+          }
         }
       }
       
@@ -3235,9 +3784,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         winnings: winAmount, // Using "winnings" to match Python implementation
         winAmount, // Keep existing field for backward compatibility
         balance: updatedUser.balance,
-        isWin: winAmount > 0,
+        isWin: win, // Usar la variable win en lugar de winAmount > 0
         sessionId: session?.id || null,
-        multiplier
+        multiplier,
+        winLines: winLines.length > 0 ? winLines : undefined, // Incluir líneas ganadoras si hay
+        gameConfig // Enviar también la configuración del juego para que el frontend pueda usarla
       });
       
     } catch (error) {
