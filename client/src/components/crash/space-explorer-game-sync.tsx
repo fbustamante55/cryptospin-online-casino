@@ -403,32 +403,36 @@ export function SpaceExplorerGameSync() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Área principal de juego */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-6">
               {/* Estado de misión y multiplicador */}
               <div className="flex justify-between mb-2">
-                <SciFiHud className="py-2 px-3">
-                  <MissionStatus 
-                    status={
-                      missionState === 'countdown' ? 'ready' :
-                      missionState === 'exploring' ? 'exploring' :
-                      missionState === 'returning' ? 'returning' :
-                      missionState === 'crashed' ? 'crashed' : 'ready'
-                    }
-                    countdown={countdown || undefined}
-                  />
-                </SciFiHud>
+                <div className="w-1/2">
+                  <SciFiHud className="py-3 px-4">
+                    <MissionStatus 
+                      status={
+                        missionState === 'countdown' ? 'ready' :
+                        missionState === 'exploring' ? 'exploring' :
+                        missionState === 'returning' ? 'returning' :
+                        missionState === 'crashed' ? 'crashed' : 'ready'
+                      }
+                      countdown={countdown || undefined}
+                    />
+                  </SciFiHud>
+                </div>
                 
-                <SciFiHud className="py-2 px-3">
-                  <Multiplier 
-                    value={currentMultiplier} 
-                    size="lg" 
-                    isGlowing={missionState === 'exploring' || missionState === 'returning'} 
-                  />
-                </SciFiHud>
+                <div className="w-2/5">
+                  <SciFiHud className="py-3 px-4">
+                    <Multiplier 
+                      value={currentMultiplier} 
+                      size="lg" 
+                      isGlowing={missionState === 'exploring' || missionState === 'returning'} 
+                    />
+                  </SciFiHud>
+                </div>
               </div>
               
-              {/* Área de visualización OVNI/juego */}
-              <div className="relative h-96 rounded-lg border border-blue-500/30 bg-black/40 overflow-hidden">
+              {/* Área de visualización OVNI/juego - Aumentando el tamaño */}
+              <div className="relative h-[400px] rounded-lg border border-blue-500/30 bg-black/60 overflow-hidden">
                 {/* Animación principal del OVNI */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <AnimatePresence mode="wait">
@@ -438,8 +442,8 @@ export function SpaceExplorerGameSync() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-center"
                       >
-                        <UfoSvg scale={1.5} className="mx-auto mb-4 animate-float" />
-                        <p className="text-blue-300 font-digital">Listo para explorar el universo</p>
+                        <UfoSvg scale={2} className="mx-auto mb-4 animate-float" />
+                        <p className="text-blue-300 font-digital text-lg">Listo para explorar el universo</p>
                       </motion.div>
                     )}
                     
@@ -449,11 +453,11 @@ export function SpaceExplorerGameSync() {
                         animate={{ scale: 1, opacity: 1 }}
                         className="text-center"
                       >
-                        <UfoSvg scale={1.5} className="mx-auto mb-2 animate-float" />
-                        <div className="font-digital text-amber-400 text-5xl font-bold text-shadow-lg">
+                        <UfoSvg scale={2} className="mx-auto mb-2 animate-float" />
+                        <div className="font-digital text-amber-400 text-6xl font-bold text-shadow-lg">
                           {countdown}
                         </div>
-                        <p className="text-blue-300 font-digital mt-1">Preparando para despegue</p>
+                        <p className="text-blue-300 font-digital mt-1 text-lg">Preparando para despegue</p>
                       </motion.div>
                     )}
                     
@@ -464,7 +468,7 @@ export function SpaceExplorerGameSync() {
                         className="text-center"
                       >
                         <UfoSvg 
-                          scale={1.5} 
+                          scale={2.5} 
                           className="mx-auto animate-rocket" 
                         />
                       </motion.div>
@@ -476,12 +480,12 @@ export function SpaceExplorerGameSync() {
                         animate={{ opacity: 1 }}
                         className="text-center"
                       >
-                        <UfoSvg scale={1.5} className="mx-auto animate-launch" />
+                        <UfoSvg scale={2} className="mx-auto animate-launch" />
                         <motion.div
                           initial={{ scale: 0, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ delay: 0.2 }}
-                          className="font-digital text-green-500 text-4xl font-bold mt-4 text-shadow-lg"
+                          className="font-digital text-green-500 text-5xl font-bold mt-4 text-shadow-lg"
                         >
                           +{winAmount.toLocaleString()}
                         </motion.div>
@@ -494,12 +498,12 @@ export function SpaceExplorerGameSync() {
                         animate={{ opacity: 1 }}
                         className="text-center"
                       >
-                        <UfoSvg scale={1.5} className="mx-auto animate-crash" isExploding />
+                        <UfoSvg scale={2.2} className="mx-auto animate-crash" isExploding />
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
-                          className="font-digital text-red-500 text-4xl font-bold mt-4 text-shadow-lg"
+                          className="font-digital text-red-500 text-5xl font-bold mt-6 text-shadow-lg"
                         >
                           CRASH @ {crashPoint.toFixed(2)}x
                         </motion.div>
@@ -509,17 +513,17 @@ export function SpaceExplorerGameSync() {
                 </div>
                 
                 {/* Línea de tiempo en la parte inferior */}
-                <div className="absolute bottom-2 left-2 right-2 flex justify-between text-xs text-gray-400">
+                <div className="absolute bottom-3 left-5 right-5 flex justify-between text-xs text-gray-400">
                   <span className="font-mono">T+0s</span>
                   <span className="font-mono">T+15s</span>
                   <span className="font-mono">T+30s</span>
                 </div>
               </div>
               
-              {/* Controles de juego */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Controles de juego - Mejorando la interfaz */}
+              <div className="grid grid-cols-2 gap-6 mt-4">
                 <div>
-                  <label className="block text-sm text-blue-300 mb-1 font-mono">CANTIDAD DE APUESTA</label>
+                  <label className="block text-sm text-blue-300 mb-2 font-mono font-bold">CANTIDAD DE APUESTA</label>
                   <div className="flex">
                     <Input 
                       type="number" 
@@ -527,19 +531,19 @@ export function SpaceExplorerGameSync() {
                       min={10}
                       max={user?.balance || 10000}
                       onChange={(e) => setBet(Math.max(10, Math.min(user?.balance || 10000, Number(e.target.value))))}
-                      className="bg-blue-950/30 border-blue-500/30 text-white"
+                      className="bg-blue-950/50 border-blue-500/50 text-white text-lg font-mono h-12"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm text-blue-300 mb-1 font-mono">AUTO CASHOUT</label>
+                  <label className="block text-sm text-blue-300 mb-2 font-mono font-bold">AUTO CASHOUT</label>
                   <div className="flex items-center gap-2">
                     <Checkbox 
                       checked={isAutoCashoutEnabled} 
                       onCheckedChange={(checked) => setIsAutoCashoutEnabled(!!checked)} 
                       id="auto-cashout"
-                      className="border-blue-500/50"
+                      className="border-blue-500/50 h-6 w-6"
                     />
                     <Input 
                       type="number" 
@@ -548,16 +552,16 @@ export function SpaceExplorerGameSync() {
                       step={0.01}
                       disabled={!isAutoCashoutEnabled}
                       onChange={(e) => setAutoCashout(Math.max(1.01, Number(e.target.value)))}
-                      className="bg-blue-950/30 border-blue-500/30 text-white"
+                      className="bg-blue-950/50 border-blue-500/50 text-white text-lg font-mono h-12"
                     />
                   </div>
                 </div>
               </div>
               
-              {/* Botones de acción */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Botones de acción - Más grandes y llamativos */}
+              <div className="grid grid-cols-2 gap-6 mt-2">
                 <Button
-                  variant={canBet ? "default" : "secondary"}
+                  variant="default"
                   disabled={!canBet || betMutation.isPending}
                   onClick={() => {
                     // Simular apuesta para demo (ya que tenemos error 401)
@@ -565,7 +569,6 @@ export function SpaceExplorerGameSync() {
                     toast({
                       title: "Apuesta colocada",
                       description: `Has apostado ${bet} en esta misión espacial.`,
-                      variant: "default",
                     });
                     
                     // Intentar hacer la apuesta real
@@ -574,9 +577,13 @@ export function SpaceExplorerGameSync() {
                     // Establecer estado de apuesta para la demostración
                     hasPlacedBetInCurrentGame.current = true;
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-14 text-lg"
+                  className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
+                    !canBet || betMutation.isPending 
+                      ? "bg-blue-800/70 text-blue-300/80" 
+                      : "bg-blue-600 hover:bg-blue-500 text-white hover:shadow-blue-500/50"
+                  }`}
                 >
-                  {betMutation.isPending ? "Apostando..." : "APOSTAR"}
+                  {betMutation.isPending ? "APOSTANDO..." : "APOSTAR"}
                 </Button>
                 
                 <Button
@@ -595,7 +602,6 @@ export function SpaceExplorerGameSync() {
                     toast({
                       title: "¡Cashout exitoso!",
                       description: `Has recogido ${simulatedWin} (${currentMultiplier.toFixed(2)}x)`,
-                      variant: "success",
                     });
                     
                     // Intentar hacer el cashout real
@@ -605,10 +611,14 @@ export function SpaceExplorerGameSync() {
                     setHasReturned(true);
                     setWinAmount(simulatedWin);
                   }}
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold h-14 text-lg"
+                  className={`w-full h-16 text-xl font-bold tracking-wide shadow-lg rounded-md transition-all ${
+                    missionState !== 'exploring' || hasReturned || cashoutMutation.isPending || explorationTime < 5
+                      ? "bg-green-800/50 text-green-300/80" 
+                      : "bg-green-600 hover:bg-green-500 text-white hover:shadow-green-500/50"
+                  }`}
                 >
                   {cashoutMutation.isPending 
-                    ? "Recogiendo..." 
+                    ? "RECOGIENDO..." 
                     : hasReturned 
                       ? "RECOGIDO"
                       : explorationTime < 5
@@ -620,29 +630,29 @@ export function SpaceExplorerGameSync() {
             </div>
             
             {/* Panel lateral con información */}
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Historial de misiones */}
-              <Card className="bg-blue-950/30 border-blue-500/30">
-                <CardHeader className="py-2 px-4 border-b border-blue-500/30">
-                  <CardTitle className="text-sm font-heading text-blue-400">HISTORIAL DE MISIONES</CardTitle>
+              <Card className="bg-blue-950/60 border-blue-500/50 shadow-lg shadow-blue-900/20">
+                <CardHeader className="py-3 px-4 border-b border-blue-500/40">
+                  <CardTitle className="text-sm font-heading text-blue-300 uppercase tracking-wider">HISTORIAL DE MISIONES</CardTitle>
                 </CardHeader>
-                <CardContent className="p-2 max-h-32 overflow-auto">
+                <CardContent className="p-2 max-h-40 overflow-auto">
                   <MissionHistory missions={recentMissions} />
                 </CardContent>
               </Card>
               
               {/* Jugadores activos */}
-              <Card className="bg-blue-950/30 border-blue-500/30">
-                <CardHeader className="py-2 px-4 border-b border-blue-500/30">
-                  <CardTitle className="text-sm font-heading text-blue-400">EXPLORADORES ACTIVOS</CardTitle>
+              <Card className="bg-blue-950/60 border-blue-500/50 shadow-lg shadow-blue-900/20">
+                <CardHeader className="py-3 px-4 border-b border-blue-500/40">
+                  <CardTitle className="text-sm font-heading text-blue-300 uppercase tracking-wider">EXPLORADORES ACTIVOS</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 max-h-48 overflow-auto">
                   <ul className="divide-y divide-blue-500/20">
                     {activePlayers.map((player, index) => (
-                      <li key={index} className="px-4 py-2 flex justify-between items-center text-sm">
+                      <li key={index} className="px-4 py-3 flex justify-between items-center text-sm hover:bg-blue-900/20">
                         <span className="font-mono text-gray-300">{player.name}</span>
                         <div className="flex flex-col items-end">
-                          <span className="font-mono">{player.bet.toLocaleString()}</span>
+                          <span className="font-mono font-semibold">{player.bet.toLocaleString()}</span>
                           {player.cashoutMultiplier && (
                             <span className={`font-mono text-xs ${getStatusClass(player.status)}`}>
                               {player.status === 'cashed_out' ? '✓' : '✗'} {player.cashoutMultiplier.toFixed(2)}x
@@ -656,10 +666,10 @@ export function SpaceExplorerGameSync() {
               </Card>
               
               {/* Verificador de fairness */}
-              <Card className="bg-blue-950/30 border-blue-500/30">
-                <CardHeader className="py-2 px-4 border-b border-blue-500/30">
-                  <CardTitle className="text-sm font-heading text-blue-400 flex items-center">
-                    <LifeBuoy className="h-4 w-4 mr-1" />
+              <Card className="bg-blue-950/60 border-blue-500/50 shadow-lg shadow-blue-900/20">
+                <CardHeader className="py-3 px-4 border-b border-blue-500/40">
+                  <CardTitle className="text-sm font-heading text-blue-300 uppercase tracking-wider flex items-center">
+                    <LifeBuoy className="h-4 w-4 mr-2" />
                     VERIFICADOR FAIRNESS
                   </CardTitle>
                 </CardHeader>
@@ -672,9 +682,9 @@ export function SpaceExplorerGameSync() {
               </Card>
               
               {/* Advertencias */}
-              <div className="p-3 rounded-lg border border-yellow-500/30 bg-yellow-950/20">
+              <div className="p-4 rounded-lg border border-yellow-500/40 bg-yellow-950/40 shadow-lg shadow-yellow-900/10">
                 <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 text-yellow-500 mr-3 flex-shrink-0 mt-0.5" />
                   <p className="text-yellow-300 text-xs">
                     Juega de manera responsable. El juego SPACE EXPLORER implica riesgo de pérdida.
                     Nunca apuestes más de lo que puedes permitirte perder.
