@@ -179,10 +179,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Sidebar Header with Logo */}
       <div className="px-4 py-3 flex items-center justify-between border-b border-[#1c2b3a]">
         {!sidebarCollapsed && (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-white">CryptoSpin</h1>
-            </div>
+          <div className="flex items-center justify-end w-full">
             <button 
               onClick={() => setSidebarCollapsed(true)}
               className="text-gray-400 hover:text-white p-1"
