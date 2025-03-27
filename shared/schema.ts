@@ -71,18 +71,22 @@ export const gameHistory = pgTable("game_history", {
 export const slotGames = pgTable("slot_games", {
   id: serial("id").primaryKey(),
   gameId: text("game_id").notNull().unique(), // Unique identifier for the slot game
-  provider: text("provider").notNull(), // AGT, Novomatic, NetEnt, etc.
+  provider: text("provider").notNull(), // BetSoft, NetEnt, CryptoSpin, etc.
   name: text("name").notNull(), // Display name
   description: text("description"),
   thumbnail: text("thumbnail"), // Path to thumbnail image
   paylines: integer("paylines").notNull(), // Number of paylines
   reels: integer("reels").notNull(), // Number of reels
+  rows: integer("rows").default(3), // Number of rows, default is 3
   minBet: integer("min_bet").notNull(),
   maxBet: integer("max_bet").notNull(),
   rtp: doublePrecision("rtp").notNull(), // Return to player percentage
   volatility: text("volatility").notNull(), // low, medium, high
   features: jsonb("features"), // Array of special features like free spins, wilds, etc.
   symbols: jsonb("symbols"), // Information about symbols and payouts
+  symbolWeights: jsonb("symbol_weights"), // Weights for each symbol (rarity)
+  payTable: jsonb("pay_table"), // Payout information
+  theme: jsonb("theme"), // Visual theme information 
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").notNull().defaultNow()
 });
@@ -229,12 +233,16 @@ export const insertSlotGameSchema = createInsertSchema(slotGames).pick({
   thumbnail: true,
   paylines: true,
   reels: true,
+  rows: true,
   minBet: true,
   maxBet: true,
   rtp: true,
   volatility: true,
   features: true,
   symbols: true,
+  symbolWeights: true,
+  payTable: true,
+  theme: true,
   isActive: true,
 });
 

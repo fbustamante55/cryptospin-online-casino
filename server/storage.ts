@@ -624,6 +624,10 @@ export class MemStorage implements IStorage {
       ...game,
       id: 0, // Auto-increment field, but we use gameId as primary identifier
       isActive: game.isActive !== undefined ? game.isActive : true,
+      rows: game.rows || 3, // Default to 3 rows if not specified
+      symbolWeights: game.symbolWeights || {}, // Default empty object
+      payTable: game.payTable || {}, // Default empty object
+      theme: game.theme || {}, // Default empty object
       createdAt: now
     };
     

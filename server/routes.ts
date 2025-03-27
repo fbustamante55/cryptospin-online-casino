@@ -3053,6 +3053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/slots/config/:id", async (req, res) => {
     try {
       const gameId = req.params.id;
+      console.log("Fetching slot game configuration for:", gameId);
       
       // Find the slot game in the database
       const game = await storage.getSlotGame(gameId);
@@ -3061,32 +3062,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Slot game not found" });
       }
       
-      // Definir la configuración básica del juego
-      const baseConfig = {
-        name: game.name,
-        gameId: game.gameId,
-        reels: game.reels,
-        rows: 3, // La mayoría de las tragamonedas tienen 3 filas
-        paylines: game.paylines,
-        minBet: game.minBet,
-        maxBet: game.maxBet,
-        provider: game.provider,
-        rtp: game.rtp,
-        volatility: game.volatility,
-        description: game.description,
-        features: game.features || [],
+      console.log("Game configuration loaded successfully:", game.name);
+      
+      // Extract symbols from the game data
+      let gameSymbols: string[] = [];
+      let symbolWeights: Record<string, number> = {};
+      let payTable: Record<string, any> = {};
+      let symbolColors: Record<string, string> = {};
+      let specialSymbols: Record<string, any> = {};
+      let bonusFeatures: any[] = [];
+      
+      // Check if we have symbols defined in the database
+      if (game.symbols && typeof game.symbols === 'object') {
+        // Extract symbols from the symbols object keys
+        gameSymbols = Object.keys(game.symbols as Record<string, any>);
+        
+        // Process the symbols information into payTable structure
+        for (const symbol of gameSymbols) {
+          const symbolData = (game.symbols as Record<string, any>)[symbol];
+          
+          // Check if the symbol data contains payout information
+          if (typeof symbolData === 'object' && (symbolData[3] || symbolData[4] || symbolData[5])) {
+            payTable[symbol] = symbolData;
+          } 
+          // Add any special symbol properties
+          if (typeof symbolData === 'object' && symbolData.type) {
+            specialSymbols[symbol] = symbolData;
+          }
+        }
+      }
+      
+      // If there's no explicit payTable but we have one defined separately
+      if (Object.keys(payTable).length === 0 && game.payTable && typeof game.payTable === 'object') {
+        payTable = game.payTable as Record<string, any>;
+      }
+      
+      // Extract symbol weights if available
+      if (game.symbolWeights && typeof game.symbolWeights === 'object') {
+        symbolWeights = game.symbolWeights as Record<string, number>;
+      } else {
+        // Generate default weights if not available
+        const baseWeight = 20;
+        gameSymbols.forEach((symbol, index) => {
+          // Create a distribution where high-value symbols (at the beginning) are rarer
+          // First symbols (index 0, 1) are usually high-value with lower probability
+          const weight = baseWeight + (index * 2);
+          symbolWeights[symbol] = weight;
+        });
+      }
+      
+      // Generate default symbol colors if not available
+      const defaultColors = [
+        '#d4af37', // Gold
+        '#c0c0c0', // Silver
+        '#cd7f32', // Bronze
+        '#ff0000', // Red
+        '#008000', // Green
+        '#0000ff', // Blue
+        '#800080', // Purple
+        '#ffa500', // Orange
+        '#ffff00', // Yellow
+        '#8e4585', // Dark Purple
+        '#f0f8ff', // Alice Blue
+        '#e9967a', // Dark Salmon
+        '#00ced1', // Dark Turquoise
+        '#ff00ff', // Magenta
+        '#8b008b', // Dark Magenta
+        '#2f4f4f'  // Dark Slate Gray
+      ];
+      
+      // Generate colorful symbol colors if none are defined
+      gameSymbols.forEach((symbol, index) => {
+        symbolColors[symbol] = defaultColors[index % defaultColors.length];
+      });
+      
+      // Extract bonus features if available
+      if (game.features && Array.isArray(game.features)) {
+        bonusFeatures = game.features;
+      }
+      
+      // Default theme configuration based on game type/provider
+      let themeConfig = {
+        background: '#121212', // Dark theme by default
+        highlight: '#d4af37', // Gold
+        reelBg: '#1e1e1e', // Dark gray
+        buttonColor: '#d4af37', // Gold
+        buttonTextColor: '#000000', // Black
+        textColor: '#ffffff', // White
       };
       
-      // Configuraciones específicas según el tipo de juego
-      let config = { ...baseConfig };
+      // Use theme from database if available
+      if (game.theme && typeof game.theme === 'object') {
+        themeConfig = {...themeConfig, ...game.theme as Record<string, string>};
+      } else {
+        // Set theme based on provider if not defined
+        switch(game.provider.toLowerCase()) {
+          case 'betsoft':
+            themeConfig = {
+              background: '#0a0033', // Very dark blue
+              highlight: '#9966cc', // Amethyst purple
+              reelBg: '#1a0066', // Dark blue
+              buttonColor: '#9966cc', // Purple
+              buttonTextColor: '#ffffff', // White
+              textColor: '#ffffff' // White
+            };
+            break;
+          case 'netent':
+            themeConfig = {
+              background: '#003300', // Dark green
+              highlight: '#00cc00', // Bright green
+              reelBg: '#004d00', // Darker green
+              buttonColor: '#00cc00', // Bright green
+              buttonTextColor: '#ffffff', // White
+              textColor: '#ffffff' // White
+            };
+            break;
+          case 'agt':
+            themeConfig = {
+              background: '#4d2600', // Dark amber
+              highlight: '#ffbf00', // Amber
+              reelBg: '#663300', // Brown
+              buttonColor: '#ffbf00', // Amber
+              buttonTextColor: '#000000', // Black
+              textColor: '#ffffff' // White
+            };
+            break;
+          case 'inhouse':
+            themeConfig = {
+              background: '#003333', // Dark teal
+              highlight: '#00ffff', // Cyan
+              reelBg: '#004d4d', // Darker teal
+              buttonColor: '#00ffff', // Cyan
+              buttonTextColor: '#000000', // Black
+              textColor: '#ffffff' // White
+            };
+            break;
+        }
+      }
       
-      switch (gameId) {
-        case 'classic3reel': {
-          // Configuración para el juego clásico de 3 rodillos
-          config = {
-            ...baseConfig,
-            symbols: ['7', 'BAR', '2xBAR', '3xBAR', 'CHERRY', 'LEMON', 'ORANGE', 'PLUM'],
-            symbolColors: {
+      // Fallback to predefined game configurations if data in the database is insufficient
+      if (gameSymbols.length === 0) {
+        console.log("No symbols found in database, using predefined configuration");
+        
+        // Set default symbols based on gameId
+        switch(gameId) {
+          case 'classic3reel':
+            gameSymbols = ['7', 'BAR', '2xBAR', '3xBAR', 'CHERRY', 'LEMON', 'ORANGE', 'PLUM'];
+            symbolColors = {
               '7': '#d4af37', // Gold
               'BAR': '#c0c0c0', // Silver
               '2xBAR': '#cd7f32', // Bronze
@@ -3095,8 +3217,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'LEMON': '#ffff00', // Yellow
               'ORANGE': '#ffa500', // Orange
               'PLUM': '#8e4585', // Purple
-            },
-            payTable: {
+            };
+            payTable = {
               '7-7-7': 150,
               'BAR-BAR-BAR': 50,
               '2xBAR-2xBAR-2xBAR': 20,
@@ -3107,24 +3229,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'PLUM-PLUM-PLUM': 4,
               'CHERRY-CHERRY-any': 2,
               'CHERRY-any-any': 1,
-            },
-            theme: {
+            };
+            themeConfig = {
               background: '#121212',
               highlight: '#d4af37',
               reelBg: '#1e1e1e',
               buttonColor: '#d4af37',
               buttonTextColor: '#000000',
               textColor: '#ffffff',
-            }
-          };
-          break;
-        }
-        case 'bookofegypt': {
-          // Configuración para el juego Book of Egypt
-          config = {
-            ...baseConfig,
-            symbols: ['BOOK', 'PHARAOH', 'ANKH', 'SCARAB', 'EYE', 'A', 'K', 'Q', 'J', '10'],
-            symbolColors: {
+            };
+            break;
+            
+          case 'bookofegypt':
+            gameSymbols = ['BOOK', 'PHARAOH', 'ANKH', 'SCARAB', 'EYE', 'A', 'K', 'Q', 'J', '10'];
+            symbolColors = {
               'BOOK': '#d4af37', // Gold
               'PHARAOH': '#c19a6b', // Desert tan
               'ANKH': '#add8e6', // Light blue
@@ -3135,20 +3253,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'Q': '#6a5acd', // Slate blue
               'J': '#ff69b4', // Hot pink
               '10': '#ffff00', // Yellow
-            },
-            payTable: {
-              'BOOK-BOOK-BOOK': { 3: 25, 4: 100, 5: 500 },
-              'PHARAOH-PHARAOH-PHARAOH': { 3: 20, 4: 80, 5: 400 },
-              'ANKH-ANKH-ANKH': { 3: 15, 4: 60, 5: 300 },
-              'SCARAB-SCARAB-SCARAB': { 3: 10, 4: 40, 5: 200 },
-              'EYE-EYE-EYE': { 3: 8, 4: 30, 5: 150 },
-              'A-A-A': { 3: 5, 4: 15, 5: 100 },
-              'K-K-K': { 3: 5, 4: 15, 5: 100 },
-              'Q-Q-Q': { 3: 2, 4: 10, 5: 50 },
-              'J-J-J': { 3: 2, 4: 10, 5: 50 },
-              '10-10-10': { 3: 2, 4: 10, 5: 50 },
-            },
-            specialSymbols: {
+            };
+            payTable = {
+              'BOOK': { 3: 25, 4: 100, 5: 500 },
+              'PHARAOH': { 3: 20, 4: 80, 5: 400 },
+              'ANKH': { 3: 15, 4: 60, 5: 300 },
+              'SCARAB': { 3: 10, 4: 40, 5: 200 },
+              'EYE': { 3: 8, 4: 30, 5: 150 },
+              'A': { 3: 5, 4: 15, 5: 100 },
+              'K': { 3: 5, 4: 15, 5: 100 },
+              'Q': { 3: 2, 4: 10, 5: 50 },
+              'J': { 3: 2, 4: 10, 5: 50 },
+              '10': { 3: 2, 4: 10, 5: 50 },
+            };
+            specialSymbols = {
               'BOOK': {
                 type: 'scatter',
                 description: 'Book symbols trigger 10 free spins when 3 or more appear. Acts as wild and substitutes for all symbols.',
@@ -3157,222 +3275,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 type: 'expandingWild',
                 description: 'During free spins, Pharaoh symbol expands to cover the entire reel when appearing.',
               },
-            },
-            bonusFeatures: [
+            };
+            bonusFeatures = [
               {
                 name: 'Free Spins',
                 description: 'Get 3 or more Book symbols to trigger 10 free spins. A special expanding symbol is randomly selected for the duration of free spins.',
                 trigger: 'BOOK-BOOK-BOOK',
-              },
-              {
-                name: 'Gamble Feature',
-                description: 'After any win, you can gamble your winnings by guessing the color of the next card. Correct guess doubles your win, wrong guess loses your win.',
-              },
-            ],
-            theme: {
+              }
+            ];
+            themeConfig = {
               background: '#2d1b00',
               highlight: '#ffd700',
               reelBg: '#3d2b10',
               buttonColor: '#ffd700',
               buttonTextColor: '#000000',
               textColor: '#ffd700',
-            }
-          };
-          break;
-        }
-        case 'fruitymultipliers': {
-          // Configuración para el juego Fruity Multipliers
-          config = {
-            ...baseConfig,
-            symbols: ['WILD', 'SEVEN', 'BELL', 'WATERMELON', 'GRAPES', 'ORANGE', 'LEMON', 'CHERRY'],
-            symbolColors: {
-              'WILD': '#ff0000', // Red
-              'SEVEN': '#d4af37', // Gold
-              'BELL': '#ffd700', // Yellow gold
-              'WATERMELON': '#228B22', // Forest green
-              'GRAPES': '#800080', // Purple
-              'ORANGE': '#ffa500', // Orange
-              'LEMON': '#ffff00', // Yellow
-              'CHERRY': '#ff0000', // Red
-            },
-            payTable: {
-              'WILD-WILD-WILD': { 3: 50, 4: 200, 5: 1000 },
-              'SEVEN-SEVEN-SEVEN': { 3: 30, 4: 120, 5: 600 },
-              'BELL-BELL-BELL': { 3: 20, 4: 80, 5: 400 },
-              'WATERMELON-WATERMELON-WATERMELON': { 3: 15, 4: 60, 5: 300 },
-              'GRAPES-GRAPES-GRAPES': { 3: 10, 4: 40, 5: 200 },
-              'ORANGE-ORANGE-ORANGE': { 3: 5, 4: 20, 5: 100 },
-              'LEMON-LEMON-LEMON': { 3: 3, 4: 15, 5: 75 },
-              'CHERRY-CHERRY-CHERRY': { 3: 2, 4: 10, 5: 50 },
-            },
-            specialSymbols: {
-              'WILD': {
-                type: 'wild',
-                description: 'Substitutes for all symbols and adds a 2x multiplier to any win it contributes to.',
-              },
-            },
-            multipliers: {
-              basic: 1,
-              wild: 2,
-              multiple_wilds: [2, 4, 8], // 1 wild = 2x, 2 wilds = 4x, 3 wilds = 8x
-            },
-            theme: {
-              background: '#006400', // Dark green
-              highlight: '#ffd700', // Gold
-              reelBg: '#004d00', // Darker green
-              buttonColor: '#ff4500', // Orange-red
-              buttonTextColor: '#ffffff',
-              textColor: '#ffffff',
-            }
-          };
-          break;
-        }
-        case 'megafortune': {
-          // Configuración para el juego Mega Fortune
-          config = {
-            ...baseConfig,
-            symbols: ['MEGA', 'MAJOR', 'MINOR', 'YACHT', 'LIMOUSINE', 'CHAMPAGNE', 'RING', 'WATCH', 'DOLLAR', 'A', 'K', 'Q', 'J', '10'],
-            symbolColors: {
-              'MEGA': '#d4af37', // Gold
-              'MAJOR': '#c0c0c0', // Silver
-              'MINOR': '#cd7f32', // Bronze
-              'YACHT': '#add8e6', // Light blue
-              'LIMOUSINE': '#000000', // Black
-              'CHAMPAGNE': '#f8f8ff', // White
-              'RING': '#ffd700', // Gold
-              'WATCH': '#808080', // Gray
-              'DOLLAR': '#006400', // Dark green
-              'A': '#ff0000', // Red
-              'K': '#ff0000', // Red
-              'Q': '#ff0000', // Red
-              'J': '#ff0000', // Red
-              '10': '#ff0000', // Red
-            },
-            payTable: {
-              'MEGA-MEGA-MEGA': { 3: 100, 4: 1000, 5: 10000 },
-              'MAJOR-MAJOR-MAJOR': { 3: 50, 4: 500, 5: 5000 },
-              'MINOR-MINOR-MINOR': { 3: 25, 4: 250, 5: 2500 },
-              'YACHT-YACHT-YACHT': { 3: 20, 4: 100, 5: 500 },
-              'LIMOUSINE-LIMOUSINE-LIMOUSINE': { 3: 15, 4: 75, 5: 350 },
-              'CHAMPAGNE-CHAMPAGNE-CHAMPAGNE': { 3: 10, 4: 50, 5: 250 },
-              'RING-RING-RING': { 3: 7, 4: 35, 5: 200 },
-              'WATCH-WATCH-WATCH': { 3: 5, 4: 25, 5: 150 },
-              'DOLLAR-DOLLAR-DOLLAR': { 3: 3, 4: 15, 5: 100 },
-              'A-A-A': { 3: 2, 4: 10, 5: 50 },
-              'K-K-K': { 3: 2, 4: 10, 5: 50 },
-              'Q-Q-Q': { 3: 1, 4: 5, 5: 25 },
-              'J-J-J': { 3: 1, 4: 5, 5: 25 },
-              '10-10-10': { 3: 1, 4: 5, 5: 25 },
-            },
-            specialSymbols: {
-              'MEGA': {
-                type: 'jackpot',
-                description: 'Three or more MEGA symbols trigger the Mega Jackpot bonus wheel.',
-              },
-              'MAJOR': {
-                type: 'jackpot',
-                description: 'Three or more MAJOR symbols trigger the Major Jackpot bonus wheel.',
-              },
-              'MINOR': {
-                type: 'jackpot',
-                description: 'Three or more MINOR symbols trigger the Minor Jackpot bonus wheel.',
-              },
-              'DOLLAR': {
-                type: 'wild',
-                description: 'Substitutes for all symbols except jackpot symbols.',
-              },
-            },
-            bonusFeatures: [
-              {
-                name: 'Jackpot Wheel',
-                description: 'Spin the wheel to win one of three progressive jackpots: Mega, Major, or Minor.',
-                trigger: 'Three or more jackpot symbols.',
-              },
-              {
-                name: 'Free Spins',
-                description: '3 or more DOLLAR symbols award 10, 15, or 20 free spins with a 3x multiplier.',
-                trigger: 'DOLLAR-DOLLAR-DOLLAR',
-              },
-            ],
-            jackpots: {
-              'MEGA': 'Progressive starting at 100,000',
-              'MAJOR': 'Progressive starting at 10,000',
-              'MINOR': 'Progressive starting at 1,000',
-            },
-            theme: {
-              background: '#00008b', // Dark blue
-              highlight: '#ffd700', // Gold
-              reelBg: '#000080', // Navy blue
-              buttonColor: '#ffd700', // Gold
-              buttonTextColor: '#000000',
-              textColor: '#ffffff',
-            }
-          };
-          break;
-        }
-        case 'jewelcascade': {
-          // Configuración para el juego Jewel Cascade
-          config = {
-            ...baseConfig,
-            symbols: ['WILD', 'DIAMOND', 'RUBY', 'EMERALD', 'SAPPHIRE', 'AMETHYST', 'TOPAZ', 'PEARL'],
-            symbolColors: {
-              'WILD': '#ff0000', // Red
-              'DIAMOND': '#b9f2ff', // Diamond blue
-              'RUBY': '#e0115f', // Ruby red
-              'EMERALD': '#50c878', // Emerald green
-              'SAPPHIRE': '#0f52ba', // Sapphire blue
-              'AMETHYST': '#9966cc', // Amethyst purple
-              'TOPAZ': '#ffc87c', // Topaz
-              'PEARL': '#f5f5f5', // Pearl white
-            },
-            payTable: {
-              'WILD-WILD-WILD': { 3: 50, 4: 200, 5: 1000 },
-              'DIAMOND-DIAMOND-DIAMOND': { 3: 30, 4: 150, 5: 750 },
-              'RUBY-RUBY-RUBY': { 3: 25, 4: 125, 5: 625 },
-              'EMERALD-EMERALD-EMERALD': { 3: 20, 4: 100, 5: 500 },
-              'SAPPHIRE-SAPPHIRE-SAPPHIRE': { 3: 15, 4: 75, 5: 375 },
-              'AMETHYST-AMETHYST-AMETHYST': { 3: 10, 4: 50, 5: 250 },
-              'TOPAZ-TOPAZ-TOPAZ': { 3: 5, 4: 25, 5: 125 },
-              'PEARL-PEARL-PEARL': { 3: 3, 4: 15, 5: 75 },
-            },
-            specialSymbols: {
-              'WILD': {
-                type: 'wild',
-                description: 'Substitutes for all symbols.',
-              },
-            },
-            bonusFeatures: [
-              {
-                name: 'Cascading Reels',
-                description: 'Winning combinations disappear, allowing new symbols to fall in, potentially creating new wins in a chain reaction.',
-              },
-              {
-                name: 'Multiplier Trail',
-                description: 'Each consecutive cascade increases the win multiplier: 1x, 2x, 3x, 5x, up to 10x maximum.',
-              },
-              {
-                name: 'Free Falls',
-                description: 'Collect 3 or more DIAMOND symbols to trigger 10 Free Falls (free spins) with enhanced multipliers.',
-                trigger: 'DIAMOND-DIAMOND-DIAMOND',
-              },
-            ],
-            theme: {
-              background: '#2e0854', // Deep purple
-              highlight: '#ffd700', // Gold
-              reelBg: '#3a0e6a', // Lighter purple
-              buttonColor: '#e0115f', // Ruby red
-              buttonTextColor: '#ffffff',
-              textColor: '#ffffff',
-            }
-          };
-          break;
-        }
-        default:
-          // Configuración genérica para cualquier otro juego
-          config = {
-            ...baseConfig,
-            symbols: ['WILD', 'SCATTER', 'HIGH1', 'HIGH2', 'HIGH3', 'HIGH4', 'LOW1', 'LOW2', 'LOW3', 'LOW4'],
-            symbolColors: {
+            };
+            break;
+            
+          // Default for other games
+          default:
+            gameSymbols = ['WILD', 'SCATTER', 'HIGH1', 'HIGH2', 'HIGH3', 'HIGH4', 'LOW1', 'LOW2', 'LOW3', 'LOW4'];
+            symbolColors = {
               'WILD': '#ffd700', // Gold
               'SCATTER': '#ff0000', // Red
               'HIGH1': '#9370db', // Medium purple
@@ -3383,32 +3307,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'LOW2': '#00ced1', // Dark turquoise
               'LOW3': '#ffff00', // Yellow
               'LOW4': '#32cd32', // Lime green
-            },
-            payTable: {
-              'WILD-WILD-WILD': { 3: 50, 4: 200, 5: 1000 },
-              'SCATTER-SCATTER-SCATTER': { 3: 5, 4: 20, 5: 100 },
-              'HIGH1-HIGH1-HIGH1': { 3: 15, 4: 50, 5: 200 },
-              'HIGH2-HIGH2-HIGH2': { 3: 10, 4: 40, 5: 150 },
-              'HIGH3-HIGH3-HIGH3': { 3: 8, 4: 30, 5: 125 },
-              'HIGH4-HIGH4-HIGH4': { 3: 6, 4: 25, 5: 100 },
-              'LOW1-LOW1-LOW1': { 3: 4, 4: 15, 5: 75 },
-              'LOW2-LOW2-LOW2': { 3: 3, 4: 10, 5: 50 },
-              'LOW3-LOW3-LOW3': { 3: 2, 4: 8, 5: 40 },
-              'LOW4-LOW4-LOW4': { 3: 1, 4: 5, 5: 25 },
-            },
-            theme: {
+            };
+            payTable = {
+              'WILD': { 3: 50, 4: 200, 5: 1000 },
+              'SCATTER': { 3: 5, 4: 20, 5: 100 },
+              'HIGH1': { 3: 15, 4: 50, 5: 200 },
+              'HIGH2': { 3: 10, 4: 40, 5: 150 },
+              'HIGH3': { 3: 8, 4: 30, 5: 125 },
+              'HIGH4': { 3: 6, 4: 25, 5: 100 },
+              'LOW1': { 3: 4, 4: 15, 5: 75 },
+              'LOW2': { 3: 3, 4: 10, 5: 50 },
+              'LOW3': { 3: 2, 4: 8, 5: 40 },
+              'LOW4': { 3: 1, 4: 5, 5: 25 },
+            };
+            specialSymbols = {
+              'WILD': {
+                type: 'wild',
+                description: 'Substitutes for all symbols except scatter.',
+              },
+              'SCATTER': {
+                type: 'scatter',
+                description: 'Pays in any position. 3 or more trigger free spins.',
+              }
+            };
+            bonusFeatures = [
+              {
+                name: 'Free Spins',
+                description: '3 or more SCATTER symbols trigger 10 free spins with all wins multiplied by 3.',
+                trigger: 'SCATTER-SCATTER-SCATTER',
+              }
+            ];
+            themeConfig = {
               background: '#1a1a2e', // Dark blue
               highlight: '#ffd700', // Gold
               reelBg: '#16213e', // Darker blue
               buttonColor: '#ff4500', // Orange red
               buttonTextColor: '#ffffff',
               textColor: '#ffffff',
-            }
-          };
-          break;
+            };
+            break;
+        }
       }
       
-      res.json({ config });
+      // Build the complete configuration object
+      const config = {
+        name: game.name,
+        gameId: game.gameId,
+        reels: game.reels,
+        rows: game.rows || 3,
+        paylines: game.paylines,
+        minBet: game.minBet,
+        maxBet: game.maxBet,
+        provider: game.provider,
+        rtp: game.rtp,
+        volatility: game.volatility,
+        description: game.description,
+        features: bonusFeatures,
+        symbols: gameSymbols,
+        symbolColors: symbolColors,
+        symbolWeights: symbolWeights,
+        payTable: payTable,
+        specialSymbols: specialSymbols,
+        theme: themeConfig
+      };
+      
+      // Log the symbols and pay table for debugging
+      console.log(`Slot game '${gameId}' configuration ready with ${gameSymbols.length} symbols and ${Object.keys(payTable).length} paytable entries`);
+      
+      return res.json({ config });
     } catch (error) {
       console.error("Error fetching slot configuration:", error);
       res.status(500).json({ message: "Error fetching slot configuration" });
