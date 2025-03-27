@@ -24,7 +24,11 @@ import {
   HeartHandshake,
   Headset,
   BookOpenText,
-  Calendar
+  Calendar,
+  Trophy,
+  Globe,
+  HelpCircle,
+  ChevronDown
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { SidebarLanguageSwitcher } from "./sidebar-language-switcher";
@@ -43,6 +47,7 @@ export function Sidebar({ className }: SidebarProps) {
   const { t } = useTranslation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [liveEventsCount, setLiveEventsCount] = useState(0);
+  const [totalBets, setTotalBets] = useState("8,065,415,781");
   
   // Determinar el tab activo basado en la URL actual
   const [activeTab, setActiveTab] = useState(
@@ -84,314 +89,157 @@ export function Sidebar({ className }: SidebarProps) {
     }
   }, [eventsData]);
 
-  const isActive = (path: string) => location === path;
-
-  const favoriteItems = [
-    { name: t('sidebar.favorites'), path: "/favorites", icon: <Star className="h-4 w-4" /> },
-    { name: t('sidebar.recent'), path: "/recent", icon: <Clock className="h-4 w-4" /> },
-    { name: t('sidebar.challenges'), icon: <Target className="h-4 w-4" /> },
-    { name: t('sidebar.myBets'), icon: <BarChart className="h-4 w-4" /> },
-  ];
-
-  const gameItems = [
-    { name: t('sidebar.cryptoSpinOriginals'), path: "/crash", icon: <Home className="h-4 w-4" /> },
-    { name: t('sidebar.cryptoSpinExclusives'), path: "/crash", icon: <Star className="h-4 w-4" /> },
-    { name: t('sidebar.crash'), path: "/crash", icon: <TrendingUp className="h-4 w-4" /> },
-    { name: t('sidebar.liveCasino'), path: "/crash", icon: <PlayCircle className="h-4 w-4" /> },
-    { name: t('sidebar.tvShows'), path: "/crash", icon: <Tv className="h-4 w-4" /> },
-    { name: t('sidebar.releases'), path: "/crash", icon: <Rocket className="h-4 w-4" /> },
-    { name: t('sidebar.bonusBuy'), path: "/wallet", icon: <DollarSign className="h-4 w-4" /> },
-    { name: t('sidebar.enhancedRTP'), path: "/crash", icon: <Zap className="h-4 w-4" /> },
-  ];
-  
-  // Elementos para la sección de deportes
-  // Función para filtrar eventos deportivos
-  const [, setLocation] = useLocation();
-
-  const handleSportsFilter = (filter: 'live' | 'upcoming' | 'tomorrow' | 'favorites') => {
-    // Guardar filtro en localStorage
-    localStorage.setItem('sportsFilter', filter);
-    
-    // Navegar a la página de deportes con parámetro de filtro
-    setLocation(`/sports?filter=${filter}`);
-  };
-
-  const sportsItems = [
-    { 
-      name: t('sidebar.liveEvents'), 
-      icon: <Tv className="h-4 w-4" />, 
-      badge: liveEventsCount.toString(), 
-      path: "/sports/vivo",
-      onClick: undefined
+  const sidebarItems = [
+    {
+      name: "Casino",
+      icon: <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gradient-to-r from-[#9400d3] to-[#e100ff]">
+        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm14 8h-4v6h4v-6z"/>
+        </svg>
+      </div>,
+      path: "/",
+      active: !location.includes('/sports'),
+      hasChildren: true
     },
-    { 
-      name: "Próximos Eventos", 
-      icon: <Clock className="h-4 w-4" />, 
-      path: "/sports", 
-      onClick: () => handleSportsFilter('upcoming') 
+    {
+      name: "Sportsbook",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Trophy className="w-4 h-4 text-white" />
+      </div>,
+      path: "/sports",
+      active: location.includes('/sports'),
+      hasChildren: true
     },
-    { 
-      name: "Favoritos", 
-      icon: <Star className="h-4 w-4" />, 
-      path: "/sports", 
-      onClick: () => handleSportsFilter('favorites') 
+    {
+      name: "Recompensas",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Gift className="w-4 h-4 text-white" />
+      </div>,
+      path: "#",
+      badge: 1
     },
-    { 
-      name: "Mañana", 
-      icon: <Calendar className="h-4 w-4" />, 
-      path: "/sports", 
-      onClick: () => handleSportsFilter('tomorrow') 
+    {
+      name: "RTP en vivo",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Clock className="w-4 h-4 text-white" />
+      </div>,
+      path: "#"
     },
-    { 
-      name: t('sidebar.myBets'), 
-      icon: <BarChart className="h-4 w-4" /> 
+    {
+      name: "Promociones",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Target className="w-4 h-4 text-white" />
+      </div>,
+      path: "#"
     },
-  ];
-  
-  // Deportes populares
-  const popularSports = [
-    { name: t('sports.soccer'), icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: t('sports.basketball'), icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: t('sports.tennis'), icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "MMA", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Béisbol", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Hockey sobre hielo", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Tenis de Mesa", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Vóleibol", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "CS2", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Carreras", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-    { name: "Todos los Deportes", icon: <Tv className="h-4 w-4" />, hasArrow: true },
-  ];
-  
-  const footerItems = [
-    { name: t('sidebar.profile'), path: "/profile", icon: <User className="h-4 w-4" />, hasArrow: true },
-    { name: t('sidebar.promotions'), path: "#", icon: <Gift className="h-4 w-4" />, hasArrow: true },
-    { name: t('sidebar.affiliate'), path: "#", icon: <Users className="h-4 w-4" /> },
-    { name: t('sidebar.vipClub'), path: "#", icon: <Award className="h-4 w-4" /> },
-    { name: t('sidebar.blog'), path: "#", icon: <FileText className="h-4 w-4" /> },
-    { name: t('sidebar.forum'), path: "#", icon: <MessageCircle className="h-4 w-4" /> },
-    { name: t('sidebar.sponsorships'), path: "#", icon: <HeartHandshake className="h-4 w-4" />, hasArrow: true },
-    { name: t('sidebar.responsibleGaming'), path: "#", icon: <BookOpenText className="h-4 w-4" /> },
-    { name: t('sidebar.liveSupport'), path: "#", icon: <Headset className="h-4 w-4" /> },
+    {
+      name: "Recomienda y gana",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Users className="w-4 h-4 text-white" />
+      </div>,
+      path: "#"
+    },
+    {
+      name: "Canjear",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Wallet className="w-4 h-4 text-white" />
+      </div>,
+      path: "#"
+    },
+    {
+      name: "Club VIP",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Award className="w-4 h-4 text-white" />
+      </div>,
+      path: "#"
+    },
+    {
+      name: "Soporte en vivo",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Headset className="w-4 h-4 text-white" />
+      </div>,
+      path: "#"
+    },
+    {
+      name: "Español",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Globe className="w-4 h-4 text-white" />
+      </div>,
+      path: "#",
+      hasChildren: true
+    }
   ];
 
   return (
     <div className={cn(
-      "hidden md:flex flex-col bg-[#0e1824] border-r border-[#1c2b3a] transition-all duration-300",
+      "hidden md:flex flex-col bg-[#2d0a45] border-r border-[#3d1158] transition-all duration-300",
       sidebarCollapsed ? "w-16" : "w-64",
       className
     )}>
-      {/* Top section with menu button and tabs */}
-      <div className="flex items-center border-b border-[#1c2b3a] p-2">
-        <button 
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="text-gray-400 hover:text-white p-1"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-        
+      {/* Sidebar Header with Logo */}
+      <div className="px-4 py-3 flex items-center justify-between">
         {!sidebarCollapsed && (
-          <div className="flex ml-2">
-            <button 
-              className={`px-4 py-2 rounded-md text-white font-medium text-sm ${activeTab === 'casino' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
-              onClick={() => {
-                setActiveTab('casino');
-                setLocation('/');
-              }}
-            >
-              {t('tabs.casino')}
-            </button>
-            <button 
-              className={`px-4 py-2 rounded-md text-white font-medium text-sm ml-1 ${activeTab === 'deportes' ? 'bg-[#09b66d]' : 'bg-[#313d4a] hover:bg-[#2a3441]'}`}
-              onClick={() => {
-                setActiveTab('deportes');
-                setLocation('/sports');
-              }}
-            >
-              {t('tabs.sports')}
-            </button>
+          <div className="flex items-center">
+            <div className="text-xl font-bold text-white">CryptoSpin</div>
+          </div>
+        )}
+        {sidebarCollapsed && (
+          <div className="w-full flex justify-center">
+            <div className="h-8 w-8 rounded-full bg-[#9400d3] flex items-center justify-center">
+              <span className="text-white font-bold text-sm">CS</span>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Sidebar content */}
-      <div className="flex-1 overflow-y-auto">
-        {activeTab === 'casino' ? (
-          <>
-            {/* Favorites section - Casino tab */}
-            <div className="py-2 border-b border-[#1c2b3a]">
-              {favoriteItems.map((item, index) => (
-                <Link 
-                  key={index} 
-                  href={item.path || "#"}
-                  className={cn(
-                    "flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors",
-                    item.path && isActive(item.path) ? "bg-[#192531]" : ""
-                  )}
-                >
-                  <span className={cn(
-                    "", 
-                    item.path && isActive(item.path) ? "text-[#09b66d]" : "text-gray-400"
-                  )}>
-                    {item.icon}
-                  </span>
-                  {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
-                </Link>
-              ))}
-            </div>
+      {/* Divider */}
+      <div className="border-b border-[#3d1158]"></div>
 
-            {/* Games section - Casino tab */}
-            <div>
-              {!sidebarCollapsed && (
-                <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-                  {t('sidebar.games')}
-                </div>
-              )}
-
-              {gameItems.map((item, index) => (
-                <Link 
-                  key={index} 
-                  href={item.path || "#"}
-                  className={cn(
-                    "flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors",
-                    item.path && isActive(item.path) ? "bg-[#192531]" : ""
-                  )}
-                >
-                  <span className={cn(
-                    "", 
-                    item.path && isActive(item.path) ? "text-[#09b66d]" : "text-gray-400"
-                  )}>
-                    {item.icon}
-                  </span>
-                  {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
-                </Link>
-              ))}
-            </div>
-
-            {/* Providers section - Casino tab */}
-            <div className="border-t border-[#1c2b3a]">
-              {!sidebarCollapsed && (
-                <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-                  {t('sidebar.providers')}
-                </div>
-              )}
-              <Link 
-                href="#"
-                className="flex items-center px-4 py-3 text-white hover:bg-[#192531] transition-colors"
-              >
-                <span className="text-gray-400">
-                  <Zap className="h-4 w-4" />
-                </span>
-                {!sidebarCollapsed && <span className="ml-3">{t('sidebar.providers')}</span>}
-              </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Sports section */}
-            <div className="py-2">
-              {sportsItems.map((item, index) => (
-                <Link 
-                  key={index} 
-                  href={item.path || "#"}
-                  onClick={item.onClick}
-                  className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="text-gray-400">
-                      {item.icon}
-                    </span>
-                    {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
-                  </div>
-                  {!sidebarCollapsed && item.badge && (
-                    <span className="text-xs bg-[#f8c541] text-[#0e1824] font-bold px-1.5 py-0.5 rounded">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-
-            {/* Mejores Deportes section */}
-            <div className="border-t border-[#1c2b3a]">
-              {!sidebarCollapsed && (
-                <div className="px-4 py-3 text-gray-400 font-semibold text-sm">
-                  {t('sidebar.topSports')}
-                </div>
-              )}
-              
-              {popularSports.map((item, index) => (
-                <Link 
-                  key={index} 
-                  href="#"
-                  className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="text-gray-400">
-                      {item.icon}
-                    </span>
-                    {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
-                  </div>
-                  {!sidebarCollapsed && item.hasArrow && (
-                    <span className="text-gray-400">
-                      <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 9L5 5L1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
-        
-        {/* Footer Items */}
-        <div className="border-t border-[#1c2b3a]">
-          {/* Idioma Selector */}
-          <SidebarLanguageSwitcher collapsed={sidebarCollapsed} />
-          
-          {/* Otros items */}
-          {footerItems.map((item, index) => (
+      {/* Sidebar Items */}
+      <div className="flex-1 overflow-y-auto pb-4">
+        <div className="py-2 space-y-1">
+          {sidebarItems.map((item, index) => (
             <Link 
               key={index} 
               href={item.path || "#"}
-              className="flex items-center justify-between px-4 py-3 text-white hover:bg-[#192531] transition-colors"
+              className={cn(
+                "group flex items-center justify-between px-3 py-2 mx-2 rounded-lg text-white transition-colors",
+                item.active ? "bg-[#3d1158]" : "hover:bg-[#3d1158]/50"
+              )}
             >
-              <div className="flex items-center">
-                <span className="text-gray-400">
-                  {item.icon}
-                </span>
-                {!sidebarCollapsed && <span className="ml-3">{item.name}</span>}
+              <div className="flex items-center space-x-3">
+                {item.icon}
+                {!sidebarCollapsed && (
+                  <span className={cn(
+                    "font-medium text-sm",
+                    item.active ? "text-white" : "text-gray-300 group-hover:text-white"
+                  )}>
+                    {item.name}
+                  </span>
+                )}
               </div>
-              {!sidebarCollapsed && item.hasArrow && (
-                <span className="text-gray-400">
-                  <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 9L5 5L1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </span>
+              {!sidebarCollapsed && (
+                <>
+                  {item.badge && (
+                    <div className="h-5 w-5 rounded-full bg-[#f5a623] text-[#2d0a45] text-xs font-bold flex items-center justify-center">
+                      {item.badge}
+                    </div>
+                  )}
+                  {item.hasChildren && (
+                    <ChevronDown className="h-4 w-4 text-gray-300" />
+                  )}
+                </>
               )}
             </Link>
           ))}
         </div>
       </div>
-      
-      {/* User section */}
+
+      {/* Total Bets Counter */}
       {!sidebarCollapsed && (
-        <div className="p-4 border-t border-[#1c2b3a]">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-[#09b66d] flex items-center justify-center text-[#0e1824]">
-              <User className="h-4 w-4" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-white">{user?.username}</p>
-              <button 
-                onClick={() => logoutMutation.mutate()}
-                className="text-xs text-gray-400 hover:text-[#09b66d]"
-              >
-                {t('auth.logout')}
-              </button>
-            </div>
-          </div>
+        <div className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#3d1158]/70">
+          <div className="text-xs text-gray-300 mb-1">Total apuestas</div>
+          <div className="text-sm font-medium text-white">{totalBets}</div>
         </div>
       )}
     </div>
