@@ -581,6 +581,7 @@ export function Sidebar({ className }: SidebarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
             transition={{ delay: 0.1, duration: 0.3 }}
+            aria-label="Balance del usuario"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -622,6 +623,7 @@ export function Sidebar({ className }: SidebarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
+            aria-label="Contador de apuestas totales"
           >
             <div className="text-xs text-gray-300 mb-1">Total apuestas</div>
             <div className="text-sm font-medium text-white">{totalBets}</div>
