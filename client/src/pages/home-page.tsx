@@ -205,6 +205,122 @@ export default function HomePage() {
             </div>
           </div>
           
+          {/* Slots Providers */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-heading text-xl font-bold text-white">Slots Providers</h2>
+              <Link href="/casino-games">
+                <span className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">{t('buttons.viewAll')}</span>
+              </Link>
+            </div>
+            
+            <div className="bg-[#192531] border border-[#1c2b3a] rounded-xl p-4 md:p-6">
+              <div className="text-white text-sm mb-4">
+                <p className="text-gray-300 mb-2">Our platform features <span className="text-[#09b66d] font-bold">188 games</span> from <span className="text-[#09b66d] font-bold">10 providers</span> with <span className="text-[#09b66d] font-bold">97 algorithms</span>.</p>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {/* AGT Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">AGT</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">60 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Popular: 50 Gems, Fruit Queen</div>
+                </div>
+                
+                {/* Novomatic Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">Novomatic</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">78 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Popular: Book of Ra, Fairy Queen</div>
+                </div>
+                
+                {/* NetEnt Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">NetEnt</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">20 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Popular: Trolls, Fruit Shop</div>
+                </div>
+                
+                {/* Playtech Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">Playtech</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">7 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Popular slots from Playtech</div>
+                </div>
+                
+                {/* IGT Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">IGT</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">5 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Popular: Wolf Run, Cleopatra</div>
+                </div>
+                
+                {/* Other providers can be included in a special tile */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">BetSoft</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">3 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Quality BetSoft games</div>
+                </div>
+                
+                {/* Aristocrat Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">Aristocrat</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Classic Aristocrat slots</div>
+                </div>
+                
+                {/* Megajack Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">Megajack</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Popular: Aztec Gold</div>
+                </div>
+                
+                {/* Play'n GO Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">Play'n GO</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">3 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Popular: Fire Joker</div>
+                </div>
+                
+                {/* Slotopol Provider */}
+                <div className="bg-[#0e1824] rounded-lg p-3 border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-white font-medium">Slotopol</h3>
+                    <span className="text-xs bg-[#09b66d] text-white px-2 py-0.5 rounded-full">4 games</span>
+                  </div>
+                  <div className="text-xs text-gray-400">Slotopol exclusive games</div>
+                </div>
+              </div>
+              
+              <div className="mt-4 text-center">
+                <Link href="/casino-games">
+                  <button className="px-4 py-2 bg-[#313d4a] hover:bg-[#2a3441] text-white font-medium rounded-md transition-all duration-200">
+                    See All Slot Games
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
+          
           {/* Popular Games */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
