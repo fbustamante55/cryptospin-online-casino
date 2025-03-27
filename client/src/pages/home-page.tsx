@@ -3,6 +3,12 @@ import { UserDropdown } from "@/components/ui/user-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import { Search, Gift, Bell, ChevronDown, ChevronUp, Settings, Trophy, Dices, TrendingUp } from "lucide-react";
+// Importar el icono ChevronDown como SVG por si hay problemas con lucide-react
+const ChevronDownIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+);
 import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
@@ -98,7 +104,9 @@ export default function HomePage() {
                     {currentCurrency.icon}
                   </div>
                   <span className="text-white text-sm font-bold">{currentCurrency.value.toFixed(8)}</span>
-                  {ChevronDown && <ChevronDown className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`} />}
+                  <div className={`h-4 w-4 ml-2 text-white transition-transform ${isWalletOpen ? 'rotate-180' : ''}`}>
+                    <ChevronDownIcon />
+                  </div>
                 </div>
                 
                 {/* Línea vertical separadora */}
