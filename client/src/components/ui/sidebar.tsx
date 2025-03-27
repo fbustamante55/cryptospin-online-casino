@@ -248,25 +248,7 @@ export function Sidebar({ className }: SidebarProps) {
         <Target className="w-4 h-4 text-white" />
       </div>,
       path: "/promotions",
-      active: location.includes('/promotions'),
-      hasChildren: true,
-      children: [
-        {
-          name: "Ofertas Especiales",
-          icon: <Gift className="w-4 h-4 text-gray-300" />,
-          path: "/promotions/special",
-        },
-        {
-          name: "Torneos",
-          icon: <Trophy className="w-4 h-4 text-gray-300" />,
-          path: "/promotions/tournaments",
-        },
-        {
-          name: "Calendario",
-          icon: <Calendar className="w-4 h-4 text-gray-300" />,
-          path: "/promotions/calendar",
-        }
-      ]
+      active: location.includes('/promotions')
     },
     {
       name: "Recompensas",
@@ -277,84 +259,41 @@ export function Sidebar({ className }: SidebarProps) {
       badge: 1,
       active: location.includes('/rewards')
     },
-    // Sección de Herramientas y Utilidades
+    // Sección de RTP en vivo
     {
-      name: "Utilidades",
+      name: "RTP en vivo",
       icon: <div className="w-5 h-5 flex items-center justify-center">
-        <BarChart className="w-4 h-4 text-white" />
+        <Clock className="w-4 h-4 text-white" />
       </div>,
-      path: "#",
-      hasChildren: true,
-      children: [
-        {
-          name: "RTP en vivo",
-          icon: <Clock className="w-4 h-4 text-gray-300" />,
-          path: "/rtp-live",
-        },
-        {
-          name: "Estadísticas",
-          icon: <BarChart className="w-4 h-4 text-gray-300" />,
-          path: "/statistics",
-        },
-        {
-          name: "Resultados",
-          icon: <FileText className="w-4 h-4 text-gray-300" />,
-          path: "/results",
-        }
-      ]
+      path: "/rtp-live",
+      active: location.includes('/rtp-live')
     },
-    // Sección de Programas y Comunidad
+    // Recomienda y gana
     {
-      name: "Comunidad",
+      name: "Recomienda y gana",
       icon: <div className="w-5 h-5 flex items-center justify-center">
         <Users className="w-4 h-4 text-white" />
       </div>,
-      path: "#",
-      hasChildren: true,
-      children: [
-        {
-          name: "Recomienda y gana",
-          icon: <Users className="w-4 h-4 text-gray-300" />,
-          path: "/refer",
-        },
-        {
-          name: "Club VIP",
-          icon: <Award className="w-4 h-4 text-gray-300" />,
-          path: "/vip",
-        }
-      ]
+      path: "/refer",
+      active: location.includes('/refer')
     },
-    // Sección de Pagos
+    // Club VIP
+    {
+      name: "Club VIP",
+      icon: <div className="w-5 h-5 flex items-center justify-center">
+        <Award className="w-4 h-4 text-white" />
+      </div>,
+      path: "/vip",
+      active: location.includes('/vip')
+    },
+    // Sección de Pagos (sin submenús)
     {
       name: "Pagos",
       icon: <div className="w-5 h-5 flex items-center justify-center">
         <Wallet className="w-4 h-4 text-white" />
       </div>,
       path: "/wallet",
-      active: location.includes('/wallet'),
-      hasChildren: true,
-      children: [
-        {
-          name: "Depositar",
-          icon: <DollarSign className="w-4 h-4 text-gray-300" />,
-          path: "/wallet/deposit",
-        },
-        {
-          name: "Retirar",
-          icon: <Wallet className="w-4 h-4 text-gray-300" />,
-          path: "/wallet/withdraw",
-        },
-        {
-          name: "Canjear",
-          icon: <Gift className="w-4 h-4 text-gray-300" />,
-          path: "/wallet/redeem",
-        },
-        {
-          name: "Historial",
-          icon: <FileText className="w-4 h-4 text-gray-300" />,
-          path: "/wallet/history",
-        }
-      ]
+      active: location.includes('/wallet')
     },
     // Sección de Soporte e Idioma
     {

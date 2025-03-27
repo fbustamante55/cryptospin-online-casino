@@ -398,7 +398,7 @@ export function MobileNav() {
           <DrawerItem 
             icon={<Target className="h-5 w-5" />}
             label="Promociones"
-            path="#"
+            path="/promotions"
           />
           
           <DrawerItem 
@@ -411,25 +411,25 @@ export function MobileNav() {
           <DrawerItem 
             icon={<Clock className="h-5 w-5" />}
             label="RTP en vivo"
-            path="#"
+            path="/rtp-live"
           />
           
           <DrawerItem 
             icon={<Users className="h-5 w-5" />}
             label="Recomienda y gana"
-            path="#"
+            path="/refer"
           />
           
           <DrawerItem 
             icon={<Wallet className="h-5 w-5" />}
-            label="Billetera"
+            label="Pagos"
             path="/wallet"
           />
           
           <DrawerItem 
             icon={<Award className="h-5 w-5" />}
             label="Club VIP"
-            path="#"
+            path="/vip"
           />
           
           <DrawerItem 
