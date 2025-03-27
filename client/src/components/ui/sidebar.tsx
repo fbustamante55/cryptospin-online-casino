@@ -181,7 +181,7 @@ export function Sidebar({ className }: SidebarProps) {
         {!sidebarCollapsed && (
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
+              <h1 className="text-xl font-bold text-white">CryptoSpin</h1>
             </div>
             <button 
               onClick={() => setSidebarCollapsed(true)}
