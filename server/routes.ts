@@ -389,6 +389,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error processing withdrawal" });
     }
   });
+  
+  /**
+   * @route POST /api/wallet/deduct
+   * @desc Deduct credits from user's wallet (used for placing bets)
+   * @body { amount: number, gameType: string, gameId: string }
+   */
+  app.post("/api/wallet/deduct", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const deductSchema = z.object({
+      amount: z.number().positive("Bet amount must be positive"),
+      gameType: z.string(),
+      gameId: z.string().optional()
+    });
+    
+    try {
+      const { amount, gameType, gameId } = deductSchema.parse(req.body);
+      const userId = req.user.id;
+      
+      // Get current user and check balance
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Check if user has enough balance
+      if (user.balance < amount) {
+        return res.status(400).json({
+          error: "Insufficient funds",
+          balance: user.balance,
+          required: amount
+        });
+      }
+      
+      // Deduct amount
+      const updatedUser = await storage.updateUserBalance(userId, -amount);
+      if (!updatedUser) {
+        return res.status(500).json({ error: "Failed to update balance" });
+      }
+      
+      // Create transaction record
+      await storage.createTransaction({
+        userId,
+        type: "bet",
+        amount,
+        gameType,
+        gameData: gameId ? { gameId } : undefined
+      });
+      
+      // Return updated balance
+      return res.json({
+        success: true,
+        previousBalance: user.balance,
+        deducted: amount,
+        currentBalance: updatedUser.balance
+      });
+      
+    } catch (error) {
+      console.error("Error deducting from wallet:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          }))
+        });
+      }
+      
+      return res.status(500).json({ 
+        error: "An error occurred while processing your request",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  /**
+   * @route POST /api/wallet/add
+   * @desc Add credits to user's wallet (used for winnings)
+   * @body { amount: number, gameType: string, gameId: string, outcome: string }
+   */
+  app.post("/api/wallet/add", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const addSchema = z.object({
+      amount: z.number().positive("Amount must be positive"),
+      gameType: z.string(),
+      gameId: z.string().optional(),
+      outcome: z.string().optional()
+    });
+    
+    try {
+      const { amount, gameType, gameId, outcome } = addSchema.parse(req.body);
+      const userId = req.user.id;
+      
+      // Get current user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Add amount
+      const updatedUser = await storage.updateUserBalance(userId, amount);
+      if (!updatedUser) {
+        return res.status(500).json({ error: "Failed to update balance" });
+      }
+      
+      // Create transaction record
+      await storage.createTransaction({
+        userId,
+        type: "win",
+        amount,
+        gameType,
+        gameData: gameId ? { gameId, outcome } : undefined
+      });
+      
+      // Return updated balance
+      return res.json({
+        success: true,
+        previousBalance: user.balance,
+        added: amount,
+        currentBalance: updatedUser.balance
+      });
+      
+    } catch (error) {
+      console.error("Error adding to wallet:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          }))
+        });
+      }
+      
+      return res.status(500).json({ 
+        error: "An error occurred while processing your request",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   // Game-related routes
   

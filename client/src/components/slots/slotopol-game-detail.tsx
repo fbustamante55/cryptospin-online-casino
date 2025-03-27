@@ -58,6 +58,9 @@ export function SlotopolGameDetail({ gameId }: { gameId: string }) {
   // Spin mutation
   const spinMutation = useMutation({
     mutationFn: async () => {
+      // For real users (not demo mode), we could use a separate wallet deduction API
+      // But our server already handles wallet operations in a single request
+      // for simplicity and transaction integrity
       return apiRequest<SpinResult>({
         method: 'POST',
         url: '/api/slots/spin',
@@ -114,17 +117,37 @@ export function SlotopolGameDetail({ gameId }: { gameId: string }) {
   const handleSpin = () => {
     if (isSpinning) return;
     
-    // Check if user has enough balance
-    if (user && user.balance < totalBet) {
+    // Check if user is logged in
+    if (!user) {
       toast({
-        title: 'Insufficient balance',
-        description: 'You do not have enough credits to place this bet.',
+        title: 'Login Required',
+        description: 'Please log in to play slot games with real credits.',
         variant: 'destructive',
       });
       return;
     }
     
+    // Check if user has enough balance
+    if (user.balance < totalBet) {
+      toast({
+        title: 'Insufficient Balance',
+        description: `You need ${totalBet} credits to spin. Your balance: ${user.balance} credits.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Visual feedback that we're processing the bet
     setIsSpinning(true);
+    
+    // Update local UI immediately for better UX (optimistic update)
+    const projectedBalance = user.balance - totalBet;
+    queryClient.setQueryData(['/api/user'], (oldData: any) => ({
+      ...oldData,
+      balance: projectedBalance
+    }));
+    
+    // Execute the actual spin (the server will validate and update the real balance)
     spinMutation.mutate();
   };
 

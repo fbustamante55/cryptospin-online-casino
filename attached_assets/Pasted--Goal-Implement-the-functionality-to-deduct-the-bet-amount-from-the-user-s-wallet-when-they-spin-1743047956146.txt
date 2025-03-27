@@ -1,0 +1,45 @@
+**Goal:** Implement the functionality to deduct the bet amount from the user's wallet when they spin a slot machine on my Replit project.
+
+**Context:** I have integrated slot games from the Slotopol server, and users can seemingly interact with the game interface. However, when a user places a bet and spins, their in-game wallet balance is not being deducted by the bet amount. I need to implement this crucial step.
+
+**Assumptions:**
+
+* I have a system in place (likely on the backend of my Replit project, separate from the Slotopol server itself) to manage user wallet balances. This system might involve a database or in-memory storage.
+* I have a way to identify the currently logged-in user on the frontend.
+* The frontend is sending the `bet` amount to the Slotopol server's spin API (as discussed in previous prompts).
+
+**Please provide guidance and code modifications for the following:**
+
+1.  **Identify the Correct Point for Wallet Deduction:**
+    * At what point in the user interaction flow should the bet amount be deducted from the user's wallet? (Likely immediately before or as part of the process of sending the spin request to the Slotopol server).
+
+2.  **Frontend Modifications (JavaScript):**
+    * When the "Spin" button is clicked, how should the frontend JavaScript:
+        * Retrieve the current bet amount from the UI?
+        * Make an API call to my backend (the wallet management system in my Replit project) to deduct this amount from the logged-in user's balance? What would this API endpoint on my backend likely be (e.g., `/api/wallet/deduct`)? What data should be sent in this request (e.g., user identifier, bet amount, potentially game ID)?
+        * Handle the response from my backend. What should happen if the deduction is successful? What should happen if the user has insufficient funds? (Display an error message to the user).
+        * Only proceed to send the spin request to the Slotopol server's `/api/slots/spin` endpoint *after* the bet has been successfully deducted from the user's wallet (or if the user has sufficient funds).
+
+3.  **Backend Modifications (Python/Flask - Assuming this is my wallet management backend):**
+    * Create a new API endpoint (e.g., `/api/wallet/deduct`) on my backend that accepts POST requests.
+    * This endpoint should:
+        * Receive the user identifier and bet amount from the frontend request.
+        * Retrieve the user's current balance from my wallet management system.
+        * Check if the user has sufficient funds to cover the bet.
+        * If sufficient funds are available, deduct the bet amount from the user's balance and update the balance in my wallet management system. Return a success response.
+        * If insufficient funds are available, return an error response indicating this.
+
+4.  **Communication Flow:**
+    * Describe the complete flow of events when a user clicks "Spin," including the communication between the frontend, my wallet management backend, and the Slotopol server.
+
+5.  **Error Handling and User Feedback:**
+    * Emphasize the importance of providing clear feedback to the user in case of insufficient funds or any errors during the bet deduction process.
+
+**Please provide example JavaScript code for the frontend and Python/Flask code for the backend (wallet management system) to implement this bet deduction functionality.** Assume I have a basic user authentication system in place and can access the current user's ID on the backend.
+
+**Important Information:**
+
+* The Slotopol server handles the actual game logic (spinning and payouts). My Replit backend needs to manage the user's currency.
+* The frontend needs to orchestrate the bet deduction with my backend *before* telling the Slotopol server to spin.
+
+By implementing this bet deduction logic, you will ensure that users are spending their in-game currency when playing the slot machines. Remember to adapt the API endpoints and data structures to match your existing wallet management system.
