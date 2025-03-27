@@ -63,9 +63,9 @@ export default function HomePage() {
   const popularGames = [
     { title: t("games.crash_title"), type: t("games.crash"), players: 315, gameType: "crash" as const },
     { title: t("games.slots_50gems_title"), type: t("games.slots"), players: 301, gameType: "slots" as const, gameId: "50gems" },
-    { title: t("games.keno_title"), type: t("games.keno"), players: 298, gameType: "keno" as const },
-    { title: t("games.slots_777_title"), type: t("games.slots"), players: 265, gameType: "slots" as const, gameId: "777" },
-    { title: t("games.slots_book_of_egypt_title"), type: t("games.slots"), players: 243, gameType: "slots" as const, gameId: "book-of-egypt" }
+    { title: t("games.slots_book_of_egypt_title"), type: t("games.slots"), players: 298, gameType: "slots" as const, gameId: "book-of-egypt" },
+    { title: t("games.slots_777_title"), type: t("games.slots"), players: 283, gameType: "slots" as const, gameId: "777" },
+    { title: t("games.keno_title"), type: t("games.keno"), players: 265, gameType: "keno" as const }
   ];
 
   const currencyTriggerRef = useRef<HTMLDivElement>(null);
@@ -345,7 +345,9 @@ export default function HomePage() {
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-heading text-xl font-bold text-white">{t('home.popularGames')}</h2>
-              <a href="#" className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">{t('buttons.viewAll')}</a>
+              <Link href="/casino-games">
+                <span className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">{t('buttons.viewAll')}</span>
+              </Link>
             </div>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
