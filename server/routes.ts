@@ -35,9 +35,52 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Initialize default slot games for testing
+async function initializeDefaultSlotGames() {
+  try {
+    // Check if classic3reel game already exists
+    const existingGame = await storage.getSlotGame("classic3reel");
+    if (!existingGame) {
+      // Create the classic 3-reel slot game
+      await storage.createSlotGame({
+        gameId: "classic3reel",
+        name: "Classic 3-Reel",
+        provider: "inhouse",
+        description: "A classic 3-reel slot machine with traditional fruit symbols.",
+        thumbnail: "/images/slots/classic3reel.png",
+        paylines: 1,
+        reels: 3,
+        minBet: 1,
+        maxBet: 100,
+        rtp: 95.0,
+        volatility: "medium",
+        features: ["basic"],
+        symbols: {
+          "cherry": { payout: { 3: 10 } },
+          "lemon": { payout: { 3: 20 } },
+          "orange": { payout: { 3: 30 } },
+          "plum": { payout: { 3: 40 } },
+          "bell": { payout: { 3: 50 } },
+          "bar": { payout: { 3: 100, "bar-bar-any": 50 } },
+          "seven": { payout: { 3: 500, "seven-seven-any": 100 } }
+        },
+        isActive: true
+      });
+      console.log("Created default classic3reel slot game");
+    } else {
+      console.log("Classic3reel slot game already exists");
+    }
+  } catch (error) {
+    console.error("Failed to initialize default slot games:", error);
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+  
+  // Initialize default slot games
+  await initializeDefaultSlotGames();
 
   // Special admin setup route
   app.post("/api/setup-admin", async (req, res) => {
