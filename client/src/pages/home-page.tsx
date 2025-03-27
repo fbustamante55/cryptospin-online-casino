@@ -1,8 +1,6 @@
-import { GameCard } from "@/components/ui/game-card";
-import { UserDropdown } from "@/components/ui/user-dropdown";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
-import { Search, Gift, Bell, ChevronDown, ChevronUp, Settings, Trophy, Dices, TrendingUp } from "lucide-react";
+import { Search, Gift, Bell, ChevronDown } from "lucide-react";
 // Importar el icono ChevronDown como SVG por si hay problemas con lucide-react
 const ChevronDownIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -10,15 +8,13 @@ const ChevronDownIcon = () => (
   </svg>
 );
 import { useTranslation } from "react-i18next";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
-import { SlotopolCasinoGamesSection } from "@/components/slots/slotopol-casino-games-section";
 
 export default function HomePage() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [location] = useLocation();
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('USDT');
   
@@ -38,42 +34,6 @@ export default function HomePage() {
   
   // Obtener la moneda seleccionada
   const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[3]; // USDT por defecto
-
-  const featuredGames = [
-    {
-      title: t("games.crash_title"),
-      description: t("games.crash_description"),
-      image: "/images/games/crash.webp",
-      tag: { text: "Hot", color: "tertiary" as const },
-      rating: 4.9,
-      gameType: "crash" as const
-    },
-    {
-      title: t("games.slots_book_of_egypt_title"),
-      description: t("games.slots_book_of_egypt_description"),
-      image: "/images/games/book-of-egypt.webp",
-      tag: { text: "HOT", color: "primary" as const },
-      rating: 4.9,
-      gameType: "slots" as const,
-      gameId: "book-of-egypt"
-    },
-    {
-      title: t("games.keno_title"),
-      description: t("games.keno_description"),
-      image: "/images/games/keno.webp",
-      tag: { text: "Nuevo", color: "secondary" as const },
-      rating: 4.5,
-      gameType: "keno" as const
-    }
-  ];
-
-  const popularGames = [
-    { title: t("games.crash_title"), type: t("games.crash"), players: 315, gameType: "crash" as const },
-    { title: t("games.slots_50gems_title"), type: t("games.slots"), players: 301, gameType: "slots" as const, gameId: "50gems" },
-    { title: t("games.keno_title"), type: t("games.keno"), players: 298, gameType: "keno" as const },
-    { title: t("games.slots_777_title"), type: t("games.slots"), players: 265, gameType: "slots" as const, gameId: "777" },
-    { title: t("games.slots_book_of_egypt_title"), type: t("games.slots"), players: 243, gameType: "slots" as const, gameId: "book-of-egypt" }
-  ];
 
   const currencyTriggerRef = useRef<HTMLDivElement>(null);
   
@@ -170,112 +130,16 @@ export default function HomePage() {
       {/* Main Content - Add top padding on mobile for the mobile header */}
       <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6">
         <div className="max-w-7xl mx-auto">
-          
-          {/* Casino Slots from Slotopol */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-heading text-xl font-bold text-white">CryptoSpin Originals</h2>
-              <Link href="/slots" className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">{t('buttons.viewAll')}</Link>
-            </div>
-            
-            <SlotopolCasinoGamesSection />
-          </div>
-          
-          {/* Featured Games */}
-          <div className="mb-8">
-            <h2 className="font-heading text-xl font-bold text-white mb-4">{t('home.featuredGames')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {featuredGames.map((game, index) => (
-                <GameCard key={index} {...game} />
-              ))}
-            </div>
-          </div>
-          
-          {/* Popular Games */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-heading text-xl font-bold text-white">{t('home.popularGames')}</h2>
-              <a href="#" className="text-[#09b66d] hover:text-[#0fda85] text-sm font-medium">{t('buttons.viewAll')}</a>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {popularGames.map((game, index) => (
-                <Link key={index} href={game.gameType === "slots" && game.gameId ? `/${game.gameType}/${game.gameId}` : `/${game.gameType}`}>
-                  <div className="rounded-lg overflow-hidden bg-[#192531] border border-[#1c2b3a] hover:border-[#09b66d]/30 transition-all duration-300 cursor-pointer">
-                    <div className="aspect-square bg-gradient-to-br from-[#192531] to-[#0e1824] relative overflow-hidden">
-                      {game.gameType === "keno" ? (
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className="w-full h-full opacity-70"
-                          viewBox="0 0 200 200"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
-                        >
-                          {/* Keno graphic */}
-                          <rect x="40" y="40" width="120" height="120" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
-                          <circle cx="70" cy="70" r="12" fill="#09b66d" opacity="0.9" />
-                          <circle cx="100" cy="70" r="12" fill="#1c2b3a" opacity="0.5" />
-                          <circle cx="130" cy="70" r="12" fill="#1c2b3a" opacity="0.5" />
-                          <circle cx="70" cy="100" r="12" fill="#1c2b3a" opacity="0.5" />
-                          <circle cx="100" cy="100" r="12" fill="#09b66d" opacity="0.9" />
-                          <circle cx="130" cy="100" r="12" fill="#1c2b3a" opacity="0.5" />
-                          <circle cx="70" cy="130" r="12" fill="#1c2b3a" opacity="0.5" />
-                          <circle cx="100" cy="130" r="12" fill="#1c2b3a" opacity="0.5" />
-                          <circle cx="130" cy="130" r="12" fill="#09b66d" opacity="0.9" />
-                        </svg>
-                      ) : game.gameType === "crash" ? (
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className="w-full h-full opacity-70"
-                          viewBox="0 0 200 200"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
-                        >
-                          {/* Crash graphic */}
-                          <rect x="50" y="50" width="100" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
-                          <path d="M70,130 Q90,80 110,110 T150,70" stroke="#09b66d" strokeWidth="3" fill="none"/>
-                          <circle cx="150" cy="70" r="4" fill="#09b66d"/>
-                        </svg>
-                      ) : (
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className="w-full h-full opacity-70"
-                          viewBox="0 0 200 200"
-                          style={{ background: 'linear-gradient(135deg, #192531 0%, #0e1824 100%)' }}
-                        >
-                          {/* Slots graphic */}
-                          <rect x="40" y="50" width="120" height="100" rx="5" fill="#0e1824" stroke="#1c2b3a" strokeWidth="2"/>
-                          {/* Slots reels */}
-                          <rect x="50" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
-                          <rect x="85" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
-                          <rect x="120" y="60" width="30" height="80" fill="#192531" stroke="#1c2b3a" strokeWidth="1"/>
-                          {/* Slots symbols */}
-                          <circle cx="65" cy="75" r="10" fill="#f9c846" />
-                          <text x="65" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">7</text>
-                          <circle cx="100" cy="75" r="10" fill="#09b66d" />
-                          <text x="100" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">$</text>
-                          <circle cx="135" cy="75" r="10" fill="#f95258" />
-                          <text x="135" y="79" textAnchor="middle" fontSize="14" fill="#0e1824" fontWeight="bold">♦</text>
-                          {/* Lever */}
-                          <rect x="165" y="60" width="5" height="40" fill="#09b66d" />
-                          <circle cx="167.5" cy="110" r="10" fill="#f9c846" />
-                        </svg>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0e1824] to-transparent"></div>
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-heading font-medium text-white text-sm">{game.title}</h3>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-gray-400">{game.type}</span>
-                        <div className="flex items-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-400 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
-                          <span className="text-xs">{game.players}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+          <div className="flex flex-col items-center justify-center h-[60vh]">
+            <h1 className="text-3xl font-bold text-white mb-4">Bienvenido a CryptoSpin</h1>
+            <p className="text-gray-400 text-center max-w-lg mb-6">Estamos mejorando la experiencia de usuario. Pronto tendremos nuevas funcionalidades disponibles.</p>
+            <div className="flex space-x-4">
+              <Link href="/sports" className="px-6 py-3 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold rounded-md transition-all duration-200">
+                Deportes
+              </Link>
+              <Link href="/profile" className="px-6 py-3 bg-[#192531] hover:bg-[#2a3a4c] text-white font-bold rounded-md border border-[#1c2b3a] transition-all duration-200">
+                Mi Perfil
+              </Link>
             </div>
           </div>
         </div>
