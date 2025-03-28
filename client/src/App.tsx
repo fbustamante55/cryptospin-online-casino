@@ -25,6 +25,7 @@ import SupportPage from "@/pages/support-page";
 import RecentGamesPage from "@/pages/recent-games-page";
 import LiveEventsPage from "@/pages/live-events-page";
 import EventDetailPage from "@/pages/event-detail-page";
+import VIPPage from "@/pages/vip-page";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       <ProtectedRoute path="/sports/event/:eventId" component={EventDetailPage} />
       <ProtectedRoute path="/tournaments" component={TournamentsPage} />
       <ProtectedRoute path="/rewards" component={RewardsPage} />
+      <ProtectedRoute path="/vip" component={VIPPage} />
       <ProtectedRoute path="/support" component={SupportPage} />
       <Route path="/test-phone-input">
         <TestPhoneInputPage />

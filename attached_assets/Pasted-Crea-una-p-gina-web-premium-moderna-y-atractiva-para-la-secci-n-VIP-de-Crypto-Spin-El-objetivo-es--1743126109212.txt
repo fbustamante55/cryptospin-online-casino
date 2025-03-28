@@ -1,0 +1,99 @@
+Crea una página web premium, moderna y atractiva para la sección VIP de Crypto Spin. El objetivo es que los nuevos usuarios comprendan cómo funciona el sistema VIP y se motiven a apostar más para subir de nivel.
+
+1. Encabezado y Barra de Progreso VIP
+🔹 Título principal (grande y llamativo):
+📢 "¡Bienvenido al Club VIP de Crypto Spin!"
+
+🔹 Subtítulo motivador:
+💰 "Cuanto más apuestes, más subirás de nivel y desbloquearás recompensas exclusivas".
+
+🔹 Barra de Progreso Animada:
+
+Debe ser interactiva y visualmente atractiva.
+
+Muestra el progreso actual del usuario con una animación fluida.
+
+📊 Ejemplo: Usuario tiene 17,99% de avance en el nivel Bronce.
+
+La barra debe estar segmentada por niveles (Bronce → Plata → Oro → Platino → Diamante).
+
+Al pasar el cursor sobre cada nivel, debe mostrar los beneficios clave que desbloqueará.
+
+🔹 Indicador del Nivel Actual:
+
+Un ícono visual llamativo con el diseño del nivel actual ("Bronce").
+
+Un texto con efecto metálico: "Tu nivel actual: BRONCE".
+
+Fondo marrón con efecto metálico para resaltar el estado actual.
+
+🔹 Próximo Nivel y Meta:
+
+Mostrar un icono atenuado de "Plata" para indicar el siguiente objetivo.
+
+📈 Texto motivacional:
+
+"Solo un 7,01% más para subir a Plata y desbloquear más beneficios".
+
+"Sigue apostando y gana más recompensas cada semana 🎉".
+
+Indicar cuánto debe apostar para alcanzar el siguiente nivel.
+
+🔹 Sistema de Recompensas Progresivas:
+
+Incluir una sección de recompensas dinámicas que aumentan con el nivel VIP.
+
+Ejemplo de mensaje personalizado:
+
+"Has apostado $350 este mes. Apuesta $150 más para alcanzar el siguiente nivel y obtener un bono exclusivo."
+
+2. Beneficios VIP Explicados
+📌 Cada nivel VIP debe estar presentado en tarjetas interactivas con colores, íconos y efectos visuales distintivos.
+
+💎 Niveles VIP y Beneficios:
+
+Bronce: Beneficios iniciales como Rakeback y Bonos Semanales.
+
+Plata: Bonos mensuales incrementados y más acceso a promociones.
+
+Oro: Soporte VIP y mejores tasas de rakeback.
+
+Platino (I - VI): Recargas diarias y un Anfitrión VIP exclusivo.
+
+Diamante (I - V): Bonos personalizados y beneficios únicos para grandes apostadores.
+
+✅ Cada tarjeta debe incluir un botón "Más detalles" que expanda la información sobre cada nivel.
+
+3. Sección "Tu Anfitrión VIP" (Para niveles altos)
+👑 Explicación de los beneficios de tener un Anfitrión VIP:
+
+Contacto directo con un gestor personal.
+
+Bonificaciones personalizadas según el historial de apuestas.
+
+Aumentos en los límites de apuestas y promociones exclusivas.
+
+🎁 Ejemplo de mensaje:
+"¡Alcanza el nivel Platino IV para desbloquear tu propio Anfitrión VIP dedicado!"
+
+4. Experiencia de Usuario y Diseño
+🖥️ Diseño Premium:
+
+Colores oscuros con detalles dorados y plateados.
+
+Animaciones suaves para la barra de progreso y cambios de nivel.
+
+Diseño responsivo para móviles y escritorio.
+
+⚡ Interactividad:
+
+Al pasar el cursor sobre cada nivel, mostrar una breve descripción de los beneficios.
+
+Botones de "Saber más" y "Cómo subir de nivel".
+
+Extras para Mejorar la Motivación del Usuario
+✅ Animaciones progresivas en la barra de progreso para hacer el avance visualmente atractivo.
+✅ Mensajes motivacionales según el avance del usuario.
+✅ Gráficos de apuestas recientes para mostrar cómo ha progresado en el sistema VIP.
+
+📌 Objetivo: Crear una página intuitiva, atractiva y motivadora que impulse al usuario a seguir apostando para subir de nivel en el Club VIP de Crypto Spin.
