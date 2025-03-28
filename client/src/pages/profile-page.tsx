@@ -368,38 +368,10 @@ export default function ProfilePage() {
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-10">
-          <div className="flex items-center justify-between h-16 px-4">
-            <div className="flex items-center md:hidden">
-              <button type="button" className="text-gray-400 hover:text-white focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <h1 className="font-heading font-bold text-xl text-white tracking-wider ml-3">
-                <span className="text-[#09b66d]">Crypto</span>Spin
-              </h1>
-            </div>
-            
-            <div className="md:flex flex-1 px-4 justify-center">
-              <h1 className="text-xl font-heading font-bold">My Profile</h1>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="px-3 py-1.5 rounded-md bg-[#192531] border border-[#1c2b3a] flex items-center">
-                <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
-                <span className="text-sm font-semibold">{user?.balance}</span>
-              </div>
-              
-              {/* User Dropdown Menu */}
-              <UserDropdown />
-              
-              {/* Notification Dropdown */}
-              <NotificationDropdown />
-            </div>
-          </div>
-        </header>
+        {/* Page Title */}
+        <div className="py-4 px-6 border-b border-[#1c2b3a]">
+          <h1 className="text-xl font-heading font-bold">My Profile</h1>
+        </div>
         
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
