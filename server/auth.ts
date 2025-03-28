@@ -170,8 +170,25 @@ export function setupAuth(app: Express) {
       }
       
       // Log user in
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) return next(err);
+        
+        // Registrar la actividad de inicio de sesión
+        try {
+          await storage.createUserActivity({
+            userId: user.id,
+            activityType: "login",
+            ipAddress: req.ip || req.socket.remoteAddress || null,
+            deviceInfo: req.headers["user-agent"] || null,
+            details: { 
+              timestamp: new Date(),
+              rememberMe: validatedData.rememberMe || false
+            }
+          });
+        } catch (activityError) {
+          console.error("Error registrando actividad de inicio de sesión:", activityError);
+          // No fallamos la petición si falla el registro de actividad
+        }
         
         // Return user without sensitive info
         const { password, ...safeUser } = user;
@@ -189,10 +206,35 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
-      if (err) return next(err);
-      res.sendStatus(200);
-    });
+    if (req.isAuthenticated()) {
+      const userId = req.user?.id;
+      
+      // Cerrar sesión
+      req.logout((err) => {
+        if (err) return next(err);
+        
+        // Registrar actividad de cierre de sesión si teníamos un usuario
+        if (userId) {
+          try {
+            storage.createUserActivity({
+              userId: userId,
+              activityType: "logout",
+              ipAddress: req.ip || req.socket.remoteAddress || null,
+              deviceInfo: req.headers["user-agent"] || null,
+              details: { timestamp: new Date() }
+            }).catch(error => {
+              console.error("Error registrando actividad de logout:", error);
+            });
+          } catch (activityError) {
+            console.error("Error registrando actividad de logout:", activityError);
+          }
+        }
+        
+        res.sendStatus(200);
+      });
+    } else {
+      res.sendStatus(200); // Si no hay sesión, simplemente devolvemos éxito
+    }
   });
 
   app.get("/api/user", (req, res) => {
@@ -256,6 +298,22 @@ export function setupAuth(app: Express) {
       // Clear the reset token
       await storage.updateResetToken(user.id, null, null);
       
+      // Registrar actividad de restablecimiento de contraseña
+      try {
+        await storage.createUserActivity({
+          userId: user.id,
+          activityType: "password_reset",
+          ipAddress: req.ip || req.socket.remoteAddress || null,
+          deviceInfo: req.headers["user-agent"] || null,
+          details: { 
+            timestamp: new Date(),
+            method: "token"
+          }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad de restablecimiento de contraseña:", activityError);
+      }
+      
       return res.status(200).json({ message: "Password has been reset successfully" });
     } catch (error) {
       next(error);
@@ -285,6 +343,22 @@ export function setupAuth(app: Express) {
       await storage.updateUserProfile(req.user.id, { phoneNumber });
       await storage.verifyPhone(req.user.id);
       
+      // Registrar la actividad de verificación de teléfono
+      try {
+        await storage.createUserActivity({
+          userId: req.user.id,
+          activityType: "phone_verification",
+          ipAddress: req.ip || req.socket.remoteAddress || null,
+          deviceInfo: req.headers["user-agent"] || null,
+          details: { 
+            timestamp: new Date(),
+            phoneNumber: phoneNumber // Guardamos solo los últimos 4 dígitos por privacidad
+          }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad de verificación de teléfono:", activityError);
+      }
+      
       return res.status(200).json({ message: "Phone number verified successfully" });
     } catch (error) {
       next(error);
@@ -310,6 +384,23 @@ export function setupAuth(app: Express) {
         documentPath,
         metadata: metadata || {}
       });
+      
+      // Registrar la actividad de carga de documento KYC
+      try {
+        await storage.createUserActivity({
+          userId: req.user.id,
+          activityType: "kyc_document_upload",
+          ipAddress: req.ip || req.socket.remoteAddress || null,
+          deviceInfo: req.headers["user-agent"] || null,
+          details: { 
+            timestamp: new Date(),
+            documentType: documentType,
+            documentId: document.id
+          }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad de carga de documento KYC:", activityError);
+      }
       
       return res.status(201).json(document);
     } catch (error) {

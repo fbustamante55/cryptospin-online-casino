@@ -822,6 +822,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gameData: gameId ? { gameId } : undefined
       });
       
+      // Registrar actividad de apuesta
+      try {
+        await storage.createUserActivity({
+          userId,
+          activityType: "wallet_bet",
+          ipAddress: req.ip || req.socket.remoteAddress || null,
+          deviceInfo: req.headers["user-agent"] || null,
+          details: { 
+            timestamp: new Date(),
+            amount,
+            gameType,
+            gameId: gameId || null,
+            previousBalance: user.balance,
+            currentBalance: updatedUser.balance
+          }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad de apuesta:", activityError);
+      }
+      
       // Return updated balance
       return res.json({
         success: true,
@@ -889,6 +909,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gameType,
         gameData: gameId ? { gameId, outcome } : undefined
       });
+      
+      // Registrar actividad de ganancia
+      try {
+        await storage.createUserActivity({
+          userId,
+          activityType: "wallet_win",
+          ipAddress: req.ip || req.socket.remoteAddress || null,
+          deviceInfo: req.headers["user-agent"] || null,
+          details: { 
+            timestamp: new Date(),
+            amount,
+            gameType,
+            gameId: gameId || null,
+            outcome: outcome || "win",
+            previousBalance: user.balance,
+            currentBalance: updatedUser.balance
+          }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad de ganancia:", activityError);
+      }
       
       // Return updated balance
       return res.json({
@@ -3952,6 +3993,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
+        // Registrar actividad de juego de tragamonedas
+        try {
+          await storage.createUserActivity({
+            userId,
+            activityType: "game_play",
+            ipAddress: req.ip || req.socket.remoteAddress || null,
+            deviceInfo: req.headers["user-agent"] || null,
+            details: { 
+              timestamp: new Date(),
+              gameType: "slot",
+              gameId,
+              bet: totalBet,
+              outcome: winAmount > 0 ? "win" : "loss",
+              winAmount: winAmount
+            }
+          });
+        } catch (activityError) {
+          console.error("Error registrando actividad de juego de tragamonedas:", activityError);
+        }
+        
         // Create a game history record
         await storage.createGameHistory({
           userId,
@@ -4042,6 +4103,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Close the session
       await storage.updateSlotSession(sessionId, { isActive: false });
+      
+      // Registrar actividad de colección de ganancias
+      try {
+        await storage.createUserActivity({
+          userId,
+          activityType: "slot_collect",
+          ipAddress: req.ip || req.socket.remoteAddress || null,
+          deviceInfo: req.headers["user-agent"] || null,
+          details: { 
+            timestamp: new Date(),
+            gameId,
+            sessionId,
+            totalWon: session.totalWon,
+            totalWagered: session.totalWagered
+          }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad de colección de ganancias:", activityError);
+      }
       
       return res.json({
         success: true,
