@@ -5,12 +5,14 @@ import { setupAuth, hashPassword, comparePasswords } from "./auth";
 import { z } from "zod";
 import path from "path";
 import fs from "fs";
+import multer from "multer";
 import { 
   insertTransactionSchema, 
   insertGameHistorySchema, 
   insertSportsBetSchema, 
   insertSportsEventSchema,
   insertFavoriteSchema,
+  insertUserActivitySchema,
   slotSpinSchema,
   slotDoubleUpSchema,
   slotCollectSchema
@@ -239,20 +241,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
-      const userProfileSchema = z.object({
-        address: z.string().optional(),
-        city: z.string().optional(),
-        state: z.string().optional(),
-        zipCode: z.string().optional(),
-      });
+      // Importamos el esquema de validación desde schema.ts
+      const { profileUpdateSchema } = await import("@shared/schema");
+      const validatedData = profileUpdateSchema.safeParse(req.body);
       
-      const profileData = userProfileSchema.parse(req.body);
+      if (!validatedData.success) {
+        return res.status(400).json({ 
+          message: "Invalid profile data", 
+          errors: validatedData.error.errors 
+        });
+      }
       
-      // Update user profile
-      const updatedUser = await storage.updateUserProfile(req.user.id, profileData);
+      // Update user profile con los nuevos campos
+      const updatedUser = await storage.updateUserProfile(req.user.id, validatedData.data);
       
       if (!updatedUser) {
         return res.status(500).json({ message: "Failed to update profile" });
+      }
+      
+      // Registrar actividad del usuario
+      try {
+        await storage.createUserActivity({
+          userId: req.user.id,
+          activityType: "profile_update",
+          ipAddress: req.ip,
+          deviceInfo: req.headers["user-agent"] || "",
+          details: { 
+            updatedFields: Object.keys(validatedData.data)
+          }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad:", activityError);
+        // No fallamos la petición si falla el registro de actividad
       }
       
       // Remove sensitive data

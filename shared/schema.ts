@@ -25,13 +25,24 @@ export const users = pgTable("users", {
   balance: integer("balance").notNull().default(5000),
   googleId: text("google_id").unique(),
   facebookId: text("facebook_id").unique(),
+  twitterId: text("twitter_id").unique(),
   profileImage: text("profile_image"),
   btcAddress: text("btc_address"),
   ethAddress: text("eth_address"),
   resetToken: text("reset_token"),
   resetTokenExpiry: timestamp("reset_token_expiry"),
   lastLogin: timestamp("last_login"),
+  theme: text("theme").default("dark"), // dark, light, system
+  notificationPreferences: jsonb("notification_preferences").default({
+    email: true,
+    promotions: true,
+    security: true,
+    updates: true
+  }),
+  socialLinks: jsonb("social_links").default({}),
   isVerified: boolean("is_verified").default(false),
+  kycStatus: text("kyc_status").default("not_submitted"), // not_submitted, pending, approved, rejected
+  kycCompletionPercent: integer("kyc_completion_percent").default(0),
   isAdmin: boolean("is_admin").default(false),
   isBanned: boolean("is_banned").default(false),
   banReason: text("ban_reason"),
@@ -153,6 +164,17 @@ export const favorites = pgTable("favorites", {
   gameTitle: text("game_title").notNull(), // Display name of the game
   gameImage: text("game_image"), // Path to game image/thumbnail
   addedAt: timestamp("added_at").notNull().defaultNow()
+});
+
+export const userActivities = pgTable("user_activities", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  activityType: text("activity_type").notNull(), // login, logout, password_change, profile_update, kyc_submit, etc.
+  ipAddress: text("ip_address"),
+  deviceInfo: text("device_info"),
+  location: text("location"),
+  details: jsonb("details"), // Additional activity details
+  createdAt: timestamp("created_at").notNull().defaultNow()
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -287,6 +309,18 @@ export type SlotGame = typeof slotGames.$inferSelect;
 export type InsertSlotSession = z.infer<typeof insertSlotSessionSchema>;
 export type SlotSession = typeof slotSessions.$inferSelect;
 
+export const insertUserActivitySchema = createInsertSchema(userActivities).pick({
+  userId: true,
+  activityType: true,
+  ipAddress: true,
+  deviceInfo: true,
+  location: true,
+  details: true,
+});
+
+export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
+export type UserActivity = typeof userActivities.$inferSelect;
+
 // Auth schemas for login, password reset, etc.
 export const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -314,12 +348,31 @@ export const phoneVerificationSchema = z.object({
 });
 
 export const profileUpdateSchema = z.object({
+  // Información básica
   address: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
   zipCode: z.string().optional(),
   language: z.string().optional(),
   country: z.string().optional(),
+  
+  // Nuevos campos
+  theme: z.enum(["dark", "light", "system"]).optional(),
+  
+  // JSON para preferencias de notificación
+  notificationPreferences: z.object({
+    email: z.boolean().optional(),
+    promotions: z.boolean().optional(),
+    security: z.boolean().optional(),
+    updates: z.boolean().optional(),
+  }).optional(),
+  
+  // JSON para enlaces sociales
+  socialLinks: z.record(z.string(), z.string()).optional(),
+  
+  // Direcciones de criptomonedas
+  btcAddress: z.string().optional(),
+  ethAddress: z.string().optional(),
 });
 
 export const twoFactorSetupSchema = z.object({

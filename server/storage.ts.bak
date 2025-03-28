@@ -866,10 +866,7 @@ export class MemStorage implements IStorage {
     const userActivity: UserActivity = {
       ...activity,
       id,
-      createdAt: now,
-      ipAddress: activity.ipAddress || null,
-      deviceInfo: activity.deviceInfo || null,
-      location: activity.location || null,
+      timestamp: now,
       details: activity.details || {}
     };
     
@@ -880,7 +877,7 @@ export class MemStorage implements IStorage {
   async getUserActivities(userId: number, limit?: number): Promise<UserActivity[]> {
     let activities = Array.from(this.userActivities.values())
       .filter(activity => activity.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     if (limit && limit > 0) {
       activities = activities.slice(0, limit);
@@ -891,7 +888,7 @@ export class MemStorage implements IStorage {
   
   async getAllUserActivities(limit?: number): Promise<UserActivity[]> {
     let activities = Array.from(this.userActivities.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     if (limit && limit > 0) {
       activities = activities.slice(0, limit);
