@@ -37,6 +37,54 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+/**
+ * Middleware para registrar actividades de usuario
+ * @param activityType Tipo de actividad (login, logout, etc.)
+ * @param getDetails Función para obtener detalles adicionales de la actividad
+ */
+function logUserActivity(activityType: string, getDetails?: (req: Request) => any) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Solo registrar actividad si hay un usuario autenticado
+    if (req.isAuthenticated() && req.user) {
+      const userId = req.user.id;
+      const ipAddress = req.ip || req.socket.remoteAddress || null;
+      const userAgent = req.headers['user-agent'] || null;
+      
+      // Extraer información básica del dispositivo a partir del user-agent
+      let deviceInfo = null;
+      if (userAgent) {
+        const isMobile = /mobile|android|iphone|ipad|ipod/i.test(userAgent);
+        const browser = userAgent.match(/(chrome|safari|firefox|opera|edge|ie|trident)\/?\s*(\d+(\.\d+)?)/i);
+        const os = userAgent.match(/(windows|mac|linux|android|ios|iphone|ipad)[\s\/]?([^;]*)/i);
+        
+        deviceInfo = {
+          type: isMobile ? 'mobile' : 'desktop',
+          browser: browser ? browser[1] : 'unknown',
+          os: os ? os[1] : 'unknown'
+        };
+      }
+      
+      // Obtener detalles personalizados si se proporcionó la función
+      const details = getDetails ? getDetails(req) : {};
+      
+      // Crear la actividad en segundo plano (no esperamos la respuesta)
+      storage.createUserActivity({
+        userId,
+        activityType,
+        ipAddress,
+        deviceInfo: deviceInfo ? JSON.stringify(deviceInfo) : null,
+        location: null, // No implementamos geolocalización por ahora
+        details
+      }).catch(err => {
+        console.error('Error al registrar actividad de usuario:', err);
+      });
+    }
+    
+    // Continuar con el flujo normal
+    next();
+  };
+}
+
 // Initialize default slot games for testing
 async function initializeDefaultSlotGames() {
   try {
@@ -320,6 +368,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to update password" });
       }
       
+      // Registrar actividad de cambio de contraseña
+      try {
+        await storage.createUserActivity({
+          userId: req.user.id,
+          activityType: "password_change",
+          ipAddress: req.ip || null,
+          deviceInfo: req.headers["user-agent"] || null,
+          details: { timestamp: new Date() }
+        });
+      } catch (activityError) {
+        console.error("Error registrando actividad de cambio de contraseña:", activityError);
+        // No fallamos la petición si falla el registro de actividad
+      }
+      
       return res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
       console.error("Error changing password:", error);
@@ -327,6 +389,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid password data", errors: error.errors });
       }
       return res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+  
+  // API endpoints para obtener actividades de usuario
+  app.get('/api/user/activities', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      
+      const activities = await storage.getUserActivities(req.user.id, limit);
+      
+      return res.status(200).json({
+        activities
+      });
+    } catch (error) {
+      console.error("Error obteniendo actividades de usuario:", error);
+      return res.status(500).json({ message: "Error al obtener actividades de usuario" });
+    }
+  });
+  
+  // API endpoint para administradores - ver todas las actividades de usuario
+  app.get('/api/admin/user-activities', isAdmin, async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      
+      let activities;
+      if (userId) {
+        activities = await storage.getUserActivities(userId, limit);
+      } else {
+        activities = await storage.getAllUserActivities(limit);
+      }
+      
+      return res.status(200).json({
+        activities
+      });
+    } catch (error) {
+      console.error("Error obteniendo actividades de usuarios:", error);
+      return res.status(500).json({ message: "Error al obtener actividades de usuarios" });
     }
   });
   
