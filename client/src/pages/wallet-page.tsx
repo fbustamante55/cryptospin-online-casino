@@ -186,26 +186,13 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#0F1923] text-white">
-      <Sidebar />
-      
+    <div className="min-h-screen bg-[#0F1923] text-white">
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
+        {/* Header - Removed duplicate header */}
         <header className="bg-[#0F1923] border-b border-gray-800 sticky top-0 z-10">
           <div className="flex items-center justify-between h-16 px-4">
-            <div className="flex items-center md:hidden">
-              <button type="button" className="text-gray-400 hover:text-white focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <h1 className="font-heading font-bold text-xl text-white tracking-wider ml-3">
-                <span className="text-[#00FFAA]">Crypto</span>Spin
-              </h1>
-            </div>
-            
-            <div className="md:flex flex-1 px-4 justify-center">
-              <h1 className="text-xl font-heading font-bold">Wallet</h1>
+            <div className="flex-1 text-center">
+              <h1 className="text-xl font-heading font-bold">My Wallet</h1>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -609,8 +596,6 @@ export default function WalletPage() {
           </div>
         </main>
       </div>
-      
-      <MobileNav />
     </div>
   );
 }
