@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth } from "./auth";
+import { setupAuth, hashPassword, comparePasswords } from "./auth";
 import { z } from "zod";
 import path from "path";
 import fs from "fs";
@@ -231,6 +231,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating language:", error);
       return res.status(500).json({ message: "Failed to update language" });
+    }
+  });
+  
+  // Update user profile information
+  app.patch('/api/user/profile', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const userProfileSchema = z.object({
+        address: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zipCode: z.string().optional(),
+      });
+      
+      const profileData = userProfileSchema.parse(req.body);
+      
+      // Update user profile
+      const updatedUser = await storage.updateUserProfile(req.user.id, profileData);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update profile" });
+      }
+      
+      // Remove sensitive data
+      const { password, ...safeUser } = updatedUser;
+      return res.status(200).json(safeUser);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      }
+      return res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+  
+  // Change user password
+  app.post('/api/user/change-password', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const passwordChangeSchema = z.object({
+        currentPassword: z.string().min(8, "Password must be at least 8 characters"),
+        newPassword: z.string().min(8, "Password must be at least 8 characters"),
+      });
+      
+      const { currentPassword, newPassword } = passwordChangeSchema.parse(req.body);
+      
+      // Get current user
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const isPasswordValid = await comparePasswords(currentPassword, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await hashPassword(newPassword);
+      
+      // Update password
+      const updatedUser = await storage.updatePassword(user.id, hashedPassword);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update password" });
+      }
+      
+      return res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid password data", errors: error.errors });
+      }
+      return res.status(500).json({ message: "Failed to change password" });
     }
   });
   
