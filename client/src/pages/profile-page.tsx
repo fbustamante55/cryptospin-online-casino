@@ -6,10 +6,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { phoneVerificationSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Sidebar } from "@/components/ui/sidebar";
-import { MobileNav } from "@/components/ui/mobile-nav";
-import { UserDropdown } from "@/components/ui/user-dropdown";
-import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -364,385 +360,401 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#0e1824] text-white">
-      <Sidebar />
+    <>
+      {/* Page Title */}
+      <div className="py-4 px-6 border-b border-[#1c2b3a]">
+        <h1 className="text-xl font-heading font-bold">My Profile</h1>
+      </div>
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Page Title */}
-        <div className="py-4 px-6 border-b border-[#1c2b3a]">
-          <h1 className="text-xl font-heading font-bold">My Profile</h1>
-        </div>
-        
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="max-w-5xl mx-auto">
-            <div className="mb-6 md:mb-8 p-4 md:p-6 bg-[#1A2634] rounded-xl border border-gray-800">
-              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-                <div className="relative">
-                  <Avatar className="h-24 w-24 rounded-xl border-4 border-[#09b66d]/10">
-                    {user?.profileImage ? (
-                      <AvatarImage src={user.profileImage} />
-                    ) : null}
-                    <AvatarFallback className="bg-[#0e1824] text-[#09b66d]">
-                      {user?.username ? user.username.substring(0, 2).toUpperCase() : "CS"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -bottom-2 -right-2 bg-[#09b66d] rounded-full p-1.5">
-                    <User className="h-4 w-4 text-[#0e1824]" />
-                  </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-6 md:mb-8 p-4 md:p-6 bg-[#1A2634] rounded-xl border border-gray-800">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+              <div className="relative">
+                <Avatar className="h-24 w-24 rounded-xl border-4 border-[#09b66d]/10">
+                  {user?.profileImage ? (
+                    <AvatarImage src={user.profileImage} />
+                  ) : null}
+                  <AvatarFallback className="bg-[#0e1824] text-[#09b66d]">
+                    {user?.username ? user.username.substring(0, 2).toUpperCase() : "CS"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-2 -right-2 bg-[#09b66d] rounded-full p-1.5">
+                  <User className="h-4 w-4 text-[#0e1824]" />
                 </div>
+              </div>
+              
+              <div className="text-center md:text-left flex-1">
+                <h2 className="text-2xl font-bold">{user?.username}</h2>
+                <div className="mt-1 text-gray-400">{user?.email}</div>
                 
-                <div className="text-center md:text-left flex-1">
-                  <h2 className="text-2xl font-bold">{user?.username}</h2>
-                  <div className="mt-1 text-gray-400">{user?.email}</div>
+                <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
+                  <Badge variant="outline" className="bg-[#0e1824]/80 text-[#09b66d] border-[#09b66d]/30">
+                    Member
+                  </Badge>
                   
-                  <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
-                    <Badge variant="outline" className="bg-[#0e1824]/80 text-[#09b66d] border-[#09b66d]/30">
-                      Member
+                  {user?.phoneVerified && (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-green-400 border-green-500/30">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Phone Verified
                     </Badge>
-                    
-                    {user?.phoneVerified && (
-                      <Badge variant="outline" className="bg-[#0F1923]/80 text-green-400 border-green-500/30">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Phone Verified
-                      </Badge>
-                    )}
-                    
-                    {user?.isVerified ? (
-                      <Badge variant="outline" className="bg-[#0F1923]/80 text-green-400 border-green-500/30">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        KYC Verified
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-[#0F1923]/80 text-yellow-500 border-yellow-500/30">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        KYC Required
-                      </Badge>
-                    )}
-                    
-                    {user?.twoFactorEnabled && (
-                      <Badge variant="outline" className="bg-[#0F1923]/80 text-blue-400 border-blue-500/30">
-                        <Shield className="h-3 w-3 mr-1" />
-                        2FA Active
-                      </Badge>
-                    )}
-                  </div>
+                  )}
+                  
+                  {user?.isVerified ? (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-green-400 border-green-500/30">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      KYC Verified
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-yellow-500 border-yellow-500/30">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      KYC Required
+                    </Badge>
+                  )}
+                  
+                  {user?.twoFactorEnabled && (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-blue-400 border-blue-500/30">
+                      <Shield className="h-3 w-3 mr-1" />
+                      2FA Active
+                    </Badge>
+                  )}
                 </div>
-                
-                <div className="flex flex-col items-center gap-2">
-                  <div className="text-center">
-                    <div className="text-lg font-bold">{user?.balance}</div>
-                    <div className="text-xs text-gray-400">Balance</div>
-                  </div>
+              </div>
+              
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-center">
+                  <div className="text-lg font-bold">{user?.balance}</div>
+                  <div className="text-xs text-gray-400">Balance</div>
                 </div>
               </div>
             </div>
+          </div>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="bg-[#0F1923] border border-gray-800 mb-6">
+              <TabsTrigger 
+                value="profile" 
+                className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
+              >
+                Profile
+              </TabsTrigger>
+              <TabsTrigger 
+                value="security" 
+                className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
+              >
+                Security
+              </TabsTrigger>
+            </TabsList>
             
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-              <TabsList className="bg-[#0F1923] border border-gray-800 mb-6">
-                <TabsTrigger 
-                  value="profile" 
-                  className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
-                >
-                  Profile
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="security" 
-                  className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
-                >
-                  Security
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="profile" className="m-0">
-                <Form {...profileUpdateForm}>
-                  <form onSubmit={profileUpdateForm.handleSubmit(updateProfile)}>
-                    <Card className="bg-[#1A2634] border-gray-800">
-                      <CardHeader>
-                        <CardTitle>Profile Information</CardTitle>
-                        <CardDescription>
-                          Update your account information and personal details
-                        </CardDescription>
-                      </CardHeader>
-                      
-                      <CardContent>
-                        <div className="space-y-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium text-gray-300">Username</label>
+            <TabsContent value="profile" className="m-0">
+              <Form {...profileUpdateForm}>
+                <form onSubmit={profileUpdateForm.handleSubmit(updateProfile)}>
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader>
+                      <CardTitle>Profile Information</CardTitle>
+                      <CardDescription>
+                        Update your account information and personal details
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Username</label>
+                            <Input 
+                              value={user?.username} 
+                              className="bg-[#0F1923] border-gray-800" 
+                              disabled 
+                            />
+                            <p className="text-xs text-gray-500">Usernames cannot be changed</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Email Address</label>
+                            <div className="relative">
                               <Input 
-                                value={user?.username} 
+                                value={user?.email} 
                                 className="bg-[#0F1923] border-gray-800" 
                                 disabled 
                               />
-                              <p className="text-xs text-gray-500">Usernames cannot be changed</p>
+                              {!user?.isVerified && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-xs border-yellow-500 text-yellow-500 hover:text-yellow-400 hover:border-yellow-400"
+                                  onClick={() => setShowEmailVerificationDialog(true)}
+                                >
+                                  Verify
+                                </Button>
+                              )}
                             </div>
-                            
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium text-gray-300">Email Address</label>
-                              <div className="relative">
-                                <Input 
-                                  value={user?.email} 
-                                  className="bg-[#0F1923] border-gray-800" 
-                                  disabled 
-                                />
-                                {!user?.isVerified && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-xs border-yellow-500 text-yellow-500 hover:text-yellow-400 hover:border-yellow-400"
-                                    onClick={() => setShowEmailVerificationDialog(true)}
-                                  >
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium text-gray-300">Phone Number</label>
-                              <div className="relative">
-                                <Input 
-                                  value={user?.phoneNumber || "Not provided"} 
-                                  className="bg-[#0F1923] border-gray-800" 
-                                  disabled 
-                                />
-                                {!user?.phoneVerified && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-xs border-yellow-500 text-yellow-500 hover:text-yellow-400 hover:border-yellow-400"
-                                    onClick={() => setShowPhoneVerificationDialog(true)}
-                                  >
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium text-gray-300">Country</label>
-                              <Input 
-                                value={user?.country || "Not provided"} 
-                                className="bg-[#0F1923] border-gray-800" 
-                                disabled 
-                              />
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <label className="text-sm font-medium text-gray-300 block mb-2">Address</label>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <FormField
-                                control={profileUpdateForm.control}
-                                name="address"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="Street Address" 
-                                        className="bg-[#0F1923] border-gray-800" 
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={profileUpdateForm.control}
-                                name="city"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="City" 
-                                        className="bg-[#0F1923] border-gray-800" 
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={profileUpdateForm.control}
-                                name="state"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="State/Province" 
-                                        className="bg-[#0F1923] border-gray-800" 
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={profileUpdateForm.control}
-                                name="zipCode"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="Zip/Postal Code" 
-                                        className="bg-[#0F1923] border-gray-800" 
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                            <p className="text-sm text-gray-400 mt-2">Required for KYC verification and withdrawals</p>
-                          </div>
-                          
-                          <div className="flex justify-end">
-                            <Button 
-                              type="submit"
-                              className="bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
-                              disabled={isSubmittingProfile}
-                            >
-                              {isSubmittingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                              Save Changes
-                            </Button>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </form>
-                </Form>
-              </TabsContent>
-              
-              <TabsContent value="security" className="m-0">
-                <Card className="bg-[#1A2634] border-gray-800 mb-6">
-                  <CardHeader>
-                    <CardTitle>Security & Verification</CardTitle>
-                    <CardDescription>
-                      Manage your security settings and account verification
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-6">
-                    {/* Password Section */}
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Phone Number</label>
+                            <div className="relative">
+                              <Input 
+                                value={user?.phoneNumber || "Not provided"} 
+                                className="bg-[#0F1923] border-gray-800" 
+                                disabled 
+                              />
+                              {!user?.phoneVerified && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-xs border-yellow-500 text-yellow-500 hover:text-yellow-400 hover:border-yellow-400"
+                                  onClick={() => setShowPhoneVerificationDialog(true)}
+                                >
+                                  Verify
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Country</label>
+                            <Input 
+                              value={user?.country || "Not provided"} 
+                              className="bg-[#0F1923] border-gray-800" 
+                              disabled 
+                            />
+                          </div>
+                        </div>
+                        
                         <div>
-                          <h3 className="text-base font-medium text-white">Change Password</h3>
-                          <p className="text-sm text-gray-400">Update your password regularly for better security</p>
+                          <label className="text-sm font-medium text-gray-300 block mb-2">Address</label>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="address"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Street Address" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="city"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="City" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="state"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="State/Province" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="zipCode"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Zip/Postal Code" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <p className="text-sm text-gray-400 mt-2">Required for KYC verification and withdrawals</p>
                         </div>
+                        
+                        <div className="flex justify-end">
+                          <Button 
+                            type="submit"
+                            className="bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+                            disabled={isSubmittingProfile}
+                          >
+                            {isSubmittingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Changes
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </form>
+              </Form>
+            </TabsContent>
+            
+            <TabsContent value="security" className="m-0">
+              <Card className="bg-[#1A2634] border-gray-800 mb-6">
+                <CardHeader>
+                  <CardTitle>Security & Verification</CardTitle>
+                  <CardDescription>
+                    Manage your security settings and account verification
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  {/* Password Section */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">Change Password</h3>
+                        <p className="text-sm text-gray-400">Update your password regularly for better security</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                        onClick={() => setShowPasswordChangeDialog(true)}
+                      >
+                        <Lock className="h-4 w-4 mr-2" />
+                        Change
+                      </Button>
+                    </div>
+                    <Separator className="bg-gray-800" />
+                  </div>
+                  
+                  {/* 2FA Section */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">Two-Factor Authentication</h3>
+                        <p className="text-sm text-gray-400">Add an extra layer of security to your account</p>
+                      </div>
+                      
+                      {user?.twoFactorEnabled ? (
+                        <Button 
+                          variant="outline" 
+                          className="border-gray-700 text-red-400 hover:text-red-300 hover:border-red-400"
+                          onClick={() => setShowDisable2FADialog(true)}
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Disable
+                        </Button>
+                      ) : (
                         <Button 
                           variant="outline" 
                           className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
-                          onClick={() => setShowPasswordChangeDialog(true)}
+                          onClick={() => setShowSetup2FADialog(true)}
                         >
-                          <Lock className="h-4 w-4 mr-2" />
-                          Change
+                          <Shield className="h-4 w-4 mr-2" />
+                          Enable
+                        </Button>
+                      )}
+                    </div>
+                    <Separator className="bg-gray-800" />
+                  </div>
+                  
+                  {/* KYC Verification */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">KYC Verification</h3>
+                        <p className="text-sm text-gray-400">Verify your identity to unlock higher withdrawal limits</p>
+                      </div>
+                      
+                      {user?.isVerified ? (
+                        <Badge variant="outline" className="h-9 py-2 px-4 border-green-500/30 text-green-400">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Verified
+                        </Badge>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                          onClick={() => setShowKYCDialog(true)}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Verify
+                        </Button>
+                      )}
+                    </div>
+                    <Separator className="bg-gray-800" />
+                  </div>
+                  
+                  {/* Wallet Addresses */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">Cryptocurrency Wallets</h3>
+                        <p className="text-sm text-gray-400">Manage your cryptocurrency wallet addresses</p>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-gray-700 hover:border-[#f7931a] hover:text-[#f7931a]"
+                          onClick={() => {
+                            setSelectedCrypto("BTC");
+                            setShowAddWalletDialog(true);
+                          }}
+                        >
+                          BTC
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-gray-700 hover:border-[#627eea] hover:text-[#627eea]"
+                          onClick={() => {
+                            setSelectedCrypto("ETH");
+                            setShowAddWalletDialog(true);
+                          }}
+                        >
+                          ETH
                         </Button>
                       </div>
-                      <Separator className="bg-gray-800" />
                     </div>
                     
-                    {/* 2FA Section */}
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-base font-medium text-white">Two-Factor Authentication</h3>
-                          <p className="text-sm text-gray-400">Add an extra layer of security to your account</p>
-                        </div>
-                        
-                        {user?.twoFactorEnabled ? (
-                          <Button 
-                            variant="outline" 
-                            className="border-gray-700 text-red-400 hover:text-red-300 hover:border-red-400"
-                            onClick={() => setShowDisable2FADialog(true)}
-                          >
-                            <Shield className="h-4 w-4 mr-2" />
-                            Disable
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="outline" 
-                            className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
-                            onClick={() => setShowSetup2FADialog(true)}
-                          >
-                            <Shield className="h-4 w-4 mr-2" />
-                            Enable
-                          </Button>
-                        )}
-                      </div>
-                      <Separator className="bg-gray-800" />
-                    </div>
-                    
-                    {/* KYC Verification */}
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-base font-medium text-white">Identity Verification (KYC)</h3>
-                          <p className="text-sm text-gray-400">
-                            Verify your identity to unlock withdrawals and higher limits
-                          </p>
-                        </div>
-                        
-                        {user?.isVerified ? (
-                          <Badge className="px-3 py-1 bg-green-500/20 text-green-400 border-green-500/30">
-                            <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-                            Verified
-                          </Badge>
-                        ) : (
-                          <Button 
-                            variant="outline" 
-                            className="border-yellow-600/60 text-yellow-500 hover:text-yellow-400 hover:border-yellow-500"
-                            onClick={() => setShowKYCDialog(true)}
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Start KYC
-                          </Button>
-                        )}
-                      </div>
-                      <Separator className="bg-gray-800" />
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-[#1A2634] border-gray-800">
-                  <CardHeader>
-                    <CardTitle>Wallet Addresses</CardTitle>
-                    <CardDescription>
-                      Manage your cryptocurrency withdrawal addresses
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="bg-[#0F1923] rounded-lg border border-gray-800 p-4">
+                    <div className="grid grid-cols-1 gap-4 mt-4">
+                      <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800">
                         <div className="flex justify-between items-center">
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F9C846] to-[#F7931A] flex items-center justify-center mr-3">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.7-6.2L15.48 2.9" />
-                              </svg>
+                          <div className="flex items-center gap-2">
+                            <div className="bg-[#f7931a]/10 p-2 rounded-full">
+                              <Coins className="h-5 w-5 text-[#f7931a]" />
                             </div>
                             <div>
-                              <div className="font-medium mb-1">Bitcoin (BTC)</div>
-                              <div className="text-sm text-gray-400 truncate max-w-xs">
-                                {user?.btcAddress || "No address added"}
-                              </div>
+                              <h4 className="font-medium">Bitcoin (BTC)</h4>
+                              <p className="text-xs text-gray-400 truncate max-w-[220px] md:max-w-xs">
+                                {user?.btcAddress || "No address set"}
+                              </p>
                             </div>
                           </div>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="border-gray-700"
+                            className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d] h-8 px-3"
                             onClick={() => {
                               setSelectedCrypto("BTC");
                               setShowAddWalletDialog(true);
@@ -753,32 +765,23 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       
-                      <div className="bg-[#0F1923] rounded-lg border border-gray-800 p-4">
+                      <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800">
                         <div className="flex justify-between items-center">
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#627EEA] to-[#3C3C3D] flex items-center justify-center mr-3">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 32 32">
-                                <g fill="none" fillRule="evenodd">
-                                  <path fill="#FFF" d="M16 16v7.2L8 17.5z" />
-                                  <path fill="#FFF" fillOpacity=".8" d="M16 16 8 17.5 16 8.8z" />
-                                  <path fill="#FFF" d="M16 16v7.2l8-5.7z" />
-                                  <path fill="#FFF" fillOpacity=".8" d="M16 16 24 17.5 16 8.8z" />
-                                  <path fill="#FFF" d="m16 22.4-8-4.6L16 24z" />
-                                  <path fill="#FFF" fillOpacity=".8" d="M16 24V16l8 5.1z" />
-                                </g>
-                              </svg>
+                          <div className="flex items-center gap-2">
+                            <div className="bg-[#627eea]/10 p-2 rounded-full">
+                              <Coins className="h-5 w-5 text-[#627eea]" />
                             </div>
                             <div>
-                              <div className="font-medium mb-1">Ethereum (ETH)</div>
-                              <div className="text-sm text-gray-400 truncate max-w-xs">
-                                {user?.ethAddress || "No address added"}
-                              </div>
+                              <h4 className="font-medium">Ethereum (ETH)</h4>
+                              <p className="text-xs text-gray-400 truncate max-w-[220px] md:max-w-xs">
+                                {user?.ethAddress || "No address set"}
+                              </p>
                             </div>
                           </div>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="border-gray-700"
+                            className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d] h-8 px-3"
                             onClick={() => {
                               setSelectedCrypto("ETH");
                               setShowAddWalletDialog(true);
@@ -789,15 +792,13 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-      </div>
-      
-      <MobileNav />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
       
       {/* Phone Verification Dialog */}
       <Dialog open={showPhoneVerificationDialog} onOpenChange={setShowPhoneVerificationDialog}>
@@ -1143,6 +1144,82 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
       
+      {/* KYC Dialog */}
+      <Dialog open={showKYCDialog} onOpenChange={setShowKYCDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">KYC Verification</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Verify your identity to unlock higher withdrawal limits
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-6">
+            <Alert className="bg-[#0F1923] border-gray-800">
+              <CheckCircle className="h-4 w-4 text-[#09b66d]" />
+              <AlertTitle>Increased Limits</AlertTitle>
+              <AlertDescription>
+                Completing KYC verification will increase your withdrawal limits and give you access to additional features.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm font-medium">Front Side</p>
+                    <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                  </div>
+                </div>
+                
+                <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm font-medium">Back Side</p>
+                    <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">ID Type</label>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" className="border-gray-700 bg-[#0F1923] data-[state=active]:bg-[#09b66d]/20 data-[state=active]:text-[#09b66d]">
+                    Passport
+                  </Button>
+                  <Button variant="outline" className="border-gray-700 bg-[#0F1923] data-[state=active]:bg-[#09b66d]/20 data-[state=active]:text-[#09b66d]">
+                    National ID
+                  </Button>
+                  <Button variant="outline" className="border-gray-700 bg-[#0F1923] data-[state=active]:bg-[#09b66d]/20 data-[state=active]:text-[#09b66d]">
+                    Driver's License
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                <div className="flex flex-col items-center">
+                  <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm font-medium">Address Document</p>
+                  <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+              disabled={isUploadingKYC}
+              onClick={submitKYC}
+            >
+              {isUploadingKYC && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Submit Verification
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       {/* Add Wallet Dialog */}
       <Dialog open={showAddWalletDialog} onOpenChange={setShowAddWalletDialog}>
         <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
@@ -1159,22 +1236,6 @@ export default function ProfilePage() {
             <form onSubmit={walletAddressForm.handleSubmit(addWalletAddress)} className="space-y-4">
               <FormField
                 control={walletAddressForm.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem className="hidden">
-                    <FormControl>
-                      <Input 
-                        type="hidden"
-                        {...field}
-                        value={selectedCrypto}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={walletAddressForm.control}
                 name="address"
                 render={({ field }) => (
                   <FormItem>
@@ -1182,13 +1243,12 @@ export default function ProfilePage() {
                     <FormControl>
                       <Input 
                         placeholder={`Enter your ${selectedCrypto} address`}
-                        className="bg-[#0F1923] border-gray-800 font-mono text-sm" 
+                        className="bg-[#0F1923] border-gray-800" 
                         {...field}
-                        defaultValue={user?.[selectedCrypto === "BTC" ? "btcAddress" : "ethAddress"] || ""}
                       />
                     </FormControl>
                     <FormDescription className="text-gray-500">
-                      Double-check your address carefully. Wrong addresses can lead to permanent loss of funds.
+                      Make sure to double-check your wallet address to avoid loss of funds
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -1209,87 +1269,6 @@ export default function ProfilePage() {
           </Form>
         </DialogContent>
       </Dialog>
-      
-      {/* KYC Verification Dialog */}
-      <Dialog open={showKYCDialog} onOpenChange={setShowKYCDialog}>
-        <DialogContent className="bg-[#1A2634] border-gray-800 text-white sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Identity Verification (KYC)</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Complete the KYC process to unlock withdrawals and other features.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4 space-y-6">
-            <Alert className="bg-[#0F1923] border-gray-800">
-              <AlertCircle className="h-4 w-4 text-[#09b66d]" />
-              <AlertTitle>Why we need this</AlertTitle>
-              <AlertDescription>
-                KYC verification is required to comply with regulations and to protect against fraud and money laundering.
-              </AlertDescription>
-            </Alert>
-            
-            <div className="space-y-4">
-              <h3 className="text-base font-medium text-white">Required Documents</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-white">Government-Issued ID</h4>
-                  <p className="text-xs text-gray-400">Upload a passport, driver's license, or national ID card</p>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                    <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="p-2 rounded-full bg-[#0F1923]">
-                          <Upload className="h-5 w-5 text-[#09b66d]" />
-                        </div>
-                        <p className="text-sm font-medium">Front Side</p>
-                        <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
-                      </div>
-                    </div>
-                    
-                    <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="p-2 rounded-full bg-[#0F1923]">
-                          <Upload className="h-5 w-5 text-[#09b66d]" />
-                        </div>
-                        <p className="text-sm font-medium">Back Side</p>
-                        <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-white">Proof of Address</h4>
-                  <p className="text-xs text-gray-400">Upload a utility bill or bank statement from the last 3 months</p>
-                  
-                  <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="p-2 rounded-full bg-[#0F1923]">
-                        <Upload className="h-5 w-5 text-[#09b66d]" />
-                      </div>
-                      <p className="text-sm font-medium">Address Document</p>
-                      <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
-              disabled={isUploadingKYC}
-              onClick={submitKYC}
-            >
-              {isUploadingKYC && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Submit Verification
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </>
   );
 }
