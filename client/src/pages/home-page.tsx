@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
-import { Search, Gift, Bell, ChevronDown } from "lucide-react";
+import { Search, Gift, Bell, ChevronDown, Sparkles, Clock, TrendingUp, Star } from "lucide-react";
 // Importar el icono ChevronDown como SVG por si hay problemas con lucide-react
 const ChevronDownIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -8,20 +8,72 @@ const ChevronDownIcon = () => (
   </svg>
 );
 import { useTranslation } from "react-i18next";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CurrencyDropdown } from "@/components/ui/currency-dropdown";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { LiveActivityTable } from "@/components/ui/live-activity-table";
 import { DepositModal } from "@/components/ui/deposit-modal";
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 
 export default function HomePage() {
   const { t } = useTranslation();
-  // Estado para el modal de depósito (mantener por ahora para compatibilidad)
+  const { user } = useAuth();
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [activeGameCategory, setActiveGameCategory] = useState("all");
+  
+  // Obtener los juegos favoritos del usuario
+  const { data: favorites, isLoading: isLoadingFavorites } = useQuery({
+    queryKey: ["/api/favorites"],
+    enabled: !!user
+  });
+  
+  // Obtener las últimas actividades del usuario (juegos recientes)
+  const { data: recentActivities, isLoading: isLoadingRecentActivities } = useQuery({
+    queryKey: ["/api/user/activities"],
+    queryFn: async () => {
+      // Solo intentar obtener actividades si el usuario está autenticado
+      if (!user) return { activities: [] };
+      
+      const res = await fetch("/api/user/activities?limit=5&type=wallet_bet");
+      if (!res.ok) {
+        throw new Error("Failed to fetch recent activities");
+      }
+      return res.json();
+    },
+    enabled: !!user
+  });
+  
+  // Función para obtener juegos recientes del usuario
+  const getRecentGames = () => {
+    if (!recentActivities || !recentActivities.activities) return [];
+    
+    // Filtrar actividades de tipo wallet_bet y extraer nombres de juego únicos
+    const gameSet = new Set<string>();
+    const games: Array<{name: string, timestamp: Date | string}> = [];
+    
+    if (recentActivities.activities && Array.isArray(recentActivities.activities)) {
+      recentActivities.activities.forEach((activity: any) => {
+        if (activity.gameType && !gameSet.has(activity.gameType)) {
+          gameSet.add(activity.gameType);
+          games.push({
+            name: activity.gameType,
+            timestamp: activity.timestamp
+          });
+        }
+      });
+    }
+    
+    return games.slice(0, 5); // Retornar máximo 5 juegos
+  };
   
   return (
     <>
-      {/* Modal de depósito - Mantener para compatibilidad, pero podría eliminarse más adelante */}
       <DepositModal 
         isOpen={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}
@@ -30,6 +82,24 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#0e1824]">
         <div className="max-w-7xl mx-auto">
+        
+          {/* Mensaje de bienvenida personalizado */}
+          {user && (
+            <div className="mb-6 p-4 bg-[#1A2634] rounded-xl border border-gray-800">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-bold text-white">¡Bienvenido, {user.username}!</h2>
+                  <p className="text-gray-400 mt-1">Tu balance actual: <span className="text-[#09b66d] font-bold">{user.balance} créditos</span></p>
+                </div>
+                <button 
+                  onClick={() => setIsDepositModalOpen(true)}
+                  className="bg-[#09b66d] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#09b66d]/90 transition-colors"
+                >
+                  Depositar
+                </button>
+              </div>
+            </div>
+          )}
           {/* Banner promocional con carrusel */}
           <div className="rounded-xl overflow-hidden mb-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -117,61 +187,121 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Navegación por categorías */}
+          {/* Tabs para categorías */}
           <div className="mb-8">
-            <nav className="flex overflow-x-auto pb-2 hide-scrollbar">
-              <div className="flex space-x-1 md:space-x-2">
-                <button className="whitespace-nowrap flex items-center space-x-2 bg-[#09b66d] text-white py-2 px-4 rounded-md font-medium text-sm">
+            <Tabs defaultValue="all" onValueChange={setActiveGameCategory}>
+              <TabsList className="bg-[#192531] border border-[#1c2b3a] w-full h-auto flex flex-wrap md:flex-nowrap overflow-x-auto hide-scrollbar">
+                <TabsTrigger 
+                  value="all" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                   </svg>
                   <span>Lobby</span>
-                </button>
-                <button className="whitespace-nowrap flex items-center space-x-2 bg-[#192531] hover:bg-[#1c2b3a] text-white py-2 px-4 rounded-md font-medium text-sm transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                  </svg>
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="originals" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
+                  <Sparkles className="w-4 h-4" />
                   <span>Originales</span>
-                </button>
-                <button className="whitespace-nowrap flex items-center space-x-2 bg-[#192531] hover:bg-[#1c2b3a] text-white py-2 px-4 rounded-md font-medium text-sm transition-colors">
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="slots" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span>Slots</span>
-                </button>
-                <button className="whitespace-nowrap flex items-center space-x-2 bg-[#192531] hover:bg-[#1c2b3a] text-white py-2 px-4 rounded-md font-medium text-sm transition-colors">
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="live" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span>Casino en Vivo</span>
-                </button>
-                <button className="whitespace-nowrap flex items-center space-x-2 bg-[#192531] hover:bg-[#1c2b3a] text-white py-2 px-4 rounded-md font-medium text-sm transition-colors">
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="tv" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                   </svg>
                   <span>Concursos de TV</span>
-                </button>
-                <button className="whitespace-nowrap flex items-center space-x-2 bg-[#192531] hover:bg-[#1c2b3a] text-white py-2 px-4 rounded-md font-medium text-sm transition-colors">
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="exclusive" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                   </svg>
-                  <span>Exclusivos de Stake</span>
-                </button>
-                <button className="whitespace-nowrap flex items-center space-x-2 bg-[#192531] hover:bg-[#1c2b3a] text-white py-2 px-4 rounded-md font-medium text-sm transition-colors">
+                  <span>Exclusivos</span>
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="new" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span>Lanzamientos</span>
-                </button>
-              </div>
-            </nav>
+                </TabsTrigger>
+                
+                {user && (
+                  <TabsTrigger 
+                    value="favorites" 
+                    className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                  >
+                    <Star className="w-4 h-4" />
+                    <span>Favoritos</span>
+                  </TabsTrigger>
+                )}
+                
+                {user && (
+                  <TabsTrigger 
+                    value="recent" 
+                    className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                  >
+                    <Clock className="w-4 h-4" />
+                    <span>Recientes</span>
+                  </TabsTrigger>
+                )}
+              </TabsList>
+            </Tabs>
           </div>
 
-          {/* Sección de Originales */}
+          {/* Área de juegos para la categoría seleccionada */}
           <div className="mb-10">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white text-xl font-bold">Originales</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-white text-xl font-bold">
+                  {activeGameCategory === 'all' && 'Juegos Populares'}
+                  {activeGameCategory === 'originals' && 'Originales'}
+                  {activeGameCategory === 'slots' && 'Slots'}
+                  {activeGameCategory === 'live' && 'Casino en Vivo'}
+                  {activeGameCategory === 'tv' && 'Concursos de TV'}
+                  {activeGameCategory === 'exclusive' && 'Exclusivos'}
+                  {activeGameCategory === 'new' && 'Nuevos Lanzamientos'}
+                  {activeGameCategory === 'favorites' && 'Tus Favoritos'}
+                  {activeGameCategory === 'recent' && 'Jugados Recientemente'}
+                </h2>
+                {activeGameCategory === 'favorites' && (
+                  <span className="text-gray-400 text-xs">({favorites?.length || 0} juegos)</span>
+                )}
+              </div>
               <div className="flex space-x-2">
                 <button className="bg-[#192531] p-1 rounded-md hover:bg-[#1c2b3a] transition-colors">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -182,6 +312,9 @@ export default function HomePage() {
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                   </svg>
+                </button>
+                <button className="bg-[#192531] text-xs py-1 px-2 rounded-md hover:bg-[#1c2b3a] transition-colors text-gray-300">
+                  Ver Todos
                 </button>
               </div>
             </div>
