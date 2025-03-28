@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -8,6 +8,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,8 +33,56 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, CheckCircle, AlertCircle, Mail, Phone, Shield, User, Lock, Upload, Coins } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Mail, Phone, Shield, User, Lock, Upload, Coins, LogIn, LogOut, CreditCard, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+// Componente de elemento de actividad
+interface ActivityItemProps {
+  type: string;
+  timestamp: string;
+  device: string;
+  ip: string;
+  details: string;
+}
+
+const ActivityItem = ({ type, timestamp, device, ip, details }: ActivityItemProps) => {
+  const getIcon = () => {
+    switch (type) {
+      case 'login':
+        return <LogIn className="h-4 w-4 text-blue-400" />;
+      case 'logout':
+        return <LogOut className="h-4 w-4 text-orange-400" />;
+      case 'security':
+        return <Shield className="h-4 w-4 text-purple-400" />;
+      case 'wallet_bet':
+        return <CreditCard className="h-4 w-4 text-red-400" />;
+      case 'wallet_win':
+        return <Coins className="h-4 w-4 text-green-400" />;
+      default:
+        return <RefreshCw className="h-4 w-4 text-gray-400" />;
+    }
+  };
+  
+  return (
+    <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800">
+      <div className="flex items-start gap-3">
+        <div className="mt-1 bg-[#1A2634] p-2 rounded-full">
+          {getIcon()}
+        </div>
+        <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <h4 className="font-medium text-white">{details}</h4>
+            <span className="text-xs text-gray-400 mt-1 sm:mt-0">{timestamp}</span>
+          </div>
+          <div className="mt-1 text-xs text-gray-500">
+            <p>Dispositivo: {device}</p>
+            <p>IP: {ip}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Define zod schemas for form validation
 const phoneVerificationFormSchema = phoneVerificationSchema;
@@ -81,6 +131,92 @@ export default function ProfilePage() {
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isAddingWallet, setIsAddingWallet] = useState(false);
+  const [activityFilter, setActivityFilter] = useState("all");
+  
+  // Obtener las actividades del usuario
+  const { data: userActivitiesData, isLoading: isLoadingActivities } = useQuery({
+    queryKey: ['/api/user/activities'],
+    enabled: activeTab === "activity",
+  });
+
+  // Para fines de demostración, usaremos datos de ejemplo si no hay datos reales disponibles
+  const userActivities = userActivitiesData?.activities || [
+    { 
+      activityType: 'login', 
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-27T12:45:00'),
+      details: 'Successful login'
+    },
+    { 
+      activityType: 'wallet_bet',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-27T12:30:00'),
+      amount: 100,
+      gameType: 'Slots',
+      details: 'Placed bet of 100 credits on Slots'
+    },
+    { 
+      activityType: 'wallet_win',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-27T12:32:00'),
+      amount: 250,
+      gameType: 'Slots',
+      details: 'Won 250 credits on Slots'
+    },
+    { 
+      activityType: 'security',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-26T10:15:00'),
+      details: 'Changed account password'
+    },
+    { 
+      activityType: 'login',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-26T10:10:00'),
+      details: 'Successful login'
+    }
+  ];
+  
+  // Función para obtener la descripción de la actividad según su tipo
+  const getActivityDescription = (activity: any) => {
+    const { activityType, details } = activity;
+    
+    // Si hay detalles específicos, mostrarlos
+    if (details) {
+      return details;
+    }
+    
+    // Descripción por defecto según el tipo de actividad
+    switch (activityType) {
+      case 'login':
+        return "Successful login";
+      case 'logout':
+        return "Successful logout";
+      case 'password_change':
+        return "Changed account password";
+      case 'phone_verification':
+        return "Verified phone number";
+      case 'email_verification':
+        return "Verified email address";
+      case 'kyc_upload':
+        return "Uploaded KYC documents";
+      case 'wallet_bet':
+        return `Placed bet of ${activity.amount || "unknown"} credits on ${activity.gameType || "Game"}`;
+      case 'wallet_win':
+        return `Won ${activity.amount || "unknown"} credits on ${activity.gameType || "Game"}`;
+      case 'wallet_deposit':
+        return `Deposited ${activity.amount || "unknown"} credits`;
+      case 'wallet_withdrawal':
+        return `Withdrew ${activity.amount || "unknown"} credits`;
+      default:
+        return `${activityType.replace('_', ' ')}`;
+    }
+  };
   
   // Phone verification form
   const phoneVerificationForm = useForm<PhoneVerificationFormData>({
@@ -445,6 +581,12 @@ export default function ProfilePage() {
               >
                 Security
               </TabsTrigger>
+              <TabsTrigger 
+                value="activity" 
+                className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
+              >
+                Activity
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="profile" className="m-0">
@@ -614,6 +756,188 @@ export default function ProfilePage() {
                   </Card>
                 </form>
               </Form>
+            </TabsContent>
+            
+            <TabsContent value="activity" className="m-0">
+              <Card className="bg-[#1A2634] border-gray-800 mb-6">
+                <CardHeader>
+                  <CardTitle>Account Activity</CardTitle>
+                  <CardDescription>
+                    Review your recent account activities and device history
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-base font-medium text-white">Recent Activities</h3>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'all' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('all')}
+                        >
+                          All
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'login' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('login')}
+                        >
+                          Login
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'security' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('security')}
+                        >
+                          Security
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'wallet' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('wallet')}
+                        >
+                          Bets
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                      {isLoadingActivities ? (
+                        <div className="py-12 flex justify-center items-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                        </div>
+                      ) : userActivities && userActivities.length > 0 ? (
+                        userActivities
+                          .filter(activity => {
+                            if (activityFilter === 'all') return true;
+                            if (activityFilter === 'login') return activity.activityType === 'login' || activity.activityType === 'logout';
+                            if (activityFilter === 'security') return activity.activityType === 'password_change' || activity.activityType === 'phone_verification' || activity.activityType === 'kyc_upload';
+                            if (activityFilter === 'wallet') return activity.activityType === 'wallet_bet' || activity.activityType === 'wallet_win';
+                            return true;
+                          })
+                          .map((activity, idx) => (
+                            <ActivityItem 
+                              key={idx}
+                              type={activity.activityType}
+                              timestamp={format(new Date(activity.timestamp), "MMM dd, yyyy - hh:mm a")}
+                              device={activity.deviceInfo || "Unknown device"}
+                              ip={activity.ipAddress || "Unknown IP"}
+                              details={getActivityDescription(activity)}
+                            />
+                          ))
+                      ) : (
+                        <div className="py-12 text-center text-gray-400">
+                          <p>No activity records found</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-between mt-4">
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                      >
+                        Export Data
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                      >
+                        View All
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#1A2634] border-gray-800">
+                <CardHeader>
+                  <CardTitle>Sessions & Devices</CardTitle>
+                  <CardDescription>
+                    Manage your active sessions and connected devices
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-blue-500/10 p-2 rounded-full">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <path d="M12 18h.01" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-medium flex items-center gap-2">
+                            Current Session
+                            <Badge variant="outline" className="border-green-500/30 text-green-400 ml-2 text-xs font-normal">
+                              Active
+                            </Badge>
+                          </h4>
+                          <p className="text-xs text-gray-400">Chrome 95.0 - Windows</p>
+                          <p className="text-xs text-gray-400">IP: 192.168.1.1 - Last active: Just now</p>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-red-700 text-red-400 hover:text-red-300 hover:border-red-400"
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                    
+                    <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-orange-500/10 p-2 rounded-full">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                            <rect x="9" y="9" width="6" height="6" />
+                            <line x1="9" y1="1" x2="9" y2="4" />
+                            <line x1="15" y1="1" x2="15" y2="4" />
+                            <line x1="9" y1="20" x2="9" y2="23" />
+                            <line x1="15" y1="20" x2="15" y2="23" />
+                            <line x1="20" y1="9" x2="23" y2="9" />
+                            <line x1="20" y1="14" x2="23" y2="14" />
+                            <line x1="1" y1="9" x2="4" y2="9" />
+                            <line x1="1" y1="14" x2="4" y2="14" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Firefox - macOS</h4>
+                          <p className="text-xs text-gray-400">IP: 192.168.2.2 - Last active: Mar 26, 2025</p>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-red-700 text-red-400 hover:text-red-300 hover:border-red-400"
+                      >
+                        Revoke
+                      </Button>
+                    </div>
+                    
+                    <div className="flex justify-end mt-4">
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                      >
+                        Logout from all devices
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
             
             <TabsContent value="security" className="m-0">
