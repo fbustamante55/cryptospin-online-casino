@@ -512,28 +512,58 @@ export function BlackjackGame() {
   const renderCard = (card: BlackjackCard, index: number) => {
     if (card.hidden) {
       return (
-        <div key={index} className="w-20 h-32 bg-blue-800 rounded-lg shadow-md border-2 border-white flex items-center justify-center">
-          <div className="bg-white rounded w-12 h-16 flex items-center justify-center text-blue-800 font-bold text-xl">
-            ?
+        <div key={index} className="relative w-20 h-32 rounded-md shadow-lg overflow-hidden transform transition-transform duration-300" style={{ marginLeft: index > 0 ? '-10px' : '0' }}>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-900 border-2 border-white">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-16 bg-white rounded-sm flex items-center justify-center">
+                <div className="text-blue-800 font-bold text-lg">
+                  EUROPA
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       );
     }
     
     const color = card.suit === 'hearts' || card.suit === 'diamonds' ? 'text-red-600' : 'text-black';
+    const suitSymbol = card.suit === 'hearts' ? '♥' : 
+                      card.suit === 'diamonds' ? '♦' : 
+                      card.suit === 'clubs' ? '♣' : '♠';
     
     return (
-      <div key={index} className="w-20 h-32 bg-white rounded-lg shadow-md border border-gray-300 flex flex-col items-center justify-between p-2">
-        <div className={`${color} font-bold text-xl self-start`}>
-          {card.value}
-        </div>
-        <div className={`${color} text-2xl`}>
-          {card.suit === 'hearts' ? '♥' : 
-           card.suit === 'diamonds' ? '♦' : 
-           card.suit === 'clubs' ? '♣' : '♠'}
-        </div>
-        <div className={`${color} font-bold text-xl self-end`}>
-          {card.value}
+      <div 
+        key={index} 
+        className="relative w-20 h-32 bg-white rounded-md shadow-lg overflow-hidden transform transition-transform duration-300" 
+        style={{ marginLeft: index > 0 ? '-10px' : '0' }}
+      >
+        <div className="absolute inset-0 bg-white border border-gray-300">
+          {/* Top left corner */}
+          <div className="absolute top-1 left-1">
+            <div className={`${color} font-bold text-lg leading-none`}>
+              {card.value}
+            </div>
+            <div className={`${color} text-lg leading-none`}>
+              {suitSymbol}
+            </div>
+          </div>
+          
+          {/* Bottom right corner */}
+          <div className="absolute bottom-1 right-1 rotate-180">
+            <div className={`${color} font-bold text-lg leading-none`}>
+              {card.value}
+            </div>
+            <div className={`${color} text-lg leading-none`}>
+              {suitSymbol}
+            </div>
+          </div>
+          
+          {/* Center symbol */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`${color} text-4xl font-bold`}>
+              {suitSymbol}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -545,26 +575,45 @@ export function BlackjackGame() {
         {/* Main game area */}
         <div className="lg:col-span-3 space-y-6">
           {/* Game table */}
-          <Card className="border-2 border-gray-200 dark:border-gray-800 bg-green-800 min-h-[450px] flex flex-col">
-            <CardContent className="flex-1 p-6 flex flex-col">
+          <div className="relative overflow-hidden rounded-xl border-8 border-amber-950">
+            {/* Mesa de blackjack */}
+            <div className="relative w-full min-h-[550px] bg-gradient-to-b from-green-700 to-green-800 flex flex-col">
+              
+              {/* Título y reglas del juego */}
+              <div className="absolute top-0 left-0 w-full text-center pt-4">
+                <h2 className="text-3xl font-bold text-white tracking-wider uppercase mb-1">BLACKJACK</h2>
+                <div className="text-xs text-gold text-center max-w-md mx-auto opacity-80 tracking-wide text-amber-100">
+                  PAGA 3 A 2
+                  <span className="px-4">•</span> 
+                  DEALER MUST DRAW TO 16 AND STAND ON ALL 17's 
+                  <span className="px-4">•</span>
+                  INSURANCE PAYS 2 TO 1
+                </div>
+              </div>
+              
+              {/* Logo de EUROPA Casino */}
+              <div className="absolute bottom-4 left-0 right-0 text-center">
+                <div className="text-2xl font-bold uppercase text-amber-200 opacity-70">EUROPA</div>
+                <div className="text-sm text-amber-200 opacity-70">CASINO</div>
+              </div>
+              
               {gameState.gameStatus === 'betting' ? (
-                <div className="flex flex-col items-center justify-center h-full space-y-6">
-                  <div className="text-white text-2xl font-bold">Coloca tu apuesta</div>
-                  
-                  {/* Chip selection */}
-                  <div className="flex justify-center mb-4 gap-2">
+                <div className="flex flex-col items-center justify-center h-full space-y-6 pt-12 pb-12">
+                  {/* Selección de fichas */}
+                  <div className="flex flex-wrap justify-center gap-2 mb-4">
+                    <div className="text-white text-xl font-bold mb-2 w-full text-center">Coloca tu apuesta</div>
                     {chips.map(chip => (
                       <Button
                         key={chip}
-                        variant={betAmount === chip ? "default" : "outline"}
+                        variant="outline"
                         className={`
-                          w-16 h-16 rounded-full font-bold p-0
-                          ${chip === 5 ? "bg-red-500 hover:bg-red-400" : 
-                            chip === 25 ? "bg-green-500 hover:bg-green-400" : 
-                            chip === 100 ? "bg-blue-500 hover:bg-blue-400" : 
-                            chip === 500 ? "bg-purple-500 hover:bg-purple-400" :
-                            "bg-yellow-500 hover:bg-yellow-400"}
-                          ${betAmount === chip ? "ring-4 ring-white" : ""}
+                          w-14 h-14 rounded-full font-bold p-0 border-2 shadow-md transform transition-transform hover:scale-110
+                          ${chip === 5 ? "bg-white border-red-700 text-red-700" : 
+                            chip === 25 ? "bg-red-600 border-white text-white" : 
+                            chip === 100 ? "bg-blue-600 border-white text-white" : 
+                            chip === 500 ? "bg-purple-600 border-white text-white" :
+                            "bg-green-600 border-white text-white"}
+                          ${betAmount === chip ? "ring-4 ring-yellow-400" : ""}
                         `}
                         onClick={() => handleChipSelect(chip)}
                       >
@@ -575,7 +624,7 @@ export function BlackjackGame() {
                   
                   <Button 
                     size="lg"
-                    className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-8 py-6 rounded text-xl"
+                    className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-8 py-4 rounded text-xl border-2 border-amber-700 shadow-lg transform transition-transform hover:scale-105"
                     onClick={() => dealMutation.mutate()}
                     disabled={!userData || userData.balance < betAmount}
                   >
@@ -583,86 +632,153 @@ export function BlackjackGame() {
                   </Button>
                   
                   {(!userData || userData.balance < betAmount) && (
-                    <div className="text-red-300 text-center mt-2">
+                    <div className="text-red-300 text-center mt-2 bg-black/40 px-4 py-2 rounded-md">
                       No tienes suficiente saldo para esta apuesta
                     </div>
                   )}
+                  
+                  {/* Límites de apuesta */}
+                  <div className="absolute top-4 right-4 bg-amber-900/80 border border-amber-700 rounded-md p-2 text-amber-100 text-xs">
+                    <div>MIN: €1</div>
+                    <div>MAX: €300</div>
+                  </div>
                 </div>
               ) : (
-                <>
-                  {/* Dealer's cards */}
-                  <div className="mb-8">
-                    <div className="text-white mb-2">Crupier {gameState.dealerHand.value > 0 && `(${gameState.dealerHand.value})`}</div>
-                    <div className="flex flex-wrap gap-2">
+                <div className="flex-1 p-6 flex flex-col justify-between pt-16 pb-12">
+                  {/* Área del crupier */}
+                  <div className="flex flex-col items-center mb-12">
+                    <div className="flex flex-wrap justify-center">
                       {gameState.dealerHand.cards.map((card, index) => renderCard(card, index))}
+                    </div>
+                    <div className="bg-black/40 text-white text-sm px-3 py-1 rounded-full mt-2">
+                      {gameState.dealerHand.value > 0 && `Crupier: ${gameState.dealerHand.value}`}
                     </div>
                   </div>
                   
-                  {/* Player's cards */}
-                  <div className="mt-auto">
-                    <div className="text-white mb-2">Jugador {gameState.playerHands[gameState.currentHandIndex]?.value}</div>
-                    <div className="flex flex-wrap gap-2">
-                      {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
+                  {/* Área del jugador con posiciones */}
+                  <div className="flex flex-wrap justify-center gap-8 px-4">
+                    {/* Posición 1 */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full border-2 border-white/30 bg-white/10"></div>
+                        {gameState.playerHands[gameState.currentHandIndex]?.cards && (
+                          <div className="absolute -top-40 left-1/2 transform -translate-x-1/2">
+                            <div className="flex">
+                              {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
+                            </div>
+                            <div className="text-center bg-black/40 text-white text-sm px-3 py-1 rounded-full mt-2">
+                              {gameState.playerHands[gameState.currentHandIndex]?.value > 0 && (
+                                gameState.playerHands[gameState.currentHandIndex]?.value > 21 ? 
+                                <span className="text-red-500 font-bold">Bust</span> : 
+                                `${gameState.playerHands[gameState.currentHandIndex]?.value}`
+                              )}
+                            </div>
+                            
+                            {/* Fichas apostadas */}
+                            <div className="flex justify-center -mt-6">
+                              <div 
+                                className="bg-red-600 border-2 border-white text-white w-12 h-12 rounded-full 
+                                           flex items-center justify-center font-bold shadow-md transform -rotate-6"
+                              >
+                                {betAmount}
+                              </div>
+                            </div>
+                            
+                            {/* Mensaje de ganancia */}
+                            {gameState.gameStatus === 'complete' && (
+                              <div className="text-center mt-2 font-bold text-gold">
+                                {gameState.result === 'win' && (
+                                  <div className="text-yellow-300">Ganas: €{betAmount * 2}</div>
+                                )}
+                                {gameState.result === 'lose' && (
+                                  <div className="text-red-400">Pierdes</div>
+                                )}
+                                {gameState.result === 'push' && (
+                                  <div className="text-blue-300">Empate</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    
-                    {/* Game result message */}
-                    {gameState.gameStatus === 'complete' && (
-                      <div className="mt-4 p-4 bg-black/50 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-white">{gameState.message}</div>
+                  </div>
+                  
+                  {/* Game result message */}
+                  {gameState.gameStatus === 'complete' && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                      <div className="bg-black/70 p-4 rounded-xl text-center min-w-[200px]">
+                        <div className="text-2xl font-bold text-white mb-2">{gameState.message}</div>
                         
                         <Button 
-                          className="mt-4 bg-amber-600 hover:bg-amber-500"
+                          className="mt-2 bg-amber-600 hover:bg-amber-500 border border-amber-700"
                           onClick={handlePlayAgain}
                         >
                           Jugar otra vez
                         </Button>
                       </div>
-                    )}
-                  </div>
-                </>
+                    </div>
+                  )}
+                </div>
               )}
-            </CardContent>
-            
-            {/* Game controls */}
-            {gameState.gameStatus === 'playing' && (
-              <CardFooter className="bg-black/20 p-4 flex justify-center gap-4">
-                <Button 
-                  variant="default"
-                  onClick={() => hitMutation.mutate()}
-                  disabled={isAnimating || gameState.playerHands[gameState.currentHandIndex]?.isBusted}
-                >
-                  Pedir carta
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => standMutation.mutate()}
-                  disabled={isAnimating}
-                >
-                  Plantarse
-                </Button>
-                <Button 
-                  variant="secondary"
-                  onClick={() => doubleDownMutation.mutate()}
-                  disabled={
-                    isAnimating || 
-                    gameState.playerHands[gameState.currentHandIndex]?.cards.length !== 2 ||
-                    (userData?.balance || 0) < betAmount * 2
-                  }
-                >
-                  Doblar
-                </Button>
-              </CardFooter>
-            )}
-          </Card>
+              
+              {/* Controles del juego */}
+              {gameState.gameStatus === 'playing' && (
+                <div className="bg-black/40 p-3 flex justify-center gap-3 mt-auto">
+                  <Button 
+                    variant="default"
+                    onClick={() => hitMutation.mutate()}
+                    disabled={isAnimating || gameState.playerHands[gameState.currentHandIndex]?.isBusted}
+                    className="bg-red-600 hover:bg-red-500 border border-red-700"
+                  >
+                    Pedir
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => standMutation.mutate()}
+                    disabled={isAnimating}
+                    className="border-yellow-400 text-yellow-400 hover:bg-yellow-400/20"
+                  >
+                    Plantarse
+                  </Button>
+                  <Button 
+                    variant="secondary"
+                    onClick={() => doubleDownMutation.mutate()}
+                    disabled={
+                      isAnimating || 
+                      gameState.playerHands[gameState.currentHandIndex]?.cards.length !== 2 ||
+                      (userData?.balance || 0) < betAmount * 2
+                    }
+                    className="bg-green-600 hover:bg-green-500 border border-green-700 text-white"
+                  >
+                    Doblar
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
           
-          {/* Bet info */}
-          <div className="flex justify-between items-center">
-            <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-lg p-2">
-              Apuesta: ${betAmount}
-            </Badge>
-            <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-lg p-2">
-              Balance: ${userData?.balance || 0}
-            </Badge>
+          {/* Fichas del jugador */}
+          <div className="flex flex-wrap justify-center gap-2 py-2 bg-gray-900 rounded-lg">
+            {chips.map(chip => (
+              <div 
+                key={chip}
+                className={`
+                  w-12 h-12 rounded-full flex items-center justify-center font-bold border-2 
+                  ${chip === 5 ? "bg-white border-red-700 text-red-700" : 
+                  chip === 25 ? "bg-red-600 border-white text-white" : 
+                  chip === 100 ? "bg-blue-600 border-white text-white" : 
+                  chip === 500 ? "bg-purple-600 border-white text-white" :
+                  "bg-green-600 border-white text-white"}
+                `}
+              >
+                {chip}
+              </div>
+            ))}
+            <div className="ml-4 px-4 py-2 bg-gray-800 text-white rounded-md flex items-center">
+              <span className="font-bold mr-1">€</span>
+              <span>{userData?.balance || 0}</span>
+            </div>
           </div>
         </div>
         
