@@ -748,7 +748,7 @@ export function BlackjackGame() {
           key={index} 
           className="relative w-[80px] h-[124px] rounded-[6px] shadow-xl overflow-hidden"
           style={{ 
-            marginLeft: index > 0 ? '-40px' : '0', 
+            marginLeft: index > 0 ? '-25px' : '0', 
             zIndex: 10 - index,
             transformStyle: 'preserve-3d',
           }}
@@ -790,7 +790,7 @@ export function BlackjackGame() {
         key={index} 
         className="relative w-[80px] h-[124px] bg-white rounded-[6px] shadow-xl overflow-hidden"
         style={{ 
-          marginLeft: index > 0 ? '-40px' : '0', 
+          marginLeft: index > 0 ? '-25px' : '0', 
           zIndex: 10 - index,
           transformStyle: 'preserve-3d',
         }}
@@ -850,7 +850,7 @@ export function BlackjackGame() {
           {/* Game table - Styled after the reference image */}
           <div className="relative overflow-hidden rounded-b-[50%] rounded-t-xl">
             {/* Mesa de blackjack */}
-            <div ref={tableRef} className="relative w-full aspect-[16/10] bg-green-700 flex flex-col">
+            <div ref={tableRef} className="relative w-full aspect-[16/8] bg-green-700 flex flex-col">
               {/* Borde de madera */}
               <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-r from-amber-800 via-amber-700 to-amber-800 rounded-b-full"></div>
               
@@ -878,7 +878,7 @@ export function BlackjackGame() {
                     €{betAmount}
                   </div>
                 )}
-                <div className="text-2xl font-bold uppercase text-[#b0a172] opacity-40 blackjack-casino-text">CryptoSpin</div>
+                <div className="text-3xl font-bold uppercase text-[#b0a172] opacity-40 blackjack-casino-text">CryptoSpin</div>
                 <div className="text-sm text-[#b0a172] opacity-40">CASINO</div>
               </div>
 
@@ -1080,8 +1080,8 @@ export function BlackjackGame() {
               ) : (
                 <div className="flex-1 p-6 flex flex-col justify-between pt-4 pb-4 z-10">
                   {/* Área del crupier - Con mayor espacio vertical y separación */}
-                  <div className="flex flex-col items-center mb-4 mt-2">
-                    <div className="flex">
+                  <div className="flex flex-col items-center mb-12 mt-6">
+                    <div className="flex justify-center" style={{ marginLeft: '40px' }}>
                       {gameState.dealerHand.cards.map((card, index) => renderCard(card, index))}
                     </div>
                     
@@ -1126,8 +1126,8 @@ export function BlackjackGame() {
                         
                         {/* Área de cartas del jugador - movida más abajo para mayor separación */}
                         {gameState.playerHands[gameState.currentHandIndex]?.cards && (
-                          <div className="absolute -top-32 left-1/2 transform -translate-x-1/2">
-                            <div className="flex">
+                          <div className="absolute -top-32 left-1/2 transform -translate-x-1/2" style={{ marginLeft: '20px' }}>
+                            <div className="flex justify-center" style={{ marginLeft: '20px' }}>
                               {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
                             </div>
                             
