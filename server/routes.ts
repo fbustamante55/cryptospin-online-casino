@@ -249,9 +249,15 @@ async function initializeDefaultSlotGames() {
   }
 }
 
+// Importar las rutas del casino
+import { setupCasinoRoutes } from './games/routes';
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+  
+  // Set up casino game routes
+  setupCasinoRoutes(app);
   
   // User profile and settings routes
   app.post('/api/user/update-language', async (req: Request, res: Response) => {
