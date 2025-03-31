@@ -112,7 +112,7 @@ export function BlackjackGame() {
         gameStatus: 'playing',
       });
       
-      soundManager.playSound('/sounds/card_deal.mp3');
+      // soundManager.playSound('/sounds/card_deal.mp3');
       
       // Check for natural blackjack
       if (isBlackjack(response.playerHand)) {
@@ -563,14 +563,14 @@ export function BlackjackGame() {
       endY
     }]);
     
-    // Sonido de ficha
-    try {
-      const audio = new Audio('/sounds/chip.mp3');
-      audio.volume = 0.5;
-      audio.play();
-    } catch (e) {
-      console.error("Error playing audio:", e);
-    }
+    // Sonido de ficha - Comentado temporalmente para evitar errores de carga
+    // try {
+    //   const audio = new Audio('/sounds/chip.mp3');
+    //   audio.volume = 0.5;
+    //   audio.play();
+    // } catch (e) {
+    //   console.error("Error playing audio:", e);
+    // }
     
     // Eliminar la animación después de que termine
     setTimeout(() => {

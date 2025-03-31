@@ -115,36 +115,12 @@ export function useSoundManager() {
   }, [isMuted]);
 
   // Play a sound with the current volume settings
+  // Temporalmente deshabilitado para evitar errores de carga
   const playSound = useCallback((src: string, options: { volume?: number; loop?: boolean } = {}) => {
-    if (!src) return;
-    
-    try {
-      let audio: HTMLAudioElement;
-      
-      // Check if audio is already cached
-      if (audioCache.current.has(src)) {
-        audio = audioCache.current.get(src)!;
-        audio.currentTime = 0; // Reset to beginning
-      } else {
-        // Create and cache new audio
-        audio = new Audio(src);
-        audio.preload = 'auto';
-        audioCache.current.set(src, audio);
-      }
-      
-      // Apply current settings
-      const effectiveVolume = isMuted ? 0 : (options.volume !== undefined ? options.volume * masterVolume : masterVolume);
-      audio.volume = effectiveVolume;
-      audio.loop = options.loop || false;
-      
-      // Play the sound
-      audio.play().catch(error => {
-        console.error("Error playing audio:", error);
-      });
-    } catch (error) {
-      console.error("Error setting up audio:", error);
-    }
-  }, [masterVolume, isMuted]);
+    // No hacer nada, para evitar errores de carga de sonidos
+    console.log("Sound playback temporarily disabled:", src);
+    return;
+  }, []);
 
   return {
     masterVolume,
