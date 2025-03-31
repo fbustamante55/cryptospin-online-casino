@@ -623,10 +623,16 @@ export function BlackjackGame() {
     const startX = chipRect.left - tableRect.left + (chipRect.width / 2);
     const startY = chipRect.top - tableRect.top + (chipRect.height / 2);
     
-    // El destino es la posición específica del área de EUROPA CASINO en el centro inferior
-    // Las posiciones están ajustadas para que las fichas queden justo encima del texto EUROPA
-    const endX = tableRect.width / 2;
-    const endY = tableRect.height * 0.83; // Ajustado para estar justo sobre el texto EUROPA
+    // Posición precisa del área EUROPA
+    const europaElement = document.querySelector('.blackjack-europa-text');
+    let endX = tableRect.width / 2;
+    let endY = tableRect.height * 0.75;
+    
+    if (europaElement) {
+      const europaRect = europaElement.getBoundingClientRect();
+      endX = europaRect.left - tableRect.left + (europaRect.width / 2);
+      endY = europaRect.top - tableRect.top - 10; // 10px encima del texto
+    }
     
     // Obtener los colores del chip
     const chipStyle = chipStyles[amount] || 
@@ -806,7 +812,7 @@ export function BlackjackGame() {
                     €{betAmount}
                   </div>
                 )}
-                <div className="text-2xl font-bold uppercase text-[#b0a172] opacity-40">EUROPA</div>
+                <div className="text-2xl font-bold uppercase text-[#b0a172] opacity-40 blackjack-europa-text">EUROPA</div>
                 <div className="text-sm text-[#b0a172] opacity-40">CASINO</div>
               </div>
 
@@ -1182,15 +1188,15 @@ export function BlackjackGame() {
                 </div>
               )}
               
-              {/* Controles del juego - Movidos al borde inferior de la mesa, más abajo */}
+              {/* Controles del juego - Movidos al borde inferior de la pantalla, más abajo */}
               {gameState.gameStatus === 'playing' && (
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/40 px-4 py-3 rounded-full flex justify-center gap-3 z-20">
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 px-6 py-4 rounded-xl flex justify-center gap-4 z-50 border-2 border-amber-600 shadow-lg">
                   <Button 
                     variant="default"
                     size="lg"
                     onClick={() => hitMutation.mutate()}
                     disabled={isAnimating || gameState.playerHands[gameState.currentHandIndex]?.isBusted}
-                    className="bg-red-600 hover:bg-red-500 text-white font-bold border-2 border-red-700 shadow-lg"
+                    className="bg-red-600 hover:bg-red-500 text-white font-bold border-2 border-red-700 shadow-lg px-6"
                   >
                     Pedir carta
                   </Button>
@@ -1199,7 +1205,7 @@ export function BlackjackGame() {
                     size="lg"
                     onClick={() => standMutation.mutate()}
                     disabled={isAnimating}
-                    className="border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20 font-bold"
+                    className="border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20 font-bold px-6"
                   >
                     Plantarse
                   </Button>
@@ -1212,7 +1218,7 @@ export function BlackjackGame() {
                       gameState.playerHands[gameState.currentHandIndex]?.cards.length !== 2 ||
                       (userData?.balance || 0) < betAmount * 2
                     }
-                    className="bg-green-600 hover:bg-green-500 text-white font-bold border-2 border-green-700 shadow-lg"
+                    className="bg-green-600 hover:bg-green-500 text-white font-bold border-2 border-green-700 shadow-lg px-6"
                   >
                     Doblar
                   </Button>
@@ -1386,20 +1392,32 @@ export function BlackjackGame() {
   );
 }
 
-// Mocked API response for dealing cards
+// Mocked API response for dealing cards con mayor aleatoriedad
 function mockDealHand(bet: number): BlackjackBetResponse {
+  // Generar un mazo de cartas completo
+  const deck: BlackjackCard[] = [];
+  for (const suit of SUITS) {
+    for (const value of VALUES) {
+      deck.push({ suit, value });
+    }
+  }
+  
+  // Mezclar el mazo (algoritmo Fisher-Yates)
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  
+  // Repartir cartas
   const playerHand: BlackjackHand = {
-    cards: [
-      { suit: 'hearts', value: VALUES[Math.floor(Math.random() * VALUES.length)] },
-      { suit: 'spades', value: VALUES[Math.floor(Math.random() * VALUES.length)] }
-    ],
+    cards: [deck.pop()!, deck.pop()!],
     value: 0
   };
   
   const dealerHand: BlackjackHand = {
     cards: [
-      { suit: 'diamonds', value: VALUES[Math.floor(Math.random() * VALUES.length)] },
-      { suit: 'clubs', value: VALUES[Math.floor(Math.random() * VALUES.length)], hidden: true }
+      deck.pop()!,
+      {...deck.pop()!, hidden: true}
     ],
     value: 0
   };
@@ -1414,7 +1432,7 @@ function mockDealHand(bet: number): BlackjackBetResponse {
   return {
     playerHand,
     dealerHand,
-    deck: [], // Not used in our simulation
+    deck: [], // No necesitamos mantener el deck para la simulación
     balance: 0, // Updated by client
     canInsure: dealerHand.cards[0].value === 'A'
   };
