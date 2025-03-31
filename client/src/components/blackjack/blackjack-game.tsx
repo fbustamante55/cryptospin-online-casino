@@ -65,6 +65,19 @@ interface UserData {
 const SUITS = ['hearts', 'diamonds', 'clubs', 'spades'] as const;
 const VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'] as const;
 
+// Función para obtener el valor numérico de una carta para comparar si son iguales
+function getCardValue(card?: BlackjackCard): number {
+  if (!card) return 0;
+  
+  if (card.value === 'J' || card.value === 'Q' || card.value === 'K') {
+    return 10;
+  } else if (card.value === 'A') {
+    return 11;
+  } else {
+    return parseInt(card.value);
+  }
+}
+
 export function BlackjackGame() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -184,7 +197,12 @@ export function BlackjackGame() {
           return apiRequest({
             url: "/api/games/blackjack/hit",
             method: "POST",
-            data: { handIndex: gameState.currentHandIndex }
+            data: { 
+              handIndex: gameState.currentHandIndex,
+              bet: betAmount,
+              gameId: "demo-blackjack",
+              currentCards: gameState.playerHands[gameState.currentHandIndex]?.cards || []
+            }
           });
         } else {
           // Demo mode
@@ -279,7 +297,12 @@ export function BlackjackGame() {
           return apiRequest({
             url: "/api/games/blackjack/stand",
             method: "POST",
-            data: { handIndex: gameState.currentHandIndex }
+            data: { 
+              handIndex: gameState.currentHandIndex,
+              bet: betAmount,
+              gameId: "demo-blackjack",
+              currentCards: gameState.playerHands[gameState.currentHandIndex]?.cards || []
+            }
           });
         } else {
           // Demo mode
@@ -312,6 +335,135 @@ export function BlackjackGame() {
     },
   });
   
+  // Split hand - divide the hand into two hands, placing equal bet on each
+  const splitHandMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        if (user?.id) {
+          // Real API call
+          return apiRequest({
+            url: "/api/games/blackjack/split",
+            method: "POST",
+            data: { 
+              handIndex: gameState.currentHandIndex,
+              bet: betAmount,
+              gameId: "demo-blackjack",
+              currentCards: gameState.playerHands[gameState.currentHandIndex]?.cards || []
+            }
+          });
+        } else {
+          // Demo mode
+          console.log("Using demo split mode");
+          
+          // Get current hand
+          const currentHand = { ...gameState.playerHands[gameState.currentHandIndex] };
+          
+          if (currentHand.cards.length !== 2) {
+            throw new Error("Solo se pueden dividir manos de 2 cartas");
+          }
+          
+          // Create two new hands from the split
+          const firstCard = currentHand.cards[0];
+          const secondCard = currentHand.cards[1];
+          
+          // Add a new card to each hand
+          const firstNewCard = drawCard();
+          const secondNewCard = drawCard();
+          
+          const firstHand: BlackjackHand = {
+            cards: [firstCard, firstNewCard],
+            value: calculateHandValue([firstCard, firstNewCard])
+          };
+          
+          const secondHand: BlackjackHand = {
+            cards: [secondCard, secondNewCard],
+            value: calculateHandValue([secondCard, secondNewCard])
+          };
+          
+          // Create updated array of hands
+          const updatedHands = [...gameState.playerHands];
+          updatedHands[gameState.currentHandIndex] = firstHand;
+          updatedHands.push(secondHand);
+          
+          return {
+            playerHands: updatedHands,
+            balance: userData ? userData.balance - betAmount : 0 // Deduct additional bet
+          };
+        }
+      } catch (error) {
+        console.error("Error calling split API, using demo mode:", error);
+        
+        // Fallback implementation
+        const currentHand = { ...gameState.playerHands[gameState.currentHandIndex] };
+          
+        if (currentHand.cards.length !== 2) {
+          throw new Error("Solo se pueden dividir manos de 2 cartas");
+        }
+        
+        // Create two new hands from the split
+        const firstCard = currentHand.cards[0];
+        const secondCard = currentHand.cards[1];
+        
+        // Add a new card to each hand
+        const firstNewCard = drawCard();
+        const secondNewCard = drawCard();
+        
+        const firstHand: BlackjackHand = {
+          cards: [firstCard, firstNewCard],
+          value: calculateHandValue([firstCard, firstNewCard])
+        };
+        
+        const secondHand: BlackjackHand = {
+          cards: [secondCard, secondNewCard],
+          value: calculateHandValue([secondCard, secondNewCard])
+        };
+        
+        // Create updated array of hands
+        const updatedHands = [...gameState.playerHands];
+        updatedHands[gameState.currentHandIndex] = firstHand;
+        updatedHands.push(secondHand);
+        
+        return {
+          playerHands: updatedHands,
+          balance: userData ? userData.balance - betAmount : 0
+        };
+      }
+    },
+    onSuccess: (data) => {
+      // Sound effect
+      soundManager.playSound('/sounds/card_slide.mp3');
+      
+      // Update game state with the split hands
+      setGameState(prevState => ({
+        ...prevState,
+        playerHands: data.playerHands || prevState.playerHands,
+      }));
+      
+      // Update user balance
+      if (userData && data.balance !== undefined) {
+        queryClient.setQueryData(['/api/user'], {
+          ...userData,
+          balance: data.balance
+        });
+      } else if (userData) {
+        // Si estamos en modo demo, actualizamos el saldo localmente
+        queryClient.setQueryData(['/api/user'], {
+          ...userData,
+          balance: userData.balance - betAmount
+        });
+      }
+      
+      // No automatic actions after split - player continues with the first hand
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "No se pudo dividir la mano. " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
   // Double Down - double bet, take one card, then stand
   const doubleDownMutation = useMutation({
     mutationFn: async () => {
@@ -321,7 +473,12 @@ export function BlackjackGame() {
           return apiRequest({
             url: "/api/games/blackjack/double",
             method: "POST",
-            data: { handIndex: gameState.currentHandIndex }
+            data: { 
+              handIndex: gameState.currentHandIndex,
+              bet: betAmount,
+              gameId: "demo-blackjack",
+              currentCards: gameState.playerHands[gameState.currentHandIndex]?.cards || []
+            }
           });
         } else {
           // Demo mode
@@ -883,16 +1040,7 @@ export function BlackjackGame() {
                 <div className="text-sm text-[#b0a172] opacity-40">CASINO</div>
               </div>
 
-              {/* Deck en la izquierda */}
-              <div className="absolute top-10 left-10">
-                <div className="w-24 h-32 bg-gradient-to-br from-blue-900 to-blue-800 rounded-md shadow-lg border-2 border-white transform rotate-2">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-white rounded-sm w-16 h-20 flex items-center justify-center">
-                      <span className="text-blue-900 font-bold text-xs">CryptoSpin</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Eliminamos el mazo de la izquierda que tapa la caja de monedas del crupier */}
 
               {/* Límites de apuesta y rack de fichas mejorado - Sin chips extras */}
               <div className="absolute top-6 right-6 flex">
@@ -947,16 +1095,7 @@ export function BlackjackGame() {
                 </div>
               </div>
               
-              {/* Deck en la derecha */}
-              <div className="absolute top-10 right-[100px]">
-                <div className="w-24 h-32 bg-gradient-to-br from-blue-900 to-blue-800 rounded-md shadow-lg border-2 border-white transform -rotate-2">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-white rounded-sm w-16 h-20 flex items-center justify-center">
-                      <span className="text-blue-900 font-bold text-xs">CryptoSpin</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Eliminamos el mazo de la derecha que también tapa parte de la interfaz */}
               
               {/* Animación de fichas flotando hacia la apuesta - Diseño basado en la imagen de referencia */}
               <AnimatePresence>
@@ -1248,6 +1387,23 @@ export function BlackjackGame() {
                       >
                         Doblar
                       </Button>
+                      {/* Botón de Split - Solo habilitado cuando el jugador tiene dos cartas del mismo valor */}
+                      {/* Función para verificar si se puede dividir la mano */}
+                      {gameState.playerHands[gameState.currentHandIndex]?.cards.length === 2 && 
+                       getCardValue(gameState.playerHands[gameState.currentHandIndex]?.cards[0]) === 
+                       getCardValue(gameState.playerHands[gameState.currentHandIndex]?.cards[1]) && (
+                        <Button 
+                          onClick={() => splitHandMutation.mutate()}
+                          className="bg-purple-700 hover:bg-purple-600 text-white font-bold px-6 py-2 rounded shadow-lg border-2 border-purple-800 hover:scale-105 transform transition-transform"
+                          disabled={
+                            isAnimating || 
+                            !userData || 
+                            userData.balance < betAmount
+                          }
+                        >
+                          Dividir
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
