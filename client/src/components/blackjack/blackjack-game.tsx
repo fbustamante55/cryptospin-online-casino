@@ -96,39 +96,23 @@ export function BlackjackGame() {
   // Place bet and deal cards
   const dealMutation = useMutation({
     mutationFn: async () => {
-      // Si no hay usuario autenticado, simulamos el juego de forma local
-      if (!user?.id) {
-        // Generamos datos de juego locales para demostración
-        // Esto permite que el juego funcione sin autenticación para fines de demostración
-        const demoResponse: BlackjackBetResponse = {
-          playerHand: {
-            cards: [
-              { suit: 'hearts', value: 'A' },
-              { suit: 'spades', value: '10' }
-            ],
-            value: 21
-          },
-          dealerHand: {
-            cards: [
-              { suit: 'diamonds', value: '9' },
-              { suit: 'clubs', value: '8', hidden: true }
-            ],
-            value: 9
-          },
-          deck: [],
-          balance: 1000,
-          canInsure: false
-        };
-        return demoResponse;
+      try {
+        // Si hay usuario autenticado, intentamos hacer la petición a la API
+        if (user?.id) {
+          const response = await apiRequest<BlackjackBetResponse>({
+            url: "/api/games/blackjack/bet",
+            method: "POST",
+            data: { bet: betAmount }
+          });
+          return response;
+        }
+      } catch (error) {
+        console.error("Error calling blackjack API, falling back to demo mode:", error);
       }
-      
-      // Si hay usuario autenticado, hacemos la petición normal a la API
-      const response = await apiRequest<BlackjackBetResponse>({
-        url: "/api/games/blackjack/bet",
-        method: "POST",
-        data: { bet: betAmount }
-      });
-      return response;
+        
+      // Si no hay usuario autenticado o falla la API, usamos el modo demostración
+      console.log("Using demo blackjack mode");
+      return mockDealHand(betAmount);
     },
     onSuccess: (response) => {
       setGameState({
@@ -168,16 +152,27 @@ export function BlackjackGame() {
   // Player action - hit
   const hitMutation = useMutation({
     mutationFn: async () => {
-      const currentHand = gameState.playerHands[gameState.currentHandIndex];
-      const response = await apiRequest({
-        url: "/api/games/blackjack/hit",
-        method: "POST",
-        data: { 
-          handIndex: gameState.currentHandIndex,
-          currentCards: currentHand.cards
+      try {
+        if (user?.id) {
+          // Si hay usuario autenticado, intentamos usar la API
+          const currentHand = gameState.playerHands[gameState.currentHandIndex];
+          const response = await apiRequest({
+            url: "/api/games/blackjack/hit",
+            method: "POST",
+            data: { 
+              handIndex: gameState.currentHandIndex,
+              currentCards: currentHand.cards
+            }
+          });
+          return response.card;
         }
-      });
-      return response.card;
+      } catch (error) {
+        console.error("Error calling hit API, using demo mode:", error);
+      }
+      
+      // Modo demostración - simplemente generamos una carta aleatoria
+      console.log("Using demo hit mode");
+      return drawCard();
     },
     onSuccess: (newCard) => {
       const updatedPlayerHands = [...gameState.playerHands];
@@ -228,12 +223,23 @@ export function BlackjackGame() {
   // Player action - stand
   const standMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest({
-        url: "/api/games/blackjack/stand",
-        method: "POST",
-        data: { handIndex: gameState.currentHandIndex }
-      });
-      return response.success;
+      try {
+        if (user?.id) {
+          // Si hay usuario autenticado, intentamos usar la API
+          const response = await apiRequest({
+            url: "/api/games/blackjack/stand",
+            method: "POST",
+            data: { handIndex: gameState.currentHandIndex }
+          });
+          return response.success;
+        }
+      } catch (error) {
+        console.error("Error calling stand API, using demo mode:", error);
+      }
+      
+      // En modo demostración, simplemente retornamos true
+      console.log("Using demo stand mode");
+      return true;
     },
     onSuccess: () => {
       // Move to next hand or dealer's turn
@@ -262,24 +268,44 @@ export function BlackjackGame() {
   // Player action - double down
   const doubleDownMutation = useMutation({
     mutationFn: async () => {
-      const currentHand = gameState.playerHands[gameState.currentHandIndex];
-      const response = await apiRequest({
-        url: "/api/games/blackjack/double",
-        method: "POST",
-        data: { 
-          bet: betAmount,
-          handIndex: gameState.currentHandIndex,
-          currentCards: currentHand.cards
+      try {
+        if (user?.id) {
+          // Si hay usuario autenticado, intentamos usar la API
+          const currentHand = gameState.playerHands[gameState.currentHandIndex];
+          const response = await apiRequest({
+            url: "/api/games/blackjack/double",
+            method: "POST",
+            data: { 
+              bet: betAmount,
+              handIndex: gameState.currentHandIndex,
+              currentCards: currentHand.cards
+            }
+          });
+          // Update user's balance with the new balance from response
+          if (userData && response.balance !== undefined) {
+            queryClient.setQueryData(['/api/user'], {
+              ...userData,
+              balance: response.balance
+            });
+          }
+          return response.card;
         }
-      });
-      // Update user's balance with the new balance from response
-      if (userData && response.balance !== undefined) {
+      } catch (error) {
+        console.error("Error calling double down API, using demo mode:", error);
+      }
+      
+      // Modo demostración - simplemente generamos una carta aleatoria
+      console.log("Using demo double down mode");
+      
+      // Actualizar el saldo del usuario en el modo demostración
+      if (userData) {
         queryClient.setQueryData(['/api/user'], {
           ...userData,
-          balance: response.balance
+          balance: userData.balance - betAmount // Restar el valor de la apuesta original
         });
       }
-      return response.card;
+      
+      return drawCard();
     },
     onSuccess: (newCard) => {
       const updatedPlayerHands = [...gameState.playerHands];
@@ -486,25 +512,38 @@ export function BlackjackGame() {
     
     // Record game results on server
     try {
-      const bets = gameState.playerHands.map(() => betAmount);
-      const response = await apiRequest({
-        url: "/api/games/blackjack/end",
-        method: "POST",
-        data: {
-          playerHands: gameState.playerHands,
-          dealerHand: gameState.dealerHand,
-          bets,
-          results,
-          payouts
-        }
-      });
-      
-      // Update user balance from API response
-      if (userData && response.balance !== undefined) {
-        queryClient.setQueryData(['/api/user'], {
-          ...userData,
-          balance: response.balance
+      if (user?.id) {
+        // Si hay usuario autenticado, intentamos usar la API
+        const bets = gameState.playerHands.map(() => betAmount);
+        const response = await apiRequest({
+          url: "/api/games/blackjack/end",
+          method: "POST",
+          data: {
+            playerHands: gameState.playerHands,
+            dealerHand: gameState.dealerHand,
+            bets,
+            results,
+            payouts
+          }
         });
+        
+        // Update user balance from API response
+        if (userData && response.balance !== undefined) {
+          queryClient.setQueryData(['/api/user'], {
+            ...userData,
+            balance: response.balance
+          });
+        }
+      } else {
+        // Modo demostración - actualizar el saldo localmente
+        console.log("Using demo end game mode");
+        const totalPayout = payouts.reduce((sum, payout) => sum + payout, 0);
+        if (userData) {
+          queryClient.setQueryData(['/api/user'], {
+            ...userData,
+            balance: userData.balance - (betAmount * gameState.playerHands.length) + totalPayout,
+          });
+        }
       }
     } catch (error) {
       console.error("Error recording game result:", error);
