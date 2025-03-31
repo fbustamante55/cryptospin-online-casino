@@ -99,19 +99,26 @@ export function BlackjackGame() {
       try {
         // Si hay usuario autenticado, intentamos hacer la petición a la API
         if (user?.id) {
-          return apiRequest({
+          console.log("User authenticated, using API mode");
+          const response = await apiRequest({
             url: "/api/games/blackjack/bet",
             method: "POST",
             data: { amount: betAmount }
           });
+          console.log("API response:", response);
+          return response;
         } else {
           // Modo demostración - creamos una respuesta simulada
           console.log("Using demo blackjack mode");
-          return mockDealHand(betAmount);
+          const demoResponse = mockDealHand(betAmount);
+          console.log("Demo response:", demoResponse);
+          return demoResponse;
         }
       } catch (error) {
         console.error("Error calling blackjack API, falling back to demo mode:", error);
-        return mockDealHand(betAmount);
+        const fallbackResponse = mockDealHand(betAmount);
+        console.log("Fallback demo response:", fallbackResponse);
+        return fallbackResponse;
       }
     },
     onSuccess: (data) => {
@@ -250,7 +257,7 @@ export function BlackjackGame() {
       if (currentHand.isBusted || currentHand.value >= 21) {
         // Automatic stand after bust or 21
         setTimeout(() => {
-          handleStand();
+          standMutation.mutate();
         }, 1000);
       }
     },
@@ -750,7 +757,7 @@ export function BlackjackGame() {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-blue-800 border-[3px] border-white rounded-[6px]">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-14 h-20 bg-white rounded-sm flex items-center justify-center">
-                <div className="text-blue-900 font-bold text-sm tracking-tight">
+                <div className="text-blue-900 font-bold text-xs tracking-tight">
                   CryptoSpin
                 </div>
               </div>
@@ -880,7 +887,7 @@ export function BlackjackGame() {
                 <div className="w-24 h-32 bg-gradient-to-br from-blue-900 to-blue-800 rounded-md shadow-lg border-2 border-white transform rotate-2">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="bg-white rounded-sm w-16 h-20 flex items-center justify-center">
-                      <span className="text-blue-900 font-bold text-sm">CryptoSpin</span>
+                      <span className="text-blue-900 font-bold text-xs">CryptoSpin</span>
                     </div>
                   </div>
                 </div>
@@ -944,7 +951,7 @@ export function BlackjackGame() {
                 <div className="w-24 h-32 bg-gradient-to-br from-blue-900 to-blue-800 rounded-md shadow-lg border-2 border-white transform -rotate-2">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="bg-white rounded-sm w-16 h-20 flex items-center justify-center">
-                      <span className="text-blue-900 font-bold text-sm">CryptoSpin</span>
+                      <span className="text-blue-900 font-bold text-xs">CryptoSpin</span>
                     </div>
                   </div>
                 </div>
