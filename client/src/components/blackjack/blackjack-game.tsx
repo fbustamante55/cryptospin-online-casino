@@ -510,21 +510,31 @@ export function BlackjackGame() {
   };
   
   // Handle chip selection
-  // Animación para cuando el jugador selecciona una ficha para apostar
+  // Animación mejorada para cuando el jugador selecciona una ficha para apostar
   const [chipAnimations, setChipAnimations] = useState<{ 
     id: string; 
     chip: number; 
-    x: number; 
-    y: number; 
     startX: number; 
     startY: number;
     endX: number;
     endY: number;
+    color: string;
+    borderColor: string;
+    textColor: string;
   }[]>([]);
   
   // Referencia a las posiciones de los chips en la mesa de juego
   const chipRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
+  
+  // Mapa de colores para los chips
+  const chipStyles: Record<number, { color: string, borderColor: string, textColor: string }> = {
+    1: { color: "#FFFFFF", borderColor: "#CC0000", textColor: "#CC0000" },
+    5: { color: "#FF3333", borderColor: "#FFFFFF", textColor: "#FFFFFF" },
+    25: { color: "#3366CC", borderColor: "#FFFFFF", textColor: "#FFFFFF" },
+    100: { color: "#009900", borderColor: "#FFFFFF", textColor: "#FFFFFF" },
+    500: { color: "#333333", borderColor: "#FFD700", textColor: "#FFD700" },
+  };
   
   const handleChipSelect = (amount: number, event: React.MouseEvent<HTMLElement>) => {
     setBetAmount(amount);
@@ -549,18 +559,23 @@ export function BlackjackGame() {
     
     // Destino es el centro de la mesa (ajustado para tener un poco de aleatoriedad)
     const endX = tableRect.width / 2 + (Math.random() * 40 - 20);
-    const endY = tableRect.height / 2 + 40 + (Math.random() * 20 - 10);
+    const endY = tableRect.height / 2 - 20 + (Math.random() * 40 - 20); // Más centrado en la mesa
+    
+    // Obtener los colores del chip
+    const chipStyle = chipStyles[amount] || 
+      { color: "#009900", borderColor: "#FFFFFF", textColor: "#FFFFFF" };
     
     // Agregar la animación
     setChipAnimations(prev => [...prev, {
       id,
       chip: amount,
-      x: 0, // Inicialmente en 0, luego se animará
-      y: 0, // Inicialmente en 0, luego se animará
       startX,
       startY,
       endX,
-      endY
+      endY,
+      color: chipStyle.color,
+      borderColor: chipStyle.borderColor,
+      textColor: chipStyle.textColor
     }]);
     
     // Sonido de ficha - Comentado temporalmente para evitar errores de carga
@@ -731,31 +746,44 @@ export function BlackjackGame() {
                 </div>
               </div>
 
-              {/* Límites de apuesta y rack de fichas */}
+              {/* Límites de apuesta y rack de fichas mejorado */}
               <div className="absolute top-6 right-6 flex">
                 <div className="bg-[#5c2b1b] border-2 border-amber-600 rounded-sm p-2 text-amber-200 text-xs mr-4">
                   <div>MIN: €1</div>
                   <div>MAX: €300</div>
                 </div>
-                <div className="h-16 w-60 bg-[#5c2b1b]/80 border-2 border-amber-600 rounded-sm flex items-center justify-center overflow-hidden">
-                  <div className="flex space-x-[-5px]">
+                <div className="h-16 w-64 bg-[#5c2b1b]/80 border-2 border-amber-600 rounded-sm flex items-center justify-center overflow-hidden">
+                  <div className="flex space-x-2">
                     {[
-                      { color: "white", value: "1" },
-                      { color: "red-600", value: "5" },
-                      { color: "blue-600", value: "10" },
-                      { color: "green-600", value: "25" },
-                      { color: "black", value: "100" },
-                      { color: "purple-600", value: "500" },
-                      { color: "amber-500", value: "1000" }
+                      { color: "#FFFFFF", borderColor: "#CC0000", textColor: "#CC0000", value: "1" },
+                      { color: "#FF3333", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "5" },
+                      { color: "#3366CC", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "25" },
+                      { color: "#009900", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "100" },
+                      { color: "#333333", borderColor: "#FFD700", textColor: "#FFD700", value: "500" }
                     ].map((chipData, i) => (
-                      <div key={i} className="relative">
-                        {[...Array(4)].map((_, j) => (
+                      <div key={i} className="relative px-1">
+                        {[...Array(5)].map((_, j) => (
                           <div 
                             key={j} 
-                            className={`absolute w-10 h-10 rounded-full flex items-center justify-center border border-white/50 bg-${chipData.color} text-white text-xs font-bold shadow-md`}
-                            style={{ bottom: j * 3 }}
+                            style={{ 
+                              position: 'absolute',
+                              bottom: j * 2.5,
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '100%',
+                              backgroundColor: chipData.color,
+                              border: `3px solid ${chipData.borderColor}`,
+                              color: chipData.textColor,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '11px',
+                              fontWeight: 'bold',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                              zIndex: 50 - j
+                            }}
                           >
-                            {chipData.value}
+                            {j === 0 && chipData.value}
                           </div>
                         ))}
                       </div>
@@ -775,7 +803,7 @@ export function BlackjackGame() {
                 </div>
               </div>
               
-              {/* Animación de fichas flotando hacia la apuesta */}
+              {/* Animación de fichas flotando hacia la apuesta - Diseño mejorado */}
               <AnimatePresence>
                 {chipAnimations.map(anim => (
                   <motion.div
@@ -797,14 +825,22 @@ export function BlackjackGame() {
                       duration: 0.7, 
                       ease: "easeOut" 
                     }}
-                    className={`absolute z-50
-                      w-16 h-16 rounded-full font-bold border-4 shadow-lg flex items-center justify-center
-                      ${anim.chip === 5 ? "bg-white border-red-700 text-red-700" : 
-                        anim.chip === 25 ? "bg-red-600 border-white text-white" : 
-                        anim.chip === 100 ? "bg-blue-600 border-white text-white" : 
-                        anim.chip === 500 ? "bg-purple-600 border-white text-white" :
-                        "bg-green-600 border-white text-white"}
-                    `}
+                    style={{
+                      position: 'absolute',
+                      zIndex: 50,
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '100%',
+                      backgroundColor: anim.color,
+                      border: `4px solid ${anim.borderColor}`,
+                      color: anim.textColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.5)'
+                    }}
                   >
                     {anim.chip}
                   </motion.div>
@@ -856,8 +892,8 @@ export function BlackjackGame() {
                 </div>
               ) : (
                 <div className="flex-1 p-6 flex flex-col justify-between pt-16 pb-12 z-10">
-                  {/* Área del crupier */}
-                  <div className="flex flex-col items-center mb-6 mt-6">
+                  {/* Área del crupier - Ahora con mayor espacio vertical */}
+                  <div className="flex flex-col items-center mb-12 mt-2">
                     <div className="flex">
                       {gameState.dealerHand.cards.map((card, index) => renderCard(card, index))}
                     </div>
@@ -873,7 +909,7 @@ export function BlackjackGame() {
                     )}
                   </div>
                   
-                  {/* Área central para resultados de blackjack, etc. */}
+                  {/* Área central para resultados de blackjack, etc. - Aumentado espacio vertical */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
                     {gameState.gameStatus === 'complete' && (
                       <motion.div 
@@ -893,8 +929,8 @@ export function BlackjackGame() {
                     )}
                   </div>
                   
-                  {/* Área del jugador con posiciones y apuestas */}
-                  <div className="flex justify-center gap-24 px-8 mt-4">
+                  {/* Área del jugador con posiciones y apuestas - Movido más abajo */}
+                  <div className="flex justify-center gap-24 px-8 mt-auto pt-8">
                     {/* Primera posición (de 3 posibles posiciones en el futuro) */}
                     <div className="flex flex-col items-center">
                       {/* Círculo de posición */}
@@ -920,7 +956,7 @@ export function BlackjackGame() {
                               </div>
                             </div>
                             
-                            {/* Fichas apostadas - Con animación */}
+                            {/* Fichas apostadas - Con animación y diseño mejorado */}
                             <div className="flex justify-center mt-6">
                               <motion.div
                                 initial={gameState.gameStatus === 'playing' ? { y: 50, opacity: 0 } : false}
@@ -928,17 +964,60 @@ export function BlackjackGame() {
                                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                                 className="relative"
                               >
-                                {/* Pila de chips */}
-                                {[...Array(Math.min(5, Math.ceil(betAmount / 25)))].map((_, i) => (
-                                  <div 
-                                    key={i}
-                                    className={`absolute w-16 h-16 rounded-full flex items-center justify-center font-bold text-white shadow-lg border-4 border-white 
-                                      ${i % 3 === 0 ? 'bg-red-600' : i % 3 === 1 ? 'bg-blue-600' : 'bg-green-600'}`}
-                                    style={{ bottom: i * 4 }}
-                                  >
-                                    {i === 0 && betAmount}
-                                  </div>
-                                ))}
+                                {/* Pila de chips con colores realistas */}
+                                {(() => {
+                                  // Determinar qué chips usar para representar la apuesta
+                                  // Usar valores de mayor a menor para apilar chips de forma realista
+                                  const chipValues = [500, 100, 25, 5, 1];
+                                  const chipsToShow = [];
+                                  let remainingAmount = betAmount;
+                                  
+                                  // Calcular cuántos chips de cada denominación necesitamos
+                                  for (const value of chipValues) {
+                                    while (remainingAmount >= value) {
+                                      chipsToShow.push(value);
+                                      remainingAmount -= value;
+                                      if (chipsToShow.length >= 8) break; // Limitar a 8 chips para evitar una pila demasiado alta
+                                    }
+                                    if (chipsToShow.length >= 8) break;
+                                  }
+                                  
+                                  // Si no se agregaron chips (apuesta muy pequeña), agregar al menos uno
+                                  if (chipsToShow.length === 0 && betAmount > 0) {
+                                    chipsToShow.push(1);
+                                  }
+                                  
+                                  // Mostrar los chips apilados
+                                  return chipsToShow.map((chipValue, i) => {
+                                    const chipStyle = chipStyles[chipValue] || 
+                                      { color: "#009900", borderColor: "#FFFFFF", textColor: "#FFFFFF" };
+                                    
+                                    return (
+                                      <div 
+                                        key={i}
+                                        style={{ 
+                                          position: 'absolute',
+                                          bottom: i * 4,
+                                          width: '46px',
+                                          height: '46px',
+                                          borderRadius: '100%',
+                                          backgroundColor: chipStyle.color,
+                                          border: `4px solid ${chipStyle.borderColor}`,
+                                          color: chipStyle.textColor,
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          fontSize: '13px',
+                                          fontWeight: 'bold',
+                                          boxShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                          zIndex: 50 - i
+                                        }}
+                                      >
+                                        {i === 0 && betAmount}
+                                      </div>
+                                    );
+                                  });
+                                })()}
                               </motion.div>
                             </div>
                             
@@ -1014,38 +1093,48 @@ export function BlackjackGame() {
             </div>
           </div>
           
-          {/* Fichas del jugador - Estilo bandeja */}
+          {/* Fichas del jugador - Estilo bandeja mejorado */}
           <div className="flex flex-wrap justify-center gap-2 py-3 bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 rounded-lg border-t-4 border-amber-950 shadow-inner -mt-3">
-            {chips.map(chip => (
-              <motion.div
-                key={chip}
-                whileHover={{ y: -5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => handleChipSelect(chip, e)}
-                className="cursor-pointer"
-              >
-                {[...Array(3)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`
-                      w-14 h-14 rounded-full border-4 flex items-center justify-center font-bold text-lg shadow-md
-                      ${chip === 5 ? "bg-white border-red-700 text-red-700" : 
-                      chip === 25 ? "bg-red-600 border-white text-white" : 
-                      chip === 100 ? "bg-blue-600 border-white text-white" : 
-                      chip === 500 ? "bg-purple-600 border-white text-white" :
-                      "bg-green-600 border-white text-white"}
-                    `}
-                    style={{
-                      position: 'relative',
-                      bottom: i * 4,
-                      zIndex: 10 - i
-                    }}
-                  >
-                    {i === 0 && chip}
-                  </div>
-                ))}
-              </motion.div>
-            ))}
+            {chips.map(chip => {
+              // Obtener los colores del chip
+              const chipStyle = chipStyles[chip] || 
+                { color: "#009900", borderColor: "#FFFFFF", textColor: "#FFFFFF" };
+              
+              return (
+                <motion.div
+                  key={chip}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => handleChipSelect(chip, e)}
+                  className="cursor-pointer"
+                >
+                  {[...Array(3)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      style={{ 
+                        position: 'relative',
+                        bottom: i * 4,
+                        zIndex: 10 - i,
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '100%',
+                        backgroundColor: chipStyle.color,
+                        border: `3px solid ${chipStyle.borderColor}`,
+                        color: chipStyle.textColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      {i === 0 && chip}
+                    </div>
+                  ))}
+                </motion.div>
+              );
+            })}
             
             {/* Saldo del jugador */}
             <div className="ml-6 px-5 py-2 bg-amber-950 text-amber-200 rounded-md flex items-center border-2 border-amber-800 shadow-inner">
