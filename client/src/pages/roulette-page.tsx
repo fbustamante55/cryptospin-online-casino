@@ -1,22 +1,20 @@
-import React from 'react';
 import { RouletteGame } from '@/components/roulette/roulette-game';
-import { useAuth } from '@/hooks/use-auth';
+import { Button } from '@/components/ui/button';
+import { Link } from 'wouter';
+import { ArrowLeft } from 'lucide-react';
 
 export default function RoulettePage() {
-  const { user } = useAuth() || {};
-
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-6 space-y-2">
-        <h1 className="text-3xl font-bold">Ruleta</h1>
-        <p className="text-muted-foreground">
-          Coloca tus apuestas en números, colores o secciones. ¡La suerte puede estar de tu lado!
-        </p>
-        {user && (
-          <div className="text-lg font-medium">
-            Balance: <span className="text-primary">{user.balance.toLocaleString()} fichas</span>
-          </div>
-        )}
+    <div className="container py-6">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" asChild>
+            <Link to="/">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold">Ruleta Europea</h1>
+        </div>
       </div>
       
       <RouletteGame />

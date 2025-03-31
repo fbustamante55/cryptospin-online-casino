@@ -98,54 +98,59 @@ export function RouletteGame() {
     }
     
     // Start spinning
-    setIsSpinning(true);
     setShowResult(false);
     soundManager.playSound('/sounds/roulette_spin.mp3');
     
-    // Simulate server call and result
+    // Generate random winning number (0-36) - esto se hace antes para que la rueda sepa a qué número debe detenerse
+    const winningNumber = Math.floor(Math.random() * 37);
+    
+    // Determine color
+    let color: 'red' | 'black' | 'green';
+    const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+    
+    if (winningNumber === 0) {
+      color = 'green';
+    } else if (redNumbers.includes(winningNumber)) {
+      color = 'red';
+    } else {
+      color = 'black';
+    }
+    
+    // Check which bets are winners
+    const winningBets = placedBets.filter(bet => 
+      bet.numbers.includes(winningNumber)
+    );
+    
+    // Calculate total win
+    const totalWin = winningBets.reduce((sum, bet) => sum + (bet.amount * (bet.odds + 1)), 0);
+    
+    // Update user balance (this would normally be done on the server)
+    const newBalance = userData ? userData.balance - totalBet + totalWin : 0;
+    
+    // Create result
+    const result: RouletteResult = {
+      number: winningNumber,
+      color,
+      winningBets,
+      totalWin,
+      balance: newBalance
+    };
+    
+    // Add to history
+    const historyItem: HistoryItem = {
+      number: winningNumber,
+      color,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Establecer el resultado para que la rueda sepa qué número debe mostrar
+    setLastResult(result);
+    
+    // Comenzar la animación de giro
+    setIsSpinning(true);
+    
+    // Aproximadamente 0.5 segundos antes de que termine la animación, añadir a la historia
     setTimeout(() => {
-      // Generate random winning number (0-36)
-      const winningNumber = Math.floor(Math.random() * 37);
-      
-      // Determine color
-      let color: 'red' | 'black' | 'green';
-      const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
-      
-      if (winningNumber === 0) {
-        color = 'green';
-      } else if (redNumbers.includes(winningNumber)) {
-        color = 'red';
-      } else {
-        color = 'black';
-      }
-      
-      // Check which bets are winners
-      const winningBets = placedBets.filter(bet => 
-        bet.numbers.includes(winningNumber)
-      );
-      
-      // Calculate total win
-      const totalWin = winningBets.reduce((sum, bet) => sum + (bet.amount * (bet.odds + 1)), 0);
-      
-      // Update user balance (this would normally be done on the server)
-      const newBalance = userData ? userData.balance - totalBet + totalWin : 0;
-      
-      // Create result
-      const result: RouletteResult = {
-        number: winningNumber,
-        color,
-        winningBets,
-        totalWin,
-        balance: newBalance
-      };
-      
-      // Add to history
-      const historyItem: HistoryItem = {
-        number: winningNumber,
-        color,
-        timestamp: new Date().toISOString()
-      };
-      
       setGameHistory([historyItem, ...gameHistory.slice(0, 9)]);
       
       // Update UI
@@ -155,6 +160,11 @@ export function RouletteGame() {
           balance: newBalance
         });
       }
+    }, 4500);
+    
+    // Mostrar el resultado y reproducir el sonido adecuado después de que la rueda se detenga
+    setTimeout(() => {
+      setShowResult(true);
       
       // Play sound based on result
       if (totalWin > 0) {
@@ -162,11 +172,7 @@ export function RouletteGame() {
       } else {
         soundManager.playSound('/sounds/roulette_lose.mp3');
       }
-      
-      // Set the result and show it
-      setLastResult(result);
-      setShowResult(true);
-    }, 5500); // Simulate server delay + wheel spin time
+    }, 5500);
   };
   
   // Handle spin complete
@@ -195,6 +201,7 @@ export function RouletteGame() {
           <RouletteWheel 
             spinning={isSpinning}
             onSpinComplete={handleSpinComplete}
+            resultNumber={lastResult?.number}
           />
           
           {/* Resultado */}
