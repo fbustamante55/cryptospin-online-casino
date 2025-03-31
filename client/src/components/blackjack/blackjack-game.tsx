@@ -1081,7 +1081,7 @@ export function BlackjackGame() {
               ) : (
                 <div className="flex-1 p-6 flex flex-col justify-between pt-4 pb-4 z-10">
                   {/* Área del crupier - Con mayor espacio vertical y separación */}
-                  <div className="flex flex-col items-center mb-16 mt-12">
+                  <div className="flex flex-col items-center mb-16 mt-36">
                     <div className="flex justify-center" style={{ marginLeft: '40px' }}>
                       {gameState.dealerHand.cards.map((card, index) => renderCard(card, index))}
                     </div>
@@ -1127,7 +1127,7 @@ export function BlackjackGame() {
                         
                         {/* Área de cartas del jugador - movida más abajo para mayor separación */}
                         {gameState.playerHands[gameState.currentHandIndex]?.cards && (
-                          <div className="absolute -top-72 left-1/2 transform -translate-x-1/2" style={{ marginLeft: '20px' }}>
+                          <div className="absolute -top-96 left-1/2 transform -translate-x-1/2" style={{ marginLeft: '20px' }}>
                             <div className="flex justify-center" style={{ marginLeft: '20px' }}>
                               {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
                             </div>
@@ -1221,7 +1221,7 @@ export function BlackjackGame() {
                   
                   {/* Botones de acción - Alineados en la parte inferior de la pantalla */}
                   {gameState.gameStatus === 'playing' && !isAnimating && (
-                    <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center space-x-4 z-30">
+                    <div className="absolute bottom-[20%] left-0 right-0 flex items-center justify-center space-x-4 z-30">
                       <Button 
                         onClick={() => hitMutation.mutate()}
                         className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-2 rounded shadow-lg border-2 border-amber-700 hover:scale-105 transform transition-transform"
