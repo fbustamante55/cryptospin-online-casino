@@ -1146,9 +1146,9 @@ export function BlackjackGame() {
                             </Badge>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span>Jugador: {item.playerHands[0].value}</span>
-                            <span>Crupier: {item.dealerHand.value}</span>
-                            <span>Pago: ${item.payouts[0]}</span>
+                            <span>Jugador: {item.playerHands?.[0]?.value || 0}</span>
+                            <span>Crupier: {item.dealerHand?.value || 0}</span>
+                            <span>Pago: ${item.payouts?.[0] || 0}</span>
                           </div>
                         </div>
                       ))}
