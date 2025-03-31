@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino API - Test Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .game-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .game-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .action-buttons {
+            margin-top: 15px;
+        }
+        #responseArea {
+            margin-top: 20px;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .action-panel {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Casino API - Test Interface</h1>
+        
+        <div id="gamesList">
+            <h2>Available Games</h2>
+            <div id="gamesContainer"></div>
+        </div>
+        
+        <div id="gameSession" style="display: none;">
+            <h2>Game Session</h2>
+            <div id="gameInfo"></div>
+            
+            <div class="action-panel" id="blackjackPanel">
+                <h3>Blackjack Controls</h3>
+                <div class="form-group" id="betForm">
+                    <label for="betAmount">Bet Amount:</label>
+                    <input type="number" id="betAmount" min="5" value="10">
+                    <button onclick="placeBet()">Place Bet</button>
+                </div>
+                <div class="action-buttons" id="blackjackActions" style="display: none;">
+                    <button onclick="hitBlackjack()">Hit</button>
+                    <button onclick="standBlackjack()">Stand</button>
+                </div>
+            </div>
+            
+            <div class="action-panel" id="roulettePanel">
+                <h3>Roulette Controls</h3>
+                <div class="form-group">
+                    <label for="rouletteBetAmount">Bet Amount:</label>
+                    <input type="number" id="rouletteBetAmount" min="5" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="rouletteBetType">Bet Type:</label>
+                    <select id="rouletteBetType">
+                        <option value="number">Number (0-36)</option>
+                        <option value="color">Color (Red/Black)</option>
+                        <option value="even_odd">Even/Odd</option>
+                        <option value="dozen">Dozen (1-12, 13-24, 25-36)</option>
+                        <option value="half">Half (1-18 or 19-36)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="numberValueForm">
+                    <label for="numberValue">Number:</label>
+                    <input type="number" id="numberValue" min="0" max="36" value="0">
+                </div>
+                <div class="form-group" id="colorValueForm" style="display: none;">
+                    <label for="colorValue">Color:</label>
+                    <select id="colorValue">
+                        <option value="red">Red</option>
+                        <option value="black">Black</option>
+                    </select>
+                </div>
+                <div class="form-group" id="evenOddValueForm" style="display: none;">
+                    <label for="evenOddValue">Even/Odd:</label>
+                    <select id="evenOddValue">
+                        <option value="even">Even</option>
+                        <option value="odd">Odd</option>
+                    </select>
+                </div>
+                <div class="form-group" id="dozenValueForm" style="display: none;">
+                    <label for="dozenValue">Dozen:</label>
+                    <select id="dozenValue">
+                        <option value="1">First (1-12)</option>
+                        <option value="2">Second (13-24)</option>
+                        <option value="3">Third (25-36)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="halfValueForm" style="display: none;">
+                    <label for="halfValue">Half:</label>
+                    <select id="halfValue">
+                        <option value="low">Low (1-18)</option>
+                        <option value="high">High (19-36)</option>
+                    </select>
+                </div>
+                <div class="action-buttons">
+                    <button onclick="placeBetRoulette()">Place Bet</button>
+                    <button onclick="spinRoulette()">Spin</button>
+                </div>
+            </div>
+            
+            <div class="action-panel" id="slotMachinePanel">
+                <h3>Slot Machine Controls</h3>
+                <div class="form-group">
+                    <label for="slotBetAmount">Bet Amount:</label>
+                    <input type="number" id="slotBetAmount" min="5" value="10">
+                </div>
+                <div class="action-buttons">
+                    <button onclick="spinSlots()">Spin</button>
+                </div>
+            </div>
+            
+            <div class="action-panel" id="horseBettingPanel">
+                <h3>Horse Betting Controls</h3>
+                <div class="form-group">
+                    <label for="horseBetAmount">Bet Amount:</label>
+                    <input type="number" id="horseBetAmount" min="5" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="horseSelection">Select Horse:</label>
+                    <select id="horseSelection">
+                        <option value="blue">Blue Lightning</option>
+                        <option value="red">Red Rocket</option>
+                        <option value="green">Green Machine</option>
+                        <option value="orange">Orange Crush</option>
+                        <option value="pink">Pink Panther</option>
+                    </select>
+                </div>
+                <div class="action-buttons">
+                    <button onclick="placeBetHorse()">Place Bet</button>
+                    <button onclick="startRace()" id="startRaceButton" disabled>Start Race</button>
+                </div>
+            </div>
+            
+            <div id="gameStateContainer"></div>
+            
+            <button onclick="backToGameList()">Back to Game List</button>
+        </div>
+        
+        <div id="responseArea">
+            <h2>Response</h2>
+            <pre id="responseJson"></pre>
+        </div>
+    </div>
+
+    <script>
+        let currentGameId = null;
+        let currentGameName = null;
+        let gameState = null;
+        
+        // Fetch available games when page loads
+        window.onload = function() {
+            fetchGames();
+        };
+        
+        function fetchGames() {
+            fetch('/api/games')
+                .then(response => response.json())
+                .then(games => {
+                    const gamesContainer = document.getElementById('gamesContainer');
+                    gamesContainer.innerHTML = '';
+                    
+                    games.forEach(game => {
+                        const gameCard = document.createElement('div');
+                        gameCard.className = 'game-card';
+                        gameCard.innerHTML = `
+                            <h3>${game.name}</h3>
+                            <p>${game.description}</p>
+                            <button onclick="startGame('${game.id}')">Start Game</button>
+                        `;
+                        gamesContainer.appendChild(gameCard);
+                    });
+                    
+                    displayResponse(games);
+                })
+                .catch(error => {
+                    console.error('Error fetching games:', error);
+                    displayResponse({ error: 'Failed to fetch games' });
+                });
+        }
+        
+        function startGame(gameId) {
+            fetch(`/api/game/${gameId}/start`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    displayResponse(data);
+                    return;
+                }
+                
+                currentGameId = data.game_id;
+                currentGameName = gameId;
+                gameState = data.state;
+                
+                // Show game session panel
+                document.getElementById('gamesList').style.display = 'none';
+                document.getElementById('gameSession').style.display = 'block';
+                
+                // Update game info
+                document.getElementById('gameInfo').innerHTML = `
+                    <h3>Game: ${gameId}</h3>
+                    <p>Game ID: ${currentGameId}</p>
+                    <p>Balance: $${gameState.balance}</p>
+                `;
+                
+                // Show appropriate action panel
+                hideAllActionPanels();
+                if (gameId === 'blackjack') {
+                    document.getElementById('blackjackPanel').style.display = 'block';
+                } else if (gameId === 'roulette') {
+                    document.getElementById('roulettePanel').style.display = 'block';
+                } else if (gameId === 'slot_machine') {
+                    document.getElementById('slotMachinePanel').style.display = 'block';
+                } else if (gameId === 'horse_betting') {
+                    document.getElementById('horseBettingPanel').style.display = 'block';
+                }
+                
+                updateGameState(data.state);
+                displayResponse(data);
+            })
+            .catch(error => {
+                console.error('Error starting game:', error);
+                displayResponse({ error: 'Failed to start game' });
+            });
+        }
+        
+        function hideAllActionPanels() {
+            document.getElementById('blackjackPanel').style.display = 'none';
+            document.getElementById('roulettePanel').style.display = 'none';
+            document.getElementById('slotMachinePanel').style.display = 'none';
+            document.getElementById('horseBettingPanel').style.display = 'none';
+        }
+        
+        function updateGameState(state) {
+            gameState = state;
+            
+            // Update the game state container
+            const container = document.getElementById('gameStateContainer');
+            let html = '<h3>Game State</h3>';
+            
+            // Customize display based on game type
+            if (currentGameName === 'blackjack') {
+                html += `<p>State: ${state.game_state}</p>`;
+                html += `<p>Balance: $${state.balance}</p>`;
+                html += `<p>Bet: $${state.bet_amount}</p>`;
+                
+                if (state.player_cards && state.player_cards.length > 0) {
+                    html += '<p>Your Hand: ';
+                    state.player_cards.forEach(card => {
+                        html += `${card.rank} of ${card.suit}, `;
+                    });
+                    html += `Score: ${state.player_score}</p>`;
+                }
+                
+                if (state.dealer_cards && state.dealer_cards.length > 0) {
+                    html += '<p>Dealer Hand: ';
+                    state.dealer_cards.forEach(card => {
+                        if (card.rank === 'hidden') {
+                            html += 'Hidden card, ';
+                        } else {
+                            html += `${card.rank} of ${card.suit}, `;
+                        }
+                    });
+                    html += `Score: ${state.dealer_score}</p>`;
+                }
+                
+                if (state.result) {
+                    html += `<p>Result: ${state.result}</p>`;
+                }
+                
+                // Show/hide action buttons based on game state
+                if (state.game_state === 'player_turn') {
+                    document.getElementById('blackjackActions').style.display = 'block';
+                    document.getElementById('betForm').style.display = 'none';
+                } else if (state.game_state === 'betting') {
+                    document.getElementById('blackjackActions').style.display = 'none';
+                    document.getElementById('betForm').style.display = 'block';
+                } else {
+                    document.getElementById('blackjackActions').style.display = 'none';
+                    document.getElementById('betForm').style.display = 'block';
+                }
+                
+            } else if (currentGameName === 'roulette') {
+                html += `<p>State: ${state.game_state}</p>`;
+                html += `<p>Balance: $${state.balance}</p>`;
+                html += `<p>Total Bet: $${state.total_bet || 0}</p>`;
+                
+                if (state.bets && state.bets.length > 0) {
+                    html += '<p>Your Bets:</p><ul>';
+                    state.bets.forEach(bet => {
+                        html += `<li>$${bet.amount} on ${bet.type}: ${bet.value}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                if (state.winning_number !== undefined) {
+                    html += `<p>Winning Number: ${state.winning_number} (${state.winning_color})</p>`;
+                }
+                
+                if (state.results) {
+                    html += '<p>Results:</p><ul>';
+                    state.results.forEach(result => {
+                        html += `<li>Bet: $${result.bet.amount} on ${result.bet.type}: ${result.bet.value} - `;
+                        if (result.win) {
+                            html += `Win! $${result.winnings}`;
+                        } else {
+                            html += 'Loss';
+                        }
+                        html += '</li>';
+                    });
+                    html += '</ul>';
+                    
+                    if (state.total_winnings !== undefined) {
+                        html += `<p>Total Winnings: $${state.total_winnings}</p>`;
+                    }
+                }
+                
+            } else if (currentGameName === 'slot_machine') {
+                html += `<p>State: ${state.game_state}</p>`;
+                html += `<p>Balance: $${state.balance}</p>`;
+                
+                if (state.bet_amount) {
+                    html += `<p>Bet: $${state.bet_amount}</p>`;
+                }
+                
+                if (state.result && state.result.length > 0) {
+                    html += '<p>Result: ';
+                    state.result.forEach(symbol => {
+                        html += `${symbol} `;
+                    });
+                    html += '</p>';
+                    
+                    if (state.is_win) {
+                        html += `<p>Win! $${state.win_amount}</p>`;
+                    } else {
+                        html += '<p>No win this time</p>';
+                    }
+                }
+                
+            } else if (currentGameName === 'horse_betting') {
+                html += `<p>State: ${state.game_state}</p>`;
+                html += `<p>Balance: $${state.balance}</p>`;
+                
+                if (state.bet_amount) {
+                    html += `<p>Bet: $${state.bet_amount} on ${state.selected_horse}</p>`;
+                }
+                
+                if (state.horses) {
+                    html += '<p>Horses:</p><ul>';
+                    for (const [key, horse] of Object.entries(state.horses)) {
+                        html += `<li>${horse.name} (${horse.color}) - Odds: ${horse.odds}x</li>`;
+                    }
+                    html += '</ul>';
+                }
+                
+                if (state.horse_positions) {
+                    html += '<p>Race Progress:</p><ul>';
+                    for (const [key, position] of Object.entries(state.horse_positions)) {
+                        const horseName = state.horses[key]?.name || key;
+                        html += `<li>${horseName}: ${position}/${state.race_length}</li>`;
+                    }
+                    html += '</ul>';
+                }
+                
+                if (state.race_result) {
+                    html += '<p>Race Result:</p>';
+                    html += `<p>Winner: ${state.horses[state.race_result.winner]?.name || state.race_result.winner}</p>`;
+                    
+                    if (state.race_result.win) {
+                        html += `<p>You won $${state.race_result.win_amount}!</p>`;
+                    } else {
+                        html += '<p>Better luck next time!</p>';
+                    }
+                }
+                
+                // Enable/disable buttons based on game state
+                if (state.game_state === 'ready_to_race') {
+                    document.getElementById('startRaceButton').disabled = false;
+                } else {
+                    document.getElementById('startRaceButton').disabled = true;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function makeMove(action) {
+            if (!currentGameId) return;
+            
+            fetch(`/api/game/${currentGameId}/play`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(action)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    displayResponse(data);
+                    return;
+                }
+                
+                updateGameState(data.state);
+                displayResponse(data);
+            })
+            .catch(error => {
+                console.error('Error making move:', error);
+                displayResponse({ error: 'Failed to make move' });
+            });
+        }
+        
+        // Blackjack actions
+        function placeBet() {
+            const betAmount = parseInt(document.getElementById('betAmount').value);
+            makeMove({
+                move: 'place_bet',
+                bet_amount: betAmount
+            });
+        }
+        
+        function hitBlackjack() {
+            makeMove({
+                move: 'hit'
+            });
+        }
+        
+        function standBlackjack() {
+            makeMove({
+                move: 'stand'
+            });
+        }
+        
+        // Roulette actions
+        document.getElementById('rouletteBetType').addEventListener('change', function() {
+            const betType = this.value;
+            document.getElementById('numberValueForm').style.display = 'none';
+            document.getElementById('colorValueForm').style.display = 'none';
+            document.getElementById('evenOddValueForm').style.display = 'none';
+            document.getElementById('dozenValueForm').style.display = 'none';
+            document.getElementById('halfValueForm').style.display = 'none';
+            
+            if (betType === 'number') {
+                document.getElementById('numberValueForm').style.display = 'block';
+            } else if (betType === 'color') {
+                document.getElementById('colorValueForm').style.display = 'block';
+            } else if (betType === 'even_odd') {
+                document.getElementById('evenOddValueForm').style.display = 'block';
+            } else if (betType === 'dozen') {
+                document.getElementById('dozenValueForm').style.display = 'block';
+            } else if (betType === 'half') {
+                document.getElementById('halfValueForm').style.display = 'block';
+            }
+        });
+        
+        function placeBetRoulette() {
+            const betAmount = parseInt(document.getElementById('rouletteBetAmount').value);
+            const betType = document.getElementById('rouletteBetType').value;
+            let betValue;
+            
+            if (betType === 'number') {
+                betValue = parseInt(document.getElementById('numberValue').value);
+            } else if (betType === 'color') {
+                betValue = document.getElementById('colorValue').value;
+            } else if (betType === 'even_odd') {
+                betValue = document.getElementById('evenOddValue').value;
+            } else if (betType === 'dozen') {
+                betValue = parseInt(document.getElementById('dozenValue').value);
+            } else if (betType === 'half') {
+                betValue = document.getElementById('halfValue').value;
+            }
+            
+            makeMove({
+                move: 'place_bet',
+                bet_type: betType,
+                bet_value: betValue,
+                bet_amount: betAmount
+            });
+        }
+        
+        function spinRoulette() {
+            makeMove({
+                move: 'spin'
+            });
+        }
+        
+        // Slot machine actions
+        function spinSlots() {
+            const betAmount = parseInt(document.getElementById('slotBetAmount').value);
+            makeMove({
+                move: 'spin',
+                bet_amount: betAmount
+            });
+        }
+        
+        // Horse betting actions
+        function placeBetHorse() {
+            const betAmount = parseInt(document.getElementById('horseBetAmount').value);
+            const horse = document.getElementById('horseSelection').value;
+            makeMove({
+                move: 'place_bet',
+                horse: horse,
+                bet_amount: betAmount
+            });
+        }
+        
+        function startRace() {
+            makeMove({
+                move: 'start_race'
+            });
+        }
+        
+        function backToGameList() {
+            currentGameId = null;
+            currentGameName = null;
+            gameState = null;
+            document.getElementById('gamesList').style.display = 'block';
+            document.getElementById('gameSession').style.display = 'none';
+        }
+        
+        function displayResponse(data) {
+            document.getElementById('responseJson').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
