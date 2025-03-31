@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
-import { Search, Gift, Bell, ChevronDown, Sparkles, Clock, TrendingUp, Star } from "lucide-react";
+import { Search, Gift, Bell, ChevronDown, Sparkles, Clock, TrendingUp, Star, Zap } from "lucide-react";
 // Importar el icono ChevronDown como SVG por si hay problemas con lucide-react
 const ChevronDownIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -20,6 +20,7 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
+import { CasinoGamesSection } from "@/components/casino/casino-games-section";
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -28,7 +29,7 @@ export default function HomePage() {
   const [activeGameCategory, setActiveGameCategory] = useState("all");
   
   // Obtener los juegos favoritos del usuario
-  const { data: favorites, isLoading: isLoadingFavorites } = useQuery({
+  const { data: favorites, isLoading: isLoadingFavorites } = useQuery<string[]>({
     queryKey: ["/api/favorites"],
     enabled: !!user
   });
@@ -210,6 +211,21 @@ export default function HomePage() {
                 </TabsTrigger>
                 
                 <TabsTrigger 
+                  value="casino" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v8M8 12h8" />
+                    <circle cx="19" cy="5" r="2" />
+                    <circle cx="5" cy="5" r="2" />
+                    <circle cx="19" cy="19" r="2" />
+                    <circle cx="5" cy="19" r="2" />
+                  </svg>
+                  <span>Casino</span>
+                </TabsTrigger>
+                
+                <TabsTrigger 
                   value="slots" 
                   className="flex items-center gap-2 data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
                 >
@@ -290,6 +306,7 @@ export default function HomePage() {
                 <h2 className="text-white text-xl font-bold">
                   {activeGameCategory === 'all' && 'Juegos Populares'}
                   {activeGameCategory === 'originals' && 'Originales'}
+                  {activeGameCategory === 'casino' && 'Juegos de Casino'}
                   {activeGameCategory === 'slots' && 'Slots'}
                   {activeGameCategory === 'live' && 'Casino en Vivo'}
                   {activeGameCategory === 'tv' && 'Concursos de TV'}
@@ -299,7 +316,7 @@ export default function HomePage() {
                   {activeGameCategory === 'recent' && 'Jugados Recientemente'}
                 </h2>
                 {activeGameCategory === 'favorites' && (
-                  <span className="text-gray-400 text-xs">({favorites?.length || 0} juegos)</span>
+                  <span className="text-gray-400 text-xs">({Array.isArray(favorites) ? favorites.length : 0} juegos)</span>
                 )}
               </div>
               <div className="flex space-x-2">
@@ -319,185 +336,257 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4">
-              {/* Juego 1 */}
-              <div className="group cursor-pointer">
-                <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
-                  <div className="aspect-square relative bg-gradient-to-br from-[#471a54] to-[#2d1034]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-white">DICE</div>
+            {activeGameCategory === 'casino' ? (
+              <CasinoGamesSection />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4">
+                {/* Juego de Blackjack - Casino */}
+                <div className="group cursor-pointer">
+                  <a href="/casino/blackjack">
+                    <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                      <div className="aspect-square relative bg-gradient-to-br from-[#1a3a2a] to-[#0e1f16]">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="flex justify-center space-x-1">
+                              <div className="bg-white rounded-md w-10 h-14 flex items-center justify-center shadow-md">
+                                <span className="text-black text-xl font-bold">A</span>
+                                <span className="text-red-600 text-md">♥</span>
+                              </div>
+                              <div className="bg-white rounded-md w-10 h-14 flex items-center justify-center shadow-md">
+                                <span className="text-black text-xl font-bold">K</span>
+                                <span className="text-black text-md">♠</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-2 left-2 bg-[#09b66d]/90 text-white text-xs px-2 py-1 rounded">CASINO</div>
+                      </div>
+                      <div className="p-3">
+                        <div className="text-white font-medium text-sm">Blackjack</div>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-xs text-gray-400">CASINO</span>
+                          <div className="flex items-center text-xs text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span>4.6</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="absolute bottom-2 left-2 bg-[#FF51FF]/80 text-white text-xs px-2 py-1 rounded">HOT</div>
+                  </a>
+                </div>
+                
+                {/* Juego de Ruleta - Casino */}
+                <div className="group cursor-pointer">
+                  <a href="/casino/roulette">
+                    <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                      <div className="aspect-square relative bg-gradient-to-br from-[#4a1a1a] to-[#2a0e0e]">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="relative w-16 h-16 rounded-full border-4 border-[#B21A1A] bg-[#0e1f16]">
+                              <div className="absolute w-4 h-4 rounded-full bg-white top-1 left-6"></div>
+                              <div className="absolute w-14 h-14 top-1 left-1 rounded-full border border-gray-600"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-2 left-2 bg-[#B21A1A]/90 text-white text-xs px-2 py-1 rounded">HOT</div>
+                      </div>
+                      <div className="p-3">
+                        <div className="text-white font-medium text-sm">Ruleta</div>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-xs text-gray-400">CASINO</span>
+                          <div className="flex items-center text-xs text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span>4.8</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+                
+                {/* Juego 1 */}
+                <div className="group cursor-pointer">
+                  <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                    <div className="aspect-square relative bg-gradient-to-br from-[#471a54] to-[#2d1034]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-white">DICE</div>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-2 left-2 bg-[#FF51FF]/80 text-white text-xs px-2 py-1 rounded">HOT</div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-white font-medium text-sm">Dice</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400">DICE</span>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <span>207</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-3">
-                    <div className="text-white font-medium text-sm">Dice</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-gray-400">DICE</span>
-                      <div className="flex items-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <span>207</span>
+                </div>
+  
+                {/* Juego 2 */}
+                <div className="group cursor-pointer">
+                  <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                    <div className="aspect-square relative bg-gradient-to-br from-[#1a6fb6] to-[#0c3c63]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-white">MINES</div>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-2 left-2 bg-[#51BDFF]/80 text-white text-xs px-2 py-1 rounded">HOT</div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-white font-medium text-sm">Mines</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400">MINAS</span>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <span>189</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Juego 3 */}
+                <div className="group cursor-pointer">
+                  <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                    <div className="aspect-square relative bg-gradient-to-br from-[#9c4889] to-[#5d2b52]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-white">PLINKO</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-white font-medium text-sm">Plinko</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400">STAKE</span>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <span>176</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Juego 4 */}
+                <div className="group cursor-pointer">
+                  <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                    <div className="aspect-square relative bg-gradient-to-br from-[#d97d20] to-[#854e15]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-white">CRASH</div>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-2 left-2 bg-[#FF9147]/80 text-white text-xs px-2 py-1 rounded">HOT</div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-white font-medium text-sm">Crash</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400">STAKE</span>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <span>315</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Juego 5 */}
+                <div className="group cursor-pointer">
+                  <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                    <div className="aspect-square relative bg-gradient-to-br from-[#cf3946] to-[#931f29]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-white">PUMP</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-white font-medium text-sm">Pump</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400">STAKE</span>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <span>142</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Juego 6 */}
+                <div className="group cursor-pointer">
+                  <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                    <div className="aspect-square relative bg-gradient-to-br from-[#d9bf1a] to-[#93821a]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-white">LIMBO</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-white font-medium text-sm">Limbo</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400">STAKE</span>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <span>98</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Juego 7 */}
+                <div className="group cursor-pointer">
+                  <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
+                    <div className="aspect-square relative bg-gradient-to-br from-[#27ae60] to-[#176f3d]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-white">KENO</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-white font-medium text-sm">Keno</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400">STAKE</span>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <span>87</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Juego 2 */}
-              <div className="group cursor-pointer">
-                <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
-                  <div className="aspect-square relative bg-gradient-to-br from-[#1a6fb6] to-[#0c3c63]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-white">MINES</div>
-                      </div>
-                    </div>
-                    <div className="absolute bottom-2 left-2 bg-[#51BDFF]/80 text-white text-xs px-2 py-1 rounded">HOT</div>
-                  </div>
-                  <div className="p-3">
-                    <div className="text-white font-medium text-sm">Mines</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-gray-400">MINAS</span>
-                      <div className="flex items-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <span>189</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Juego 3 */}
-              <div className="group cursor-pointer">
-                <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
-                  <div className="aspect-square relative bg-gradient-to-br from-[#9c4889] to-[#5d2b52]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-white">PLINKO</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <div className="text-white font-medium text-sm">Plinko</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-gray-400">STAKE</span>
-                      <div className="flex items-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <span>176</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Juego 4 */}
-              <div className="group cursor-pointer">
-                <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
-                  <div className="aspect-square relative bg-gradient-to-br from-[#d97d20] to-[#854e15]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-white">CRASH</div>
-                      </div>
-                    </div>
-                    <div className="absolute bottom-2 left-2 bg-[#FF9147]/80 text-white text-xs px-2 py-1 rounded">HOT</div>
-                  </div>
-                  <div className="p-3">
-                    <div className="text-white font-medium text-sm">Crash</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-gray-400">STAKE</span>
-                      <div className="flex items-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <span>315</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Juego 5 */}
-              <div className="group cursor-pointer">
-                <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
-                  <div className="aspect-square relative bg-gradient-to-br from-[#cf3946] to-[#931f29]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-white">PUMP</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <div className="text-white font-medium text-sm">Pump</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-gray-400">STAKE</span>
-                      <div className="flex items-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <span>142</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Juego 6 */}
-              <div className="group cursor-pointer">
-                <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
-                  <div className="aspect-square relative bg-gradient-to-br from-[#d9bf1a] to-[#93821a]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-white">LIMBO</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <div className="text-white font-medium text-sm">Limbo</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-gray-400">STAKE</span>
-                      <div className="flex items-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <span>98</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Juego 7 */}
-              <div className="group cursor-pointer">
-                <div className="bg-[#192531] rounded-lg overflow-hidden border border-[#1c2b3a] group-hover:border-[#09b66d]/40 transition-all duration-300">
-                  <div className="aspect-square relative bg-gradient-to-br from-[#27ae60] to-[#176f3d]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-white">KENO</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <div className="text-white font-medium text-sm">Keno</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-gray-400">STAKE</span>
-                      <div className="flex items-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <span>87</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Sección de Slots */}
