@@ -26,6 +26,8 @@ import RecentGamesPage from "@/pages/recent-games-page";
 import LiveEventsPage from "@/pages/live-events-page";
 import EventDetailPage from "@/pages/event-detail-page";
 import VIPPage from "@/pages/vip-page";
+import BlackjackPage from "@/pages/blackjack-page";
+import RoulettePage from "@/pages/roulette-page";
 
 function Router() {
   return (
@@ -44,6 +46,8 @@ function Router() {
       <ProtectedRoute path="/rewards" component={RewardsPage} />
       <ProtectedRoute path="/vip" component={VIPPage} />
       <ProtectedRoute path="/support" component={SupportPage} />
+      <ProtectedRoute path="/casino/blackjack" component={BlackjackPage} />
+      <ProtectedRoute path="/casino/roulette" component={RoulettePage} />
       <Route path="/test-phone-input">
         <TestPhoneInputPage />
       </Route>

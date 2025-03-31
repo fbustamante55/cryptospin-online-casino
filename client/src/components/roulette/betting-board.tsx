@@ -1,344 +1,432 @@
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-interface BettingBoardProps {
-  onPlaceBet: (bet: RouletteBet) => void;
-  onRemoveBet: (bet: RouletteBet) => void;
-  onSpin: () => void;
-  chips: number[];
-  selectedChip: number;
-  onChipSelect: (chip: number) => void;
-  placedBets: RouletteBet[];
-  disabled: boolean;
-  className?: string;
-}
-
+// Definición de tipos para las apuestas
 export interface RouletteBet {
   id: string;
-  type: BetType;
+  type: 'number' | 'split' | 'street' | 'corner' | 'sixline' | 'dozen' | 'column' | 'color' | 'evenOdd' | 'highLow';
   numbers: number[];
   odds: number;
   amount: number;
+  label: string;
 }
 
-export type BetType = 
-  | 'straight' // Single number
-  | 'split' // Two adjacent numbers
-  | 'street' // Three numbers in a row
-  | 'corner' // Four numbers 
-  | 'line' // Six numbers (two rows)
-  | 'column' // Twelve numbers (a column)
-  | 'dozen' // Twelve numbers (1-12, 13-24, 25-36)
-  | 'red' // All red numbers
-  | 'black' // All black numbers
-  | 'even' // All even numbers
-  | 'odd' // All odd numbers
-  | 'high' // 19-36
-  | 'low'; // 1-18
+interface BettingBoardProps {
+  onPlaceBet: (bet: RouletteBet) => void;
+  placedBets: RouletteBet[];
+  onClearBets: () => void;
+  onSpin: () => void;
+  isSpinning: boolean;
+}
 
-// Roulette constants
-const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
-const BLACK_NUMBERS = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35];
-
-export function BettingBoard({ 
-  onPlaceBet, 
-  onRemoveBet, 
-  onSpin, 
-  chips, 
-  selectedChip, 
-  onChipSelect,
-  placedBets,
-  disabled,
-  className 
-}: BettingBoardProps) {
+export function BettingBoard({ onPlaceBet, placedBets, onClearBets, onSpin, isSpinning }: BettingBoardProps) {
+  const [selectedBetType, setSelectedBetType] = useState<RouletteBet['type']>('number');
+  const [betAmount, setBetAmount] = useState(25);
+  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   
-  // Find bets with the given number
-  const getBetsOnNumber = (number: number) => {
-    return placedBets.filter(bet => 
-      bet.numbers.includes(number)
-    );
+  // Chips predefinidos
+  const chips = [5, 25, 100, 500, 1000];
+  
+  // Generación de números para la mesa de apuestas
+  const numbers = Array.from({ length: 37 }, (_, i) => i);
+  
+  // Configuración de odds para cada tipo de apuesta
+  const betTypeConfig = {
+    number: { odds: 35, label: 'Pleno' },
+    split: { odds: 17, label: 'Semipleno' },
+    street: { odds: 11, label: 'Calle' },
+    corner: { odds: 8, label: 'Esquina' },
+    sixline: { odds: 5, label: 'Línea' },
+    dozen: { odds: 2, label: 'Docena' },
+    column: { odds: 2, label: 'Columna' },
+    color: { odds: 1, label: 'Color' },
+    evenOdd: { odds: 1, label: 'Par/Impar' },
+    highLow: { odds: 1, label: 'Alta/Baja' },
   };
-
-  // Get total bet amount on a specific number
-  const getBetAmountOnNumber = (number: number) => {
-    return getBetsOnNumber(number).reduce((total, bet) => total + bet.amount, 0);
-  };
-
-  // Check if a bet type is already placed
-  const isBetPlaced = (type: BetType, numbers: number[]) => {
-    return placedBets.some(bet => 
-      bet.type === type && 
-      bet.numbers.length === numbers.length && 
-      bet.numbers.every(num => numbers.includes(num))
-    );
-  };
-
-  // Find a specific bet
-  const findBet = (type: BetType, numbers: number[]) => {
-    return placedBets.find(bet => 
-      bet.type === type && 
-      bet.numbers.length === numbers.length && 
-      bet.numbers.every(num => numbers.includes(num))
-    );
-  };
-
-  // Handle betting on a straight up number
-  const handleStraightBet = (number: number) => {
-    if (disabled) return;
-    
-    const betType: BetType = 'straight';
-    const numbers = [number];
-    const odds = 35;
-    
-    const existingBet = findBet(betType, numbers);
-    
-    if (existingBet) {
-      onRemoveBet(existingBet);
+  
+  // Gestionar la selección de números
+  const handleNumberClick = (number: number) => {
+    if (selectedBetType === 'number') {
+      setSelectedNumbers([number]);
+    } else if (selectedBetType === 'color') {
+      // Para apuestas por color, seleccionar todos los números rojos o negros
+      const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+      const isRed = redNumbers.includes(number);
+      
+      if (isRed) {
+        setSelectedNumbers(redNumbers);
+      } else if (number !== 0) {
+        setSelectedNumbers(numbers.filter(n => n !== 0 && !redNumbers.includes(n)));
+      }
+    } else if (selectedBetType === 'evenOdd') {
+      // Para apuestas par/impar
+      if (number === 0) return;
+      const isEven = number % 2 === 0;
+      setSelectedNumbers(numbers.filter(n => n !== 0 && (isEven ? n % 2 === 0 : n % 2 !== 0)));
+    } else if (selectedBetType === 'highLow') {
+      // Para apuestas alta/baja (1-18 vs 19-36)
+      const isLow = number >= 1 && number <= 18;
+      setSelectedNumbers(isLow ? Array.from({ length: 18 }, (_, i) => i + 1) : Array.from({ length: 18 }, (_, i) => i + 19));
+    } else if (selectedBetType === 'dozen') {
+      // Para apuestas por docena
+      if (number >= 1 && number <= 12) {
+        setSelectedNumbers(Array.from({ length: 12 }, (_, i) => i + 1));
+      } else if (number >= 13 && number <= 24) {
+        setSelectedNumbers(Array.from({ length: 12 }, (_, i) => i + 13));
+      } else if (number >= 25 && number <= 36) {
+        setSelectedNumbers(Array.from({ length: 12 }, (_, i) => i + 25));
+      }
     } else {
-      const newBet: RouletteBet = {
-        id: `${betType}-${numbers.join('-')}`,
-        type: betType,
-        numbers,
-        odds,
-        amount: selectedChip
-      };
-      onPlaceBet(newBet);
+      // Para otros tipos de apuestas, permitir selección múltiple hasta cierto límite
+      if (selectedNumbers.includes(number)) {
+        setSelectedNumbers(selectedNumbers.filter(n => n !== number));
+      } else {
+        // Limitar la cantidad de números según el tipo de apuesta
+        let maxNumbers = 1;
+        if (selectedBetType === 'split') maxNumbers = 2;
+        if (selectedBetType === 'street') maxNumbers = 3;
+        if (selectedBetType === 'corner') maxNumbers = 4;
+        if (selectedBetType === 'sixline') maxNumbers = 6;
+        
+        if (selectedNumbers.length < maxNumbers) {
+          setSelectedNumbers([...selectedNumbers, number]);
+        }
+      }
     }
   };
-
-  // Handle betting on columns
-  const handleColumnBet = (column: 1 | 2 | 3) => {
-    if (disabled) return;
+  
+  // Generar una apuesta basada en la selección actual
+  const generateBet = (): RouletteBet | null => {
+    if (selectedNumbers.length === 0) return null;
     
-    const betType: BetType = 'column';
-    // Create array of numbers in this column
-    const numbers: number[] = [];
-    
-    for (let i = column; i <= 36; i += 3) {
-      numbers.push(i);
-    }
-    
-    const odds = 2;
-    
-    const existingBet = findBet(betType, numbers);
-    
-    if (existingBet) {
-      onRemoveBet(existingBet);
-    } else {
-      const newBet: RouletteBet = {
-        id: `${betType}-column-${column}`,
-        type: betType,
-        numbers,
-        odds,
-        amount: selectedChip
-      };
-      onPlaceBet(newBet);
+    return {
+      id: `bet-${Date.now()}`,
+      type: selectedBetType,
+      numbers: selectedNumbers,
+      odds: betTypeConfig[selectedBetType].odds,
+      amount: betAmount,
+      label: betTypeConfig[selectedBetType].label
+    };
+  };
+  
+  // Colocar la apuesta actual
+  const handlePlaceBet = () => {
+    const bet = generateBet();
+    if (bet) {
+      onPlaceBet(bet);
+      // Limpiar selección después de apostar
+      setSelectedNumbers([]);
     }
   };
-
-  // Handle betting on dozens
-  const handleDozenBet = (dozen: 1 | 2 | 3) => {
-    if (disabled) return;
-    
-    const betType: BetType = 'dozen';
-    const start = (dozen - 1) * 12 + 1;
-    const numbers = Array.from({ length: 12 }, (_, i) => start + i);
-    const odds = 2;
-    
-    const existingBet = findBet(betType, numbers);
-    
-    if (existingBet) {
-      onRemoveBet(existingBet);
-    } else {
-      const newBet: RouletteBet = {
-        id: `${betType}-dozen-${dozen}`,
-        type: betType,
-        numbers,
-        odds,
-        amount: selectedChip
-      };
-      onPlaceBet(newBet);
-    }
+  
+  // Determinar el color de un número
+  const getNumberColor = (number: number): 'red' | 'black' | 'green' => {
+    if (number === 0) return 'green';
+    const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+    return redNumbers.includes(number) ? 'red' : 'black';
   };
-
-  // Handle outside bets like red/black, odd/even, etc.
-  const handleOutsideBet = (betType: BetType) => {
-    if (disabled) return;
-    
-    let numbers: number[] = [];
-    let odds = 1;
-    
-    if (betType === 'red') numbers = [...RED_NUMBERS];
-    else if (betType === 'black') numbers = [...BLACK_NUMBERS];
-    else if (betType === 'even') numbers = Array.from({ length: 18 }, (_, i) => (i + 1) * 2);
-    else if (betType === 'odd') numbers = Array.from({ length: 18 }, (_, i) => (i * 2) + 1);
-    else if (betType === 'high') numbers = Array.from({ length: 18 }, (_, i) => i + 19);
-    else if (betType === 'low') numbers = Array.from({ length: 18 }, (_, i) => i + 1);
-    
-    const existingBet = findBet(betType, numbers);
-    
-    if (existingBet) {
-      onRemoveBet(existingBet);
-    } else {
-      const newBet: RouletteBet = {
-        id: `${betType}`,
-        type: betType,
-        numbers,
-        odds,
-        amount: selectedChip
-      };
-      onPlaceBet(newBet);
-    }
-  };
-
-  // Render a chip with the bet amount
-  const renderChip = (amount: number, key: string) => {
-    return (
-      <div 
-        key={key}
-        className={cn(
-          "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2",
-          "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow z-10",
-          amount === 5 ? "bg-red-500" : 
-          amount === 25 ? "bg-green-500" : 
-          amount === 100 ? "bg-blue-500" : 
-          amount === 500 ? "bg-purple-500" : 
-          "bg-yellow-500" // For amount === 1000
-        )}
-      >
-        {amount}
-      </div>
-    );
-  };
-
+  
   return (
-    <Card className={cn("w-full p-4 bg-green-800 border-4 border-[#5e0000]", className)}>
-      <div className="w-full">
-        {/* Chips selection */}
-        <div className="flex justify-center mb-4 gap-2">
-          {chips.map(chip => (
-            <Button
-              key={chip}
-              variant={selectedChip === chip ? "default" : "outline"}
-              className={cn(
-                "w-12 h-12 rounded-full font-bold p-0",
-                chip === 5 ? "bg-red-500 hover:bg-red-400" : 
-                chip === 25 ? "bg-green-500 hover:bg-green-400" : 
-                chip === 100 ? "bg-blue-500 hover:bg-blue-400" : 
-                chip === 500 ? "bg-purple-500 hover:bg-purple-400" :
-                "bg-yellow-500 hover:bg-yellow-400", // For chip === 1000
-                selectedChip === chip ? "ring-4 ring-white" : ""
+    <div className="space-y-6">
+      {/* Sección de control de apuestas */}
+      <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+        <Card className="flex-1">
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tipo de apuesta</label>
+                  <select 
+                    className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm"
+                    value={selectedBetType}
+                    onChange={(e) => {
+                      setSelectedBetType(e.target.value as RouletteBet['type']);
+                      setSelectedNumbers([]);
+                    }}
+                    disabled={isSpinning}
+                  >
+                    <option value="number">Pleno (35:1)</option>
+                    <option value="split">Semipleno (17:1)</option>
+                    <option value="street">Calle (11:1)</option>
+                    <option value="corner">Esquina (8:1)</option>
+                    <option value="sixline">Línea (5:1)</option>
+                    <option value="dozen">Docena (2:1)</option>
+                    <option value="column">Columna (2:1)</option>
+                    <option value="color">Color (1:1)</option>
+                    <option value="evenOdd">Par/Impar (1:1)</option>
+                    <option value="highLow">Alta/Baja (1:1)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Cantidad</label>
+                  <Input
+                    type="number"
+                    value={betAmount}
+                    onChange={(e) => setBetAmount(Number(e.target.value))}
+                    min={5}
+                    max={10000}
+                    disabled={isSpinning}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex space-x-2 justify-start">
+                {chips.map((chip) => (
+                  <Button
+                    key={chip}
+                    variant="outline"
+                    className={`w-12 h-12 rounded-full ${betAmount === chip ? 'bg-primary text-white' : ''}`}
+                    onClick={() => setBetAmount(chip)}
+                    disabled={isSpinning}
+                  >
+                    {chip}
+                  </Button>
+                ))}
+              </div>
+              
+              <div className="flex space-x-2">
+                <Button
+                  variant="default"
+                  className="flex-1"
+                  onClick={handlePlaceBet}
+                  disabled={selectedNumbers.length === 0 || isSpinning}
+                >
+                  Apostar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={onClearBets}
+                  disabled={placedBets.length === 0 || isSpinning}
+                >
+                  Limpiar
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={onSpin}
+                  disabled={placedBets.length === 0 || isSpinning}
+                >
+                  {isSpinning ? 'Girando...' : 'Girar!'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="flex-1">
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Apuestas actuales</h3>
+              
+              {placedBets.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay apuestas colocadas</p>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {placedBets.map((bet) => (
+                    <div key={bet.id} className="flex justify-between items-center bg-card p-2 rounded-md border">
+                      <div>
+                        <span className="text-sm font-medium">{bet.label}</span>
+                        <div className="flex space-x-1 mt-1">
+                          {bet.numbers.length <= 10 ? (
+                            bet.numbers.map((num) => (
+                              <Badge key={num} variant="outline" className="text-xs">
+                                {num}
+                              </Badge>
+                            ))
+                          ) : (
+                            <Badge variant="outline" className="text-xs">
+                              {bet.numbers.length} números
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold">{bet.amount}</div>
+                        <div className="text-xs text-muted-foreground">Odds: {bet.odds}:1</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-              onClick={() => onChipSelect(chip)}
-              disabled={disabled}
-            >
-              {chip}
-            </Button>
-          ))}
-        </div>
-
-        {/* Betting table */}
-        <div className="roulette-table w-full grid grid-cols-13 gap-1 mb-4">
-          {/* Zero */}
-          <div 
-            className="col-span-1 row-span-3 bg-green-600 h-32 flex items-center justify-center relative cursor-pointer hover:bg-green-500"
-            onClick={() => handleStraightBet(0)}
+              
+              <div className="border-t pt-2 flex justify-between">
+                <span className="font-medium">Total:</span>
+                <span className="font-bold">
+                  {placedBets.reduce((sum, bet) => sum + bet.amount, 0)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Tablero de apuestas */}
+      <div className="bg-[#263850] rounded-md p-4 shadow-md">
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {/* Primera docena */}
+          <Button
+            variant="ghost"
+            className="bg-[#1b2736] hover:bg-[#1b2736]/80 text-white"
+            onClick={() => {
+              setSelectedBetType('dozen');
+              setSelectedNumbers(Array.from({ length: 12 }, (_, i) => i + 1));
+            }}
+            disabled={isSpinning}
           >
-            <span className="text-white font-bold text-xl">0</span>
-            {getBetsOnNumber(0).map(bet => renderChip(bet.amount, bet.id))}
+            1ª Docena (1-12)
+          </Button>
+          
+          {/* Segunda docena */}
+          <Button
+            variant="ghost"
+            className="bg-[#1b2736] hover:bg-[#1b2736]/80 text-white"
+            onClick={() => {
+              setSelectedBetType('dozen');
+              setSelectedNumbers(Array.from({ length: 12 }, (_, i) => i + 13));
+            }}
+            disabled={isSpinning}
+          >
+            2ª Docena (13-24)
+          </Button>
+          
+          {/* Tercera docena */}
+          <Button
+            variant="ghost"
+            className="bg-[#1b2736] hover:bg-[#1b2736]/80 text-white"
+            onClick={() => {
+              setSelectedBetType('dozen');
+              setSelectedNumbers(Array.from({ length: 12 }, (_, i) => i + 25));
+            }}
+            disabled={isSpinning}
+          >
+            3ª Docena (25-36)
+          </Button>
+        </div>
+        
+        {/* Tablero principal */}
+        <div className="grid grid-cols-12 gap-1">
+          {/* Número 0 */}
+          <div className="col-span-1 row-span-3">
+            <motion.button
+              className={`w-full pt-1 pb-1 bg-green-700 text-white rounded-md ${
+                selectedNumbers.includes(0) ? 'ring-2 ring-white' : ''
+              }`}
+              whileHover={{ scale: 1.05 }}
+              onClick={() => handleNumberClick(0)}
+              disabled={isSpinning}
+            >
+              0
+            </motion.button>
           </div>
           
-          {/* Main numbers (1-36) */}
-          <div className="col-span-12 grid grid-cols-12 grid-rows-3 gap-1">
-            {Array.from({ length: 36 }, (_, i) => {
-              const number = i + 1;
-              const isRed = RED_NUMBERS.includes(number);
+          {/* Números 1-36 */}
+          <div className="col-span-11 grid grid-cols-12 gap-1">
+            {numbers.slice(1).map((number) => {
+              const color = getNumberColor(number);
               return (
-                <div 
+                <motion.button
                   key={number}
-                  className={cn(
-                    "flex items-center justify-center h-10 relative cursor-pointer",
-                    isRed ? "bg-red-600 hover:bg-red-500" : "bg-black hover:bg-gray-800"
-                  )}
-                  onClick={() => handleStraightBet(number)}
+                  className={`w-full py-1 ${
+                    color === 'red' ? 'bg-red-600' : 'bg-gray-900'
+                  } text-white rounded-md ${
+                    selectedNumbers.includes(number) ? 'ring-2 ring-white' : ''
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  onClick={() => handleNumberClick(number)}
+                  disabled={isSpinning}
                 >
-                  <span className="text-white font-bold">{number}</span>
-                  {getBetsOnNumber(number).map(bet => renderChip(bet.amount, bet.id))}
-                </div>
+                  {number}
+                </motion.button>
               );
             })}
           </div>
-          
-          {/* 2:1 columns */}
-          <div className="col-span-1"></div>
-          <div className="col-span-4 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleColumnBet(1)}>
-            <span className="text-white font-bold">Column 1</span>
-          </div>
-          <div className="col-span-4 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleColumnBet(2)}>
-            <span className="text-white font-bold">Column 2</span>
-          </div>
-          <div className="col-span-4 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleColumnBet(3)}>
-            <span className="text-white font-bold">Column 3</span>
-          </div>
-          
-          {/* Dozens */}
-          <div className="col-span-1"></div>
-          <div className="col-span-4 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleDozenBet(1)}>
-            <span className="text-white font-bold">1st 12</span>
-          </div>
-          <div className="col-span-4 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleDozenBet(2)}>
-            <span className="text-white font-bold">2nd 12</span>
-          </div>
-          <div className="col-span-4 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleDozenBet(3)}>
-            <span className="text-white font-bold">3rd 12</span>
-          </div>
-          
-          {/* Outside bets */}
-          <div className="col-span-1"></div>
-          <div className="col-span-2 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleOutsideBet('low')}>
-            <span className="text-white font-bold">1-18</span>
-          </div>
-          <div className="col-span-2 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleOutsideBet('even')}>
-            <span className="text-white font-bold">EVEN</span>
-          </div>
-          <div className="col-span-2 h-10 bg-red-600 flex items-center justify-center cursor-pointer hover:bg-red-500" onClick={() => handleOutsideBet('red')}>
-            <span className="text-white font-bold">RED</span>
-          </div>
-          <div className="col-span-2 h-10 bg-black flex items-center justify-center cursor-pointer hover:bg-gray-800" onClick={() => handleOutsideBet('black')}>
-            <span className="text-white font-bold">BLACK</span>
-          </div>
-          <div className="col-span-2 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleOutsideBet('odd')}>
-            <span className="text-white font-bold">ODD</span>
-          </div>
-          <div className="col-span-2 h-10 bg-green-700 flex items-center justify-center cursor-pointer hover:bg-green-600" onClick={() => handleOutsideBet('high')}>
-            <span className="text-white font-bold">19-36</span>
-          </div>
         </div>
         
-        {/* Total bets & Spin button */}
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex flex-col gap-2">
-            <Badge variant="outline" className="bg-black/30 text-white">
-              Total Bets: {placedBets.length}
-            </Badge>
-            <Badge variant="outline" className="bg-black/30 text-white">
-              Total Amount: ${placedBets.reduce((sum, bet) => sum + bet.amount, 0)}
-            </Badge>
+        {/* Apuestas simples */}
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <div className="grid grid-cols-3 gap-2">
+            <Button
+              variant="ghost"
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={() => {
+                setSelectedBetType('color');
+                const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+                setSelectedNumbers(redNumbers);
+              }}
+              disabled={isSpinning}
+            >
+              Rojo
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="bg-gray-900 hover:bg-gray-800 text-white"
+              onClick={() => {
+                setSelectedBetType('color');
+                const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+                setSelectedNumbers(numbers.filter(n => n !== 0 && !redNumbers.includes(n)));
+              }}
+              disabled={isSpinning}
+            >
+              Negro
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="bg-[#1b2736] hover:bg-[#1b2736]/80 text-white"
+              onClick={() => {
+                setSelectedBetType('evenOdd');
+                setSelectedNumbers(numbers.filter(n => n !== 0 && n % 2 === 0));
+              }}
+              disabled={isSpinning}
+            >
+              Par
+            </Button>
           </div>
           
-          <Button 
-            size="lg"
-            className="bg-red-600 hover:bg-red-500 text-white font-bold px-8 py-2 rounded"
-            onClick={onSpin}
-            disabled={disabled || placedBets.length === 0}
-          >
-            SPIN
-          </Button>
+          <div className="grid grid-cols-3 gap-2">
+            <Button
+              variant="ghost"
+              className="bg-[#1b2736] hover:bg-[#1b2736]/80 text-white"
+              onClick={() => {
+                setSelectedBetType('evenOdd');
+                setSelectedNumbers(numbers.filter(n => n !== 0 && n % 2 !== 0));
+              }}
+              disabled={isSpinning}
+            >
+              Impar
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="bg-[#1b2736] hover:bg-[#1b2736]/80 text-white"
+              onClick={() => {
+                setSelectedBetType('highLow');
+                setSelectedNumbers(Array.from({ length: 18 }, (_, i) => i + 1));
+              }}
+              disabled={isSpinning}
+            >
+              1-18
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="bg-[#1b2736] hover:bg-[#1b2736]/80 text-white"
+              onClick={() => {
+                setSelectedBetType('highLow');
+                setSelectedNumbers(Array.from({ length: 18 }, (_, i) => i + 19));
+              }}
+              disabled={isSpinning}
+            >
+              19-36
+            </Button>
+          </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
