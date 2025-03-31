@@ -850,7 +850,7 @@ export function BlackjackGame() {
           {/* Game table - Styled after the reference image */}
           <div className="relative overflow-hidden rounded-b-[50%] rounded-t-xl">
             {/* Mesa de blackjack */}
-            <div ref={tableRef} className="relative w-full aspect-[16/12] bg-green-700 flex flex-col">
+            <div ref={tableRef} className="relative w-full aspect-[16/10] bg-green-700 flex flex-col">
               {/* Borde de madera */}
               <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-r from-amber-800 via-amber-700 to-amber-800 rounded-b-full"></div>
               
@@ -878,7 +878,8 @@ export function BlackjackGame() {
                     €{betAmount}
                   </div>
                 )}
-                <div className="text-3xl font-bold uppercase text-[#b0a172] opacity-40 blackjack-casino-text">CryptoSpin</div>
+                <div className="text-2xl font-bold uppercase text-[#b0a172] opacity-40 blackjack-europa-text">EUROPA</div>
+                <div className="text-2xl font-bold uppercase text-[#b0a172] opacity-40 blackjack-casino-text">CryptoSpin</div>
                 <div className="text-sm text-[#b0a172] opacity-40">CASINO</div>
               </div>
 
