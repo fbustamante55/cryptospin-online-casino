@@ -623,10 +623,10 @@ export function BlackjackGame() {
     const startX = chipRect.left - tableRect.left + (chipRect.width / 2);
     const startY = chipRect.top - tableRect.top + (chipRect.height / 2);
     
-    // El destino es la posición de la apuesta (área circular del jugador)
-    // La posición está más hacia abajo en la mesa
+    // El destino es la posición de la apuesta (área de EUROPA CASINO en el centro inferior)
+    // Las posiciones están ajustadas para que las fichas queden justo sobre el texto EUROPA CASINO
     const endX = tableRect.width / 2;
-    const endY = tableRect.height * 0.82; // Ajustado para estar en el área de apuestas, en la parte inferior de la mesa
+    const endY = tableRect.height * 0.7; // Ajustado para estar en el área de EUROPA CASINO
     
     // Obtener los colores del chip
     const chipStyle = chipStyles[amount] || 
@@ -796,8 +796,16 @@ export function BlackjackGame() {
                 </div>
               </div>
               
-              {/* Logo del casino */}
-              <div className="absolute bottom-[15%] left-0 right-0 text-center">
+              {/* Logo del casino con área de apuestas */}
+              <div className="absolute bottom-[15%] left-0 right-0 text-center z-[5]">
+                {/* Círculo de área de apuestas */}
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full border-2 border-dashed border-[#b0a172] border-opacity-30"></div>
+                {/* Mostrar el valor actual de la apuesta - Solo visible durante el juego */}
+                {gameState.gameStatus !== 'betting' && (
+                  <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-black/50 px-4 py-1 rounded-full text-amber-300 font-bold border border-amber-600">
+                    €{betAmount}
+                  </div>
+                )}
                 <div className="text-2xl font-bold uppercase text-[#b0a172] opacity-40">EUROPA</div>
                 <div className="text-sm text-[#b0a172] opacity-40">CASINO</div>
               </div>
@@ -1174,9 +1182,9 @@ export function BlackjackGame() {
                 </div>
               )}
               
-              {/* Controles del juego - Movidos a la altura de la caja de fichas */}
+              {/* Controles del juego - Movidos a la parte inferior de la mesa */}
               {gameState.gameStatus === 'playing' && (
-                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/40 px-4 py-3 rounded-full flex justify-center gap-3 z-20">
+                <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 bg-black/40 px-4 py-3 rounded-full flex justify-center gap-3 z-20">
                   <Button 
                     variant="default"
                     size="lg"
