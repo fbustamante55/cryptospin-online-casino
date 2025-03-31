@@ -748,7 +748,7 @@ export function BlackjackGame() {
           key={index} 
           className="relative w-[80px] h-[124px] rounded-[6px] shadow-xl overflow-hidden"
           style={{ 
-            marginLeft: index > 0 ? '-25px' : '0', 
+            marginLeft: index > 0 ? '-5px' : '0', 
             zIndex: 10 - index,
             transformStyle: 'preserve-3d',
           }}
@@ -790,7 +790,7 @@ export function BlackjackGame() {
         key={index} 
         className="relative w-[80px] h-[124px] bg-white rounded-[6px] shadow-xl overflow-hidden"
         style={{ 
-          marginLeft: index > 0 ? '-25px' : '0', 
+          marginLeft: index > 0 ? '-5px' : '0', 
           zIndex: 10 - index,
           transformStyle: 'preserve-3d',
         }}
@@ -1081,8 +1081,8 @@ export function BlackjackGame() {
               ) : (
                 <div className="flex-1 p-6 flex flex-col justify-between pt-4 pb-4 z-10">
                   {/* Área del crupier - Con mayor espacio vertical y separación */}
-                  <div className="flex flex-col items-center mb-16 mt-36">
-                    <div className="flex justify-center" style={{ marginLeft: '40px' }}>
+                  <div className="flex flex-col items-center mb-16 mt-16">
+                    <div className="flex justify-center space-x-4" style={{ marginLeft: '40px' }}>
                       {gameState.dealerHand.cards.map((card, index) => renderCard(card, index))}
                     </div>
                     
@@ -1127,8 +1127,8 @@ export function BlackjackGame() {
                         
                         {/* Área de cartas del jugador - movida más abajo para mayor separación */}
                         {gameState.playerHands[gameState.currentHandIndex]?.cards && (
-                          <div className="absolute -top-96 left-1/2 transform -translate-x-1/2" style={{ marginLeft: '20px' }}>
-                            <div className="flex justify-center" style={{ marginLeft: '20px' }}>
+                          <div className="absolute -top-64 left-1/2 transform -translate-x-1/2" style={{ marginLeft: '20px' }}>
+                            <div className="flex justify-center space-x-4" style={{ marginLeft: '20px' }}>
                               {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
                             </div>
                             
