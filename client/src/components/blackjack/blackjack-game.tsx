@@ -774,32 +774,33 @@ export function BlackjackGame() {
                 </div>
               </div>
 
-              {/* Límites de apuesta y rack de fichas mejorado */}
+              {/* Límites de apuesta y rack de fichas mejorado - Sin chips extras */}
               <div className="absolute top-6 right-6 flex">
                 <div className="bg-[#5c2b1b] border-2 border-amber-600 rounded-sm p-2 text-amber-200 text-xs mr-4">
                   <div>MIN: €1</div>
                   <div>MAX: €300</div>
                 </div>
                 <div className="h-16 w-64 bg-[#5c2b1b]/80 border-2 border-amber-600 rounded-sm flex items-center justify-center overflow-hidden">
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-4">
                     {[
                       { color: "#FFFFFF", borderColor: "#CC0000", textColor: "#CC0000", value: "1" },
-                      { color: "#FF3333", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "5" },
-                      { color: "#3366CC", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "25" },
-                      { color: "#009900", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "100" },
-                      { color: "#333333", borderColor: "#FFD700", textColor: "#FFD700", value: "500" }
-                    ].map((chipData, i) => (
-                      <div key={i} className="relative px-1">
-                        {[...Array(5)].map((_, j) => (
+                      { color: "#FF2233", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "5" },
+                      { color: "#006699", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "25" },
+                      { color: "#006622", borderColor: "#FFFFFF", textColor: "#FFFFFF", value: "100" },
+                      { color: "#222222", borderColor: "#FFD700", textColor: "#FFD700", value: "500" }
+                    ].map((chipData, i) => {
+                      // Obtener el patrón si es posible
+                      const chipPattern = chipStyles[parseInt(chipData.value)]?.pattern || 
+                        `radial-gradient(circle, ${chipData.color} 60%, rgba(0,0,0,0.2) 100%)`;
+                      
+                      return (
+                        <div key={i} className="relative px-1">
                           <div 
-                            key={j} 
                             style={{ 
-                              position: 'absolute',
-                              bottom: j * 2.5,
-                              width: '36px',
-                              height: '36px',
+                              width: '38px',
+                              height: '38px',
                               borderRadius: '100%',
-                              backgroundColor: chipData.color,
+                              background: chipPattern,
                               border: `3px solid ${chipData.borderColor}`,
                               color: chipData.textColor,
                               display: 'flex',
@@ -808,14 +809,20 @@ export function BlackjackGame() {
                               fontSize: '11px',
                               fontWeight: 'bold',
                               boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
-                              zIndex: 50 - j
+                              position: 'relative'
                             }}
                           >
-                            {j === 0 && chipData.value}
+                            {/* Efecto de brillo en la parte superior */}
+                            <div className="absolute inset-0 rounded-full" style={{
+                              backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 40%)',
+                              zIndex: 1
+                            }}></div>
+                            
+                            <span className="relative z-10">{chipData.value}</span>
                           </div>
-                        ))}
-                      </div>
-                    ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -953,8 +960,8 @@ export function BlackjackGame() {
                 </div>
               ) : (
                 <div className="flex-1 p-6 flex flex-col justify-between pt-16 pb-12 z-10">
-                  {/* Área del crupier - Ahora con mayor espacio vertical */}
-                  <div className="flex flex-col items-center mb-12 mt-2">
+                  {/* Área del crupier - Con mayor espacio vertical y separación */}
+                  <div className="flex flex-col items-center mb-24 mt-4">
                     <div className="flex">
                       {gameState.dealerHand.cards.map((card, index) => renderCard(card, index))}
                     </div>
@@ -990,17 +997,17 @@ export function BlackjackGame() {
                     )}
                   </div>
                   
-                  {/* Área del jugador con posiciones y apuestas - Movido más abajo */}
-                  <div className="flex justify-center gap-24 px-8 mt-auto pt-8">
+                  {/* Área del jugador con posiciones y apuestas - Movido más abajo con mayor separación */}
+                  <div className="flex justify-center gap-24 px-8 mt-auto pt-28">
                     {/* Primera posición (de 3 posibles posiciones en el futuro) */}
                     <div className="flex flex-col items-center">
                       {/* Círculo de posición */}
                       <div className="relative">
                         <div className="w-20 h-20 rounded-full border border-white/30 bg-white/5"></div>
                         
-                        {/* Área de cartas del jugador */}
+                        {/* Área de cartas del jugador - movida más arriba para mayor separación */}
                         {gameState.playerHands[gameState.currentHandIndex]?.cards && (
-                          <div className="absolute -top-44 left-1/2 transform -translate-x-1/2">
+                          <div className="absolute -top-52 left-1/2 transform -translate-x-1/2">
                             <div className="flex">
                               {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
                             </div>
@@ -1128,9 +1135,9 @@ export function BlackjackGame() {
                 </div>
               )}
               
-              {/* Controles del juego */}
+              {/* Controles del juego - Movidos a la altura de la caja de fichas */}
               {gameState.gameStatus === 'playing' && (
-                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/40 px-4 py-3 rounded-full flex justify-center gap-3 z-20">
+                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/40 px-4 py-3 rounded-full flex justify-center gap-3 z-20">
                   <Button 
                     variant="default"
                     size="lg"
@@ -1167,12 +1174,16 @@ export function BlackjackGame() {
             </div>
           </div>
           
-          {/* Fichas del jugador - Estilo bandeja mejorado */}
-          <div className="flex flex-wrap justify-center gap-2 py-3 bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 rounded-lg border-t-4 border-amber-950 shadow-inner -mt-3">
+          {/* Fichas del jugador - Estilo bandeja mejorado sin chips extras */}
+          <div className="flex flex-wrap justify-center gap-4 py-3 bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 rounded-lg border-t-4 border-amber-950 shadow-inner -mt-3">
             {chips.map(chip => {
               // Obtener los colores del chip
               const chipStyle = chipStyles[chip] || 
                 { color: "#009900", borderColor: "#FFFFFF", textColor: "#FFFFFF" };
+              
+              // Obtener el patrón si está disponible
+              const chipPattern = chipStyle.pattern || 
+                `radial-gradient(circle, ${chipStyle.color} 60%, rgba(0,0,0,0.2) 100%)`;
               
               return (
                 <motion.div
@@ -1182,30 +1193,31 @@ export function BlackjackGame() {
                   onClick={(e) => handleChipSelect(chip, e)}
                   className="cursor-pointer"
                 >
-                  {[...Array(3)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      style={{ 
-                        position: 'relative',
-                        bottom: i * 4,
-                        zIndex: 10 - i,
-                        width: '42px',
-                        height: '42px',
-                        borderRadius: '100%',
-                        backgroundColor: chipStyle.color,
-                        border: `3px solid ${chipStyle.borderColor}`,
-                        color: chipStyle.textColor,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.5)'
-                      }}
-                    >
-                      {i === 0 && chip}
-                    </div>
-                  ))}
+                  <div 
+                    style={{ 
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '100%',
+                      background: chipPattern,
+                      border: `3px solid ${chipStyle.borderColor}`,
+                      color: chipStyle.textColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 3px 6px rgba(0,0,0,0.5)',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Efecto de brillo en la parte superior */}
+                    <div className="absolute inset-0 rounded-full" style={{
+                      backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 40%)',
+                      zIndex: 1
+                    }}></div>
+                    
+                    <span className="relative z-10">{chip}</span>
+                  </div>
                 </motion.div>
               );
             })}
