@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useSoundManager } from '@/hooks/use-sound';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -387,21 +387,27 @@ export function BlackjackGame() {
   const handleEndGame = async () => {
     const dealerValue = gameState.dealerHand.value;
     const dealerHasBlackjack = isBlackjack(gameState.dealerHand);
+    const dealerIsBusted = dealerValue > 21;
     
     const results = gameState.playerHands.map(hand => {
+      // Si el jugador se pasó de 21, pierde sin importar la mano del crupier
       if (hand.isBusted) return 'lose';
       
       const playerValue = hand.value;
       const playerHasBlackjack = isBlackjack(hand);
       
+      // Reglas de blackjack: blackjack natural gana 3:2 a menos que el crupier también tenga blackjack
       if (playerHasBlackjack && !dealerHasBlackjack) return 'win';
       if (!playerHasBlackjack && dealerHasBlackjack) return 'lose';
       if (playerHasBlackjack && dealerHasBlackjack) return 'push';
       
-      if (dealerValue > 21) return 'win';
+      // Si el crupier se pasó, el jugador gana automáticamente (si no está busted)
+      if (dealerIsBusted) return 'win';
+      
+      // Comparación de valores
       if (playerValue > dealerValue) return 'win';
       if (playerValue < dealerValue) return 'lose';
-      return 'push';
+      return 'push'; // Valores iguales = empate
     });
     
     // Calculate payouts
@@ -505,21 +511,66 @@ export function BlackjackGame() {
   
   // Handle chip selection
   // Animación para cuando el jugador selecciona una ficha para apostar
-  const [chipAnimations, setChipAnimations] = useState<{ id: string; chip: number; x: number; y: number }[]>([]);
+  const [chipAnimations, setChipAnimations] = useState<{ 
+    id: string; 
+    chip: number; 
+    x: number; 
+    y: number; 
+    startX: number; 
+    startY: number;
+    endX: number;
+    endY: number;
+  }[]>([]);
   
-  const handleChipSelect = (amount: number) => {
+  // Referencia a las posiciones de los chips en la mesa de juego
+  const chipRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+  
+  const handleChipSelect = (amount: number, event: React.MouseEvent<HTMLElement>) => {
     setBetAmount(amount);
     
     // Crear una animación para la ficha seleccionada
     const id = `chip-${Date.now()}`;
-    const randomOffsetX = Math.random() * 40 - 20; // Valor aleatorio entre -20 y 20
     
+    // Posición inicial (desde el chip que fue clickeado)
+    const chipRect = event.currentTarget.getBoundingClientRect();
+    
+    // Calcular la posición del centro de la mesa
+    const tableRect = tableRef.current?.getBoundingClientRect() || { 
+      left: 0, 
+      top: 0, 
+      width: window.innerWidth, 
+      height: window.innerHeight 
+    };
+    
+    // Posiciones relativas para la animación
+    const startX = chipRect.left - tableRect.left + (chipRect.width / 2);
+    const startY = chipRect.top - tableRect.top + (chipRect.height / 2);
+    
+    // Destino es el centro de la mesa (ajustado para tener un poco de aleatoriedad)
+    const endX = tableRect.width / 2 + (Math.random() * 40 - 20);
+    const endY = tableRect.height / 2 + 40 + (Math.random() * 20 - 10);
+    
+    // Agregar la animación
     setChipAnimations(prev => [...prev, {
       id,
       chip: amount,
-      x: randomOffsetX,
-      y: -30
+      x: 0, // Inicialmente en 0, luego se animará
+      y: 0, // Inicialmente en 0, luego se animará
+      startX,
+      startY,
+      endX,
+      endY
     }]);
+    
+    // Sonido de ficha
+    try {
+      const audio = new Audio('/sounds/chip.mp3');
+      audio.volume = 0.5;
+      audio.play();
+    } catch (e) {
+      console.error("Error playing audio:", e);
+    }
     
     // Eliminar la animación después de que termine
     setTimeout(() => {
@@ -645,7 +696,7 @@ export function BlackjackGame() {
           {/* Game table - Styled after the reference image */}
           <div className="relative overflow-hidden rounded-b-[50%] rounded-t-xl">
             {/* Mesa de blackjack */}
-            <div className="relative w-full aspect-[4/3] bg-green-700 flex flex-col">
+            <div ref={tableRef} className="relative w-full aspect-[4/3] bg-green-700 flex flex-col">
               {/* Borde de madera */}
               <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-r from-amber-800 via-amber-700 to-amber-800 rounded-b-full"></div>
               
@@ -730,15 +781,15 @@ export function BlackjackGame() {
                   <motion.div
                     key={anim.id}
                     initial={{ 
-                      y: 150, 
-                      x: anim.x, 
-                      opacity: 0.8,
-                      scale: 1.2
+                      x: anim.startX,
+                      y: anim.startY,
+                      opacity: 1,
+                      scale: 1
                     }}
                     animate={{ 
-                      y: [-20, -100], 
-                      x: [anim.x, anim.x/2], 
-                      opacity: [1, 0.8, 0],
+                      x: [anim.startX, anim.endX],
+                      y: [anim.startY, anim.endY],
+                      opacity: [1, 1, 0.8],
                       scale: [1, 0.9, 0.8],
                       rotate: [0, 5, -5, 0]
                     }}
@@ -746,7 +797,7 @@ export function BlackjackGame() {
                       duration: 0.7, 
                       ease: "easeOut" 
                     }}
-                    className={`absolute left-1/2 top-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2 
+                    className={`absolute z-50
                       w-16 h-16 rounded-full font-bold border-4 shadow-lg flex items-center justify-center
                       ${anim.chip === 5 ? "bg-white border-red-700 text-red-700" : 
                         anim.chip === 25 ? "bg-red-600 border-white text-white" : 
@@ -781,7 +832,7 @@ export function BlackjackGame() {
                             "bg-green-600 border-white text-white"}
                           ${betAmount === chip ? "ring-2 ring-yellow-300" : ""}
                         `}
-                        onClick={() => handleChipSelect(chip)}
+                        onClick={(e) => handleChipSelect(chip, e)}
                       >
                         {chip}
                       </motion.button>
@@ -970,7 +1021,7 @@ export function BlackjackGame() {
                 key={chip}
                 whileHover={{ y: -5 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handleChipSelect(chip)}
+                onClick={(e) => handleChipSelect(chip, e)}
                 className="cursor-pointer"
               >
                 {[...Array(3)].map((_, i) => (
