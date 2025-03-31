@@ -850,7 +850,7 @@ export function BlackjackGame() {
           {/* Game table - Styled after the reference image */}
           <div className="relative overflow-hidden rounded-b-[50%] rounded-t-xl">
             {/* Mesa de blackjack */}
-            <div ref={tableRef} className="relative w-full aspect-[16/10] bg-green-700 flex flex-col">
+            <div ref={tableRef} className="relative w-full aspect-square bg-green-700 flex flex-col">
               {/* Borde de madera */}
               <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-r from-amber-800 via-amber-700 to-amber-800 rounded-b-full"></div>
               
@@ -1127,7 +1127,7 @@ export function BlackjackGame() {
                         
                         {/* Área de cartas del jugador - movida más abajo para mayor separación */}
                         {gameState.playerHands[gameState.currentHandIndex]?.cards && (
-                          <div className="absolute -top-48 left-1/2 transform -translate-x-1/2" style={{ marginLeft: '20px' }}>
+                          <div className="absolute -top-72 left-1/2 transform -translate-x-1/2" style={{ marginLeft: '20px' }}>
                             <div className="flex justify-center" style={{ marginLeft: '20px' }}>
                               {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
                             </div>
