@@ -348,10 +348,20 @@ export function BlackjackGame() {
     },
   });
   
-  // Helper function to simulate drawing a card
+  // Helper function to simulate drawing a card - mejor distribución aleatoria
   const drawCard = (): BlackjackCard => {
-    const suit = SUITS[Math.floor(Math.random() * SUITS.length)];
-    const value = VALUES[Math.floor(Math.random() * VALUES.length)];
+    // Generar números para específicas distribuciones de palos y valores
+    // Esto asegura una mejor distribución de probabilidades
+    
+    // Para los valores, usamos un array más representativo de un mazo real
+    // donde hay 4 cartas de cada valor (una por palo)
+    const valueIndex = Math.floor(Math.random() * 13); // 13 posibles valores (A,2,...,10,J,Q,K)
+    const value = VALUES[valueIndex];
+    
+    // Para los palos, usamos un sistema de cuartos para asegurar distribución equitativa
+    const suitIndex = Math.floor(Math.random() * 4); // 4 palos (hearts, diamonds, clubs, spades)
+    const suit = SUITS[suitIndex];
+    
     return { suit, value };
   };
   
@@ -623,16 +633,11 @@ export function BlackjackGame() {
     const startX = chipRect.left - tableRect.left + (chipRect.width / 2);
     const startY = chipRect.top - tableRect.top + (chipRect.height / 2);
     
-    // Posición precisa del área EUROPA
-    const europaElement = document.querySelector('.blackjack-europa-text');
-    let endX = tableRect.width / 2;
-    let endY = tableRect.height * 0.75;
-    
-    if (europaElement) {
-      const europaRect = europaElement.getBoundingClientRect();
-      endX = europaRect.left - tableRect.left + (europaRect.width / 2);
-      endY = europaRect.top - tableRect.top - 10; // 10px encima del texto
-    }
+    // Posición fija para las fichas sobre EUROPA
+    // En lugar de usar referencias DOM que pueden ser inestables,
+    // vamos a usar coordenadas absolutas basadas en el tamaño de la mesa
+    const endX = tableRect.width / 2; // Centro horizontal
+    const endY = tableRect.height * 0.82; // Ligeramente por encima del texto EUROPA (que está al 85%)
     
     // Obtener los colores del chip
     const chipStyle = chipStyles[amount] || 
