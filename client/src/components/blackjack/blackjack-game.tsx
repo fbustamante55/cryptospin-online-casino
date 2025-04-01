@@ -32,9 +32,10 @@ interface BlackjackGameState {
   dealerHand: BlackjackHand;
   currentHandIndex: number;
   deck: BlackjackCard[];
-  gameStatus: 'betting' | 'playing' | 'dealer-turn' | 'complete';
+  gameStatus: 'betting' | 'playing' | 'dealer-turn' | 'complete' | 'insurance-offer';
   result?: 'win' | 'lose' | 'push';
   insurance?: boolean;
+  insuranceBet?: number;
   message?: string;
 }
 
@@ -175,8 +176,16 @@ export function BlackjackGame() {
       // Play deal sound
       soundManager.playSound('/sounds/card_deal.mp3');
       
+      // Check for dealer showing Ace (insurance offer)
+      if (dealerHand.cards[0].value === 'A' && !playerHand.isBlackjack) {
+        setGameState(prevState => ({
+          ...prevState,
+          gameStatus: 'insurance-offer',
+          message: '¿Deseas tomar seguro contra Blackjack del crupier?'
+        }));
+      }
       // Check for blackjack
-      if (playerHand.isBlackjack) {
+      else if (playerHand.isBlackjack) {
         // Si tiene blackjack, terminar juego después de un breve delay
         setTimeout(() => {
           handleDealerTurn();
@@ -702,7 +711,7 @@ export function BlackjackGame() {
       // Si el crupier se pasó, el jugador gana automáticamente (si no está busted)
       if (dealerIsBusted) return 'win';
       
-      // Comparación de valores
+      // Comparación de valores para asegurar resultados realistas
       if (playerValue > dealerValue) return 'win';
       if (playerValue < dealerValue) return 'lose';
       return 'push'; // Valores iguales = empate
@@ -1418,21 +1427,17 @@ export function BlackjackGame() {
                         Doblar
                       </Button>
                       {/* Botón de Split - Solo habilitado cuando el jugador tiene dos cartas del mismo valor */}
-                      {/* Función para verificar si se puede dividir la mano */}
                       {gameState.playerHands[gameState.currentHandIndex]?.cards.length === 2 && 
                        getCardValue(gameState.playerHands[gameState.currentHandIndex]?.cards[0]) === 
-                       getCardValue(gameState.playerHands[gameState.currentHandIndex]?.cards[1]) && (
+                       getCardValue(gameState.playerHands[gameState.currentHandIndex]?.cards[1]) ? (
                         <Button 
                           onClick={() => splitHandMutation.mutate()}
                           className="bg-purple-700 hover:bg-purple-600 text-white font-bold px-6 py-2 rounded shadow-lg border-2 border-purple-800 hover:scale-105 transform transition-transform"
-                          disabled={
-                            isAnimating
-                            // Eliminamos la restricción de saldo en modo demo
-                          }
+                          disabled={isAnimating}
                         >
                           Dividir
                         </Button>
-                      )}
+                      ) : null}
                     </div>
                   )}
                 </div>
