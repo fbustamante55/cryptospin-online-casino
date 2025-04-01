@@ -662,7 +662,26 @@ export function BlackjackGame() {
     // Dealer draws until 17 or more
     let currentDealerHand = { ...updatedDealerHand };
     
+    // Verificar si el dealer tiene blackjack
+    const dealerHasBlackjack = isBlackjack(currentDealerHand);
+    
     const drawDealerCard = () => {
+      // Si el dealer tiene blackjack, no necesita más cartas
+      if (dealerHasBlackjack) {
+        console.log("Dealer has blackjack, no more cards needed");
+        currentDealerHand.isBlackjack = true;
+        
+        setGameState(prevState => ({
+          ...prevState,
+          dealerHand: currentDealerHand,
+        }));
+        
+        setIsAnimating(false);
+        handleEndGame();
+        return;
+      }
+      
+      // Dealer roba hasta llegar a 17 o más
       if (currentDealerHand.value < 17) {
         const newCard = drawCard();
         currentDealerHand.cards.push(newCard);
