@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlackjackGame } from '@/components/blackjack/blackjack-game';
+import { BlackjackGame } from '@/components/blackjack/blackjack-game-new';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function BlackjackPage() {
