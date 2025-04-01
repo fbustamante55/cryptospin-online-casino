@@ -192,8 +192,8 @@ export function BlackjackGame() {
   const hitMutation = useMutation({
     mutationFn: async () => {
       try {
-        if (user?.id) {
-          // Real API call
+        if (false && user?.id) { // Temporalmente deshabilitamos el modo API y usamos siempre el modo demo
+          // Real API call - deshabilitado temporalmente
           return apiRequest({
             url: "/api/games/blackjack/hit",
             method: "POST",
@@ -292,8 +292,8 @@ export function BlackjackGame() {
   const standMutation = useMutation({
     mutationFn: async () => {
       try {
-        if (user?.id) {
-          // Real API call
+        if (false && user?.id) { // Temporalmente deshabilitamos el modo API y usamos siempre el modo demo
+          // Real API call - deshabilitado temporalmente
           return apiRequest({
             url: "/api/games/blackjack/stand",
             method: "POST",
@@ -339,8 +339,8 @@ export function BlackjackGame() {
   const splitHandMutation = useMutation({
     mutationFn: async () => {
       try {
-        if (user?.id) {
-          // Real API call
+        if (false && user?.id) { // Temporalmente deshabilitamos el modo API y usamos siempre el modo demo
+          // Real API call - deshabilitado temporalmente
           return apiRequest({
             url: "/api/games/blackjack/split",
             method: "POST",
@@ -468,8 +468,8 @@ export function BlackjackGame() {
   const doubleDownMutation = useMutation({
     mutationFn: async () => {
       try {
-        if (user?.id) {
-          // Real API call
+        if (false && user?.id) { // Temporalmente deshabilitamos el modo API y usamos siempre el modo demo
+          // Real API call - deshabilitado temporalmente
           return apiRequest({
             url: "/api/games/blackjack/double",
             method: "POST",
