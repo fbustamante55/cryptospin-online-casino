@@ -713,25 +713,38 @@ export function BlackjackGame() {
   const handleEndGame = async () => {
     // Calculamos el valor final del dealer (revelando la carta oculta)
     const updatedDealerHand = { ...gameState.dealerHand };
-    // Aseguramos que todas las cartas estén reveladas para cálculos correctos
-    updatedDealerHand.cards = updatedDealerHand.cards.map(card => ({ ...card, hidden: false }));
-    const dealerValue = calculateHandValue(updatedDealerHand.cards);
+    let dealerValue = 0;
+    let dealerHasBlackjack = false;
+    let dealerIsBusted = false;
     
-    // Mostramos el valor correcto en consola para debugging
-    console.log(`Dealer final value: ${dealerValue}`);
-    
-    // Actualizamos la mano del dealer con el valor correcto
-    updatedDealerHand.value = dealerValue;
-    
-    // Utilizamos el valor actualizado para todas las comparaciones
-    const dealerHasBlackjack = isBlackjack(updatedDealerHand);
-    const dealerIsBusted = dealerValue > 21;
-    
-    // Actualizamos el estado con los valores finales del dealer
-    setGameState(prevState => ({
-      ...prevState,
-      dealerHand: updatedDealerHand,
-    }));
+    try {
+      // Aseguramos que todas las cartas estén reveladas para cálculos correctos
+      updatedDealerHand.cards = updatedDealerHand.cards.map(card => ({ ...card, hidden: false }));
+      dealerValue = calculateHandValue(updatedDealerHand.cards);
+      
+      // Mostramos el valor correcto en consola para debugging
+      console.log(`Dealer final value: ${dealerValue}`);
+      
+      // Actualizamos la mano del dealer con el valor correcto
+      updatedDealerHand.value = dealerValue;
+      
+      // Utilizamos el valor actualizado para todas las comparaciones
+      dealerHasBlackjack = isBlackjack(updatedDealerHand);
+      dealerIsBusted = dealerValue > 21;
+      
+      // Actualizamos el estado con los valores finales del dealer
+      setGameState(prevState => ({
+        ...prevState,
+        dealerHand: updatedDealerHand,
+      }));
+    } catch (error) {
+      console.error("Error al calcular el valor final del dealer:", error);
+      // Aseguramos que el juego continúe incluso con errores
+      updatedDealerHand.value = updatedDealerHand.value || 0;
+      dealerValue = updatedDealerHand.value;
+      dealerHasBlackjack = false;
+      dealerIsBusted = false;
+    }
     
     // Determinamos los resultados para cada mano del jugador    
     const results = gameState.playerHands.map(hand => {

@@ -68,9 +68,11 @@ app.use((req, res, next) => {
   const port = 5000;
   server.listen({
     port,
-    host: "0.0.0.0",
+    host: "0.0.0.0", // Listen on all interfaces
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    // Print additional info for debugging
+    log(`Server is accessible at http://localhost:${port}`);
   });
 })();
