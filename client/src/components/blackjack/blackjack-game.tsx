@@ -757,7 +757,7 @@ export function BlackjackGame() {
     
     // Record game results on server
     try {
-      if (user?.id) {
+      if (false && user?.id) { // Deshabilitamos temporalmente para forzar modo demo
         // Si hay usuario autenticado, intentamos usar la API
         const bets = gameState.playerHands.map(() => betAmount);
         const response = await apiRequest({
@@ -791,12 +791,8 @@ export function BlackjackGame() {
         }
       }
     } catch (error) {
-      console.error("Error recording game result:", error);
-      toast({
-        title: "Error",
-        description: "Hubo un error al registrar el resultado del juego",
-        variant: "destructive",
-      });
+      // No mostramos mensaje de error en modo demo, simplemente actualizamos el saldo localmente
+      console.log("Usando fallback para actualizar saldo en modo demo");
       
       // Fallback UI update for balance
       const totalPayout = payouts.reduce((sum, payout) => sum + payout, 0);
