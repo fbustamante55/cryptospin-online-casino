@@ -94,6 +94,7 @@ export function BlackjackGame() {
   });
   
   const [betAmount, setBetAmount] = useState(25);
+  const [currentBet, setCurrentBet] = useState(0); // Para permitir múltiples apuestas antes de comenzar
   const [gameHistory, setGameHistory] = useState<any[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   
@@ -111,25 +112,25 @@ export function BlackjackGame() {
     mutationFn: async () => {
       try {
         // Si hay usuario autenticado, intentamos hacer la petición a la API
-        if (user?.id) {
+        if (false && user?.id) { // Temporalmente deshabilitamos el modo API y usamos siempre el modo demo
           console.log("User authenticated, using API mode");
           const response = await apiRequest({
             url: "/api/games/blackjack/bet",
             method: "POST",
-            data: { amount: betAmount }
+            data: { amount: currentBet } // Usar la apuesta acumulada
           });
           console.log("API response:", response);
           return response;
         } else {
           // Modo demostración - creamos una respuesta simulada
           console.log("Using demo blackjack mode");
-          const demoResponse = mockDealHand(betAmount);
+          const demoResponse = mockDealHand(currentBet); // Usar la apuesta acumulada
           console.log("Demo response:", demoResponse);
           return demoResponse;
         }
       } catch (error) {
         console.error("Error calling blackjack API, falling back to demo mode:", error);
-        const fallbackResponse = mockDealHand(betAmount);
+        const fallbackResponse = mockDealHand(currentBet); // Usar la apuesta acumulada
         console.log("Fallback demo response:", fallbackResponse);
         return fallbackResponse;
       }
@@ -154,6 +155,9 @@ export function BlackjackGame() {
         gameStatus: 'playing',
       });
       
+      // Guardar el valor de la apuesta actual para usarlo en el juego
+      setBetAmount(currentBet);
+      
       // Update user balance if provided
       if (userData && data.balance !== undefined) {
         queryClient.setQueryData(['/api/user'], {
@@ -164,7 +168,7 @@ export function BlackjackGame() {
         // Si estamos en modo demo, actualizamos el saldo localmente
         queryClient.setQueryData(['/api/user'], {
           ...userData,
-          balance: userData.balance - betAmount
+          balance: userData.balance - currentBet
         });
       }
       
@@ -801,6 +805,9 @@ export function BlackjackGame() {
       deck: [],
       gameStatus: 'betting',
     });
+    
+    // Reiniciar la apuesta acumulada
+    setCurrentBet(0);
   };
   
   // Handle chip selection
@@ -832,6 +839,9 @@ export function BlackjackGame() {
   
   const handleChipSelect = (amount: number, event: React.MouseEvent<HTMLElement>) => {
     setBetAmount(amount);
+    
+    // Actualizar la apuesta actual sumando el valor del chip seleccionado
+    setCurrentBet(prevBet => prevBet + amount);
     
     // Crear una animación para la ficha seleccionada
     const id = `chip-${Date.now()}`;
@@ -874,14 +884,8 @@ export function BlackjackGame() {
       textColor: chipStyle.textColor
     }]);
     
-    // Sonido de ficha - Comentado temporalmente para evitar errores de carga
-    // try {
-    //   const audio = new Audio('/sounds/chip.mp3');
-    //   audio.volume = 0.5;
-    //   audio.play();
-    // } catch (e) {
-    //   console.error("Error playing audio:", e);
-    // }
+    // Sonido de ficha
+    soundManager.playSound('/sounds/chip.mp3');
     
     // Eliminar la animación después de que termine
     setTimeout(() => {
@@ -1159,6 +1163,13 @@ export function BlackjackGame() {
                     <div className="text-white text-xl font-bold mb-2 w-full text-center drop-shadow-md">
                       Coloca tu apuesta
                     </div>
+                    
+                    {/* Mostrar la apuesta actual */}
+                    <div className="w-full text-center">
+                      <div className="inline-block bg-black/70 text-amber-300 px-6 py-2 rounded-full font-bold border border-amber-600 text-lg">
+                        Apuesta actual: €{currentBet}
+                      </div>
+                    </div>
                     {chips.map(chip => {
                       const style = chipStyles[chip] || { 
                         color: "#009900", 
@@ -1202,16 +1213,27 @@ export function BlackjackGame() {
                     })}
                   </div>
                   
-                  <Button 
-                    size="lg"
-                    className="bg-amber-700 hover:bg-amber-600 text-white font-bold px-8 py-4 rounded text-xl border-2 border-amber-800 shadow-lg transform transition-transform hover:scale-105"
-                    onClick={() => dealMutation.mutate()}
-                    disabled={!userData || userData.balance < betAmount}
-                  >
-                    REPARTIR
-                  </Button>
+                  <div className="flex space-x-4">
+                    <Button 
+                      size="lg"
+                      className="bg-red-700 hover:bg-red-600 text-white font-bold px-6 py-4 rounded text-xl border-2 border-red-800 shadow-lg transform transition-transform hover:scale-105"
+                      onClick={() => setCurrentBet(0)}
+                      disabled={currentBet === 0}
+                    >
+                      REINICIAR
+                    </Button>
+
+                    <Button 
+                      size="lg"
+                      className="bg-amber-700 hover:bg-amber-600 text-white font-bold px-8 py-4 rounded text-xl border-2 border-amber-800 shadow-lg transform transition-transform hover:scale-105"
+                      onClick={() => dealMutation.mutate()}
+                      disabled={!userData || userData.balance < currentBet || currentBet === 0}
+                    >
+                      REPARTIR
+                    </Button>
+                  </div>
                   
-                  {(!userData || userData.balance < betAmount) && (
+                  {(!userData || userData.balance < currentBet) && (
                     <div className="text-red-300 text-center mt-2 bg-black/40 px-4 py-2 rounded-md">
                       No tienes suficiente saldo para esta apuesta
                     </div>
