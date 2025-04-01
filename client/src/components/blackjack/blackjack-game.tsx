@@ -1415,9 +1415,8 @@ export function BlackjackGame() {
                         className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-6 py-2 rounded shadow-lg border-2 border-blue-800 hover:scale-105 transform transition-transform"
                         disabled={
                           isAnimating || 
-                          gameState.playerHands[gameState.currentHandIndex]?.cards.length !== 2 ||
-                          !userData || 
-                          userData.balance < betAmount  // Verificamos que haya suficiente saldo para doblar
+                          gameState.playerHands[gameState.currentHandIndex]?.cards.length !== 2
+                          // Eliminamos la restricción de saldo en modo demo
                         }
                       >
                         Doblar
@@ -1431,9 +1430,8 @@ export function BlackjackGame() {
                           onClick={() => splitHandMutation.mutate()}
                           className="bg-purple-700 hover:bg-purple-600 text-white font-bold px-6 py-2 rounded shadow-lg border-2 border-purple-800 hover:scale-105 transform transition-transform"
                           disabled={
-                            isAnimating || 
-                            !userData || 
-                            userData.balance < betAmount
+                            isAnimating
+                            // Eliminamos la restricción de saldo en modo demo
                           }
                         >
                           Dividir
