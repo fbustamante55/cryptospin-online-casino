@@ -711,28 +711,73 @@ export function BlackjackGame() {
   
   // End game and determine results
   const handleEndGame = async () => {
-    const dealerValue = gameState.dealerHand.value;
-    const dealerHasBlackjack = isBlackjack(gameState.dealerHand);
+    // Calculamos el valor final del dealer (revelando la carta oculta)
+    const updatedDealerHand = { ...gameState.dealerHand };
+    // Aseguramos que todas las cartas estén reveladas para cálculos correctos
+    updatedDealerHand.cards = updatedDealerHand.cards.map(card => ({ ...card, hidden: false }));
+    const dealerValue = calculateHandValue(updatedDealerHand.cards);
+    
+    // Mostramos el valor correcto en consola para debugging
+    console.log(`Dealer final value: ${dealerValue}`);
+    
+    // Actualizamos la mano del dealer con el valor correcto
+    updatedDealerHand.value = dealerValue;
+    
+    // Utilizamos el valor actualizado para todas las comparaciones
+    const dealerHasBlackjack = isBlackjack(updatedDealerHand);
     const dealerIsBusted = dealerValue > 21;
     
+    // Actualizamos el estado con los valores finales del dealer
+    setGameState(prevState => ({
+      ...prevState,
+      dealerHand: updatedDealerHand,
+    }));
+    
+    // Determinamos los resultados para cada mano del jugador    
     const results = gameState.playerHands.map(hand => {
-      // Si el jugador se pasó de 21, pierde sin importar la mano del crupier
-      if (hand.isBusted) return 'lose';
-      
+      // Obtenemos el valor correcto de la mano del jugador
       const playerValue = hand.value;
+      console.log(`Player value: ${playerValue}, Dealer value: ${dealerValue}`);
+      
+      // Si el jugador se pasó de 21, pierde sin importar la mano del crupier
+      if (hand.isBusted || playerValue > 21) {
+        console.log("Player busted, dealer wins");
+        return 'lose';
+      }
+      
       const playerHasBlackjack = isBlackjack(hand);
       
       // Reglas de blackjack: blackjack natural gana 3:2 a menos que el crupier también tenga blackjack
-      if (playerHasBlackjack && !dealerHasBlackjack) return 'win';
-      if (!playerHasBlackjack && dealerHasBlackjack) return 'lose';
-      if (playerHasBlackjack && dealerHasBlackjack) return 'push';
+      if (playerHasBlackjack && !dealerHasBlackjack) {
+        console.log("Player has blackjack, dealer doesn't");
+        return 'win';
+      }
+      if (!playerHasBlackjack && dealerHasBlackjack) {
+        console.log("Dealer has blackjack, player doesn't");
+        return 'lose';
+      }
+      if (playerHasBlackjack && dealerHasBlackjack) {
+        console.log("Both have blackjack, push");
+        return 'push';
+      }
       
       // Si el crupier se pasó, el jugador gana automáticamente (si no está busted)
-      if (dealerIsBusted) return 'win';
+      if (dealerIsBusted) {
+        console.log("Dealer busted, player wins");
+        return 'win';
+      }
       
-      // Comparación de valores para asegurar resultados realistas
-      if (playerValue > dealerValue) return 'win';
-      if (playerValue < dealerValue) return 'lose';
+      // Comparación de valores para determinar el ganador
+      if (playerValue > dealerValue) {
+        console.log(`Player wins with ${playerValue} vs dealer's ${dealerValue}`);
+        return 'win';
+      }
+      if (playerValue < dealerValue) {
+        console.log(`Dealer wins with ${dealerValue} vs player's ${playerValue}`);
+        return 'lose';
+      }
+      
+      console.log(`Push with equal values: ${playerValue}`);
       return 'push'; // Valores iguales = empate
     });
     
@@ -1283,16 +1328,10 @@ export function BlackjackGame() {
                     <div className="flex justify-center space-x-4" style={{ marginLeft: '40px' }}>
                       {gameState.dealerHand.cards.map((card, index) => renderCard(card, index))}
                     </div>
-                    
-                    {gameState.dealerHand.value > 0 && gameState.dealerHand.cards[1] && !gameState.dealerHand.cards[1].hidden && (
-                      <div className="relative -mt-2">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full shadow-md flex items-center justify-center border border-gray-300">
-                          <div className="text-xl font-bold">
-                            {gameState.dealerHand.value}
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    {/* Contador de valor de cartas del crupier */}
+                    <div className="mt-2 bg-black/60 text-white px-4 py-1 rounded-full text-xl font-bold border border-amber-600">
+                      Crupier: {gameState.dealerHand.value}
+                    </div>
                   </div>
                   
                   {/* Área central para resultados de blackjack, etc. - Aumentado espacio vertical */}
@@ -1330,16 +1369,10 @@ export function BlackjackGame() {
                               {gameState.playerHands[gameState.currentHandIndex]?.cards.map((card, index) => renderCard(card, index))}
                             </div>
                             
-                            {/* Valor de la mano */}
-                            <div className="relative -mt-2">
-                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full shadow-md flex items-center justify-center border border-gray-300">
-                                {gameState.playerHands[gameState.currentHandIndex]?.value > 0 && (
-                                  <div className={`text-xl font-bold ${gameState.playerHands[gameState.currentHandIndex]?.value > 21 ? 'text-red-600' : ''}`}>
-                                    {gameState.playerHands[gameState.currentHandIndex]?.value}
-                                    {gameState.playerHands[gameState.currentHandIndex]?.value > 21 && ', Bust'}
-                                  </div>
-                                )}
-                              </div>
+                            {/* Valor de la mano del jugador */}
+                            <div className="mt-2 bg-black/60 text-white px-4 py-1 rounded-full text-xl font-bold border border-amber-600">
+                              Jugador: {gameState.playerHands[gameState.currentHandIndex]?.value}
+                              {gameState.playerHands[gameState.currentHandIndex]?.value > 21 && ' (Bust)'}
                             </div>
                             
                             {/* Fichas apostadas - Con animación y diseño mejorado */}
