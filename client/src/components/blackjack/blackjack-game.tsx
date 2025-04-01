@@ -504,9 +504,14 @@ export function BlackjackGame() {
           const updatedHands = [...gameState.playerHands];
           updatedHands[gameState.currentHandIndex] = currentHand;
           
+          // Guardar la apuesta anterior y la apuesta doble para usarla en los cálculos
+          const doubledBet = betAmount * 2;
+          console.log(`Doblando apuesta de ${betAmount} a ${doubledBet}`);
+          
           return {
             playerHands: updatedHands,
-            balance: userData ? userData.balance - betAmount : 0
+            balance: userData ? userData.balance - betAmount : 0,  // Solo deducimos la apuesta adicional
+            doubledBet: doubledBet // Enviamos la apuesta doblada para usarla en onSuccess
           };
         }
       } catch (error) {
@@ -526,9 +531,12 @@ export function BlackjackGame() {
         const updatedHands = [...gameState.playerHands];
         updatedHands[gameState.currentHandIndex] = currentHand;
         
+        const doubledBet = betAmount * 2;
+        
         return {
           playerHands: updatedHands,
-          balance: userData ? userData.balance - betAmount : 0
+          balance: userData ? userData.balance - betAmount : 0,
+          doubledBet: doubledBet
         };
       }
     },
@@ -542,6 +550,11 @@ export function BlackjackGame() {
         playerHands: data.playerHands || prevState.playerHands,
       }));
       
+      // Actualizar el monto de la apuesta con el valor doblado
+      if (data.doubledBet) {
+        setBetAmount(data.doubledBet);
+      }
+      
       // Update user balance
       if (userData && data.balance !== undefined) {
         queryClient.setQueryData(['/api/user'], {
@@ -552,7 +565,7 @@ export function BlackjackGame() {
         // Si estamos en modo demo, actualizamos el saldo localmente
         queryClient.setQueryData(['/api/user'], {
           ...userData,
-          balance: userData.balance - betAmount
+          balance: userData.balance - betAmount  // Restamos sólo la apuesta adicional
         });
       }
       
@@ -1404,7 +1417,7 @@ export function BlackjackGame() {
                           isAnimating || 
                           gameState.playerHands[gameState.currentHandIndex]?.cards.length !== 2 ||
                           !userData || 
-                          userData.balance < betAmount
+                          userData.balance < betAmount  // Verificamos que haya suficiente saldo para doblar
                         }
                       >
                         Doblar
