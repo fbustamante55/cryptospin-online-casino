@@ -1,0 +1,14 @@
+{
+  "name": "cryptospin-casino",
+  "version": "1.0.0",
+  "description": "A cutting-edge sports betting and gaming platform that combines virtual cryptocurrency gaming with sophisticated interactive experiences",
+  "main": "server/index.ts",
+  "scripts": {
+    "dev": "tsx server/index.ts",
+    "build": "vite build",
+    "start": "node dist/server/index.js"
+  },
+  "keywords": ["casino", "betting", "cryptocurrency", "gaming"],
+  "author": "",
+  "license": "MIT"
+}

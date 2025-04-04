@@ -1,0 +1,41 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="10" height="10">
+  <desc>Roulette win sound</desc>
+  <script type="application/javascript">
+    const audioContext = new AudioContext();
+    
+    // Create win sound
+    function createWinSound() {
+      // Create multiple oscillators for a richer sound
+      const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      const oscillators = [];
+      
+      // Master gain node
+      const masterGain = audioContext.createGain();
+      masterGain.gain.value = 0.4;
+      masterGain.connect(audioContext.destination);
+      
+      // Create and connect oscillators
+      frequencies.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.type = index % 2 === 0 ? 'sine' : 'triangle';
+        oscillator.frequency.value = freq;
+        
+        // Volume envelope for each note
+        const startTime = audioContext.currentTime + (index * 0.05);
+        gainNode.gain.setValueAtTime(0.01, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(masterGain);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.8);
+        
+        oscillators.push(oscillator);
+      });
+    }
+  </script>
+</svg>

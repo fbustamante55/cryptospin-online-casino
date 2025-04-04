@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "首页",
+    "crash": "崩溃游戏",
+    "favorites": "收藏",
+    "wallet": "钱包",
+    "bets": "投注"
+  },
+  "tabs": {
+    "casino": "赌场",
+    "sports": "体育"
+  },
+  "sidebar": {
+    "favorites": "收藏",
+    "recent": "最近",
+    "challenges": "挑战",
+    "myBets": "我的投注",
+    "games": "游戏",
+    "cryptoSpinOriginals": "CryptoSpin 原创",
+    "cryptoSpinExclusives": "CryptoSpin 独家",
+    "crash": "崩溃游戏",
+    "liveCasino": "真人赌场",
+    "tvShows": "电视节目",
+    "releases": "新品发布",
+    "bonusBuy": "奖励购买",
+    "enhancedRTP": "提高RTP",
+    "providers": "提供商",
+    "liveEvents": "直播活动",
+    "comingSoon": "即将推出",
+    "topSports": "热门体育",
+    "profile": "个人资料",
+    "promotions": "促销活动",
+    "affiliate": "联盟计划",
+    "vipClub": "贵宾俱乐部",
+    "blog": "博客",
+    "forum": "论坛",
+    "sponsorships": "赞助",
+    "responsibleGaming": "负责任博彩",
+    "liveSupport": "在线支持",
+    "language": "语言"
+  },
+  "buttons": {
+    "deposit": "存款",
+    "startPlaying": "开始游戏",
+    "learnMore": "了解更多",
+    "viewAll": "查看全部",
+    "watchNow": "立即观看",
+    "viewMatches": "查看比赛",
+    "betNow": "立即投注"
+  },
+  "header": {
+    "searchGames": "搜索游戏..."
+  },
+  "home": {
+    "welcome": "欢迎来到",
+    "welcomeDescription": "通过我们精选的刺激游戏，体验加密货币赌场游戏的乐趣。请负责任地游戏！",
+    "featuredGames": "精选游戏",
+    "popularGames": "热门游戏"
+  },
+  "sports": {
+    "searchEvents": "搜索赛事...",
+    "nba": "NBA赛事",
+    "allMatches": "所有比赛",
+    "pay3rdQuarter": "第3节支付",
+    "badStartsInsurance": "糟糕开局保险",
+    "premierLeague": "英超联赛",
+    "pay3Goals": "3球支付",
+    "favorites": "收藏",
+    "live": "直播",
+    "today": "今日",
+    "tomorrow": "明日",
+    "soccer": "足球",
+    "basketball": "篮球",
+    "tennis": "网球",
+    "topSports": "热门体育",
+    "liveEvents": "直播赛事",
+    "markets": "市场"
+  },
+  "gameDetails": {
+    "type": "类型",
+    "players": "玩家"
+  },
+  "wallet": {
+    "balance": "余额",
+    "deposit": "存款",
+    "withdraw": "提款",
+    "history": "历史记录"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出"
+  },
+  "languageSelector": {
+    "selectLanguage": "选择语言",
+    "languageUpdated": "语言已更新",
+    "languageUpdateDescription": "您的语言偏好已更新。页面将重新加载以应用更改。",
+    "errorUpdating": "更新语言时出错",
+    "unknownError": "发生未知错误"
+  }
+}

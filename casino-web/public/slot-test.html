@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slot API Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px 0;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    input, select {
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      max-width: 300px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    .slot-reels {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .reel {
+      width: 80px;
+      height: 80px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background-color: #f8f8f8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Slot Machine API Tester</h1>
+  
+  <div class="container">
+    <div class="card">
+      <h2>Get All Slot Games</h2>
+      <button id="getGamesBtn">Get Games</button>
+      <div id="gamesResult">
+        <pre id="gamesOutput"></pre>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Get Specific Slot Game</h2>
+      <label for="gameId">Game ID:</label>
+      <input type="text" id="gameId" value="classic3reel">
+      <button id="getGameBtn">Get Game</button>
+      <div id="gameResult">
+        <pre id="gameOutput"></pre>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Spin Slot Machine</h2>
+      <label for="spinGameId">Game ID:</label>
+      <input type="text" id="spinGameId" value="classic3reel">
+      <label for="betAmount">Bet Amount:</label>
+      <input type="number" id="betAmount" value="10" min="1">
+      <label for="lines">Lines:</label>
+      <input type="number" id="lines" value="1" min="1">
+      <button id="spinBtn">Spin</button>
+      
+      <h3>Result:</h3>
+      <div class="slot-reels" id="slotReels"></div>
+      <div id="spinResult">
+        <pre id="spinOutput"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helper function to make API calls
+    async function callApi(url, method = 'GET', data = null) {
+      const options = {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      };
+      
+      if (data) {
+        options.body = JSON.stringify(data);
+      }
+      
+      try {
+        const response = await fetch(url, options);
+        return await response.json();
+      } catch (error) {
+        console.error('API error:', error);
+        return { error: error.message };
+      }
+    }
+    
+    // Get All Games
+    document.getElementById('getGamesBtn').addEventListener('click', async () => {
+      const result = await callApi('/api/slots/games');
+      document.getElementById('gamesOutput').textContent = JSON.stringify(result, null, 2);
+    });
+    
+    // Get Specific Game
+    document.getElementById('getGameBtn').addEventListener('click', async () => {
+      const gameId = document.getElementById('gameId').value;
+      const result = await callApi(`/api/slots/games/${gameId}`);
+      document.getElementById('gameOutput').textContent = JSON.stringify(result, null, 2);
+    });
+    
+    // Spin Slot Machine
+    document.getElementById('spinBtn').addEventListener('click', async () => {
+      const gameId = document.getElementById('spinGameId').value;
+      const bet = parseInt(document.getElementById('betAmount').value);
+      const lines = parseInt(document.getElementById('lines').value);
+      
+      const data = { gameId, bet, lines };
+      const result = await callApi('/api/slots/spin', 'POST', data);
+      
+      // Display result
+      document.getElementById('spinOutput').textContent = JSON.stringify(result, null, 2);
+      
+      // Render reels visually
+      const reelsContainer = document.getElementById('slotReels');
+      reelsContainer.innerHTML = '';
+      
+      if (result.reels) {
+        result.reels.forEach(symbol => {
+          const reelElement = document.createElement('div');
+          reelElement.className = 'reel';
+          reelElement.textContent = symbol;
+          reelsContainer.appendChild(reelElement);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

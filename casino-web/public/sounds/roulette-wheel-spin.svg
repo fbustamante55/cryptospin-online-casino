@@ -1,0 +1,32 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="10" height="10">
+  <desc>Roulette wheel spinning sound</desc>
+  <script type="application/javascript">
+    const audioContext = new AudioContext();
+    
+    // Create oscillator for wheel spinning sound
+    function createSpinningSound(duration = 6) {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = 'triangle';
+      oscillator.frequency.value = 100;
+      
+      // Frequency ramp to simulate wheel slowing down
+      oscillator.frequency.exponentialRampToValueAtTime(
+        5, 
+        audioContext.currentTime + duration
+      );
+      
+      // Volume envelope
+      gainNode.gain.setValueAtTime(0.01, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.5);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration);
+    }
+  </script>
+</svg>

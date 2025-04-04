@@ -1,0 +1,903 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Transaction } from "@shared/schema";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Wallet, 
+  Plus, 
+  Coins, 
+  ArrowUpRight, 
+  ArrowDownLeft,
+  Clock,
+  CreditCard,
+  Gift,
+  Save,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  BarChart3,
+  Filter,
+  TicketPercent,
+  GitBranch,
+  History,
+  Landmark
+} from "lucide-react";
+import { 
+  LineChart, 
+  Line, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
+
+interface WalletAddresses {
+  btcAddress: string;
+  ethAddress: string;
+}
+
+interface ChartDataPoint {
+  name: string;
+  wins: number;
+  losses: number;
+  deposits: number;
+  withdrawals: number;
+  balance: number;
+}
+
+export default function WalletPage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [depositAmount, setDepositAmount] = useState<number>(100);
+  const [withdrawalAmount, setWithdrawalAmount] = useState<number>(100);
+  const [withdrawalAddress, setWithdrawalAddress] = useState<string>("");
+  const [withdrawalCurrency, setWithdrawalCurrency] = useState<string>("BTC");
+  const [activeTab, setActiveTab] = useState<string>("overview");
+  const [transactionFilter, setTransactionFilter] = useState<string>("all");
+  const [promoCode, setPromoCode] = useState<string>("");
+  const [referralCode, setReferralCode] = useState<string>("");
+
+  // Fetch transaction history
+  const { data: transactions } = useQuery<Transaction[]>({
+    queryKey: ["/api/transactions"],
+  });
+
+  // Fetch user's saved wallet addresses
+  const { data: walletAddresses } = useQuery<WalletAddresses>({
+    queryKey: ["/api/user/wallet-addresses"],
+  });
+
+  // Save wallet address mutation
+  const saveWalletAddressMutation = useMutation({
+    mutationFn: async (data: { btcAddress?: string; ethAddress?: string }) => {
+      return await apiRequest({
+        method: "PATCH", 
+        url: "/api/user/wallet-addresses", 
+        data
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/wallet-addresses'] });
+      toast({
+        title: "Wallet addresses updated",
+        description: "Your cryptocurrency addresses have been saved for future use."
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update wallet addresses",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Effect to set withdrawal address from saved addresses when currency changes
+  useEffect(() => {
+    if (walletAddresses) {
+      if (withdrawalCurrency === "BTC" && walletAddresses.btcAddress) {
+        setWithdrawalAddress(walletAddresses.btcAddress);
+      } else if (withdrawalCurrency === "ETH" && walletAddresses.ethAddress) {
+        setWithdrawalAddress(walletAddresses.ethAddress);
+      }
+    }
+  }, [withdrawalCurrency, walletAddresses]);
+
+  // Deposit funds mutation
+  const depositMutation = useMutation({
+    mutationFn: async (amount: number) => {
+      return await apiRequest({
+        method: "POST", 
+        url: "/api/wallet/deposit", 
+        data: { 
+          amount, 
+          method: 'crypto' 
+        }
+      });
+    },
+    onSuccess: () => {
+      // Invalidate queries to reload data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      
+      toast({
+        title: "Deposit successful",
+        description: `${depositAmount} credits have been added to your account.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Deposit failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Withdraw funds mutation
+  const withdrawMutation = useMutation({
+    mutationFn: async (data: { amount: number, address: string, currency: string }) => {
+      return await apiRequest({
+        method: "POST", 
+        url: "/api/wallet/withdraw", 
+        data
+      });
+    },
+    onSuccess: () => {
+      // Invalidate queries to reload data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      
+      toast({
+        title: "Withdrawal request submitted",
+        description: `${withdrawalAmount} credits will be sent to your ${withdrawalCurrency} wallet.`,
+      });
+      
+      // Reset withdrawal address after successful withdrawal
+      setWithdrawalAddress("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Withdrawal failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const handleDeposit = () => {
+    depositMutation.mutate(depositAmount);
+  };
+  
+  const handleWithdraw = () => {
+    if (!withdrawalAddress || withdrawalAddress.length < 10) {
+      toast({
+        title: "Invalid withdrawal address",
+        description: "Please enter a valid cryptocurrency address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    withdrawMutation.mutate({ 
+      amount: withdrawalAmount, 
+      address: withdrawalAddress, 
+      currency: withdrawalCurrency 
+    });
+  };
+  
+  // Save current wallet address
+  const handleSaveWalletAddress = () => {
+    if (!withdrawalAddress || withdrawalAddress.length < 10) {
+      toast({
+        title: "Invalid address",
+        description: "Please enter a valid cryptocurrency address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create update payload based on selected currency
+    const updateData = withdrawalCurrency === "BTC" 
+      ? { btcAddress: withdrawalAddress }
+      : { ethAddress: withdrawalAddress };
+      
+    saveWalletAddressMutation.mutate(updateData);
+  };
+  
+  // Redeem promo code handler
+  const handleRedeemPromoCode = () => {
+    if (!promoCode.trim()) {
+      toast({
+        title: "Invalid promo code",
+        description: "Please enter a valid promo code",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Simulate successful promo code redemption
+    toast({
+      title: "Promo code redeemed!",
+      description: "500 credits have been added to your account.",
+    });
+    
+    // Here you would add the actual API call to redeem the promo code
+    // For now, we'll just invalidate the relevant queries to refresh the data
+    queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    setPromoCode("");
+  };
+  
+  // Apply referral code handler
+  const handleApplyReferralCode = () => {
+    if (!referralCode.trim()) {
+      toast({
+        title: "Invalid referral code",
+        description: "Please enter a valid referral code",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Simulate successful referral code application
+    toast({
+      title: "Referral bonus received!",
+      description: "You and your friend will receive 200 credits each.",
+    });
+    
+    // Here you would add the actual API call to apply the referral code
+    // For now, we'll just invalidate the relevant queries to refresh the data
+    queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    setReferralCode("");
+  };
+  
+  // Filter transactions based on the selected filter type
+  const filteredTransactions = useMemo(() => {
+    if (!transactions) return [];
+    
+    if (transactionFilter === "all") {
+      return transactions;
+    }
+    
+    return transactions.filter(t => t.type === transactionFilter);
+  }, [transactions, transactionFilter]);
+  
+  // Prepare chart data
+  const chartData = useMemo(() => {
+    if (!transactions || transactions.length === 0) {
+      return [{
+        name: 'No Data',
+        wins: 0,
+        losses: 0,
+        balance: 0,
+        deposits: 0,
+        withdrawals: 0
+      }];
+    }
+    
+    // Group by date (using the day as the key)
+    const groupedData: Record<string, { wins: number, losses: number, deposits: number, withdrawals: number }> = {};
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.createdAt);
+      const day = date.toLocaleDateString();
+      
+      if (!groupedData[day]) {
+        groupedData[day] = { wins: 0, losses: 0, deposits: 0, withdrawals: 0 };
+      }
+      
+      if (transaction.type === 'win') {
+        groupedData[day].wins += transaction.amount;
+      } else if (transaction.type === 'bet') {
+        groupedData[day].losses += Math.abs(transaction.amount);
+      } else if (transaction.type === 'deposit') {
+        groupedData[day].deposits += transaction.amount;
+      }
+    });
+    
+    // Convert to array and calculate balance
+    const result = Object.entries(groupedData)
+      .map(([name, data]) => {
+        const balance = data.wins - data.losses + data.deposits;
+        return { 
+          name, 
+          wins: data.wins, 
+          losses: data.losses, 
+          deposits: data.deposits, 
+          withdrawals: data.withdrawals,
+          balance 
+        };
+      })
+      .slice(-7); // Get last 7 days
+      
+    return result;
+  }, [transactions]);
+
+  return (
+    <div className="min-h-screen bg-[#0F1923] text-white">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header - Removed duplicate header */}
+        <header className="bg-[#0F1923] border-b border-gray-800 sticky top-0 z-10">
+          <div className="flex items-center justify-between h-16 px-4">
+            <div className="flex-1 text-center">
+              <h1 className="text-xl font-heading font-bold">My Wallet</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="px-3 py-1.5 rounded-full bg-[#1A2634] border border-gray-700 flex items-center">
+                <Coins className="h-4 w-4 mr-1.5 text-[#F9C846]" />
+                <span className="text-sm font-semibold">{user?.balance}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Wallet Tabs Navigation */}
+            <Tabs
+              defaultValue="overview"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full mb-8"
+            >
+              <TabsList className="grid grid-cols-4 lg:w-[400px] bg-[#1A2634] border border-gray-800 rounded-lg p-1 mb-6">
+                <TabsTrigger
+                  value="overview"
+                  className="data-[state=active]:bg-[#0F1923] data-[state=active]:text-white rounded-md"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="deposit"
+                  className="data-[state=active]:bg-[#0F1923] data-[state=active]:text-white rounded-md"
+                >
+                  Deposit
+                </TabsTrigger>
+                <TabsTrigger
+                  value="withdraw"
+                  className="data-[state=active]:bg-[#0F1923] data-[state=active]:text-white rounded-md"
+                >
+                  Withdraw
+                </TabsTrigger>
+                <TabsTrigger
+                  value="history"
+                  className="data-[state=active]:bg-[#0F1923] data-[state=active]:text-white rounded-md"
+                >
+                  History
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Overview Tab Content */}
+              <TabsContent value="overview" className="mt-0">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  {/* Balance Card */}
+                  <Card className="bg-[#1A2634] border-gray-800 col-span-1">
+                    <CardHeader className="pb-0">
+                      <CardTitle className="text-lg font-heading text-gray-300">Total Balance</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-3">
+                      <div className="flex items-baseline">
+                        <span className="text-3xl font-heading font-bold text-white">{user?.balance}</span>
+                        <span className="ml-2 text-gray-400">credits</span>
+                      </div>
+                      
+                      <div className="mt-4">
+                        <Button 
+                          className="w-full py-2 bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                          onClick={() => setActiveTab('deposit')}
+                        >
+                          <Plus className="h-4 w-4 mr-1.5" />
+                          Add Funds
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Statistics */}
+                  <Card className="bg-[#1A2634] border-gray-800 col-span-1 md:col-span-2">
+                    <CardHeader className="pb-0">
+                      <CardTitle className="text-lg font-heading text-gray-300">Quick Stats</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-3">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="p-3 bg-[#0F1923] rounded-lg">
+                          <div className="flex items-center text-gray-400 text-xs mb-1">
+                            <Coins className="h-3 w-3 mr-1" />
+                            <span>Total Wagered</span>
+                          </div>
+                          <div className="text-lg font-semibold text-white">
+                            {transactions 
+                              ? transactions
+                                  .filter(t => t.type === 'bet')
+                                  .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+                              : 0}
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 bg-[#0F1923] rounded-lg">
+                          <div className="flex items-center text-gray-400 text-xs mb-1">
+                            <ArrowUpRight className="h-3 w-3 mr-1 text-[#00FFAA]" />
+                            <span>Total Wins</span>
+                          </div>
+                          <div className="text-lg font-semibold text-[#00FFAA]">
+                            +{transactions 
+                                ? transactions
+                                    .filter(t => t.type === 'win')
+                                    .reduce((sum, t) => sum + t.amount, 0)
+                                : 0}
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 bg-[#0F1923] rounded-lg">
+                          <div className="flex items-center text-gray-400 text-xs mb-1">
+                            <ArrowDownLeft className="h-3 w-3 mr-1 text-[#FF3E8F]" />
+                            <span>Total Losses</span>
+                          </div>
+                          <div className="text-lg font-semibold text-[#FF3E8F]">
+                            -{transactions 
+                                ? transactions
+                                    .filter(t => t.type === 'bet')
+                                    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+                                : 0}
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 bg-[#0F1923] rounded-lg">
+                          <div className="flex items-center text-gray-400 text-xs mb-1">
+                            <Clock className="h-3 w-3 mr-1" />
+                            <span>Total Games</span>
+                          </div>
+                          <div className="text-lg font-semibold text-white">
+                            {transactions 
+                              ? transactions.filter(t => t.type === 'bet').length
+                              : 0}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {/* Activity Graph */}
+                <Card className="bg-[#1A2634] border-gray-800 mb-8">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-heading flex items-center">
+                      <BarChart3 className="h-5 w-5 mr-2 text-[#F9C846]" />
+                      Activity Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-72">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={chartData}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#94A3B8"
+                            fontSize={12}
+                            tickMargin={10}
+                          />
+                          <YAxis 
+                            stroke="#94A3B8"
+                            fontSize={12}
+                          />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#0F1923', border: '1px solid #1E293B', borderRadius: '6px' }}
+                            itemStyle={{ color: '#fff' }}
+                            labelStyle={{ color: '#94A3B8', fontWeight: 'bold', marginBottom: '5px' }}
+                          />
+                          <Legend 
+                            verticalAlign="bottom" 
+                            height={36}
+                            wrapperStyle={{ paddingTop: '10px' }}
+                          />
+                          <Bar dataKey="wins" name="Wins" fill="#00FFAA" radius={[2, 2, 0, 0]} />
+                          <Bar dataKey="losses" name="Losses" fill="#FF3E8F" radius={[2, 2, 0, 0]} />
+                          <Bar dataKey="deposits" name="Deposits" fill="#F9C846" radius={[2, 2, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Promo Code Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader>
+                      <CardTitle className="text-lg font-heading flex items-center">
+                        <TicketPercent className="h-5 w-5 mr-2 text-[#F9C846]" />
+                        Redeem Promo Code
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-1">Enter Promo Code</label>
+                          <div className="flex space-x-2">
+                            <Input 
+                              type="text" 
+                              value={promoCode}
+                              onChange={(e) => setPromoCode(e.target.value)}
+                              placeholder="Enter code (e.g. WELCOME500)"
+                              className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
+                            />
+                            <Button
+                              className="shrink-0 bg-[#F9C846] hover:bg-[#F9C846]/90 text-[#0F1923] font-medium"
+                              onClick={handleRedeemPromoCode}
+                            >
+                              Redeem
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="bg-[#0F1923] p-3 rounded-lg border border-gray-800">
+                          <p className="text-xs text-gray-300">
+                            Enter a valid promo code to receive bonus credits. Promo codes can be found in promotions, social media, or through our affiliate partners.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader>
+                      <CardTitle className="text-lg font-heading flex items-center">
+                        <GitBranch className="h-5 w-5 mr-2 text-[#00FFAA]" />
+                        Referral Program
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-1">Apply Referral Code</label>
+                          <div className="flex space-x-2">
+                            <Input 
+                              type="text" 
+                              value={referralCode}
+                              onChange={(e) => setReferralCode(e.target.value)}
+                              placeholder="Friend's referral code"
+                              className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
+                            />
+                            <Button
+                              className="shrink-0 bg-[#00FFAA] hover:bg-[#00FFAA]/90 text-[#0F1923] font-medium"
+                              onClick={handleApplyReferralCode}
+                            >
+                              Apply
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="bg-[#0F1923] p-3 rounded-lg border border-gray-800">
+                          <p className="text-xs text-gray-300">
+                            Your referral code: <span className="font-bold text-[#00FFAA]">{user?.username?.toUpperCase() || 'REGISTER'}</span>
+                            <br />Share with friends and both get 200 credits when they use it!
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+              
+              {/* Deposit Tab Content */}
+              <TabsContent value="deposit" className="mt-0">
+                <Card className="bg-[#1A2634] border-gray-800 mb-8">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-heading flex items-center">
+                      <CreditCard className="h-5 w-5 mr-2 text-[#00FFAA]" />
+                      Add Funds
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <div className="mb-4">
+                          <label className="block text-sm text-gray-400 mb-1">Amount</label>
+                          <div className="flex">
+                            <Input 
+                              type="number" 
+                              value={depositAmount}
+                              onChange={(e) => setDepositAmount(Number(e.target.value))}
+                              className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                          <Button 
+                            variant="outline" 
+                            className="border-gray-800 hover:bg-[#0F1923]"
+                            onClick={() => setDepositAmount(100)}
+                          >
+                            100
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="border-gray-800 hover:bg-[#0F1923]"
+                            onClick={() => setDepositAmount(500)}
+                          >
+                            500
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="border-gray-800 hover:bg-[#0F1923]"
+                            onClick={() => setDepositAmount(1000)}
+                          >
+                            1000
+                          </Button>
+                        </div>
+                        
+                        <Button 
+                          className="w-full py-2.5 bg-gradient-to-r from-[#00FFAA] to-[#00FFAA]/80 hover:from-[#33FFBB] hover:to-[#00FFAA] text-[#0F1923] font-medium"
+                          onClick={handleDeposit}
+                          disabled={depositMutation.isPending}
+                        >
+                          {depositMutation.isPending ? 'Processing...' : 'Deposit Now'}
+                        </Button>
+                        
+                        <div className="mt-2 text-xs text-gray-400 text-center">
+                          This is a demo app with virtual currency only.
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="text-sm text-gray-300 mb-3">
+                          <Gift className="h-4 w-4 inline-block mr-1 text-[#FF3E8F]" />
+                          <span className="font-medium">Welcome Bonus!</span>
+                        </div>
+                        <div className="bg-[#0F1923] p-4 rounded-lg border border-gray-800">
+                          <p className="text-sm text-gray-300 mb-3">
+                            All new users receive 5,000 credits to start playing. Enjoy the games responsibly!
+                          </p>
+                          <div className="flex items-center space-x-2 text-xs text-gray-400">
+                            <div className="flex items-center">
+                              <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1" />
+                              <span>No real money</span>
+                            </div>
+                            <div className="flex items-center">
+                              <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1" />
+                              <span>For entertainment</span>
+                            </div>
+                            <div className="flex items-center">
+                              <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1" />
+                              <span>Practice games</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              {/* Withdraw Tab Content */}
+              <TabsContent value="withdraw" className="mt-0">
+                <Card className="bg-[#1A2634] border-gray-800 mb-8">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-heading flex items-center">
+                      <ArrowUpRight className="h-5 w-5 mr-2 text-[#FF3E8F]" />
+                      Withdraw Funds
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <div className="mb-4">
+                          <label className="block text-sm text-gray-400 mb-1">Amount</label>
+                          <div className="flex">
+                            <Input 
+                              type="number" 
+                              value={withdrawalAmount}
+                              onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
+                              className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="mb-4">
+                          <label className="block text-sm text-gray-400 mb-1">Cryptocurrency</label>
+                          <div className="flex">
+                            <select
+                              value={withdrawalCurrency}
+                              onChange={(e) => setWithdrawalCurrency(e.target.value)}
+                              className="w-full bg-[#0F1923] border border-gray-800 rounded-md p-2 text-white focus:border-[#00FFAA] focus:outline-none"
+                            >
+                              <option value="BTC">Bitcoin (BTC)</option>
+                              <option value="ETH">Ethereum (ETH)</option>
+                              <option value="LTC">Litecoin (LTC)</option>
+                              <option value="DOGE">Dogecoin (DOGE)</option>
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-4">
+                          <label className="block text-sm text-gray-400 mb-1">Wallet Address</label>
+                          <div className="flex space-x-2">
+                            <Input 
+                              type="text" 
+                              value={withdrawalAddress}
+                              onChange={(e) => setWithdrawalAddress(e.target.value)}
+                              placeholder={`Enter your ${withdrawalCurrency} address`}
+                              className="bg-[#0F1923] border-gray-800 focus:border-[#00FFAA]"
+                            />
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="shrink-0 border-gray-800 hover:bg-[#0F1923] hover:text-[#00FFAA]"
+                              onClick={handleSaveWalletAddress}
+                              title="Save address for future use"
+                              disabled={saveWalletAddressMutation.isPending}
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {withdrawalCurrency === "BTC" && walletAddresses?.btcAddress && (
+                            <div className="text-xs text-[#00FFAA] mt-1 flex items-center">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              BTC address saved
+                            </div>
+                          )}
+                          {withdrawalCurrency === "ETH" && walletAddresses?.ethAddress && (
+                            <div className="text-xs text-[#00FFAA] mt-1 flex items-center">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              ETH address saved
+                            </div>
+                          )}
+                        </div>
+                        
+                        {user?.isVerified ? (
+                          <Button 
+                            className="w-full py-2.5 bg-gradient-to-r from-[#FF3E8F] to-[#FF3E8F]/80 hover:from-[#FF5AA0] hover:to-[#FF3E8F] text-white font-medium"
+                            onClick={handleWithdraw}
+                            disabled={withdrawMutation.isPending || (user?.balance || 0) < withdrawalAmount}
+                          >
+                            {withdrawMutation.isPending ? 'Processing...' : 'Withdraw Now'}
+                          </Button>
+                        ) : (
+                          <Button 
+                            className="w-full py-2.5 bg-[#1A2634] text-gray-400 cursor-not-allowed"
+                            disabled={true}
+                          >
+                            <AlertCircle className="h-4 w-4 mr-1.5" />
+                            Verify account to withdraw
+                          </Button>
+                        )}
+                        
+                        {(user?.balance || 0) < withdrawalAmount && (
+                          <div className="text-xs text-[#FF3E8F] mt-2 flex items-center justify-center">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Insufficient balance
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="bg-[#0F1923] p-4 rounded-lg border border-gray-800">
+                        <p className="text-sm text-gray-300 mb-3">
+                          Please make sure to enter the correct wallet address. All withdrawals are processed within 24 hours.
+                        </p>
+                        <div className="space-y-2 text-xs text-gray-400">
+                          <div className="flex items-start">
+                            <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1 mt-0.5" />
+                            <div>
+                              <span className="block font-medium">Bitcoin (BTC)</span>
+                              <span>Min: 0.001 BTC (≈ 100 credits)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start">
+                            <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1 mt-0.5" />
+                            <div>
+                              <span className="block font-medium">Ethereum (ETH)</span>
+                              <span>Min: 0.01 ETH (≈ 100 credits)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start">
+                            <CheckCircle className="h-3 w-3 text-[#00FFAA] mr-1 mt-0.5" />
+                            <div>
+                              <span className="block font-medium">Other Cryptocurrencies</span>
+                              <span>Min: Equivalent to 100 credits</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              {/* History Tab Content */}
+              <TabsContent value="history" className="mt-0">
+                <Card className="bg-[#1A2634] border-gray-800 mb-8">
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg font-heading flex items-center">
+                        <History className="h-5 w-5 mr-2 text-[#F9C846]" />
+                        Transaction History
+                      </CardTitle>
+                      
+                      <div className="flex items-center space-x-2">
+                        <div className="text-sm text-gray-400 mr-2">Filter:</div>
+                        <select
+                          value={transactionFilter}
+                          onChange={(e) => setTransactionFilter(e.target.value)}
+                          className="bg-[#0F1923] border border-gray-800 rounded-md p-1 text-xs text-white focus:border-[#00FFAA] focus:outline-none"
+                        >
+                          <option value="all">All Transactions</option>
+                          <option value="win">Wins</option>
+                          <option value="bet">Bets</option>
+                          <option value="deposit">Deposits</option>
+                        </select>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {filteredTransactions.length > 0 ? (
+                      <div className="space-y-2">
+                        {filteredTransactions.map((transaction) => (
+                          <div key={transaction.id} className="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
+                            <div className="flex items-center">
+                              {transaction.type === 'bet' && (
+                                <div className="w-8 h-8 rounded-full bg-[#0F1923] flex items-center justify-center mr-3">
+                                  <ArrowDownLeft className="h-4 w-4 text-[#FF3E8F]" />
+                                </div>
+                              )}
+                              {transaction.type === 'win' && (
+                                <div className="w-8 h-8 rounded-full bg-[#0F1923] flex items-center justify-center mr-3">
+                                  <ArrowUpRight className="h-4 w-4 text-[#00FFAA]" />
+                                </div>
+                              )}
+                              {transaction.type === 'deposit' && (
+                                <div className="w-8 h-8 rounded-full bg-[#0F1923] flex items-center justify-center mr-3">
+                                  <Plus className="h-4 w-4 text-[#F9C846]" />
+                                </div>
+                              )}
+                              <div>
+                                <div className="font-medium">
+                                  {transaction.type === 'bet' && `Bet on ${transaction.gameType || 'game'}`}
+                                  {transaction.type === 'win' && `Win from ${transaction.gameType || 'game'}`}
+                                  {transaction.type === 'deposit' && 'Deposit'}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {new Date(transaction.createdAt).toLocaleString()}
+                                </div>
+                              </div>
+                            </div>
+                            <div className={`font-semibold ${
+                              transaction.type === 'win' || transaction.type === 'deposit'
+                                ? 'text-[#00FFAA]'
+                                : 'text-[#FF3E8F]'
+                            }`}>
+                              {transaction.type === 'win' || transaction.type === 'deposit'
+                                ? `+${transaction.amount}`
+                                : `-${Math.abs(transaction.amount)}`}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-gray-400">
+                        No transactions found
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

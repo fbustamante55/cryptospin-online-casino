@@ -1,30 +1,76 @@
-# The-Casino-Project
-This project is done by a group of seven students using Python. The goal is to create a Python console application providing a menu of games for the user to choose from. The menu consists of the following games: Blackjack, Horse Betting, Roulette and Slot Machine. 
-- - - - -
-## How To Play
-Once you run the virtual casino, you will be presented with a menu to choose from different games. Use the number keys to select the game you want to play:
+# Python Console Casino
 
-1. Blackjack
-2. Roulette
-3. Slot Machine
-4. Horse Betting
-5. Exit
-- - - - -
+A text-based casino game collection that runs in the terminal. This console application provides a simple yet engaging gaming experience with ASCII art visualizations.
+
+## Features
+
+- Terminal-based casino games with text interface
+- ASCII art visualizations
+- Multiple game implementations
+- Simple betting system
+- No external dependencies (uses Python standard library)
+
+## Games Included
+
+1. **Blackjack**: Classic card game where players try to get as close to 21 as possible without going over.
+2. **Roulette**: Bet on where the ball will land on a spinning wheel with various betting options.
+3. **Slot Machine**: A virtual slot machine with random symbols and payouts.
+4. **Horse Betting**: Bet on horses in a simulated race with different odds.
+
+## Project Structure
+
+```
+casino-project/
+├── main.py             # Main entry point and game menu
+├── blackjack.py        # Blackjack game implementation
+├── roulette.py         # Roulette game implementation
+├── slot_machine.py     # Slot Machine game implementation
+├── horse_betting.py    # Horse Betting game implementation
+└── ascii_art.py        # ASCII art for visual elements
+```
+
+## Running the Casino
+
+### Prerequisites
+- Python 3.6 or higher
+
+### Starting the Casino
+```bash
+# Use the provided script from the root directory
+./run_casino_console.sh
+
+# Or run directly
+cd casino-project
+python main.py
+```
+
+## Game Controls
+
+Each game has simple text-based controls:
+
 ### Blackjack
-In the Blackjack game, you will play against the computer. The goal is to get a hand with a total value of 21 or as close as possible without exceeding it. Follow the prompts to hit or stand during your turn. The computer will then take its turn. The winner is determined based on the final scores.
+- Type commands like 'hit', 'stand', 'double', etc.
+- Follow the on-screen prompts for betting and actions
 
 ### Roulette
-Roulette is a classic casino game where players place bets on which numbered pocket a ball will land in after the wheel is spun. The game offers various betting options, each with its own payout odds.
+- Choose betting options from the menu
+- Input bet amounts as requested
+- Watch as the wheel spins and results are displayed
 
 ### Slot Machine
-The Slot Machine game allows you to test your luck. You start with a certain number of tokens and can place bets to spin the reels. If you get matching symbols on the reels, you win tokens. Otherwise, you lose your bet. Keep spinning and see how many tokens you can win!
+- Set your bet amount
+- Press enter to spin the reels
+- View the results with ASCII art visualization
 
 ### Horse Betting
-In the Horse Betting game, you can bet on one of the five horses: blue, red, green, orange, or pink. The horses will race in front of you, and if the horse you bet on wins, you will be declared the winner. Choose wisely and enjoy the race!
-- - - - -
-## ASCII Art
-The casino project includes visually appealing ASCII art to enhance your gaming experience. From the stylish casino title to game-specific logos, immerse yourself in the world of the casino.
+- Select a horse to bet on
+- Place your bet amount
+- Watch the race unfold in ASCII animation
 
+## Technical Details
 
-
-
+- Built with Python 3
+- Uses only standard library modules
+- Command-line interface with text-based menus
+- Simple game state management
+- Randomized outcomes with fairness considerations

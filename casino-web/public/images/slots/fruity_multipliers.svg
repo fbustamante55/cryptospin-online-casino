@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fruit-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#56ab2f" />
+      <stop offset="100%" stop-color="#a8e063" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="200" fill="#301934" />
+  
+  <!-- Game board -->
+  <rect x="40" y="40" width="220" height="120" rx="10" fill="url(#fruit-gradient)" filter="url(#shadow)" />
+  
+  <!-- Fruits -->
+  <!-- Watermelon -->
+  <circle cx="80" cy="80" r="25" fill="#ff6b6b" />
+  <path d="M80,55 A25,25 0 0 1 105,80 A25,25 0 0 1 80,105 A25,25 0 0 1 55,80 A25,25 0 0 1 80,55 z" fill="#ff6b6b" />
+  <path d="M80,60 A20,20 0 0 1 100,80 A20,20 0 0 1 80,100 A20,20 0 0 1 60,80 A20,20 0 0 1 80,60 z" fill="#410041" />
+  <circle cx="75" cy="75" r="2" fill="black" />
+  <circle cx="85" cy="75" r="2" fill="black" />
+  <circle cx="70" cy="85" r="2" fill="black" />
+  <circle cx="80" cy="85" r="2" fill="black" />
+  <circle cx="90" cy="85" r="2" fill="black" />
+  
+  <!-- Orange -->
+  <circle cx="150" cy="80" r="25" fill="#ffb347" />
+  <circle cx="150" cy="65" r="5" fill="#228b22" />
+  <path d="M150,65 C160,50 140,50 150,65" fill="#228b22" />
+  
+  <!-- Cherry -->
+  <circle cx="220" cy="90" r="15" fill="#ff0000" />
+  <circle cx="200" cy="90" r="15" fill="#ff0000" />
+  <path d="M210,90 C210,80 210,70 210,60 C215,55 225,55 230,60" stroke="#228b22" stroke-width="3" fill="none" />
+  <path d="M210,90 C210,80 210,70 210,60 C205,55 195,55 190,60" stroke="#228b22" stroke-width="3" fill="none" />
+  
+  <!-- Multiplier -->
+  <circle cx="150" cy="130" r="18" fill="gold" filter="url(#shadow)" />
+  <text x="150" y="135" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#301934">x5</text>
+  
+  <!-- Title -->
+  <text x="150" y="30" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">Fruity Multipliers</text>
+  <text x="150" y="188" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#ddd">96% RTP - Medium Volatility</text>
+</svg>

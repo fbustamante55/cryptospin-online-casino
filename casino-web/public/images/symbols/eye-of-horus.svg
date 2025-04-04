@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="20" cy="20" r="19" fill="#63473D" stroke="#f7cc4f" stroke-width="1"/>
+
+  <!-- Contorno principal del ojo -->
+  <path d="M7,20 
+           C12,10 28,10 33,20
+           C28,30 12,30 7,20Z" 
+        stroke="#f7cc4f" stroke-width="2.5" fill="#382518"/>
+  
+  <!-- Pupila -->
+  <circle cx="20" cy="20" r="4" fill="#f7cc4f"/>
+  <circle cx="21" cy="19" r="1.5" fill="#fff"/>
+  
+  <!-- Marca vertical -->
+  <path d="M20,20 L20,30" 
+        stroke="#f7cc4f" stroke-width="2" fill="none"/>
+  
+  <!-- Marcas debajo del ojo -->
+  <path d="M14,24 
+           C15,25 25,25 26,24" 
+        stroke="#f7cc4f" stroke-width="1.5" fill="none"/>
+  
+  <!-- Marca lateral izquierda -->
+  <path d="M7.5,20 L12,20" 
+        stroke="#f7cc4f" stroke-width="2" fill="none"/>
+        
+  <!-- Marca lateral derecha -->
+  <path d="M28,20 L32.5,20" 
+        stroke="#f7cc4f" stroke-width="2" fill="none"/>
+  
+  <!-- Ornamento superior izquierdo -->
+  <path d="M13,14 L11,8" 
+        stroke="#f7cc4f" stroke-width="1.5" fill="none"/>
+        
+  <!-- Ornamento superior derecho -->
+  <path d="M27,14 L29,8" 
+        stroke="#f7cc4f" stroke-width="1.5" fill="none"/>
+</svg>

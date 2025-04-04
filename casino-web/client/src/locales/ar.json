@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "الرئيسية",
+    "crash": "كراش",
+    "favorites": "المفضلة",
+    "wallet": "المحفظة",
+    "bets": "الرهانات"
+  },
+  "tabs": {
+    "casino": "كازينو",
+    "sports": "رياضات"
+  },
+  "sidebar": {
+    "favorites": "المفضلة",
+    "recent": "الأخيرة",
+    "challenges": "التحديات",
+    "myBets": "رهاناتي",
+    "games": "الألعاب",
+    "cryptoSpinOriginals": "أصليات كريبتوسبين",
+    "cryptoSpinExclusives": "حصريات كريبتوسبين",
+    "crash": "كراش",
+    "liveCasino": "كازينو مباشر",
+    "tvShows": "عروض تلفزيونية",
+    "releases": "الإصدارات",
+    "bonusBuy": "شراء المكافآت",
+    "enhancedRTP": "تحسين RTP",
+    "providers": "المزودون",
+    "liveEvents": "أحداث مباشرة",
+    "comingSoon": "قريبًا",
+    "topSports": "أهم الرياضات",
+    "profile": "الملف الشخصي",
+    "promotions": "العروض",
+    "affiliate": "التسويق بالعمولة",
+    "vipClub": "نادي كبار الشخصيات",
+    "blog": "المدونة",
+    "forum": "المنتدى",
+    "sponsorships": "الرعايات",
+    "responsibleGaming": "اللعب المسؤول",
+    "liveSupport": "الدعم المباشر",
+    "language": "اللغة"
+  },
+  "buttons": {
+    "deposit": "إيداع",
+    "startPlaying": "ابدأ اللعب",
+    "learnMore": "معرفة المزيد",
+    "viewAll": "عرض الكل",
+    "watchNow": "شاهد الآن",
+    "viewMatches": "عرض المباريات",
+    "betNow": "راهن الآن"
+  },
+  "header": {
+    "searchGames": "البحث عن ألعاب..."
+  },
+  "home": {
+    "welcome": "مرحبًا بكم في",
+    "welcomeDescription": "استمتع بإثارة ألعاب كازينو العملات المشفرة مع مجموعتنا المختارة من الألعاب المثيرة. العب بمسؤولية!",
+    "featuredGames": "الألعاب المميزة",
+    "popularGames": "الألعاب الشائعة"
+  },
+  "sports": {
+    "searchEvents": "البحث عن الأحداث...",
+    "nba": "من NBA",
+    "allMatches": "كل المباريات",
+    "pay3rdQuarter": "الدفع في الربع الثالث",
+    "badStartsInsurance": "تأمين البدايات السيئة",
+    "premierLeague": "الدوري الممتاز",
+    "pay3Goals": "الدفع مقابل 3 أهداف",
+    "favorites": "المفضلة",
+    "live": "مباشر",
+    "today": "اليوم",
+    "tomorrow": "غدًا",
+    "soccer": "كرة القدم",
+    "basketball": "كرة السلة",
+    "tennis": "التنس",
+    "topSports": "أبرز الرياضات",
+    "liveEvents": "أحداث مباشرة",
+    "markets": "الأسواق"
+  },
+  "gameDetails": {
+    "type": "النوع",
+    "players": "اللاعبون"
+  },
+  "wallet": {
+    "balance": "الرصيد",
+    "deposit": "إيداع",
+    "withdraw": "سحب",
+    "history": "السجل"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "التسجيل",
+    "logout": "تسجيل الخروج"
+  },
+  "languageSelector": {
+    "selectLanguage": "اختر اللغة",
+    "languageUpdated": "تم تحديث اللغة",
+    "languageUpdateDescription": "تم تحديث تفضيلات اللغة الخاصة بك. سيتم إعادة تحميل الصفحة لتطبيق التغييرات.",
+    "errorUpdating": "خطأ في تحديث اللغة",
+    "unknownError": "حدث خطأ غير معروف"
+  }
+}

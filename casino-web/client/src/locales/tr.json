@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "Ana Sayfa",
+    "crash": "Crash",
+    "favorites": "Favoriler",
+    "wallet": "Cüzdan",
+    "bets": "Bahisler"
+  },
+  "tabs": {
+    "casino": "CASINO",
+    "sports": "SPOR"
+  },
+  "sidebar": {
+    "favorites": "Favoriler",
+    "recent": "Son",
+    "challenges": "Meydan Okumalar",
+    "myBets": "Bahislerim",
+    "games": "Oyunlar",
+    "cryptoSpinOriginals": "CryptoSpin Orijinalleri",
+    "cryptoSpinExclusives": "CryptoSpin Özel",
+    "crash": "Crash",
+    "liveCasino": "Canlı Casino",
+    "tvShows": "TV Şovları",
+    "releases": "Yeni Çıkanlar",
+    "bonusBuy": "Bonus Satın Al",
+    "enhancedRTP": "Geliştirilmiş RTP",
+    "providers": "Sağlayıcılar",
+    "liveEvents": "Canlı Etkinlikler",
+    "comingSoon": "Yakında",
+    "topSports": "Popüler Sporlar",
+    "profile": "Profil",
+    "promotions": "Promosyonlar",
+    "affiliate": "Ortaklık",
+    "vipClub": "VIP Kulüp",
+    "blog": "Blog",
+    "forum": "Forum",
+    "sponsorships": "Sponsorluklar",
+    "responsibleGaming": "Sorumlu Oyun",
+    "liveSupport": "Canlı Destek",
+    "language": "Dil"
+  },
+  "buttons": {
+    "deposit": "Para Yatır",
+    "startPlaying": "Oynamaya Başla",
+    "learnMore": "Daha Fazla Bilgi",
+    "viewAll": "Tümünü Gör",
+    "watchNow": "Şimdi İzle",
+    "viewMatches": "Maçları Gör",
+    "betNow": "Şimdi Bahis Yap"
+  },
+  "header": {
+    "searchGames": "Oyun ara..."
+  },
+  "home": {
+    "welcome": "Hoş Geldiniz",
+    "welcomeDescription": "Heyecan verici oyun seçimimizle kripto casino oyunlarının heyecanını yaşayın. Sorumlu oynayın!",
+    "featuredGames": "Öne Çıkan Oyunlar",
+    "popularGames": "Popüler Oyunlar"
+  },
+  "sports": {
+    "searchEvents": "Etkinlik ara...",
+    "nba": "NBA'den",
+    "allMatches": "Tüm Maçlar",
+    "pay3rdQuarter": "3. Çeyrek Ödeme",
+    "badStartsInsurance": "Kötü Başlangıç Sigortası",
+    "premierLeague": "Premier Lig",
+    "pay3Goals": "3 Gol Ödeme",
+    "favorites": "Favoriler",
+    "live": "Canlı",
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "soccer": "Futbol",
+    "basketball": "Basketbol",
+    "tennis": "Tenis",
+    "topSports": "Popüler Sporlar",
+    "liveEvents": "Canlı Etkinlikler",
+    "markets": "piyasalar"
+  },
+  "gameDetails": {
+    "type": "Tür",
+    "players": "Oyuncular"
+  },
+  "wallet": {
+    "balance": "Bakiye",
+    "deposit": "Para Yatır",
+    "withdraw": "Para Çek",
+    "history": "Geçmiş"
+  },
+  "auth": {
+    "login": "Giriş",
+    "register": "Kayıt Ol",
+    "logout": "Çıkış"
+  },
+  "languageSelector": {
+    "selectLanguage": "Dil Seç",
+    "languageUpdated": "Dil güncellendi",
+    "languageUpdateDescription": "Dil tercihiniz güncellendi. Değişiklikleri uygulamak için sayfa yenilenecek.",
+    "errorUpdating": "Dil güncellenirken hata",
+    "unknownError": "Bilinmeyen bir hata oluştu"
+  }
+}

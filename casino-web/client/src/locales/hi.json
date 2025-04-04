@@ -1,0 +1,101 @@
+{
+  "navigation": {
+    "home": "होम",
+    "crash": "क्रैश",
+    "favorites": "पसंदीदा",
+    "wallet": "वॉलेट",
+    "bets": "सट्टा"
+  },
+  "tabs": {
+    "casino": "कैसीनो",
+    "sports": "खेल"
+  },
+  "sidebar": {
+    "favorites": "पसंदीदा",
+    "recent": "हाल ही के",
+    "challenges": "चुनौतियाँ",
+    "myBets": "मेरे सट्टे",
+    "games": "गेम्स",
+    "cryptoSpinOriginals": "क्रिप्टोस्पिन मूल",
+    "cryptoSpinExclusives": "क्रिप्टोस्पिन विशेष",
+    "crash": "क्रैश",
+    "liveCasino": "लाइव कैसीनो",
+    "tvShows": "टीवी शो",
+    "releases": "रिलीज",
+    "bonusBuy": "बोनस खरीद",
+    "enhancedRTP": "बेहतर RTP",
+    "providers": "प्रदाता",
+    "liveEvents": "लाइव इवेंट्स",
+    "comingSoon": "जल्द आ रहा है",
+    "topSports": "टॉप स्पोर्ट्स",
+    "profile": "प्रोफाइल",
+    "promotions": "प्रमोशन",
+    "affiliate": "अफिलिएट",
+    "vipClub": "वीआईपी क्लब",
+    "blog": "ब्लॉग",
+    "forum": "फोरम",
+    "sponsorships": "प्रायोजन",
+    "responsibleGaming": "जिम्मेदार गेमिंग",
+    "liveSupport": "लाइव सपोर्ट",
+    "language": "भाषा"
+  },
+  "buttons": {
+    "deposit": "जमा",
+    "startPlaying": "खेलना शुरू करें",
+    "learnMore": "और जानें",
+    "viewAll": "सभी देखें",
+    "watchNow": "अभी देखें",
+    "viewMatches": "मैच देखें",
+    "betNow": "अभी सट्टा लगाएं"
+  },
+  "header": {
+    "searchGames": "गेम्स खोजें..."
+  },
+  "home": {
+    "welcome": "में आपका स्वागत है",
+    "welcomeDescription": "हमारे रोमांचक गेम्स के चयन के साथ क्रिप्टो कैसीनो गेम्स का रोमांच अनुभव करें। जिम्मेदारी से खेलें!",
+    "featuredGames": "विशेष गेम्स",
+    "popularGames": "लोकप्रिय गेम्स"
+  },
+  "sports": {
+    "searchEvents": "इवेंट्स खोजें...",
+    "nba": "एनबीए से",
+    "allMatches": "सभी मैच",
+    "pay3rdQuarter": "तीसरे क्वार्टर में भुगतान",
+    "badStartsInsurance": "खराब शुरुआत बीमा",
+    "premierLeague": "प्रीमियर लीग",
+    "pay3Goals": "3 गोल भुगतान",
+    "favorites": "पसंदीदा",
+    "live": "लाइव",
+    "today": "आज",
+    "tomorrow": "कल",
+    "soccer": "फुटबॉल",
+    "basketball": "बास्केटबॉल",
+    "tennis": "टेनिस",
+    "topSports": "टॉप स्पोर्ट्स",
+    "liveEvents": "लाइव इवेंट्स",
+    "markets": "मार्केट"
+  },
+  "gameDetails": {
+    "type": "प्रकार",
+    "players": "खिलाड़ी"
+  },
+  "wallet": {
+    "balance": "बैलेंस",
+    "deposit": "जमा",
+    "withdraw": "निकासी",
+    "history": "इतिहास"
+  },
+  "auth": {
+    "login": "लॉगिन",
+    "register": "रजिस्टर",
+    "logout": "लॉगआउट"
+  },
+  "languageSelector": {
+    "selectLanguage": "भाषा चुनें",
+    "languageUpdated": "भाषा अपडेट हुई",
+    "languageUpdateDescription": "आपकी भाषा प्राथमिकता अपडेट हो गई है। बदलावों को लागू करने के लिए पेज रीलोड किया जाएगा।",
+    "errorUpdating": "भाषा अपडेट करने में त्रुटि",
+    "unknownError": "एक अज्ञात त्रुटि हुई"
+  }
+}

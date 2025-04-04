@@ -1,0 +1,66 @@
+CASINO PROJECT STRUCTURE
+
+1. Web-based Casino (Modern JavaScript/TypeScript/React)
+===============================
+casino-web/
+├── client/                 # Frontend React application
+│   ├── src/
+│   │   ├── components/     # React components organized by game type
+│   │   │   ├── blackjack/  # Blackjack specific components
+│   │   │   ├── roulette/   # Roulette specific components
+│   │   │   ├── slots/      # Slots specific components
+│   │   │   ├── sports/     # Sports betting components
+│   │   │   └── ui/         # Shared UI components
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── lib/            # Utility functions and API clients
+│   │   ├── locales/        # Translation files for i18n
+│   │   ├── pages/          # Page components for routing
+│   │   ├── App.tsx         # Main application component
+│   │   └── main.tsx        # Entry point
+│   └── index.html          # HTML template
+├── server/                 # Backend Express application
+│   ├── games/              # Game logic implementations
+│   │   ├── BlackjackGame.ts
+│   │   ├── RouletteGame.ts
+│   │   ├── SlotMachineGame.ts
+│   │   ├── HorseBettingGame.ts
+│   │   └── schema.ts       # Game data schemas
+│   ├── auth.ts             # Authentication logic
+│   ├── routes.ts           # API routes
+│   └── index.ts            # Server entry point
+├── shared/                 # Shared code between client and server
+│   └── schema.ts           # Shared type definitions
+├── public/                 # Static assets
+│   ├── images/             # Images and icons
+│   └── sounds/             # Game sounds
+├── config/                 # Configuration files
+│   ├── drizzle.config.ts   # Database configuration
+│   ├── postcss.config.js   # PostCSS configuration
+│   ├── tailwind.config.ts  # Tailwind CSS configuration
+│   └── vite.config.ts      # Vite configuration
+└── package.json            # Project dependencies and scripts
+
+2. Python-based Casino API
+===============================
+casino-api/
+├── app.py                  # Main Flask application
+├── run.py                  # Server entry point
+├── game.py                 # Base game class
+├── game_manager.py         # Game session management
+├── blackjack_game.py       # Blackjack implementation
+├── roulette_game.py        # Roulette implementation
+├── slot_machine_game.py    # Slot machine implementation
+├── horse_betting_game.py   # Horse betting implementation
+├── static/                 # Static files for API documentation
+└── templates/              # HTML templates for API documentation
+
+3. Python Console Casino
+===============================
+casino-project/
+├── main.py                 # Main entry point and menu
+├── ascii_art.py            # ASCII art for console display
+├── blackjack.py            # Blackjack game implementation
+├── roulette.py             # Roulette game implementation
+├── slot_machine.py         # Slot machine implementation
+├── horse_betting.py        # Horse betting implementation
+└── README.md               # Project documentation

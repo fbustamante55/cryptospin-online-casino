@@ -1,0 +1,32 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="10" height="10">
+  <desc>Roulette ball dropping sound</desc>
+  <script type="application/javascript">
+    const audioContext = new AudioContext();
+    
+    // Create ball dropping sound
+    function createBallDropSound() {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 800;
+      
+      // Frequency drop
+      oscillator.frequency.exponentialRampToValueAtTime(
+        200, 
+        audioContext.currentTime + 0.15
+      );
+      
+      // Volume envelope
+      gainNode.gain.setValueAtTime(0.01, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+  </script>
+</svg>

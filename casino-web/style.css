@@ -1,0 +1,1232 @@
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #327932;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Open Sans", sans-serif;
+  --card-size: 1vh;
+  --card-width: calc(36 * var(--card-size));
+  --card-height: calc(54 * var(--card-size));
+  --card-base-x: calc(0.15 * var(--card-width));
+  --card-base-y: calc(0.15 * var(--card-width));
+}
+@media (max-aspect-ratio: 1/1) {
+  body {
+    --card-size: 0.4vh;
+  }
+}
+
+@property --warningPosition {
+  intial-value: 100%;
+  inherits: false;
+  syntax: "<percentage>";
+}
+@keyframes hideWarning {
+  to {
+    --warningPosition: 100%;
+  }
+}
+#warning {
+  font-weight: 300;
+  position: absolute;
+  --warningPosition: 0%;
+  top: var(--warningPosition, 0);
+  animation: 0s linear 0s 1 forwards running hideWarning;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #327932;
+  z-index: 500;
+  color: #fff;
+  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#warning p {
+  padding: 1rem;
+}
+#warning a {
+  color: #fff;
+  transition: 0.125s all;
+}
+#warning a:hover {
+  color: #02111d;
+}
+
+h2 {
+  padding: 0;
+  margin: 0;
+  font-weight: 400;
+}
+
+form,
+.stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+.stage {
+  z-index: 0;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+}
+@media (max-aspect-ratio: 1/1) {
+  .stage {
+    flex-direction: column;
+  }
+}
+.stage__body {
+  --card-offset: 0;
+  text-align: center;
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-aspect-ratio: 1/1) {
+  .stage__body {
+    width: 100%;
+    height: 50%;
+  }
+}
+.stage__body--dealer {
+  --stage-center-x: calc(
+    75vw -
+      (
+        var(--card-width) / 2 +
+          (var(--card-offset) * var(--card-base-x) / 2)
+      )
+  );
+  --stage-center-y: calc(
+    50vh -
+      (
+        var(--card-height) / 2 +
+          (var(--card-offset) * var(--card-base-y) / 2)
+      )
+  );
+  order: 2;
+}
+@media (max-aspect-ratio: 1/1) {
+  .stage__body--dealer {
+    order: 1;
+    --stage-center-x: calc(
+      50vw -
+        (
+          var(--card-width) / 2 +
+            (var(--card-offset) * var(--card-base-x) / 2)
+        )
+    );
+    --stage-center-y: calc(
+      22vh -
+        (
+          var(--card-height) / 2 +
+            (var(--card-offset) * var(--card-base-y) / 2)
+        )
+    );
+  }
+}
+.stage__body--player {
+  --stage-center-x: calc(
+    25vw -
+      (
+        var(--card-width) / 2 +
+          (var(--card-offset) * var(--card-base-x) / 2)
+      )
+  );
+  --stage-center-y: calc(
+    50vh -
+      (
+        var(--card-height) / 2 +
+          (var(--card-offset) * var(--card-base-y) / 2)
+      )
+  );
+  order: 1;
+}
+@media (max-aspect-ratio: 1/1) {
+  .stage__body--player {
+    order: 2;
+    --stage-center-x: calc(
+      50vw -
+        (
+          var(--card-width) / 2 +
+            (var(--card-offset) * var(--card-base-x) / 2)
+        )
+    );
+    --stage-center-y: calc(
+      72vh -
+        (
+          var(--card-height) / 2 +
+            (var(--card-offset) * var(--card-base-y) / 2)
+        )
+    );
+  }
+}
+.stage__labels {
+  display: flex;
+  padding: 1rem 0;
+  opacity: 0;
+  transition: 0.25s all;
+  flex-direction: row;
+}
+@media (min-height: 480px) {
+  .stage__labels {
+    flex-direction: column;
+  }
+}
+@media (max-aspect-ratio: 1/1) {
+  .stage__labels.stage__labels--player {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
+}
+.stage__labels--main {
+  display: none;
+}
+@media (min-height: 480px) {
+  .stage__labels--main {
+    display: flex;
+    justify-content: center;
+  }
+}
+.stage__labels--total {
+  text-align: left;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.stage__labels--total .sm {
+  display: inline-block;
+  margin-right: 0.25rem;
+}
+@media (min-height: 480px) {
+  .stage__labels--total .sm {
+    display: none;
+  }
+}
+.stage__labels--total.user-total {
+  counter-increment: userTotalCounter var(--user-total);
+}
+.stage__labels--total.user-total:after {
+  font-weight: 600;
+  padding-left: 0.5rem;
+  content: counter(userTotalCounter);
+}
+.stage__labels--total.dealer-total {
+  counter-increment: dealerTotalCounter var(--dealer-total);
+}
+.stage__labels--total.dealer-total:after {
+  font-weight: 600;
+  padding-left: 0.5rem;
+  content: counter(dealerTotalCounter);
+}
+
+input,
+input:checked + .label-hit,
+#start:not(:checked) + label ~ label,
+#start:checked + label,
+#stand:checked ~ label {
+  display: none;
+}
+
+label {
+  position: absolute;
+  z-index: 100;
+  color: #fff;
+  width: 10rem;
+  display: inline-block;
+  text-align: center;
+  background-color: #02111d;
+  font-size: 1.5rem;
+  padding: 0.5rem 0;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.125s;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+}
+label.label-hit {
+  top: calc(50vh - 2rem);
+}
+label#label-stand {
+  top: calc(50vh + 2rem);
+}
+@media (max-aspect-ratio: 1/1) {
+  label.label-hit {
+    top: 50%;
+    left: calc(50vw - 6rem);
+  }
+  label#label-stand {
+    top: 50%;
+    left: calc(50vw + 6rem);
+  }
+}
+label:hover {
+  background-color: #052d4d;
+}
+
+.card {
+  position: absolute;
+  left: var(--stage-center-x);
+  top: var(--stage-center-y);
+  transition: 0.5s all;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  width: var(--card-width);
+  height: var(--card-height);
+}
+.card[class^=card--u], .card[class*=" card--u"] {
+  opacity: 0;
+}
+.card__face {
+  background-image: url("https://assets.codepen.io/67732/card-faces.svg");
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  background-size: auto 400%;
+  background-repeat: no-repeat;
+}
+.card:nth-child(1) {
+  margin-left: calc(0 * var(--card-base-x));
+  margin-top: calc(0 * var(--card-base-y));
+}
+.card:nth-child(2) {
+  margin-left: calc(1 * var(--card-base-x));
+  margin-top: calc(1 * var(--card-base-y));
+}
+.card:nth-child(3) {
+  margin-left: calc(2 * var(--card-base-x));
+  margin-top: calc(2 * var(--card-base-y));
+}
+.card:nth-child(4) {
+  margin-left: calc(3 * var(--card-base-x));
+  margin-top: calc(3 * var(--card-base-y));
+}
+.card:nth-child(5) {
+  margin-left: calc(4 * var(--card-base-x));
+  margin-top: calc(4 * var(--card-base-y));
+}
+
+@keyframes drawCard {
+  0% {
+    opacity: 0;
+    transform: translate(0, -100vh) rotateZ(10deg);
+  }
+  1% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(0, -100vh) rotateZ(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0, 0vh) rotateZ(0deg);
+  }
+}
+@property --ua-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --ua-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes uaValue {
+  from {
+    --ua-offset: 1;
+  }
+  to {
+    --ua-offset: 13;
+  }
+}
+@keyframes uaSuitValue {
+  from {
+    --ua-suit: 0;
+  }
+  to {
+    --ua-suit: 3;
+  }
+}
+@property --ub-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --ub-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes ubValue {
+  from {
+    --ub-offset: 1;
+  }
+  to {
+    --ub-offset: 13;
+  }
+}
+@keyframes ubSuitValue {
+  from {
+    --ub-suit: 0;
+  }
+  to {
+    --ub-suit: 3;
+  }
+}
+@property --uc-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --uc-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes ucValue {
+  from {
+    --uc-offset: 1;
+  }
+  to {
+    --uc-offset: 13;
+  }
+}
+@keyframes ucSuitValue {
+  from {
+    --uc-suit: 0;
+  }
+  to {
+    --uc-suit: 3;
+  }
+}
+@property --ud-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --ud-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes udValue {
+  from {
+    --ud-offset: 1;
+  }
+  to {
+    --ud-offset: 13;
+  }
+}
+@keyframes udSuitValue {
+  from {
+    --ud-suit: 0;
+  }
+  to {
+    --ud-suit: 3;
+  }
+}
+@property --ue-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --ue-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes ueValue {
+  from {
+    --ue-offset: 1;
+  }
+  to {
+    --ue-offset: 13;
+  }
+}
+@keyframes ueSuitValue {
+  from {
+    --ue-suit: 0;
+  }
+  to {
+    --ue-suit: 3;
+  }
+}
+@property --da-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --da-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes daValue {
+  from {
+    --da-offset: 1;
+  }
+  to {
+    --da-offset: 13;
+  }
+}
+@keyframes daSuitValue {
+  from {
+    --da-suit: 0;
+  }
+  to {
+    --da-suit: 3;
+  }
+}
+@property --db-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --db-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes dbValue {
+  from {
+    --db-offset: 1;
+  }
+  to {
+    --db-offset: 13;
+  }
+}
+@keyframes dbSuitValue {
+  from {
+    --db-suit: 0;
+  }
+  to {
+    --db-suit: 3;
+  }
+}
+@property --dc-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --dc-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes dcValue {
+  from {
+    --dc-offset: 1;
+  }
+  to {
+    --dc-offset: 13;
+  }
+}
+@keyframes dcSuitValue {
+  from {
+    --dc-suit: 0;
+  }
+  to {
+    --dc-suit: 3;
+  }
+}
+@property --dd-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --dd-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes ddValue {
+  from {
+    --dd-offset: 1;
+  }
+  to {
+    --dd-offset: 13;
+  }
+}
+@keyframes ddSuitValue {
+  from {
+    --dd-suit: 0;
+  }
+  to {
+    --dd-suit: 3;
+  }
+}
+@property --de-offset {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: true;
+}
+@property --de-suit {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes deValue {
+  from {
+    --de-offset: 1;
+  }
+  to {
+    --de-offset: 13;
+  }
+}
+@keyframes deSuitValue {
+  from {
+    --de-suit: 0;
+  }
+  to {
+    --de-suit: 3;
+  }
+}
+@property --a-position-offset {
+  syntax: "<integer>";
+  initial-value: -1;
+  inherits: true;
+}
+@property --b-position-offset {
+  syntax: "<integer>";
+  initial-value: -1;
+  inherits: true;
+}
+@property --c-position-offset {
+  syntax: "<integer>";
+  initial-value: -1;
+  inherits: true;
+}
+@property --d-position-offset {
+  syntax: "<integer>";
+  initial-value: -1;
+  inherits: true;
+}
+@property --e-position-offset {
+  syntax: "<integer>";
+  initial-value: -1;
+  inherits: true;
+}
+form {
+  /* 
+    --[p]-[n]-offset values 
+    1 : Ace
+    2 - 10: Same
+    11 : J
+    12 : Q
+    13 : K
+  */
+  --ua-offset: 1;
+  --ua: min(
+    10,
+    var(--ua-offset)
+  );
+  --ua-is-ace: clamp(
+    0,
+    2 - var(--ua-offset),
+    1
+  );
+  --ub-offset: 1;
+  --ub: min(
+    10,
+    var(--ub-offset)
+  );
+  --ub-is-ace: clamp(
+    0,
+    2 - var(--ub-offset),
+    1
+  );
+  --uc-offset: 1;
+  --uc: min(
+    10,
+    var(--uc-offset)
+  );
+  --uc-is-ace: clamp(
+    0,
+    2 - var(--uc-offset),
+    1
+  );
+  --ud-offset: 1;
+  --ud: min(
+    10,
+    var(--ud-offset)
+  );
+  --ud-is-ace: clamp(
+    0,
+    2 - var(--ud-offset),
+    1
+  );
+  --ue-offset: 1;
+  --ue: min(
+    10,
+    var(--ue-offset)
+  );
+  --ue-is-ace: clamp(
+    0,
+    2 - var(--ue-offset),
+    1
+  );
+  --da-offset: 1;
+  --da: min(
+    10,
+    var(--da-offset)
+  );
+  --da-is-ace: clamp(
+    0,
+    2 - var(--da-offset),
+    1
+  );
+  --db-offset: 1;
+  --db: min(
+    10,
+    var(--db-offset)
+  );
+  --db-is-ace: clamp(
+    0,
+    2 - var(--db-offset),
+    1
+  );
+  --dc-offset: 1;
+  --dc: min(
+    10,
+    var(--dc-offset)
+  );
+  --dc-is-ace: clamp(
+    0,
+    2 - var(--dc-offset),
+    1
+  );
+  --dd-offset: 1;
+  --dd: min(
+    10,
+    var(--dd-offset)
+  );
+  --dd-is-ace: clamp(
+    0,
+    2 - var(--dd-offset),
+    1
+  );
+  --de-offset: 1;
+  --de: min(
+    10,
+    var(--de-offset)
+  );
+  --de-is-ace: clamp(
+    0,
+    2 - var(--de-offset),
+    1
+  );
+  --ua-base-pre: calc(
+    var(--ua)
+  );
+  --ua-a-pre: calc(
+    var(--ua-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--ua-base-pre)), 1)
+      )
+  );
+  --ua-total: var(
+    --ua-a-pre
+  );
+  --uaub-base-pre: calc(
+    var(--ua) + var(--ub)
+  );
+  --uaub-a-pre: calc(
+    var(--uaub-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--uaub-base-pre)), 1)
+      )
+  );
+  --uaub-b-pre: calc(
+    var(--uaub-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--uaub-a-pre)), 1)
+      )
+  );
+  --uaub-total: var(
+    --uaub-b-pre
+  );
+  --uaubuc-base-pre: calc(
+    var(--ua) + var(--ub) + var(--uc)
+  );
+  --uaubuc-a-pre: calc(
+    var(--uaubuc-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--uaubuc-base-pre)), 1)
+      )
+  );
+  --uaubuc-b-pre: calc(
+    var(--uaubuc-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--uaubuc-a-pre)), 1)
+      )
+  );
+  --uaubuc-c-pre: calc(
+    var(--uaubuc-b-pre) +
+      (
+        (10 * var(--uc-is-ace)) *
+          clamp(0, calc(12 - var(--uaubuc-b-pre)), 1)
+      )
+  );
+  --uaubuc-total: var(
+    --uaubuc-c-pre
+  );
+  --uaubucud-base-pre: calc(
+    var(--ua) + var(--ub) + var(--uc) + var(--ud)
+  );
+  --uaubucud-a-pre: calc(
+    var(--uaubucud-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucud-base-pre)), 1)
+      )
+  );
+  --uaubucud-b-pre: calc(
+    var(--uaubucud-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucud-a-pre)), 1)
+      )
+  );
+  --uaubucud-c-pre: calc(
+    var(--uaubucud-b-pre) +
+      (
+        (10 * var(--uc-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucud-b-pre)), 1)
+      )
+  );
+  --uaubucud-d-pre: calc(
+    var(--uaubucud-c-pre) +
+      (
+        (10 * var(--ud-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucud-c-pre)), 1)
+      )
+  );
+  --uaubucud-total: var(
+    --uaubucud-d-pre
+  );
+  --uaubucudue-base-pre: calc(
+    var(--ua) + var(--ub) + var(--uc) + var(--ud) + var(--ue)
+  );
+  --uaubucudue-a-pre: calc(
+    var(--uaubucudue-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucudue-base-pre)), 1)
+      )
+  );
+  --uaubucudue-b-pre: calc(
+    var(--uaubucudue-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucudue-a-pre)), 1)
+      )
+  );
+  --uaubucudue-c-pre: calc(
+    var(--uaubucudue-b-pre) +
+      (
+        (10 * var(--uc-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucudue-b-pre)), 1)
+      )
+  );
+  --uaubucudue-d-pre: calc(
+    var(--uaubucudue-c-pre) +
+      (
+        (10 * var(--ud-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucudue-c-pre)), 1)
+      )
+  );
+  --uaubucudue-e-pre: calc(
+    var(--uaubucudue-d-pre) +
+      (
+        (10 * var(--ue-is-ace)) *
+          clamp(0, calc(12 - var(--uaubucudue-d-pre)), 1)
+      )
+  );
+  --uaubucudue-total: var(
+    --uaubucudue-e-pre
+  );
+  --da-base-pre: calc(
+    var(--da)
+  );
+  --da-a-pre: calc(
+    var(--da-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--da-base-pre)), 1)
+      )
+  );
+  --da-total: var(
+    --da-a-pre
+  );
+  --dadb-base-pre: calc(
+    var(--da) + var(--db)
+  );
+  --dadb-a-pre: calc(
+    var(--dadb-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--dadb-base-pre)), 1)
+      )
+  );
+  --dadb-b-pre: calc(
+    var(--dadb-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--dadb-a-pre)), 1)
+      )
+  );
+  --dadb-total: var(
+    --dadb-b-pre
+  );
+  --dadbdc-base-pre: calc(
+    var(--da) + var(--db) + var(--dc)
+  );
+  --dadbdc-a-pre: calc(
+    var(--dadbdc-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdc-base-pre)), 1)
+      )
+  );
+  --dadbdc-b-pre: calc(
+    var(--dadbdc-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdc-a-pre)), 1)
+      )
+  );
+  --dadbdc-c-pre: calc(
+    var(--dadbdc-b-pre) +
+      (
+        (10 * var(--uc-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdc-b-pre)), 1)
+      )
+  );
+  --dadbdc-total: var(
+    --dadbdc-c-pre
+  );
+  --dadbdcdd-base-pre: calc(
+    var(--da) + var(--db) + var(--dc) + var(--dd)
+  );
+  --dadbdcdd-a-pre: calc(
+    var(--dadbdcdd-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcdd-base-pre)), 1)
+      )
+  );
+  --dadbdcdd-b-pre: calc(
+    var(--dadbdcdd-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcdd-a-pre)), 1)
+      )
+  );
+  --dadbdcdd-c-pre: calc(
+    var(--dadbdcdd-b-pre) +
+      (
+        (10 * var(--uc-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcdd-b-pre)), 1)
+      )
+  );
+  --dadbdcdd-d-pre: calc(
+    var(--dadbdcdd-c-pre) +
+      (
+        (10 * var(--ud-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcdd-c-pre)), 1)
+      )
+  );
+  --dadbdcdd-total: var(
+    --dadbdcdd-d-pre
+  );
+  --dadbdcddde-base-pre: calc(
+    var(--da) + var(--db) + var(--dc) + var(--dd) + var(--de)
+  );
+  --dadbdcddde-a-pre: calc(
+    var(--dadbdcddde-base-pre) +
+      (
+        (10 * var(--ua-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcddde-base-pre)), 1)
+      )
+  );
+  --dadbdcddde-b-pre: calc(
+    var(--dadbdcddde-a-pre) +
+      (
+        (10 * var(--ub-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcddde-a-pre)), 1)
+      )
+  );
+  --dadbdcddde-c-pre: calc(
+    var(--dadbdcddde-b-pre) +
+      (
+        (10 * var(--uc-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcddde-b-pre)), 1)
+      )
+  );
+  --dadbdcddde-d-pre: calc(
+    var(--dadbdcddde-c-pre) +
+      (
+        (10 * var(--ud-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcddde-c-pre)), 1)
+      )
+  );
+  --dadbdcddde-e-pre: calc(
+    var(--dadbdcddde-d-pre) +
+      (
+        (10 * var(--ue-is-ace)) *
+          clamp(0, calc(12 - var(--dadbdcddde-d-pre)), 1)
+      )
+  );
+  --dadbdcddde-total: var(
+    --dadbdcddde-e-pre
+  );
+  /* ********* */
+  /* animation */
+  /* ********* */
+  animation:  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.278s dcValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.183s dcSuitValue steps(3, jump-end) infinite,  0.144s ddValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.278s dcValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.183s dcSuitValue steps(3, jump-end) infinite,  0.217s ddSuitValue steps(3, jump-end) infinite,  0.337s deValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.278s dcValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.183s dcSuitValue steps(3, jump-end) infinite,  0.144s ddValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.278s dcValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.21s dbValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.137s daValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.149s ueValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.278s udValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.201s ucValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.181s ubValue steps(12, jump-end) infinite,  0.347s uaValue steps(12, jump-end) infinite,  0.269s uaSuitValue steps(3, jump-end) infinite,  0.284s ubSuitValue steps(3, jump-end) infinite,  0.165s ucSuitValue steps(3, jump-end) infinite,  0.122s udSuitValue steps(3, jump-end) infinite,  0.153s ueSuitValue steps(3, jump-end) infinite,  0.303s daSuitValue steps(3, jump-end) infinite,  0.286s dbSuitValue steps(3, jump-end) infinite,  0.183s dcSuitValue steps(3, jump-end) infinite,  0.217s ddSuitValue steps(3, jump-end) infinite,  0.237s deSuitValue steps(3, jump-end) infinite;
+}
+form .card--ua .card__face {
+  background-position: calc((var(--ua-offset) - 1) * 8.333%) calc(((var(--ua-suit)) / 3) * 100%);
+}
+form .card--ub .card__face {
+  background-position: calc((var(--ub-offset) - 1) * 8.333%) calc(((var(--ub-suit)) / 3) * 100%);
+}
+form .card--uc .card__face {
+  background-position: calc((var(--uc-offset) - 1) * 8.333%) calc(((var(--uc-suit)) / 3) * 100%);
+}
+form .card--ud .card__face {
+  background-position: calc((var(--ud-offset) - 1) * 8.333%) calc(((var(--ud-suit)) / 3) * 100%);
+}
+form .card--ue .card__face {
+  background-position: calc((var(--ue-offset) - 1) * 8.333%) calc(((var(--ue-suit)) / 3) * 100%);
+}
+form .card--da .card__face {
+  background-position: calc((var(--da-offset) - 1) * 8.333%) calc(((var(--da-suit)) / 3) * 100%);
+}
+form .card--db .card__face {
+  background-position: calc((var(--db-offset) - 1) * 8.333%) calc(((var(--db-suit)) / 3) * 100%);
+}
+form .card--dc .card__face {
+  background-position: calc((var(--dc-offset) - 1) * 8.333%) calc(((var(--dc-suit)) / 3) * 100%);
+}
+form .card--dd .card__face {
+  background-position: calc((var(--dd-offset) - 1) * 8.333%) calc(((var(--dd-suit)) / 3) * 100%);
+}
+form .card--de .card__face {
+  background-position: calc((var(--de-offset) - 1) * 8.333%) calc(((var(--de-suit)) / 3) * 100%);
+}
+form #stage_container {
+  --user-total: 0;
+}
+form:valid {
+  animation-play-state: paused;
+}
+form:valid .card--ua {
+  animation: 1s linear 0s 1 forwards running drawCard;
+}
+form:valid .card--ub {
+  animation: 1s linear 1s 1 forwards running drawCard;
+}
+form:valid #stage_container {
+  --user-total: var(--uaub-total);
+  --dealer-total: var(--da-total);
+  --a-position-offset: 0;
+}
+form:valid .stage__labels {
+  opacity: 1;
+}
+
+#total {
+  counter-increment: total-counter var(--uaub-total);
+}
+#total:after {
+  content: counter(total-counter);
+}
+
+#hit-c:checked ~ #stage_container .card--uc {
+  animation: 1s linear 0s 1 forwards running drawCard;
+  opacity: 1;
+}
+#hit-c:checked ~ #stage_container .stage__player {
+  --card-offset: 3;
+}
+#hit-c:checked ~ #stage_container .user-total,
+#hit-c:checked ~ #stage_container {
+  --user-total: var(--uaubuc-total);
+}
+
+#hit-d:checked ~ #stage_container .card--ud {
+  animation: 1s linear 0s 1 forwards running drawCard;
+  opacity: 1;
+}
+#hit-d:checked ~ #stage_container .stage__player {
+  --card-offset: 4;
+}
+#hit-d:checked ~ #stage_container .user-total,
+#hit-d:checked ~ #stage_container {
+  --user-total: var(--uaubucud-total);
+}
+
+#hit-e:checked ~ #stage_container .card--ue {
+  animation: 1s linear 0s 1 forwards running drawCard;
+  opacity: 1;
+}
+#hit-e:checked ~ #stage_container .stage__player {
+  --card-offset: 5;
+}
+#hit-e:checked ~ #stage_container .user-total,
+#hit-e:checked ~ #stage_container {
+  --user-total: var(--uaubucudue-total);
+}
+
+/* Dealer cards + totals */
+@property --dealer-total {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@keyframes flipB {
+  to {
+    --b-position-offset: 0;
+    --dealer-total: var(--dadb-total);
+  }
+}
+@keyframes flipC {
+  to {
+    --c-position-offset: 0;
+    --dealer-total: var(--dc-target);
+  }
+}
+@keyframes flipD {
+  to {
+    --d-position-offset: 0;
+    --dealer-total: var(--dd-target);
+  }
+}
+@keyframes flipE {
+  to {
+    --e-position-offset: 0;
+    --dealer-total: var(--de-target);
+  }
+}
+@keyframes showResult {
+  to {
+    margin-left: 0;
+  }
+}
+#stage_container {
+  --user-bust: clamp(
+    0,
+    22 - var(--user-total),
+    1
+  );
+  --dealer-bust: clamp(
+    0,
+    22 - var(--dealer-total),
+    1
+  );
+  --game-result: clamp(
+    -1,
+    var(--user-total) - var(--dealer-total),
+    1
+  );
+  --game-result-opacity: min(
+    var(--user-bust),
+    var(--dealer-bust)
+  );
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+#stage_container .card--da {
+  transform: translate(0, calc(100vh * var(--a-position-offset)));
+}
+#stage_container .card--db {
+  transform: translate(0, calc(100vh * var(--b-position-offset)));
+}
+#stage_container .card--dc {
+  transform: translate(0, calc(100vh * var(--c-position-offset)));
+  opacity: var(--d-ab-lt-seventeen);
+}
+#stage_container .card--dd {
+  transform: translate(0, calc(100vh * var(--d-position-offset)));
+  opacity: var(--d-abc-lt-seventeen);
+}
+#stage_container .card--de {
+  transform: translate(0, calc(100vh * var(--e-position-offset)));
+  opacity: var(--d-abcd-lt-seventeen);
+}
+
+.message {
+  position: absolute;
+  width: 100vw;
+  left: 0vw;
+  z-index: 400;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.message#player_bust {
+  top: calc(100vh * var(--user-bust));
+}
+.message#dealer_bust {
+  top: calc(100vh * var(--dealer-bust));
+}
+.message#game_result {
+  top: calc(-100vh + (100vh * var(--game-result)));
+  opacity: var(--game-result-opacity);
+  margin-left: 100vw;
+}
+.message__interior {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.message__label {
+  font-size: 3rem;
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  border-radius: 0.25rem;
+  background-color: #327932;
+  color: #fff;
+}
+
+#stand:checked ~ #stage_container {
+  --dealer-total: var(--da-total);
+  --d-ab-lt-seventeen: clamp(0, calc(18 - var(--dadb-total)), 1);
+  --diff-c: calc(
+    (var(--dadbdc-total) - var(--dadb-total)) * var(--d-ab-lt-seventeen)
+  );
+  --dc-target: calc(var(--dadb-total) + var(--diff-c));
+  --d-abc-lt-seventeen: clamp(0, calc(18 - var(--dadbdc-total)), 1);
+  --diff-d: calc(
+    (var(--dadbdcdd-total) - var(--dc-target)) * var(--d-abc-lt-seventeen)
+  );
+  --dd-target: calc(var(--dc-target) + var(--diff-d));
+  --d-abcd-lt-seventeen: clamp(0, calc(18 - var(--dadbdcdd-total)), 1);
+  --diff-e: calc(
+    (var(--dadbdcddde-total) - var(--dd-target)) * var(--d-abcd-lt-seventeen)
+  );
+  --de-target: calc(var(--dd-target) + var(--diff-e));
+  counter-increment: dadb-total var(--dealer-total);
+  animation: 0.5s linear 1s 1 forwards running flipB, 0.5s linear 2s 1 forwards running flipC, 0.5s linear 3s 1 forwards running flipD, 0.5s linear 4s 1 forwards running flipE;
+}
+#stand:checked ~ #stage_container #game_result {
+  animation: 0s linear 5s 1 forwards running showResult;
+}

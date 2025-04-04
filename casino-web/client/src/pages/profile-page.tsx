@@ -1,0 +1,1598 @@
+import { useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
+import { phoneVerificationSchema } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, CheckCircle, AlertCircle, Mail, Phone, Shield, User, Lock, Upload, Coins, LogIn, LogOut, CreditCard, RefreshCw } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+// Componente de elemento de actividad
+interface ActivityItemProps {
+  type: string;
+  timestamp: string;
+  device: string;
+  ip: string;
+  details: string;
+}
+
+const ActivityItem = ({ type, timestamp, device, ip, details }: ActivityItemProps) => {
+  const getIcon = () => {
+    switch (type) {
+      case 'login':
+        return <LogIn className="h-4 w-4 text-blue-400" />;
+      case 'logout':
+        return <LogOut className="h-4 w-4 text-orange-400" />;
+      case 'security':
+        return <Shield className="h-4 w-4 text-purple-400" />;
+      case 'wallet_bet':
+        return <CreditCard className="h-4 w-4 text-red-400" />;
+      case 'wallet_win':
+        return <Coins className="h-4 w-4 text-green-400" />;
+      default:
+        return <RefreshCw className="h-4 w-4 text-gray-400" />;
+    }
+  };
+  
+  return (
+    <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800">
+      <div className="flex items-start gap-3">
+        <div className="mt-1 bg-[#1A2634] p-2 rounded-full">
+          {getIcon()}
+        </div>
+        <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <h4 className="font-medium text-white">{details}</h4>
+            <span className="text-xs text-gray-400 mt-1 sm:mt-0">{timestamp}</span>
+          </div>
+          <div className="mt-1 text-xs text-gray-500">
+            <p>Dispositivo: {device}</p>
+            <p>IP: {ip}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Define zod schemas for form validation
+const phoneVerificationFormSchema = phoneVerificationSchema;
+type PhoneVerificationFormData = z.infer<typeof phoneVerificationFormSchema>;
+
+const profileUpdateSchema = z.object({
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+});
+type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
+
+const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(8, "Password must be at least 8 characters"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
+
+const walletAddressSchema = z.object({
+  currency: z.string(),
+  address: z.string().min(10, "Wallet address must be at least 10 characters"),
+});
+type WalletAddressFormData = z.infer<typeof walletAddressSchema>;
+
+export default function ProfilePage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("profile");
+  const [showPhoneVerificationDialog, setShowPhoneVerificationDialog] = useState(false);
+  const [isSubmittingPhone, setIsSubmittingPhone] = useState(false);
+  const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
+  const [phoneVerificationSent, setPhoneVerificationSent] = useState(false);
+  const [showEmailVerificationDialog, setShowEmailVerificationDialog] = useState(false);
+  const [showPasswordChangeDialog, setShowPasswordChangeDialog] = useState(false);
+  const [showSetup2FADialog, setShowSetup2FADialog] = useState(false);
+  const [showDisable2FADialog, setShowDisable2FADialog] = useState(false);
+  const [showKYCDialog, setShowKYCDialog] = useState(false);
+  const [isUploadingKYC, setIsUploadingKYC] = useState(false);
+  const [showAddWalletDialog, setShowAddWalletDialog] = useState(false);
+  const [selectedCrypto, setSelectedCrypto] = useState("BTC");
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isAddingWallet, setIsAddingWallet] = useState(false);
+  const [activityFilter, setActivityFilter] = useState("all");
+  
+  // Obtener las actividades del usuario
+  const { data: userActivitiesData, isLoading: isLoadingActivities } = useQuery({
+    queryKey: ['/api/user/activities'],
+    enabled: activeTab === "activity",
+  });
+
+  // Para fines de demostración, usaremos datos de ejemplo si no hay datos reales disponibles
+  const userActivities = userActivitiesData?.activities || [
+    { 
+      activityType: 'login', 
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-27T12:45:00'),
+      details: 'Successful login'
+    },
+    { 
+      activityType: 'wallet_bet',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-27T12:30:00'),
+      amount: 100,
+      gameType: 'Slots',
+      details: 'Placed bet of 100 credits on Slots'
+    },
+    { 
+      activityType: 'wallet_win',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-27T12:32:00'),
+      amount: 250,
+      gameType: 'Slots',
+      details: 'Won 250 credits on Slots'
+    },
+    { 
+      activityType: 'security',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-26T10:15:00'),
+      details: 'Changed account password'
+    },
+    { 
+      activityType: 'login',
+      deviceInfo: 'Chrome 95.0 - Windows',
+      ipAddress: '192.168.1.1',
+      timestamp: new Date('2025-03-26T10:10:00'),
+      details: 'Successful login'
+    }
+  ];
+  
+  // Función para obtener la descripción de la actividad según su tipo
+  const getActivityDescription = (activity: any) => {
+    const { activityType, details } = activity;
+    
+    // Si hay detalles específicos, mostrarlos
+    if (details) {
+      return details;
+    }
+    
+    // Descripción por defecto según el tipo de actividad
+    switch (activityType) {
+      case 'login':
+        return "Successful login";
+      case 'logout':
+        return "Successful logout";
+      case 'password_change':
+        return "Changed account password";
+      case 'phone_verification':
+        return "Verified phone number";
+      case 'email_verification':
+        return "Verified email address";
+      case 'kyc_upload':
+        return "Uploaded KYC documents";
+      case 'wallet_bet':
+        return `Placed bet of ${activity.amount || "unknown"} credits on ${activity.gameType || "Game"}`;
+      case 'wallet_win':
+        return `Won ${activity.amount || "unknown"} credits on ${activity.gameType || "Game"}`;
+      case 'wallet_deposit':
+        return `Deposited ${activity.amount || "unknown"} credits`;
+      case 'wallet_withdrawal':
+        return `Withdrew ${activity.amount || "unknown"} credits`;
+      default:
+        return `${activityType.replace('_', ' ')}`;
+    }
+  };
+  
+  // Phone verification form
+  const phoneVerificationForm = useForm<PhoneVerificationFormData>({
+    resolver: zodResolver(phoneVerificationFormSchema),
+    defaultValues: {
+      phoneNumber: user?.phoneNumber || "",
+      verificationCode: "",
+    },
+  });
+
+  // Profile update form
+  const profileUpdateForm = useForm<ProfileUpdateFormData>({
+    resolver: zodResolver(profileUpdateSchema),
+    defaultValues: {
+      address: user?.address || "",
+      city: user?.city || "",
+      state: user?.state || "",
+      zipCode: user?.zipCode || "",
+    },
+  });
+
+  // Password change form
+  const passwordChangeForm = useForm<PasswordChangeFormData>({
+    resolver: zodResolver(passwordChangeSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Wallet address form
+  const walletAddressForm = useForm<WalletAddressFormData>({
+    resolver: zodResolver(walletAddressSchema),
+    defaultValues: {
+      currency: "BTC",
+      address: "",
+    },
+  });
+
+  const submitPhoneNumber = async (phoneNumber: string) => {
+    setIsSubmittingPhone(true);
+    try {
+      await apiRequest({
+        method: "POST",
+        url: "/api/send-phone-verification",
+        data: { phoneNumber }
+      });
+      setPhoneVerificationSent(true);
+      toast({
+        title: "Verification code sent",
+        description: "A verification code has been sent to your phone.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to send verification code",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmittingPhone(false);
+    }
+  };
+  
+  const verifyPhoneNumber = async (data: PhoneVerificationFormData) => {
+    if (!phoneVerificationSent) {
+      await submitPhoneNumber(data.phoneNumber);
+      return;
+    }
+    
+    setIsVerifyingPhone(true);
+    try {
+      await apiRequest({
+        method: "POST",
+        url: "/api/verify-phone",
+        data: { 
+          phoneNumber: data.phoneNumber,
+          code: data.verificationCode
+        }
+      });
+      
+      toast({
+        title: "Phone verified",
+        description: "Your phone number has been successfully verified.",
+      });
+      
+      // Close dialog and reset state
+      setShowPhoneVerificationDialog(false);
+      setPhoneVerificationSent(false);
+      phoneVerificationForm.reset();
+      
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    } catch (error) {
+      toast({
+        title: "Verification failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsVerifyingPhone(false);
+    }
+  };
+
+  const updateProfile = async (data: ProfileUpdateFormData) => {
+    setIsSubmittingProfile(true);
+    try {
+      await apiRequest({
+        method: "PATCH",
+        url: "/api/user/profile",
+        data
+      });
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully.",
+      });
+      
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmittingProfile(false);
+    }
+  };
+
+  const changePassword = async (data: PasswordChangeFormData) => {
+    setIsChangingPassword(true);
+    try {
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/change-password",
+        data: {
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+        }
+      });
+      
+      toast({
+        title: "Password changed",
+        description: "Your password has been changed successfully.",
+      });
+      
+      // Close dialog and reset form
+      setShowPasswordChangeDialog(false);
+      passwordChangeForm.reset();
+    } catch (error) {
+      toast({
+        title: "Password change failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const addWalletAddress = async (data: WalletAddressFormData) => {
+    setIsAddingWallet(true);
+    try {
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/wallet",
+        data
+      });
+      
+      toast({
+        title: "Wallet address added",
+        description: `Your ${data.currency} wallet address has been added successfully.`,
+      });
+      
+      // Close dialog and reset form
+      setShowAddWalletDialog(false);
+      walletAddressForm.reset();
+      
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    } catch (error) {
+      toast({
+        title: "Failed to add wallet address",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingWallet(false);
+    }
+  };
+
+  const submitKYC = async () => {
+    setIsUploadingKYC(true);
+    try {
+      // In a real app, this would upload the KYC documents
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/kyc",
+        data: {
+          documentType: "id",
+          status: "pending",
+        }
+      });
+      
+      toast({
+        title: "KYC submitted",
+        description: "Your KYC documents have been submitted successfully. We will review them shortly.",
+      });
+      
+      setShowKYCDialog(false);
+      
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    } catch (error) {
+      toast({
+        title: "KYC submission failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingKYC(false);
+    }
+  };
+
+  const setup2FA = async (code: string) => {
+    try {
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/2fa/enable",
+        data: { code }
+      });
+      
+      toast({
+        title: "2FA enabled",
+        description: "Two-factor authentication has been enabled for your account.",
+      });
+      
+      setShowSetup2FADialog(false);
+      
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    } catch (error) {
+      toast({
+        title: "Failed to enable 2FA",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const disable2FA = async (code: string) => {
+    try {
+      await apiRequest({
+        method: "POST",
+        url: "/api/user/2fa/disable",
+        data: { code }
+      });
+      
+      toast({
+        title: "2FA disabled",
+        description: "Two-factor authentication has been disabled for your account.",
+      });
+      
+      setShowDisable2FADialog(false);
+      
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    } catch (error) {
+      toast({
+        title: "Failed to disable 2FA",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <>
+      {/* Page Title */}
+      <div className="py-4 px-6 border-b border-[#1c2b3a]">
+        <h1 className="text-xl font-heading font-bold">My Profile</h1>
+      </div>
+      
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-6 md:mb-8 p-4 md:p-6 bg-[#1A2634] rounded-xl border border-gray-800">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+              <div className="relative">
+                <Avatar className="h-24 w-24 rounded-xl border-4 border-[#09b66d]/10">
+                  {user?.profileImage ? (
+                    <AvatarImage src={user.profileImage} />
+                  ) : null}
+                  <AvatarFallback className="bg-[#0e1824] text-[#09b66d]">
+                    {user?.username ? user.username.substring(0, 2).toUpperCase() : "CS"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-2 -right-2 bg-[#09b66d] rounded-full p-1.5">
+                  <User className="h-4 w-4 text-[#0e1824]" />
+                </div>
+              </div>
+              
+              <div className="text-center md:text-left flex-1">
+                <h2 className="text-2xl font-bold">{user?.username}</h2>
+                <div className="mt-1 text-gray-400">{user?.email}</div>
+                
+                <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
+                  <Badge variant="outline" className="bg-[#0e1824]/80 text-[#09b66d] border-[#09b66d]/30">
+                    Member
+                  </Badge>
+                  
+                  {user?.phoneVerified && (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-green-400 border-green-500/30">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Phone Verified
+                    </Badge>
+                  )}
+                  
+                  {user?.isVerified ? (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-green-400 border-green-500/30">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      KYC Verified
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-yellow-500 border-yellow-500/30">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      KYC Required
+                    </Badge>
+                  )}
+                  
+                  {user?.twoFactorEnabled && (
+                    <Badge variant="outline" className="bg-[#0F1923]/80 text-blue-400 border-blue-500/30">
+                      <Shield className="h-3 w-3 mr-1" />
+                      2FA Active
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-center">
+                  <div className="text-lg font-bold">{user?.balance}</div>
+                  <div className="text-xs text-gray-400">Balance</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="bg-[#0F1923] border border-gray-800 mb-6">
+              <TabsTrigger 
+                value="profile" 
+                className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
+              >
+                Profile
+              </TabsTrigger>
+              <TabsTrigger 
+                value="security" 
+                className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
+              >
+                Security
+              </TabsTrigger>
+              <TabsTrigger 
+                value="activity" 
+                className="data-[state=active]:bg-[#1A2634] data-[state=active]:text-[#09b66d]"
+              >
+                Activity
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile" className="m-0">
+              <Form {...profileUpdateForm}>
+                <form onSubmit={profileUpdateForm.handleSubmit(updateProfile)}>
+                  <Card className="bg-[#1A2634] border-gray-800">
+                    <CardHeader>
+                      <CardTitle>Profile Information</CardTitle>
+                      <CardDescription>
+                        Update your account information and personal details
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Username</label>
+                            <Input 
+                              value={user?.username} 
+                              className="bg-[#0F1923] border-gray-800" 
+                              disabled 
+                            />
+                            <p className="text-xs text-gray-500">Usernames cannot be changed</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Email Address</label>
+                            <div className="relative">
+                              <Input 
+                                value={user?.email} 
+                                className="bg-[#0F1923] border-gray-800" 
+                                disabled 
+                              />
+                              {!user?.isVerified && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-xs border-yellow-500 text-yellow-500 hover:text-yellow-400 hover:border-yellow-400"
+                                  onClick={() => setShowEmailVerificationDialog(true)}
+                                >
+                                  Verify
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Phone Number</label>
+                            <div className="relative">
+                              <Input 
+                                value={user?.phoneNumber || "Not provided"} 
+                                className="bg-[#0F1923] border-gray-800" 
+                                disabled 
+                              />
+                              {!user?.phoneVerified && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-xs border-yellow-500 text-yellow-500 hover:text-yellow-400 hover:border-yellow-400"
+                                  onClick={() => setShowPhoneVerificationDialog(true)}
+                                >
+                                  Verify
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Country</label>
+                            <Input 
+                              value={user?.country || "Not provided"} 
+                              className="bg-[#0F1923] border-gray-800" 
+                              disabled 
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="text-sm font-medium text-gray-300 block mb-2">Address</label>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="address"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Street Address" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="city"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="City" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="state"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="State/Province" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={profileUpdateForm.control}
+                              name="zipCode"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Zip/Postal Code" 
+                                      className="bg-[#0F1923] border-gray-800" 
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <p className="text-sm text-gray-400 mt-2">Required for KYC verification and withdrawals</p>
+                        </div>
+                        
+                        <div className="flex justify-end">
+                          <Button 
+                            type="submit"
+                            className="bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+                            disabled={isSubmittingProfile}
+                          >
+                            {isSubmittingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Changes
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </form>
+              </Form>
+            </TabsContent>
+            
+            <TabsContent value="activity" className="m-0">
+              <Card className="bg-[#1A2634] border-gray-800 mb-6">
+                <CardHeader>
+                  <CardTitle>Account Activity</CardTitle>
+                  <CardDescription>
+                    Review your recent account activities and device history
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-base font-medium text-white">Recent Activities</h3>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'all' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('all')}
+                        >
+                          All
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'login' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('login')}
+                        >
+                          Login
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'security' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('security')}
+                        >
+                          Security
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${activityFilter === 'wallet' ? 'bg-[#09b66d]/10 text-[#09b66d] border-[#09b66d]' : 'border-gray-700'} hover:border-[#09b66d] hover:text-[#09b66d]`}
+                          onClick={() => setActivityFilter('wallet')}
+                        >
+                          Bets
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                      {isLoadingActivities ? (
+                        <div className="py-12 flex justify-center items-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                        </div>
+                      ) : userActivities && userActivities.length > 0 ? (
+                        userActivities
+                          .filter(activity => {
+                            if (activityFilter === 'all') return true;
+                            if (activityFilter === 'login') return activity.activityType === 'login' || activity.activityType === 'logout';
+                            if (activityFilter === 'security') return activity.activityType === 'password_change' || activity.activityType === 'phone_verification' || activity.activityType === 'kyc_upload';
+                            if (activityFilter === 'wallet') return activity.activityType === 'wallet_bet' || activity.activityType === 'wallet_win';
+                            return true;
+                          })
+                          .map((activity, idx) => (
+                            <ActivityItem 
+                              key={idx}
+                              type={activity.activityType}
+                              timestamp={format(new Date(activity.timestamp), "MMM dd, yyyy - hh:mm a")}
+                              device={activity.deviceInfo || "Unknown device"}
+                              ip={activity.ipAddress || "Unknown IP"}
+                              details={getActivityDescription(activity)}
+                            />
+                          ))
+                      ) : (
+                        <div className="py-12 text-center text-gray-400">
+                          <p>No activity records found</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-between mt-4">
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                      >
+                        Export Data
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                      >
+                        View All
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#1A2634] border-gray-800">
+                <CardHeader>
+                  <CardTitle>Sessions & Devices</CardTitle>
+                  <CardDescription>
+                    Manage your active sessions and connected devices
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-blue-500/10 p-2 rounded-full">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <path d="M12 18h.01" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-medium flex items-center gap-2">
+                            Current Session
+                            <Badge variant="outline" className="border-green-500/30 text-green-400 ml-2 text-xs font-normal">
+                              Active
+                            </Badge>
+                          </h4>
+                          <p className="text-xs text-gray-400">Chrome 95.0 - Windows</p>
+                          <p className="text-xs text-gray-400">IP: 192.168.1.1 - Last active: Just now</p>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-red-700 text-red-400 hover:text-red-300 hover:border-red-400"
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                    
+                    <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-orange-500/10 p-2 rounded-full">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                            <rect x="9" y="9" width="6" height="6" />
+                            <line x1="9" y1="1" x2="9" y2="4" />
+                            <line x1="15" y1="1" x2="15" y2="4" />
+                            <line x1="9" y1="20" x2="9" y2="23" />
+                            <line x1="15" y1="20" x2="15" y2="23" />
+                            <line x1="20" y1="9" x2="23" y2="9" />
+                            <line x1="20" y1="14" x2="23" y2="14" />
+                            <line x1="1" y1="9" x2="4" y2="9" />
+                            <line x1="1" y1="14" x2="4" y2="14" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Firefox - macOS</h4>
+                          <p className="text-xs text-gray-400">IP: 192.168.2.2 - Last active: Mar 26, 2025</p>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-red-700 text-red-400 hover:text-red-300 hover:border-red-400"
+                      >
+                        Revoke
+                      </Button>
+                    </div>
+                    
+                    <div className="flex justify-end mt-4">
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                      >
+                        Logout from all devices
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="security" className="m-0">
+              <Card className="bg-[#1A2634] border-gray-800 mb-6">
+                <CardHeader>
+                  <CardTitle>Security & Verification</CardTitle>
+                  <CardDescription>
+                    Manage your security settings and account verification
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  {/* Password Section */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">Change Password</h3>
+                        <p className="text-sm text-gray-400">Update your password regularly for better security</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                        onClick={() => setShowPasswordChangeDialog(true)}
+                      >
+                        <Lock className="h-4 w-4 mr-2" />
+                        Change
+                      </Button>
+                    </div>
+                    <Separator className="bg-gray-800" />
+                  </div>
+                  
+                  {/* 2FA Section */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">Two-Factor Authentication</h3>
+                        <p className="text-sm text-gray-400">Add an extra layer of security to your account</p>
+                      </div>
+                      
+                      {user?.twoFactorEnabled ? (
+                        <Button 
+                          variant="outline" 
+                          className="border-gray-700 text-red-400 hover:text-red-300 hover:border-red-400"
+                          onClick={() => setShowDisable2FADialog(true)}
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Disable
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                          onClick={() => setShowSetup2FADialog(true)}
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Enable
+                        </Button>
+                      )}
+                    </div>
+                    <Separator className="bg-gray-800" />
+                  </div>
+                  
+                  {/* KYC Verification */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">KYC Verification</h3>
+                        <p className="text-sm text-gray-400">Verify your identity to unlock higher withdrawal limits</p>
+                      </div>
+                      
+                      {user?.isVerified ? (
+                        <Badge variant="outline" className="h-9 py-2 px-4 border-green-500/30 text-green-400">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Verified
+                        </Badge>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d]"
+                          onClick={() => setShowKYCDialog(true)}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Verify
+                        </Button>
+                      )}
+                    </div>
+                    <Separator className="bg-gray-800" />
+                  </div>
+                  
+                  {/* Wallet Addresses */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-base font-medium text-white">Cryptocurrency Wallets</h3>
+                        <p className="text-sm text-gray-400">Manage your cryptocurrency wallet addresses</p>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-gray-700 hover:border-[#f7931a] hover:text-[#f7931a]"
+                          onClick={() => {
+                            setSelectedCrypto("BTC");
+                            setShowAddWalletDialog(true);
+                          }}
+                        >
+                          BTC
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-gray-700 hover:border-[#627eea] hover:text-[#627eea]"
+                          onClick={() => {
+                            setSelectedCrypto("ETH");
+                            setShowAddWalletDialog(true);
+                          }}
+                        >
+                          ETH
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4 mt-4">
+                      <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <div className="bg-[#f7931a]/10 p-2 rounded-full">
+                              <Coins className="h-5 w-5 text-[#f7931a]" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium">Bitcoin (BTC)</h4>
+                              <p className="text-xs text-gray-400 truncate max-w-[220px] md:max-w-xs">
+                                {user?.btcAddress || "No address set"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d] h-8 px-3"
+                            onClick={() => {
+                              setSelectedCrypto("BTC");
+                              setShowAddWalletDialog(true);
+                            }}
+                          >
+                            {user?.btcAddress ? "Edit" : "Add"}
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-[#0F1923] rounded-lg p-4 border border-gray-800">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <div className="bg-[#627eea]/10 p-2 rounded-full">
+                              <Coins className="h-5 w-5 text-[#627eea]" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium">Ethereum (ETH)</h4>
+                              <p className="text-xs text-gray-400 truncate max-w-[220px] md:max-w-xs">
+                                {user?.ethAddress || "No address set"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="border-gray-700 hover:border-[#09b66d] hover:text-[#09b66d] h-8 px-3"
+                            onClick={() => {
+                              setSelectedCrypto("ETH");
+                              setShowAddWalletDialog(true);
+                            }}
+                          >
+                            {user?.ethAddress ? "Edit" : "Add"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+      
+      {/* Phone Verification Dialog */}
+      <Dialog open={showPhoneVerificationDialog} onOpenChange={setShowPhoneVerificationDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Verify Phone Number</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Add and verify your phone number for additional security
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...phoneVerificationForm}>
+            <form onSubmit={phoneVerificationForm.handleSubmit(verifyPhoneNumber)} className="space-y-4">
+              <div className="space-y-4">
+                {!phoneVerificationSent ? (
+                  <FormField
+                    control={phoneVerificationForm.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Controller
+                            name="phoneNumber"
+                            control={phoneVerificationForm.control}
+                            render={({ field }) => (
+                              <PhoneInput
+                                country={'us'}
+                                value={field.value}
+                                onChange={(value) => {
+                                  console.log("Phone input value:", value);
+                                  field.onChange(value);
+                                }}
+                                inputStyle={{
+                                  width: '100%',
+                                  backgroundColor: '#0F1923',
+                                  color: 'white',
+                                  border: '1px solid #2c364a',
+                                  borderRadius: '0.375rem',
+                                  padding: '0.5rem 0.75rem 0.5rem 3rem',
+                                  height: '2.5rem'
+                                }}
+                                dropdownStyle={{
+                                  backgroundColor: '#1A2634',
+                                  color: 'white',
+                                  border: '1px solid #2c364a'
+                                }}
+                                buttonStyle={{
+                                  backgroundColor: '#0F1923',
+                                  border: '1px solid #2c364a',
+                                  borderRight: 'none'
+                                }}
+                                enableSearch={true}
+                                searchPlaceholder="Search countries..."
+                                searchClass="bg-[#0F1923] text-white border-gray-800"
+                                countryCodeEditable={false}
+                                containerClass="phone-input-container"
+                                inputClass="phone-input-control"
+                                specialLabel=""
+                                disableDropdown={false}
+                                preferredCountries={['us', 'ca', 'gb', 'au']}
+                              />
+                            )}
+                          />
+                        </FormControl>
+                        <FormDescription className="text-gray-500">
+                          Select your country and enter your phone number
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={phoneVerificationForm.control}
+                    name="verificationCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Verification Code</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="000000" 
+                            className="bg-[#0F1923] border-gray-800 text-center text-lg tracking-widest" 
+                            maxLength={6}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription className="text-gray-500">
+                          Enter the 6-digit code sent to your phone
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+              
+              <DialogFooter>
+                {!phoneVerificationSent ? (
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+                    disabled={isSubmittingPhone}
+                  >
+                    {isSubmittingPhone && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Send Verification Code
+                  </Button>
+                ) : (
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+                    disabled={isVerifyingPhone}
+                  >
+                    {isVerifyingPhone && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Verify Code
+                  </Button>
+                )}
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Email Verification Dialog */}
+      <Dialog open={showEmailVerificationDialog} onOpenChange={setShowEmailVerificationDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Verify Email Address</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Verify your email address for account security
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <Alert className="bg-[#0F1923] border-gray-800">
+              <Mail className="h-4 w-4 text-[#09b66d]" />
+              <AlertTitle>Verification Required</AlertTitle>
+              <AlertDescription>
+                We have sent a verification email to <span className="font-medium">{user?.email}</span>. 
+                Please check your inbox and follow the instructions to verify your email address.
+              </AlertDescription>
+            </Alert>
+            
+            <p className="text-sm text-gray-400">
+              Didn't receive the email? Check your spam folder or click the button below to resend.
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+            >
+              Resend Verification Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Password Change Dialog */}
+      <Dialog open={showPasswordChangeDialog} onOpenChange={setShowPasswordChangeDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Change Password</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Update your password for better security
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...passwordChangeForm}>
+            <form onSubmit={passwordChangeForm.handleSubmit(changePassword)} className="space-y-4">
+              <FormField
+                control={passwordChangeForm.control}
+                name="currentPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password"
+                        placeholder="Enter your current password" 
+                        className="bg-[#0F1923] border-gray-800" 
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={passwordChangeForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password"
+                        placeholder="Enter your new password" 
+                        className="bg-[#0F1923] border-gray-800" 
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={passwordChangeForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password"
+                        placeholder="Confirm your new password" 
+                        className="bg-[#0F1923] border-gray-800" 
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+                  disabled={isChangingPassword}
+                >
+                  {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Change Password
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* 2FA Setup Dialog */}
+      <Dialog open={showSetup2FADialog} onOpenChange={setShowSetup2FADialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Setup Two-Factor Authentication</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Enhance your account security with 2FA
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-6">
+            <Alert className="bg-[#0F1923] border-gray-800">
+              <Shield className="h-4 w-4 text-[#09b66d]" />
+              <AlertTitle>Stronger Security</AlertTitle>
+              <AlertDescription>
+                Two-factor authentication adds an extra layer of security to your account. Each time you sign in, you'll need your password and a verification code.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="text-center space-y-4">
+              <div className="bg-white inline-block p-2 rounded-lg">
+                {/* This would be a QR code in a real application */}
+                <div className="w-48 h-48 bg-gray-200 flex items-center justify-center">
+                  <Shield className="h-12 w-12 text-gray-400" />
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-300 mb-2">Manual Setup Code:</p>
+                <code className="bg-[#0F1923] text-[#09b66d] px-3 py-1 rounded-md text-sm">
+                  ABCD EFGH IJKL MNOP
+                </code>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm text-gray-300">Enter Verification Code</label>
+              <Input 
+                placeholder="000000" 
+                className="bg-[#0F1923] border-gray-800 text-center text-lg tracking-widest" 
+                maxLength={6}
+              />
+              <p className="text-xs text-gray-500">
+                Enter the 6-digit code from your authenticator app
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+              onClick={() => setup2FA("123456")} // In a real app, this would use the input value
+            >
+              Enable 2FA
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Disable 2FA Dialog */}
+      <Dialog open={showDisable2FADialog} onOpenChange={setShowDisable2FADialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Disable Two-Factor Authentication</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              This will remove the extra layer of security from your account
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <Alert className="bg-[#0F1923] border-gray-800">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <AlertTitle>Security Warning</AlertTitle>
+              <AlertDescription>
+                Disabling two-factor authentication will make your account less secure. Are you sure you want to continue?
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-2">
+              <label className="text-sm text-gray-300">Enter Verification Code</label>
+              <Input 
+                placeholder="000000" 
+                className="bg-[#0F1923] border-gray-800 text-center text-lg tracking-widest" 
+                maxLength={6}
+              />
+              <p className="text-xs text-gray-500">
+                Enter the 6-digit code from your authenticator app to confirm
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="destructive"
+              className="w-full"
+              onClick={() => disable2FA("123456")} // In a real app, this would use the input value
+            >
+              Disable 2FA
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* KYC Dialog */}
+      <Dialog open={showKYCDialog} onOpenChange={setShowKYCDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">KYC Verification</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Verify your identity to unlock higher withdrawal limits
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-6">
+            <Alert className="bg-[#0F1923] border-gray-800">
+              <CheckCircle className="h-4 w-4 text-[#09b66d]" />
+              <AlertTitle>Increased Limits</AlertTitle>
+              <AlertDescription>
+                Completing KYC verification will increase your withdrawal limits and give you access to additional features.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm font-medium">Front Side</p>
+                    <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                  </div>
+                </div>
+                
+                <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm font-medium">Back Side</p>
+                    <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">ID Type</label>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" className="border-gray-700 bg-[#0F1923] data-[state=active]:bg-[#09b66d]/20 data-[state=active]:text-[#09b66d]">
+                    Passport
+                  </Button>
+                  <Button variant="outline" className="border-gray-700 bg-[#0F1923] data-[state=active]:bg-[#09b66d]/20 data-[state=active]:text-[#09b66d]">
+                    National ID
+                  </Button>
+                  <Button variant="outline" className="border-gray-700 bg-[#0F1923] data-[state=active]:bg-[#09b66d]/20 data-[state=active]:text-[#09b66d]">
+                    Driver's License
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="border border-dashed border-gray-600 rounded-md p-4 text-center cursor-pointer hover:bg-[#0F1923]/50 transition-colors">
+                <div className="flex flex-col items-center">
+                  <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm font-medium">Address Document</p>
+                  <p className="text-xs text-gray-400">JPG, PNG or PDF</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+              disabled={isUploadingKYC}
+              onClick={submitKYC}
+            >
+              {isUploadingKYC && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Submit Verification
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add Wallet Dialog */}
+      <Dialog open={showAddWalletDialog} onOpenChange={setShowAddWalletDialog}>
+        <DialogContent className="bg-[#1A2634] border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              {user?.[selectedCrypto === "BTC" ? "btcAddress" : "ethAddress"] ? "Edit" : "Add"} {selectedCrypto} Address
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Enter your {selectedCrypto} wallet address for withdrawals
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...walletAddressForm}>
+            <form onSubmit={walletAddressForm.handleSubmit(addWalletAddress)} className="space-y-4">
+              <FormField
+                control={walletAddressForm.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wallet Address</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder={`Enter your ${selectedCrypto} address`}
+                        className="bg-[#0F1923] border-gray-800" 
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription className="text-gray-500">
+                      Make sure to double-check your wallet address to avoid loss of funds
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-[#09b66d] to-[#09b66d]/80 hover:from-[#0fd684] hover:to-[#09b66d] text-[#0e1824] font-medium"
+                  disabled={isAddingWallet}
+                >
+                  {isAddingWallet && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Address
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
