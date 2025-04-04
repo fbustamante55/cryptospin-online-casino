@@ -24,7 +24,7 @@ interface HeaderProps {
 }
 
 export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: HeaderProps) {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { t } = useTranslation();
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -234,7 +234,9 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
                     </div>
                   </Link>
                   
-                  <button className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-[#0e1824]">
+                  <button 
+                    onClick={() => logoutMutation.mutate()} 
+                    className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-[#0e1824]">
                     <div className="flex items-center">
                       <LogOut className="h-4 w-4 mr-2" />
                       <span>Cerrar Sesión</span>
