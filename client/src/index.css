@@ -1,5 +1,10 @@
 /* Fuentes digitales para el juego SPACE EXPLORER */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+/* Fuentes para NOVA FORTUNE (premium, elegante) */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap');
+/* Importar tema Nova Fortune */
+@import url('./styles/nova-fortune-theme.css');
 
 @tailwind base;
 @tailwind components;
