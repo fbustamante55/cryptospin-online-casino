@@ -520,9 +520,21 @@ export function CrashRocket() {
           {/* Indicador de multiplicador */}
           <div className="absolute top-4 left-0 right-0 text-center">
             <div className="bg-[#09b66d]/20 inline-block px-6 py-3 rounded-lg backdrop-blur-sm">
-              <span className="text-4xl font-bold text-white">{currentMultiplier.toFixed(2)}x</span>
+              <span className="text-5xl font-bold text-white">{currentMultiplier.toFixed(2)}x</span>
             </div>
           </div>
+          
+          {/* Botón de cashout flotante */}
+          {gameStatus === 'playing' && isBetting && !hasCashedOut && (
+            <div className="absolute top-28 left-0 right-0 text-center z-10">
+              <Button 
+                className="mt-4 bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 text-xl animate-pulse shadow-lg"
+                onClick={handleCashout}
+              >
+                {t('crash.cashOut', 'CASH OUT')} ({(betAmount * currentMultiplier).toFixed(2)})
+              </Button>
+            </div>
+          )}
           
           {/* Plataforma de lanzamiento */}
           <div className="absolute bottom-0 left-0 right-0 h-20 bg-[#0e1824]/60 flex justify-center items-center">

@@ -556,6 +556,23 @@ export function CrashGame() {
             className="w-full h-full bg-[#0e1824] rounded-md relative overflow-hidden"
           >
             {/* Aquí se dibuja el canvas con la gráfica */}
+            {/* Overlay para mostrar multiplicador y botón de cashout durante el juego */}
+            {gameStatus === 'playing' && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-6xl font-bold text-white mb-6 drop-shadow-lg">
+                  <span className="text-[#09b66d]">{currentMultiplier.toFixed(2)}x</span>
+                </div>
+                {isBetting && !hasCashedOut && (
+                  <Button 
+                    className="bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 text-xl animate-pulse shadow-lg"
+                    onClick={handleCashout}
+                  >
+                    {t('crash.cashOut', 'CASH OUT')} ({(betAmount * currentMultiplier).toFixed(2)})
+                  </Button>
+                )}
+              </div>
+            )}
+            
             {gameStatus === 'crashed' && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-4xl font-bold text-red-500 animate-pulse">
