@@ -766,7 +766,7 @@ export function CrashRocket() {
             <TabsTrigger 
               value="all" 
               onClick={() => setActiveTab("all")}
-              className="py-2 rounded-md bg-[#192531] data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+              className="py-2 rounded-md bg-[var(--nova-primary)] data-[state=active]:bg-[var(--nova-secondary)] data-[state=active]:text-[var(--nova-primary-dark)]"
             >
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-2" />
@@ -776,7 +776,7 @@ export function CrashRocket() {
             <TabsTrigger 
               value="my" 
               onClick={() => setActiveTab("my")}
-              className="py-2 rounded-md bg-[#192531] data-[state=active]:bg-[#09b66d] data-[state=active]:text-white"
+              className="py-2 rounded-md bg-[var(--nova-primary)] data-[state=active]:bg-[var(--nova-secondary)] data-[state=active]:text-[var(--nova-primary-dark)]"
             >
               <div className="flex items-center">
                 <TrendingUp className="h-4 w-4 mr-2" />
@@ -787,17 +787,17 @@ export function CrashRocket() {
           
           <TabsContent value="all" className="p-0 m-0">
             <div className="flex-1 h-[530px] overflow-y-auto">
-              <div className="grid grid-cols-3 p-2 text-xs font-semibold text-gray-400 border-b border-[#1c2b3a] sticky top-0 bg-[#0e1824]">
+              <div className="grid grid-cols-3 p-2 text-xs font-semibold nova-text-muted border-b border-[var(--nova-primary-light)] sticky top-0 bg-[var(--nova-primary-dark)]">
                 <div>{t('common.player', 'Player')}</div>
                 <div>{t('common.bet', 'Bet')}</div>
                 <div>{t('crash.profit', 'Profit')}</div>
               </div>
               
               {activeBets.map((bet, index) => (
-                <div key={index} className="grid grid-cols-3 p-2 text-xs border-b border-[#1c2b3a]">
+                <div key={index} className="grid grid-cols-3 p-2 text-xs border-b border-[var(--nova-primary-light)]">
                   <div className="truncate">
                     {bet.username === user?.username ? (
-                      <span className="font-bold text-[#09b66d]">{bet.username}</span>
+                      <span className="font-bold text-[var(--nova-secondary)]">{bet.username}</span>
                     ) : (
                       bet.username
                     )}
@@ -805,7 +805,7 @@ export function CrashRocket() {
                   <div>{bet.amount.toFixed(2)}</div>
                   <div>
                     {bet.multiplier ? (
-                      <span className="text-[#09b66d]">
+                      <span className="text-[var(--nova-secondary)]">
                         +{(bet.amount * (bet.multiplier - 1)).toFixed(2)}
                       </span>
                     ) : (
@@ -823,7 +823,7 @@ export function CrashRocket() {
           
           <TabsContent value="my" className="p-0 m-0">
             <div className="flex-1 h-[530px] overflow-y-auto">
-              <div className="grid grid-cols-4 p-2 text-xs font-semibold text-gray-400 border-b border-[#1c2b3a] sticky top-0 bg-[#0e1824]">
+              <div className="grid grid-cols-4 p-2 text-xs font-semibold nova-text-muted border-b border-[var(--nova-primary-light)] sticky top-0 bg-[var(--nova-primary-dark)]">
                 <div>{t('common.bet', 'Bet')}</div>
                 <div>{t('crash.mult', 'Mult')}</div>
                 <div>{t('crash.cashout', 'Cashout')}</div>
@@ -833,8 +833,8 @@ export function CrashRocket() {
               {betHistory.map((bet, index) => (
                 <div 
                   key={index} 
-                  className={`grid grid-cols-4 p-2 text-xs border-b border-[#1c2b3a] ${
-                    bet.cashout ? 'text-[#09b66d]' : 'text-red-500'
+                  className={`grid grid-cols-4 p-2 text-xs border-b border-[var(--nova-primary-light)] ${
+                    bet.cashout ? 'text-[var(--nova-secondary)]' : 'text-red-500'
                   }`}
                 >
                   <div>{bet.betAmount.toFixed(2)}</div>
