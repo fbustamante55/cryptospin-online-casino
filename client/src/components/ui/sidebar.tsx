@@ -392,7 +392,7 @@ export function Sidebar({ className }: SidebarProps) {
         <motion.div 
           className={cn(
             "group flex items-center justify-between px-3 py-2 mx-2 rounded-lg text-white cursor-pointer",
-            (item.active || hasActiveChild) ? "bg-[#192531]" : "",
+            (item.active || hasActiveChild) ? "bg-[var(--nova-primary-light)]" : "",
             isChild && "py-1.5 mx-3 my-0.5 rounded-md",
             indentationClasses
           )}

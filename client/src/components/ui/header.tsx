@@ -125,7 +125,7 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
                 
                 {/* Botón de depósito */}
                 <button 
-                  className="flex items-center px-5 py-1.5 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold text-sm transition-all duration-200"
+                  className="flex items-center px-5 py-1.5 bg-[var(--nova-secondary)] hover:bg-[var(--nova-secondary-light)] text-[var(--nova-primary-dark)] font-bold text-sm transition-all duration-200"
                   onClick={() => setIsDepositModalOpen(true)}
                 >
                   {t('deposit')}
@@ -272,7 +272,7 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
           
           <div className="flex items-center space-x-2">
             <button 
-              className="flex items-center py-1.5 px-3 bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold text-sm rounded-full transition-all duration-200"
+              className="flex items-center py-1.5 px-3 bg-[var(--nova-secondary)] hover:bg-[var(--nova-secondary-light)] text-[var(--nova-primary-dark)] font-bold text-sm rounded-full transition-all duration-200"
               onClick={() => setIsDepositModalOpen(true)}
             >
               {t('deposit')}
