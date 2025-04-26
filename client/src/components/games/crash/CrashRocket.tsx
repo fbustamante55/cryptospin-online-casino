@@ -96,15 +96,63 @@ export function CrashRocket() {
       handleCashout();
     }
     
-    // Animar el cohete ascendiendo
+    // Animar el cohete ascendiendo con efectos mejorados
     if (rocketRef.current && gameContainerRef.current) {
       const maxHeight = gameContainerRef.current.clientHeight - 100;
-      const height = Math.min(maxHeight, maxHeight * (1 - 1 / newMultiplier));
-      rocketRef.current.style.transform = `translateY(-${height}px)`;
       
-      // Añadir efecto de fuego más intenso a medida que sube el cohete
-      const fireIntensity = Math.min(100, 40 + (newMultiplier * 5));
+      // Movimiento más suave con una curva más natural
+      // Añadimos una pequeña oscilación horizontal para efecto realista
+      const heightPercentage = Math.min(1, (1 - 1 / newMultiplier));
+      const height = maxHeight * heightPercentage;
+      
+      // Oscilación horizontal sutil que aumenta con la altura
+      const oscillationAmplitude = 3 + (heightPercentage * 7);
+      const oscillation = Math.sin(elapsedTime * 0.005) * oscillationAmplitude;
+      
+      // Pequeña rotación para simular ajustes de trayectoria
+      const rotation = Math.sin(elapsedTime * 0.003) * 3;
+      
+      // Aplicar transformaciones combinadas
+      rocketRef.current.style.transform = `
+        translateY(-${height}px) 
+        translateX(${oscillation}px) 
+        rotate(${rotation}deg)
+      `;
+      
+      // Fuego del cohete más dinámico
+      const baseFireHeight = 40 + (newMultiplier * 5);
+      // Añadir fluctuación al fuego
+      const fireFluctuation = Math.sin(Date.now() * 0.01) * 10;
+      const fireIntensity = Math.min(120, baseFireHeight + fireFluctuation);
       rocketRef.current.style.setProperty('--fire-height', `${fireIntensity}px`);
+      
+      // Cambiar color del fuego a más intenso según el multiplicador
+      const fireHue = Math.max(0, 30 - newMultiplier * 2); // De naranja a rojo
+      const fireSaturation = Math.min(100, 80 + newMultiplier * 2); // Aumentar saturación
+      rocketRef.current.style.setProperty('--fire-color', `hsl(${fireHue}, ${fireSaturation}%, 50%)`);
+      
+      // Añadir efecto de estela
+      const trailOpacity = Math.min(0.7, 0.2 + (newMultiplier - 1) * 0.05);
+      rocketRef.current.style.setProperty('--trail-opacity', trailOpacity.toString());
+      
+      // Aumentar el brillo general del cohete
+      const brightness = Math.min(120, 100 + (newMultiplier - 1) * 2);
+      rocketRef.current.style.filter = `brightness(${brightness}%)`;
+      
+      // Efecto de vibración que aumenta con el multiplicador
+      // Solo aplicar cuando el multiplicador es alto
+      if (newMultiplier > 3) {
+        const vibrationIntensity = Math.min(2, (newMultiplier - 3) * 0.2);
+        if (Math.random() > 0.5) {
+          const randomX = (Math.random() - 0.5) * vibrationIntensity;
+          const randomY = (Math.random() - 0.5) * vibrationIntensity;
+          rocketRef.current.style.marginLeft = `${randomX}px`;
+          rocketRef.current.style.marginTop = `${randomY}px`;
+        }
+      } else {
+        rocketRef.current.style.marginLeft = '0';
+        rocketRef.current.style.marginTop = '0';
+      }
     }
     
     // Actualizar los cashouts de los jugadores artificiales

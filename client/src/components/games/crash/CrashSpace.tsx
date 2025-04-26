@@ -129,25 +129,137 @@ export function CrashSpace() {
     
     const { width, height } = canvasRef.current;
     
-    // Limpiar el canvas
-    ctx.clearRect(0, 0, width, height);
+    // Limpiar el canvas con un fondo degradado
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#0c1620'); // Oscuro arriba
+    gradient.addColorStop(1, '#1a1a3a'); // Púrpura oscuro abajo
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
     
-    // Dibujar las estrellas
+    // Efecto de nebulosa espacial (sutil)
+    if (gameStatus === 'playing') {
+      // La nebulosa se intensifica con el multiplicador
+      const nebulaOpacity = Math.min(0.15, 0.05 + (currentMultiplier - 1) * 0.01);
+      
+      // Diferentes nebulosas de colores
+      const nebulaCenters = [
+        { x: width * 0.3, y: height * 0.3, radius: width * 0.4, color: 'rgba(76, 25, 100, ' + nebulaOpacity + ')' },
+        { x: width * 0.7, y: height * 0.6, radius: width * 0.3, color: 'rgba(0, 50, 100, ' + nebulaOpacity + ')' }
+      ];
+      
+      nebulaCenters.forEach(nebula => {
+        const nebGradient = ctx.createRadialGradient(
+          nebula.x, nebula.y, 0,
+          nebula.x, nebula.y, nebula.radius
+        );
+        nebGradient.addColorStop(0, nebula.color);
+        nebGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = nebGradient;
+        ctx.fillRect(0, 0, width, height);
+      });
+    }
+    
+    // Dibujar las estrellas con efectos mejorados
     starsRef.current.forEach(star => {
+      // Las estrellas más brillantes tienen un halo
+      if (star.size > 1.2) {
+        // Halo de la estrella
+        ctx.beginPath();
+        const glow = ctx.createRadialGradient(
+          star.x, star.y, 0,
+          star.x, star.y, star.size * 4
+        );
+        glow.addColorStop(0, `rgba(180, 180, 255, ${star.opacity * 0.7})`);
+        glow.addColorStop(1, 'rgba(100, 100, 255, 0)');
+        ctx.fillStyle = glow;
+        ctx.arc(star.x, star.y, star.size * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // El color de la estrella varía ligeramente
+      const starColor = star.size > 1.5 ? 
+        `rgba(220, 220, 255, ${star.opacity})` : 
+        `rgba(255, 255, 255, ${star.opacity})`;
+      
       ctx.beginPath();
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+      ctx.fillStyle = starColor;
       ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
       ctx.fill();
       
+      // Destello en las estrellas grandes
+      if (star.size > 1.5 && Math.random() < 0.05) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 0.5;
+        
+        // Rayos de luz
+        for (let i = 0; i < 4; i++) {
+          const angle = (i * Math.PI) / 2;
+          ctx.moveTo(star.x, star.y);
+          ctx.lineTo(
+            star.x + Math.cos(angle) * star.size * 5,
+            star.y + Math.sin(angle) * star.size * 5
+          );
+        }
+        ctx.stroke();
+      }
+      
       // Mover las estrellas hacia abajo (efecto de movimiento de la nave)
+      // La velocidad varía con el multiplicador
       star.y += star.speed * speedMultiplier;
       
       // Si la estrella sale del canvas, reposicionarla arriba
       if (star.y > height) {
         star.y = 0;
         star.x = Math.random() * width;
+        // Variar el tamaño y opacidad al reiniciar
+        star.size = Math.random() * 2 + 0.5;
+        star.opacity = Math.random() * 0.5 + 0.3;
       }
     });
+    
+    // Indicador de multiplicador con efecto de resplandor
+    if (gameStatus === 'playing') {
+      const multiplierSize = Math.min(width, height) * 0.15;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      
+      // Halo exterior que pulsa con el valor del multiplicador
+      const pulseSize = 1 + Math.sin(Date.now() * 0.005) * 0.1;
+      const outerGlow = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, multiplierSize * 1.5 * pulseSize
+      );
+      
+      // El color cambia según el multiplicador
+      const intensity = Math.min(1, (currentMultiplier - 1) / 5);
+      const glowColor = `rgba(${Math.floor(9 + 200 * intensity)}, ${Math.floor(182 - 100 * intensity)}, ${Math.floor(109 - 100 * intensity)}, 0.3)`;
+      
+      outerGlow.addColorStop(0, glowColor);
+      outerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      
+      ctx.beginPath();
+      ctx.fillStyle = outerGlow;
+      ctx.arc(centerX, centerY, multiplierSize * 1.5 * pulseSize, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Mostrar multiplicador en el centro con sombra y texto brillante
+      ctx.font = 'bold 42px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Sombra del texto
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillText(`${currentMultiplier.toFixed(2)}x`, centerX + 2, centerY + 2);
+      
+      // Texto brillante
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#09b66d';
+      ctx.shadowBlur = 10;
+      ctx.fillText(`${currentMultiplier.toFixed(2)}x`, centerX, centerY);
+      ctx.shadowBlur = 0;
+    }
   };
 
   // Función para animar el espacio y la nave
@@ -209,15 +321,16 @@ export function CrashSpace() {
 
   // Función para comenzar el juego
   const startGame = () => {
+    // Establecer estado de espera para apuestas
+    setGameStatus('waiting');
+    setCurrentMultiplier(1);
+    setHasCashedOut(false);
+    setIsPlaying(false);
+    setNextGameCountdown(7); // 7 segundos de espera para apuestas
+    
     // Generar un nuevo punto de crash
     const newCrashPoint = generateCrashPoint();
     setCrashPoint(newCrashPoint);
-    
-    setGameStatus('playing');
-    setCurrentMultiplier(1);
-    setHasCashedOut(false);
-    setIsPlaying(true);
-    startTimeRef.current = null;
     
     // Regenerar jugadores artificiales
     const newPlayerBets = Array(5).fill(0).map((_, i) => ({
@@ -242,8 +355,32 @@ export function CrashSpace() {
     setPlayerBets(newPlayerBets);
     playerBetsRef.current = newPlayerBets;
     
-    // Iniciar la animación
-    animationRef.current = requestAnimationFrame(animateSpace);
+    // Mostrar una cuenta regresiva antes de iniciar el juego
+    let countdown = 7;
+    
+    const countdownTimer = setInterval(() => {
+      countdown--;
+      setNextGameCountdown(countdown);
+      
+      if (countdown <= 0) {
+        clearInterval(countdownTimer);
+        
+        // Iniciar el juego después de la cuenta regresiva
+        setGameStatus('playing');
+        setIsPlaying(true);
+        startTimeRef.current = null;
+        
+        // Reiniciar estado de la nave espacial
+        if (spaceshipRef.current) {
+          spaceshipRef.current.style.transform = 'translateY(0)';
+          spaceshipRef.current.style.opacity = '1';
+          spaceshipRef.current.classList.remove('explode');
+        }
+        
+        // Iniciar la animación
+        animationRef.current = requestAnimationFrame(animateSpace);
+      }
+    }, 1000);
   };
 
   // Función para cuando el juego crashea
