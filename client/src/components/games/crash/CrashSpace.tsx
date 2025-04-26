@@ -597,7 +597,7 @@ export function CrashSpace() {
           {gameStatus === 'crashed' && (
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="text-4xl font-bold text-red-500 animate-pulse bg-black/50 px-8 py-4 rounded-lg">
-                {t('crash.crashed', 'CRASHED')} @ {crashPoint.toFixed(2)}x
+                {t('crash.crashed', '¡NAVE ESPACIAL EXPLOTÓ!')} {crashPoint.toFixed(2)}x
               </div>
             </div>
           )}

@@ -489,7 +489,7 @@ export function CrashRocket() {
           {gameStatus === 'crashed' && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-4xl font-bold text-red-500 animate-pulse">
-                {t('crash.crashed', 'CRASHED')} @ {crashPoint.toFixed(2)}x
+                {t('crash.crashed', '¡COHETE DESTRUIDO!')} {crashPoint.toFixed(2)}x
               </div>
             </div>
           )}
