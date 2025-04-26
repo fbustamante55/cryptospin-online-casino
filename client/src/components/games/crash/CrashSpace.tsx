@@ -245,18 +245,25 @@ export function CrashSpace() {
       ctx.fill();
       
       // Mostrar multiplicador en el centro con sombra y texto brillante
-      ctx.font = 'bold 42px Arial';
+      // Hacemos el texto más grande y visible
+      const fontSize = 60 + Math.min(15, (currentMultiplier - 1) * 5); // Aumenta tamaño con el multiplicador
+      ctx.font = `bold ${fontSize}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
+      // Sombra y contorno más grueso
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.lineWidth = 4;
+      ctx.strokeText(`${currentMultiplier.toFixed(2)}x`, centerX, centerY);
+      
       // Sombra del texto
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.fillText(`${currentMultiplier.toFixed(2)}x`, centerX + 2, centerY + 2);
+      ctx.fillText(`${currentMultiplier.toFixed(2)}x`, centerX + 3, centerY + 3);
       
       // Texto brillante
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = '#09b66d';
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = 15;
       ctx.fillText(`${currentMultiplier.toFixed(2)}x`, centerX, centerY);
       ctx.shadowBlur = 0;
     }
@@ -699,13 +706,29 @@ export function CrashSpace() {
         >
           {/* El canvas para las estrellas se añade por JS */}
           
+          {/* Botón grande de cashout flotante */}
+          {gameStatus === 'playing' && isBetting && !hasCashedOut && (
+            <div className="absolute bottom-20 left-0 right-0 z-50 flex justify-center">
+              <Button 
+                className="bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 text-xl animate-pulse shadow-lg border-2 border-white/30 backdrop-blur-sm"
+                onClick={handleCashout}
+                style={{
+                  boxShadow: '0 0 20px 5px rgba(255, 180, 0, 0.5)',
+                  textShadow: '0 0 10px rgba(255, 255, 255, 0.8)'
+                }}
+              >
+                {t('crash.cashOut', 'CASH OUT')} ({(betAmount * currentMultiplier).toFixed(2)})
+              </Button>
+            </div>
+          )}
+          
           {/* Nave espacial */}
           <div 
             ref={spaceshipRef}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-200 ease-out spaceship"
             style={{ 
-              '--thruster-opacity': '0.5',
-              '--thruster-blur': '5px'
+              '--thruster-opacity': '0.8',
+              '--thruster-blur': '8px'
             } as React.CSSProperties}
           >
             {/* Cuerpo de la nave */}
