@@ -1,26 +1,31 @@
 /* NOVA FORTUNE Theme - Basado en las guías visuales proporcionadas */
 
 :root {
-  /* Colores primarios - Azules (60%) */
-  --nova-primary-dark: #0e1f2f;
-  --nova-primary: #192531;
-  --nova-primary-light: #2F4553;
+  /* Colores primarios - Azules profundos (60%) */
+  --nova-primary-darkest: #051525; /* Azul casi negro */
+  --nova-primary-dark: #0d1f35;    /* Azul profundo */
+  --nova-primary: #12263f;         /* Azul principal */
+  --nova-primary-light: #1e3a5f;   /* Azul medio */
+  --nova-primary-lighter: #2a4978; /* Azul más claro */
   
-  /* Colores secundarios - Dorados (30%) */
-  --nova-secondary-dark: #9F7C31;
-  --nova-secondary: #D4A94F;
-  --nova-secondary-light: #F5D78B;
+  /* Colores secundarios - Dorados premium (30%) */
+  --nova-secondary-dark: #a17c21;  /* Dorado oscuro */
+  --nova-secondary: #d4af37;       /* Dorado clásico */
+  --nova-secondary-light: #f2d86d; /* Dorado claro */
+  --nova-secondary-pale: #f8e896;  /* Dorado pálido */
   
   /* Acentos - Blancos (10%) */
   --nova-accent: #FFFFFF;
-  --nova-accent-soft: rgba(255, 255, 255, 0.85);
-  --nova-accent-muted: rgba(255, 255, 255, 0.5);
+  --nova-accent-soft: rgba(255, 255, 255, 0.9);
+  --nova-accent-muted: rgba(255, 255, 255, 0.6);
   
   /* Efectos especiales */
-  --nova-glow-primary: 0 0 15px rgba(47, 69, 83, 0.7);
-  --nova-glow-secondary: 0 0 20px rgba(212, 169, 79, 0.8);
-  --nova-gradient-blue: linear-gradient(to bottom, #2F4553, #0e1f2f);
-  --nova-gradient-gold: linear-gradient(to bottom, #F5D78B, #9F7C31);
+  --nova-glow-primary: 0 0 15px rgba(30, 58, 95, 0.8);
+  --nova-glow-secondary: 0 0 20px rgba(212, 175, 55, 0.85);
+  --nova-gradient-blue: linear-gradient(to bottom, #1e3a5f, #051525);
+  --nova-gradient-gold: linear-gradient(to bottom, #f2d86d, #a17c21);
+  --nova-gradient-blue-horizontal: linear-gradient(to right, #12263f, #1e3a5f);
+  --nova-gradient-gold-horizontal: linear-gradient(to right, #d4af37, #f2d86d);
 }
 
 /* Estilos generales para componentes NOVA FORTUNE */
@@ -49,16 +54,47 @@
 .nova-button-secondary {
   background: var(--nova-secondary);
   color: var(--nova-primary-dark);
-  border: 1px solid var(--nova-secondary);
-  padding: 0.5rem 1rem;
+  border: 1px solid var(--nova-secondary-dark);
+  padding: 0.75rem 1.25rem;
   border-radius: 0.25rem;
   font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.nova-button-secondary:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s ease;
+  z-index: -1;
 }
 
 .nova-button-secondary:hover {
   background: var(--nova-secondary-light);
   box-shadow: var(--nova-glow-secondary);
+  transform: translateY(-2px);
+}
+
+.nova-button-secondary:hover:before {
+  left: 100%;
+}
+
+.nova-button-secondary-fancy {
+  background: linear-gradient(135deg, var(--nova-secondary-dark), var(--nova-secondary), var(--nova-secondary-light));
+  color: var(--nova-primary-darkest);
+  border: none;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 5px rgba(212, 175, 55, 0.5);
 }
 
 .nova-title {
@@ -159,43 +195,96 @@
 }
 
 .nova-cashout-btn {
-  background: var(--nova-secondary);
-  color: var(--nova-primary-dark);
+  background: linear-gradient(135deg, var(--nova-secondary-dark), var(--nova-secondary), var(--nova-secondary-light));
+  color: var(--nova-primary-darkest);
   font-weight: 700;
   text-transform: uppercase;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 1px;
   padding: 0.75rem 1.5rem;
   border-radius: 0.375rem;
   border: 2px solid var(--nova-secondary-light);
-  box-shadow: 0 0 20px rgba(212, 169, 79, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 25px rgba(212, 175, 55, 0.5);
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.nova-cashout-btn:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 25%, rgba(255, 255, 255, 0.3) 50%, transparent 75%);
+  background-size: 200% 200%;
+  animation: nova-shimmer 2s infinite linear;
+  z-index: -1;
+}
+
+@keyframes nova-shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 200%;
+  }
 }
 
 .nova-cashout-btn:hover {
-  background: var(--nova-secondary-light);
-  box-shadow: 0 0 30px rgba(212, 169, 79, 0.6);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--nova-secondary), var(--nova-secondary-light), var(--nova-secondary-pale));
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3), 0 0 35px rgba(212, 175, 55, 0.7);
+  transform: translateY(-3px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.nova-cashout-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 15px rgba(212, 175, 55, 0.4);
 }
 
 .nova-panel {
   background: var(--nova-primary);
   border-radius: 0.5rem;
   border: 1px solid var(--nova-primary-light);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   padding: 1.5rem;
+}
+
+.nova-panel-premium {
+  background: var(--nova-gradient-blue);
+  border: 1px solid var(--nova-primary-lighter);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.nova-panel-gold {
+  background: var(--nova-primary-dark);
+  border: 2px solid var(--nova-secondary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.2);
 }
 
 .nova-input {
   background: var(--nova-primary-dark);
   border: 1px solid var(--nova-primary-light);
   color: var(--nova-accent);
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 0.25rem;
   transition: all 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .nova-input:focus {
   border-color: var(--nova-secondary);
-  box-shadow: 0 0 0 2px rgba(212, 169, 79, 0.2);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
   outline: none;
+}
+
+.nova-input-premium {
+  background: var(--nova-primary-darkest);
+  border: 1px solid var(--nova-primary-lighter);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .nova-badge {
@@ -218,6 +307,66 @@
 .nova-badge.lose {
   background: #9A2617;
   color: var(--nova-accent);
+}
+
+/* Estilos de botones deshabilitados */
+.nova-button-disabled {
+  background: var(--nova-primary);
+  border: 1px solid var(--nova-primary-light);
+  color: var(--nova-accent-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Estilos adicionales para elementos de juego */
+.nova-game-card {
+  background: var(--nova-primary-dark);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--nova-primary-light);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nova-game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(30, 58, 95, 0.4);
+  border-color: var(--nova-primary-lighter);
+}
+
+.nova-game-card:hover .nova-game-card-title {
+  color: var(--nova-secondary);
+}
+
+.nova-game-card-premium {
+  border: 1px solid var(--nova-secondary);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.nova-game-card-premium:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+.nova-game-card-title {
+  color: var(--nova-accent);
+  font-weight: 700;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.nova-game-card-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--nova-secondary);
+  color: var(--nova-primary-darkest);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Animaciones específicas */
