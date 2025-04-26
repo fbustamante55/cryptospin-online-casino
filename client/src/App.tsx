@@ -51,6 +51,8 @@ function Router() {
       <ProtectedRoute path="/blackjack" component={BlackjackPage} />
       <ProtectedRoute path="/casino/roulette" component={RoulettePage} />
       <ProtectedRoute path="/roulette" component={RoulettePage} />
+      <ProtectedRoute path="/casino/crash" component={CrashPage} />
+      <ProtectedRoute path="/crash" component={CrashPage} />
       <Route path="/test-phone-input">
         <TestPhoneInputPage />
       </Route>
