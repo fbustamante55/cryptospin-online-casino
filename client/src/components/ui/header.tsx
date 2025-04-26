@@ -171,7 +171,7 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
                       {user?.username || 'Usuario'}
                     </div>
                     <div className="flex items-center">
-                      <div className="h-2 w-2 bg-[#09b66d] rounded-full mr-1"></div>
+                      <div className="h-2 w-2 bg-[var(--nova-secondary)] rounded-full mr-1"></div>
                       <span className="text-[10px] text-gray-400">VIP</span>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
                     <div className="flex items-center">
                       <Trophy className="h-4 w-4 mr-2" />
                       <span>Programa VIP</span>
-                      <Badge className="ml-auto bg-[#09b66d] text-[10px]">Nivel 2</Badge>
+                      <Badge className="ml-auto bg-[var(--nova-secondary)] text-[var(--nova-primary-dark)] text-[10px]">Nivel 2</Badge>
                     </div>
                   </Link>
                   
@@ -221,7 +221,7 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
                     <div className="flex items-center">
                       <Gift className="h-4 w-4 mr-2" />
                       <span>Mis Bonos</span>
-                      <Badge className="ml-auto bg-[#f8c541] text-[10px] text-black">2</Badge>
+                      <Badge className="ml-auto bg-[var(--nova-secondary-light)] text-[var(--nova-primary-dark)] text-[10px]">2</Badge>
                     </div>
                   </Link>
                   

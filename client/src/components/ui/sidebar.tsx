@@ -404,7 +404,7 @@ export function Sidebar({ className }: SidebarProps) {
             }
           }}
           whileHover={{ 
-            backgroundColor: "#192531",
+            backgroundColor: "var(--nova-primary)",
             scale: 1.01,
             transition: { duration: 0.2 }
           }}
@@ -412,7 +412,7 @@ export function Sidebar({ className }: SidebarProps) {
           transition={{ duration: 0.2 }}
           animate={
             (item.active || hasActiveChild) 
-              ? { backgroundColor: "#192531" } 
+              ? { backgroundColor: "var(--nova-primary-light)" } 
               : { backgroundColor: "rgba(0,0,0,0)" }
           }
         >
@@ -445,7 +445,7 @@ export function Sidebar({ className }: SidebarProps) {
               {item.badge !== undefined && (
                 <motion.div 
                   className={cn(
-                    "h-5 w-auto min-w-5 px-1 rounded-full bg-[#09b66d] text-white text-xs font-bold flex items-center justify-center",
+                    "h-5 w-auto min-w-5 px-1 rounded-full bg-[var(--nova-secondary)] text-[var(--nova-primary-dark)] text-xs font-bold flex items-center justify-center",
                     nestLevel > 1 && "h-4 min-w-4 text-[10px]"
                   )}
                   whileHover={{ scale: 1.1 }}
@@ -493,7 +493,7 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <motion.div 
       className={cn(
-        "hidden md:flex flex-col bg-[#0e1824] border-r border-[#1c2b3a]",
+        "hidden md:flex flex-col bg-[var(--nova-primary-dark)] border-r border-[var(--nova-primary-light)]",
         className
       )}
       animate={{
@@ -506,7 +506,7 @@ export function Sidebar({ className }: SidebarProps) {
       }}
     >
       {/* Sidebar Header with Logo */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-[#1c2b3a]">
+      <div className="px-4 py-3 flex items-center justify-between border-b border-[var(--nova-primary-light)]">
         <AnimatePresence mode="wait">
           {!sidebarCollapsed ? (
             <motion.div 
@@ -519,19 +519,19 @@ export function Sidebar({ className }: SidebarProps) {
             >
               <div className="flex items-center">
                 <motion.div 
-                  className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center"
-                  whileHover={{ scale: 1.05, backgroundColor: "#0fda85" }}
+                  className="h-8 w-8 rounded-full bg-[var(--nova-secondary)] flex items-center justify-center"
+                  whileHover={{ scale: 1.05, backgroundColor: "var(--nova-secondary-light)" }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <span className="text-white font-bold text-sm">CS</span>
+                  <span className="text-[var(--nova-primary-dark)] font-bold text-sm">NF</span>
                 </motion.div>
                 <motion.span 
-                  className="ml-2 font-bold text-white"
+                  className="ml-2 font-bold bg-gradient-to-r from-[var(--nova-secondary-dark)] to-[var(--nova-secondary-light)] text-transparent bg-clip-text font-['Playfair_Display']"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  CryptoSpin
+                  NOVA FORTUNE
                 </motion.span>
               </div>
               <motion.button 
@@ -558,14 +558,14 @@ export function Sidebar({ className }: SidebarProps) {
             >
               <motion.button
                 onClick={() => setSidebarCollapsed(false)}
-                className="h-8 w-8 rounded-full bg-[#09b66d] flex items-center justify-center"
+                className="h-8 w-8 rounded-full bg-[var(--nova-secondary)] flex items-center justify-center"
                 whileHover={{ 
                   scale: 1.1, 
-                  backgroundColor: "#0fda85"
+                  backgroundColor: "var(--nova-secondary-light)"
                 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <span className="text-white font-bold text-sm">CS</span>
+                <span className="text-[var(--nova-primary-dark)] font-bold text-sm">NF</span>
               </motion.button>
             </motion.div>
           )}
@@ -585,7 +585,7 @@ export function Sidebar({ className }: SidebarProps) {
       <AnimatePresence>
         {!sidebarCollapsed && (
           <motion.div 
-            className="px-3 py-3 mx-2 mb-2 rounded-lg bg-[#192531] border border-[#1c2b3a]"
+            className="px-3 py-3 mx-2 mb-2 rounded-lg bg-[var(--nova-primary)] border border-[var(--nova-primary-light)]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
@@ -643,7 +643,7 @@ export function Sidebar({ className }: SidebarProps) {
       <AnimatePresence>
         {!sidebarCollapsed && (
           <motion.div 
-            className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[#192531] border border-[#1c2b3a]"
+            className="mt-auto px-3 py-3 mx-2 mb-2 rounded-lg bg-[var(--nova-primary)] border border-[var(--nova-primary-light)]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
