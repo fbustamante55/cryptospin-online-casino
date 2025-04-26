@@ -87,8 +87,8 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
       {/* Header - Versión desktop y mobile */}
       <header 
         className={cn(
-          "bg-[#0e1824] border-b border-[#1c2b3a] sticky top-0 z-40 w-full",
-          isScrolled && "shadow-md backdrop-blur-sm bg-[#0e1824]/95",
+          "bg-[var(--nova-primary-dark)] border-b border-[var(--nova-primary-light)] sticky top-0 z-40 w-full",
+          isScrolled && "shadow-md backdrop-blur-sm bg-[var(--nova-primary-dark)]/95",
           className
         )}
       >
@@ -96,7 +96,7 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
         <div className="hidden md:flex items-center justify-between h-16 px-4 max-w-7xl mx-auto">
           <div className="flex items-center">
             <Link href="/" className="flex items-center mr-6">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#09b66d] to-[#f8c541] text-transparent bg-clip-text font-['Montserrat']">CRYPTOSPIN</h1>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--nova-secondary-dark)] to-[var(--nova-secondary-light)] text-transparent bg-clip-text font-['Playfair_Display']">NOVA FORTUNE</h1>
             </Link>
           </div>
           
@@ -264,8 +264,8 @@ export function Header({ className, onMobileMenuToggle, isMobileMenuOpen }: Head
               )}
             </button>
             <Link href="/" className="flex items-center">
-              <h1 className="font-heading font-bold text-xl text-white tracking-wider">
-                <span className="text-[#09b66d]">Crypto</span>Spin
+              <h1 className="font-['Playfair_Display'] font-bold text-xl bg-gradient-to-r from-[var(--nova-secondary-dark)] to-[var(--nova-secondary-light)] text-transparent bg-clip-text">
+                NOVA FORTUNE
               </h1>
             </Link>
           </div>
