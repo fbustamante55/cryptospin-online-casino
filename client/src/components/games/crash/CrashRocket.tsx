@@ -589,7 +589,7 @@ export function CrashRocket() {
                 <Button 
                   variant="outline" 
                   size="icon"
-                  className="h-6 w-6 bg-[#192531] border-[#1c2b3a] hover:bg-[#1c2b3a]"
+                  className="h-6 w-6 bg-[var(--nova-primary)] border-[var(--nova-primary-light)] hover:bg-[var(--nova-primary-light)]"
                   onClick={() => setBetAmount(prev => Math.max(0.5, prev / 2))}
                   disabled={isPlaying && isBetting}
                 >
@@ -598,7 +598,7 @@ export function CrashRocket() {
                 <Button 
                   variant="outline" 
                   size="icon"
-                  className="h-6 w-6 bg-[#192531] border-[#1c2b3a] hover:bg-[#1c2b3a]"
+                  className="h-6 w-6 bg-[var(--nova-primary)] border-[var(--nova-primary-light)] hover:bg-[var(--nova-primary-light)]"
                   onClick={() => setBetAmount(prev => prev * 2)}
                   disabled={isPlaying && isBetting}
                 >
@@ -613,7 +613,7 @@ export function CrashRocket() {
                 type="number"
                 value={betAmount.toString()}
                 onChange={(e) => setBetAmount(parseFloat(e.target.value) || 0)}
-                className="pl-8 bg-[#192531] border-[#1c2b3a]"
+                className="pl-8 bg-[var(--nova-primary)] border-[var(--nova-primary-light)] nova-input"
                 disabled={isPlaying && isBetting}
               />
             </div>
@@ -625,7 +625,7 @@ export function CrashRocket() {
                   variant="outline"
                   size="sm"
                   onClick={() => setBetAmount(amount)}
-                  className="bg-[#192531] border-[#1c2b3a] text-xs hover:bg-[#1c2b3a]"
+                  className="bg-[var(--nova-primary)] border-[var(--nova-primary-light)] text-xs hover:bg-[var(--nova-primary-light)]"
                   disabled={isPlaying && isBetting}
                 >
                   {amount}
@@ -646,7 +646,7 @@ export function CrashRocket() {
                 type="number"
                 value={autoCashoutValue.toString()}
                 onChange={(e) => setAutoCashoutValue(parseFloat(e.target.value) || 1.1)}
-                className="bg-[#192531] border-[#1c2b3a]"
+                className="bg-[var(--nova-primary)] border-[var(--nova-primary-light)] nova-input"
                 disabled={isPlaying && isBetting}
                 step={0.1}
                 min={1.1}
@@ -660,7 +660,7 @@ export function CrashRocket() {
                   variant="outline"
                   size="sm"
                   onClick={() => setAutoCashoutValue(value)}
-                  className="bg-[#192531] border-[#1c2b3a] text-xs hover:bg-[#1c2b3a]"
+                  className="bg-[var(--nova-primary)] border-[var(--nova-primary-light)] text-xs hover:bg-[var(--nova-primary-light)]"
                   disabled={isPlaying && isBetting}
                 >
                   {value}x
@@ -712,7 +712,7 @@ export function CrashRocket() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-[#192531] text-gray-400 w-full p-6 text-xl cursor-not-allowed"
+                    className="bg-[var(--nova-primary)] text-gray-400 w-full p-6 text-xl cursor-not-allowed nova-button-disabled"
                     disabled
                   >
                     {t('crash.inProgress', 'Game in Progress')}
