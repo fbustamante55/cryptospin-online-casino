@@ -492,13 +492,13 @@ export function CrashGame() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
       {/* Panel de historial (barra lateral izquierda) */}
-      <Card className="lg:col-span-1 bg-[#0e1824] border-[#1c2b3a] h-[600px] flex flex-col">
-        <div className="p-3 border-b border-[#1c2b3a] font-bold text-white flex items-center">
-          <TrendingUp className="h-4 w-4 mr-2" />
+      <Card className="lg:col-span-1 bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] h-[600px] flex flex-col nova-panel">
+        <div className="p-3 border-b border-[var(--nova-primary-light)] nova-title flex items-center">
+          <TrendingUp className="h-4 w-4 mr-2 text-[var(--nova-secondary)]" />
           {t('crash.betHistory', 'Bet History')}
         </div>
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-5 p-2 text-xs font-semibold text-gray-400 border-b border-[#1c2b3a]">
+        <div className="flex-1 overflow-y-auto nova-data-table">
+          <div className="grid grid-cols-5 p-2 text-xs font-semibold nova-text-muted border-b border-[var(--nova-primary-light)]">
             <div className="col-span-2">{t('common.player', 'Player')}</div>
             <div>{t('common.bet', 'Bet')}</div>
             <div>{t('crash.mult', 'Mult')}</div>
@@ -508,8 +508,8 @@ export function CrashGame() {
           {betHistory.map((bet, index) => (
             <div 
               key={index} 
-              className={`grid grid-cols-5 p-2 text-xs border-b border-[#1c2b3a] ${
-                bet.cashout ? 'text-[#09b66d]' : 'text-red-500'
+              className={`grid grid-cols-5 p-2 text-xs border-b border-[var(--nova-primary-light)] ${
+                bet.cashout ? 'text-[var(--nova-secondary)]' : 'text-red-500'
               }`}
             >
               <div className="col-span-2 truncate">{bet.username}</div>
@@ -522,13 +522,13 @@ export function CrashGame() {
       </Card>
       
       {/* Panel principal del juego */}
-      <Card className="lg:col-span-4 bg-[#0e1824] border-[#1c2b3a] h-[600px] flex flex-col">
+      <Card className="lg:col-span-4 bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] h-[600px] flex flex-col nova-crash-container">
         {/* Estado del juego */}
-        <div className="p-3 border-b border-[#1c2b3a] flex justify-between items-center">
+        <div className="p-3 border-b border-[var(--nova-primary-light)] flex justify-between items-center nova-crash-header">
           <div className="flex items-center">
             <Badge className={`mr-2 ${
-              gameStatus === 'playing' ? 'bg-[#09b66d]' : 
-              gameStatus === 'crashed' ? 'bg-red-500' : 'bg-amber-500'
+              gameStatus === 'playing' ? 'bg-[var(--nova-secondary)]' : 
+              gameStatus === 'crashed' ? 'bg-red-500' : 'bg-[var(--nova-secondary-dark)]'
             }`}>
               {gameStatus === 'playing' ? t('crash.inProgress', 'In Progress') : 
                gameStatus === 'crashed' ? t('crash.crashed', 'Crashed!') : 
@@ -536,35 +536,35 @@ export function CrashGame() {
             </Badge>
             
             {gameStatus === 'crashed' && (
-              <div className="text-sm text-gray-300">
-                {t('crash.nextRound', 'Next round in')} <span className="font-bold text-white">{nextGameCountdown}s</span>
+              <div className="text-sm nova-text">
+                {t('crash.nextRound', 'Next round in')} <span className="font-bold text-[var(--nova-secondary)]">{nextGameCountdown}s</span>
               </div>
             )}
           </div>
           
           <div className="flex items-center">
-            <Clock className="h-4 w-4 text-gray-400 mr-1" />
-            <span className="text-sm text-gray-300">{t('crash.roundId', 'Round #')}: </span>
-            <span className="text-sm font-bold text-white ml-1">87D39F</span>
+            <Clock className="h-4 w-4 text-[var(--nova-accent-muted)] mr-1" />
+            <span className="text-sm nova-text-muted">{t('crash.roundId', 'Round #')}: </span>
+            <span className="text-sm font-bold text-[var(--nova-secondary)] ml-1">87D39F</span>
           </div>
         </div>
         
         {/* Gráfica del juego */}
-        <div className="flex-1 relative p-4">
+        <div className="flex-1 relative p-4 nova-gradient-background">
           <div 
             ref={chartRef} 
-            className="w-full h-full bg-[#0e1824] rounded-md relative overflow-hidden"
+            className="w-full h-full bg-[var(--nova-primary-dark)] rounded-md relative overflow-hidden border border-[var(--nova-primary-light)]"
           >
             {/* Aquí se dibuja el canvas con la gráfica */}
             {/* Overlay para mostrar multiplicador y botón de cashout durante el juego */}
             {gameStatus === 'playing' && (
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-6xl font-bold text-white mb-6 drop-shadow-lg">
-                  <span className="text-[#09b66d]">{currentMultiplier.toFixed(2)}x</span>
+                <div className={`nova-crash-multiplier ${currentMultiplier > 2 ? 'high nova-glow-text' : ''} mb-6`}>
+                  {currentMultiplier.toFixed(2)}x
                 </div>
                 {isBetting && !hasCashedOut && (
                   <Button 
-                    className="bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 text-xl animate-pulse shadow-lg"
+                    className="nova-cashout-btn"
                     onClick={handleCashout}
                   >
                     {t('crash.cashOut', 'CASH OUT')} ({(betAmount * currentMultiplier).toFixed(2)})
@@ -575,7 +575,7 @@ export function CrashGame() {
             
             {gameStatus === 'crashed' && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-4xl font-bold text-red-500 animate-pulse">
+                <div className="text-4xl font-bold text-red-500 animate-pulse bg-[var(--nova-primary-dark)]/80 px-8 py-4 rounded-lg border border-red-500/30 shadow-lg">
                   {t('crash.crashed', '¡MERCADO COLAPSADO!')} {crashPoint.toFixed(2)}x
                 </div>
               </div>
@@ -584,16 +584,16 @@ export function CrashGame() {
         </div>
         
         {/* Panel de control */}
-        <div className="p-4 border-t border-[#1c2b3a] grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 border-t border-[var(--nova-primary-light)] grid grid-cols-1 md:grid-cols-3 gap-4 bg-[var(--nova-primary)]">
           {/* Formulario de apuesta */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-300">{t('common.betAmount', 'Bet Amount')}</label>
+              <label className="text-sm nova-text">{t('common.betAmount', 'Bet Amount')}</label>
               <div className="flex space-x-1">
                 <Button 
                   variant="outline" 
                   size="icon"
-                  className="h-6 w-6 bg-[#192531] border-[#1c2b3a] hover:bg-[#1c2b3a]"
+                  className="h-6 w-6 bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] hover:bg-[var(--nova-primary-light)]"
                   onClick={() => setBetAmount(prev => Math.max(0.5, prev / 2))}
                   disabled={isPlaying && isBetting}
                 >
@@ -602,7 +602,7 @@ export function CrashGame() {
                 <Button 
                   variant="outline" 
                   size="icon"
-                  className="h-6 w-6 bg-[#192531] border-[#1c2b3a] hover:bg-[#1c2b3a]"
+                  className="h-6 w-6 bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] hover:bg-[var(--nova-primary-light)]"
                   onClick={() => setBetAmount(prev => prev * 2)}
                   disabled={isPlaying && isBetting}
                 >
@@ -612,12 +612,12 @@ export function CrashGame() {
             </div>
             
             <div className="relative">
-              <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--nova-secondary)]" />
               <Input 
                 type="number"
                 value={betAmount.toString()}
                 onChange={(e) => setBetAmount(parseFloat(e.target.value) || 0)}
-                className="pl-8 bg-[#192531] border-[#1c2b3a]"
+                className="pl-8 nova-input"
                 disabled={isPlaying && isBetting}
               />
             </div>
@@ -629,7 +629,7 @@ export function CrashGame() {
                   variant="outline"
                   size="sm"
                   onClick={() => setBetAmount(amount)}
-                  className="bg-[#192531] border-[#1c2b3a] text-xs hover:bg-[#1c2b3a]"
+                  className="bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] text-xs hover:bg-[var(--nova-primary-light)]"
                   disabled={isPlaying && isBetting}
                 >
                   {amount}
@@ -641,8 +641,8 @@ export function CrashGame() {
           {/* Configuración de auto-cashout */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-300">{t('crash.autoCashout', 'Auto Cashout')}</label>
-              <div className="text-sm font-bold text-white">{autoCashoutValue.toFixed(2)}x</div>
+              <label className="text-sm nova-text">{t('crash.autoCashout', 'Auto Cashout')}</label>
+              <div className="text-sm font-bold text-[var(--nova-secondary)]">{autoCashoutValue.toFixed(2)}x</div>
             </div>
             
             <Slider 
@@ -662,7 +662,7 @@ export function CrashGame() {
                   variant="outline"
                   size="sm"
                   onClick={() => setAutoCashoutValue(value)}
-                  className="bg-[#192531] border-[#1c2b3a] text-xs hover:bg-[#1c2b3a]"
+                  className="bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] text-xs hover:bg-[var(--nova-primary-light)]"
                   disabled={isPlaying && isBetting}
                 >
                   {value}x
@@ -682,7 +682,7 @@ export function CrashGame() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold w-full p-6 text-xl"
+                    className="nova-button-secondary font-bold w-full p-6 text-xl"
                     onClick={placeBet}
                   >
                     {t('common.placeBet', 'Place Bet')}
@@ -698,7 +698,7 @@ export function CrashGame() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-amber-500 hover:bg-amber-400 text-white font-bold w-full p-6 text-xl"
+                    className="nova-cashout-btn font-bold w-full p-6 text-xl"
                     onClick={handleCashout}
                   >
                     {t('crash.cashOut', 'CASH OUT')} ({(betAmount * currentMultiplier).toFixed(2)})
@@ -714,7 +714,7 @@ export function CrashGame() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-[#192531] text-gray-400 w-full p-6 text-xl cursor-not-allowed"
+                    className="bg-[var(--nova-primary-dark)] text-[var(--nova-accent-muted)] w-full p-6 text-xl cursor-not-allowed"
                     disabled
                   >
                     {t('crash.inProgress', 'Game in Progress')}
@@ -730,7 +730,7 @@ export function CrashGame() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-[#192531] text-gray-400 w-full p-6 text-xl cursor-not-allowed"
+                    className="bg-[var(--nova-primary-dark)] text-[var(--nova-accent-muted)] w-full p-6 text-xl cursor-not-allowed"
                     disabled
                   >
                     {t('crash.waiting', 'Waiting for next round...')}
@@ -741,16 +741,16 @@ export function CrashGame() {
             
             {hasCashedOut && (
               <div className="mt-3 text-center">
-                <span className="text-sm text-gray-400">{t('crash.cashedOut', 'Cashed out at')}: </span>
-                <span className="font-bold text-[#09b66d]">{currentMultiplier.toFixed(2)}x</span>
-                <span className="text-[#09b66d]"> (+{(betAmount * currentMultiplier - betAmount).toFixed(2)})</span>
+                <span className="text-sm nova-text-muted">{t('crash.cashedOut', 'Cashed out at')}: </span>
+                <span className="font-bold text-[var(--nova-secondary)]">{currentMultiplier.toFixed(2)}x</span>
+                <span className="text-[var(--nova-secondary)]"> (+{(betAmount * currentMultiplier - betAmount).toFixed(2)})</span>
               </div>
             )}
             
-            <div className="mt-auto pt-3 text-center text-sm text-gray-400">
+            <div className="mt-auto pt-3 text-center text-sm nova-text-muted">
               {user ? (
                 <span>
-                  {t('common.balance', 'Balance')}: <span className="font-bold text-white">{user.balance.toFixed(2)}</span>
+                  {t('common.balance', 'Balance')}: <span className="font-bold text-[var(--nova-secondary)]">{user.balance.toFixed(2)}</span>
                 </span>
               ) : (
                 <span>{t('common.loginToPlay', 'Login to play')}</span>
