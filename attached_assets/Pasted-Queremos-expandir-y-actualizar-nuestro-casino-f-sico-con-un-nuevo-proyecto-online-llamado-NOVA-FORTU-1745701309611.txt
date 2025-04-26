@@ -1,0 +1,129 @@
+Queremos expandir y actualizar nuestro casino físico con un nuevo proyecto online llamado NOVA FORTUNE: un nombre corto, impactante y fácil de recordar, relacionado con "nuevas oportunidades" (Nova = nueva estrella) y "fortuna" (Fortune = suerte, riqueza). Este branding reforzará nuestra identidad premium y moderna, con colores dominantes azul profundo, dorado suave y acentos en blanco, siguiendo un estilo elegante, sofisticado y adaptado a un público internacional.
+
+La plataforma online debe desarrollarse utilizando tecnologías modernas:
+
+Frontend: Next.js
+
+Backend: Node.js con Express.js
+
+Base de datos: PostgreSQL utilizando Prisma ORM para gestión de datos
+
+Web3.js o Ethers.js: para depósitos y retiros en criptomonedas
+
+El sistema debe ser completamente responsive, pensado tanto para desktop como para mobile.
+
+Estructura del proyecto:
+/frontend: Sitio web público y de usuarios con páginas como Home, Login, Registro, Dashboard, Depósitos y Retiros.
+
+/backend: APIs REST para gestión de usuarios, billeteras, transacciones, validaciones KYC, integración de juegos y apuestas deportivas.
+
+/database/prisma: Definición de schema.prisma y migraciones de base de datos.
+
+Funcionalidades esenciales:
+Sistema de registro/login con KYC obligatorio (captura de nombre, apellidos, fecha de nacimiento, nacionalidad, dirección, teléfono, correo electrónico, documentos de identidad/selfie).
+
+Login seguro mediante tokens JWT.
+
+Usuarios con KYC aprobado podrán depositar, jugar y retirar fondos.
+
+Billetera multicripto por usuario: soporte para balances en BTC, ETH, USDT (ERC-20/TRC-20) y LTC.
+
+Generación de direcciones únicas de depósito por cripto.
+
+Detección automática de depósitos vía blockchain.
+
+Procesamiento manual o automático de retiros, aplicando comisiones configurables.
+
+Integraciones requeridas:
+APIs de FrontOffice CMS (registro, login, KYC) y iGaming Platform API (juegos de casino y apuestas deportivas).
+
+Preparado para integrar procesadores de pagos cripto como NOWPayments o Binance Pay.
+
+Paneles y vistas:
+Admin Panel:
+
+Gestionar usuarios registrados
+
+Aprobar/rechazar KYC
+
+Ver y gestionar balances
+
+Revisar historial de transacciones
+
+Suspender usuarios
+
+Administrar catálogos de juegos y proveedores
+
+User Dashboard:
+
+Mostrar balances por cripto
+
+Historial de movimientos
+
+Sección de carga KYC
+
+Formularios para depósitos y retiros
+
+Diseño visual:
+60% tonos primarios (azules)
+
+30% tonos secundarios/acento (dorado)
+
+10% highlights (blancos)
+
+Estilo limpio, premium y adaptativo. Tiles diferenciados para casino y sportsbook.
+
+Seguridad:
+Captcha en login y registro
+
+Cifrado de contraseñas (bcrypt o Argon2)
+
+Manejo seguro de sesiones JWT
+
+Cumplimiento de GDPR
+
+Validaciones antifraude básicas en patrones de depósitos y retiros
+
+Modelos principales en la base de datos (Prisma):
+User
+
+Wallet
+
+Transaction
+
+KycRequest
+
+Con enumeraciones:
+
+Estados de KYC: PENDING, APPROVED, REJECTED
+
+Tipos de transacción: DEPOSIT, WITHDRAWAL, BET, WIN
+
+Status de transacción: PENDING, SUCCESS, FAILED
+
+Criptomonedas: BTC, ETH, USDT_ERC20, USDT_TRC20, LTC
+
+Arquitectura general:
+scss
+Copy
+Edit
+Usuario ➔ Frontend (Next.js) ➔ Backend (Express.js) ➔ Base de Datos (PostgreSQL)
+Detección automática de depósitos cripto vía blockchain.
+
+Backend conectado a APIs de CMS y plataformas de juegos/apuestas.
+
+Despliegue y escalabilidad:
+Frontend optimizado para Vercel
+
+Backend desplegado en Railway o AWS EC2
+
+Base de datos en Railway o AWS RDS
+
+Preparado para:
+
+Escalabilidad horizontal (microservicios en el futuro)
+
+Multi-idioma (inglés y español inicialmente)
+
+Integración futura de más criptos, programas de referidos, torneos y sistemas VIP
+
