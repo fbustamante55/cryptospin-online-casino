@@ -28,6 +28,7 @@ import EventDetailPage from "@/pages/event-detail-page";
 import VIPPage from "@/pages/vip-page";
 import BlackjackPage from "@/pages/blackjack-page";
 import RoulettePage from "@/pages/roulette-page";
+import { CrashPage } from "@/pages/CrashPage";
 
 function Router() {
   return (
