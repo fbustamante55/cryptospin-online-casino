@@ -728,7 +728,7 @@ export function CrashRocket() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-[#192531] text-gray-400 w-full p-6 text-xl cursor-not-allowed"
+                    className="bg-[var(--nova-primary)] text-gray-400 w-full p-6 text-xl cursor-not-allowed nova-button-disabled"
                     disabled
                   >
                     {t('crash.waiting', 'Waiting for next round...')}
@@ -740,8 +740,8 @@ export function CrashRocket() {
             {hasCashedOut && (
               <div className="mt-3 text-center">
                 <span className="text-sm text-gray-400">{t('crash.cashedOut', 'Cashed out at')}: </span>
-                <span className="font-bold text-[#09b66d]">{currentMultiplier.toFixed(2)}x</span>
-                <span className="text-[#09b66d]"> (+{(betAmount * currentMultiplier - betAmount).toFixed(2)})</span>
+                <span className="font-bold text-[var(--nova-secondary)]">{currentMultiplier.toFixed(2)}x</span>
+                <span className="text-[var(--nova-secondary)]"> (+{(betAmount * currentMultiplier - betAmount).toFixed(2)})</span>
               </div>
             )}
             
