@@ -126,10 +126,12 @@ export function CrashRocket() {
       const fireIntensity = Math.min(120, baseFireHeight + fireFluctuation);
       rocketRef.current.style.setProperty('--fire-height', `${fireIntensity}px`);
       
-      // Cambiar color del fuego a más intenso según el multiplicador
-      const fireHue = Math.max(0, 30 - newMultiplier * 2); // De naranja a rojo
-      const fireSaturation = Math.min(100, 80 + newMultiplier * 2); // Aumentar saturación
-      rocketRef.current.style.setProperty('--fire-color', `hsl(${fireHue}, ${fireSaturation}%, 50%)`);
+      // Cambiar color del fuego a dorado NOVA FORTUNE según el multiplicador
+      // Usando tonalidades doradas con valores crecientes 
+      const baseHue = 45; // Dorado NOVA FORTUNE base
+      const fireHue = Math.max(35, baseHue - newMultiplier * 2); // De dorado a más naranja rojizo
+      const fireSaturation = Math.min(100, 85 + newMultiplier * 1.5); // Aumentar saturación
+      rocketRef.current.style.setProperty('--fire-color', `hsl(${fireHue}, ${fireSaturation}%, 55%)`);
       
       // Añadir efecto de estela
       const trailOpacity = Math.min(0.7, 0.2 + (newMultiplier - 1) * 0.05);
@@ -480,9 +482,9 @@ export function CrashRocket() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Panel principal del juego */}
-      <Card className="lg:col-span-2 bg-[#0e1824] border-[#1c2b3a] h-[600px] flex flex-col">
+      <Card className="lg:col-span-2 bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] h-[600px] flex flex-col">
         {/* Estado del juego */}
-        <div className="p-3 border-b border-[#1c2b3a] flex justify-between items-center">
+        <div className="p-3 border-b border-[var(--nova-primary-light)] flex justify-between items-center">
           <div className="flex items-center">
             <Badge className={`mr-2 ${
               gameStatus === 'playing' ? 'bg-[#09b66d]' : 
@@ -678,7 +680,7 @@ export function CrashRocket() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-[#09b66d] hover:bg-[#0fda85] text-white font-bold w-full p-6 text-xl"
+                    className="nova-button-secondary font-bold w-full p-6 text-xl"
                     onClick={placeBet}
                   >
                     {t('common.placeBet', 'Place Bet')}
@@ -694,7 +696,7 @@ export function CrashRocket() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Button 
-                    className="bg-amber-500 hover:bg-amber-400 text-white font-bold w-full p-6 text-xl"
+                    className="nova-cashout-btn font-bold w-full p-6 text-xl"
                     onClick={handleCashout}
                   >
                     {t('crash.cashOut', 'CASH OUT')} ({(betAmount * currentMultiplier).toFixed(2)})
@@ -757,10 +759,10 @@ export function CrashRocket() {
       </Card>
       
       {/* Panel lateral (jugadores y estadísticas) */}
-      <Card className="lg:col-span-1 bg-[#0e1824] border-[#1c2b3a] h-[600px] flex flex-col">
+      <Card className="lg:col-span-1 bg-[var(--nova-primary-dark)] border-[var(--nova-primary-light)] h-[600px] flex flex-col nova-panel">
         {/* Pestañas de jugadores */}
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="w-full bg-[#0e1824] border-b border-[#1c2b3a] rounded-t-lg rounded-b-none h-auto py-2 px-4 grid grid-cols-2 gap-2">
+          <TabsList className="w-full bg-[var(--nova-primary-dark)] border-b border-[var(--nova-primary-light)] rounded-t-lg rounded-b-none h-auto py-2 px-4 grid grid-cols-2 gap-2">
             <TabsTrigger 
               value="all" 
               onClick={() => setActiveTab("all")}
