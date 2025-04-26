@@ -134,15 +134,16 @@ export function CrashRocket() {
 
   // Función para comenzar el juego
   const startGame = () => {
+    // Establecer estado de espera para apuestas
+    setGameStatus('waiting');
+    setCurrentMultiplier(1);
+    setHasCashedOut(false);
+    setIsPlaying(false);
+    setNextGameCountdown(7); // 7 segundos de espera para apuestas
+    
     // Generar un nuevo punto de crash
     const newCrashPoint = generateCrashPoint();
     setCrashPoint(newCrashPoint);
-    
-    setGameStatus('playing');
-    setCurrentMultiplier(1);
-    setHasCashedOut(false);
-    setIsPlaying(true);
-    startTimeRef.current = null;
     
     // Regenerar jugadores artificiales
     setActiveBets(prevBets => {
@@ -159,8 +160,29 @@ export function CrashRocket() {
       return playerBet ? [...newArtificialPlayers, playerBet] : newArtificialPlayers;
     });
     
-    // Iniciar la animación
-    animationRef.current = requestAnimationFrame(animateRocket);
+    // Iniciar cuenta regresiva para apuestas
+    let countdown = 7;
+    
+    const countdownTimer = setInterval(() => {
+      countdown -= 1;
+      setNextGameCountdown(countdown);
+      
+      if (countdown <= 0) {
+        clearInterval(countdownTimer);
+        // Iniciar el juego después de la cuenta regresiva
+        setGameStatus('playing');
+        setIsPlaying(true);
+        startTimeRef.current = null;
+        
+        // Si el cohete tiene la clase explode, quitársela
+        if (rocketRef.current) {
+          rocketRef.current.classList.remove('explode');
+        }
+        
+        // Iniciar la animación
+        animationRef.current = requestAnimationFrame(animateRocket);
+      }
+    }, 1000);
   };
 
   // Función para cuando el juego crashea

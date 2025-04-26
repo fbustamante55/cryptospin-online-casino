@@ -82,7 +82,7 @@ export function CrashGame() {
     }
   }, []);
 
-  // Función para dibujar la curva de multiplicador
+  // Función para dibujar la curva de multiplicador con animación mejorada
   const drawCurve = (ctx: CanvasRenderingContext2D, multiplier: number) => {
     if (!chartRef.current || !canvasRef.current) return;
 
@@ -92,7 +92,26 @@ export function CrashGame() {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Dibujar ejes
+    // Dibujar cuadrícula de fondo
+    const gridSize = 30;
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(28, 43, 58, 0.3)';
+    ctx.lineWidth = 1;
+
+    // Líneas horizontales
+    for (let y = height - padding; y >= padding; y -= gridSize) {
+      ctx.moveTo(padding, y);
+      ctx.lineTo(width - padding, y);
+    }
+
+    // Líneas verticales
+    for (let x = padding; x <= width - padding; x += gridSize) {
+      ctx.moveTo(x, padding);
+      ctx.lineTo(x, height - padding);
+    }
+    ctx.stroke();
+
+    // Dibujar ejes principales
     ctx.beginPath();
     ctx.strokeStyle = '#1c2b3a';
     ctx.lineWidth = 2;
@@ -105,7 +124,7 @@ export function CrashGame() {
     ctx.lineTo(padding, padding);
     ctx.stroke();
 
-    // Dibujar curva
+    // Dibujar curva con animación mejorada
     const startX = padding;
     const endX = width - padding;
     const startY = height - padding;
@@ -113,14 +132,15 @@ export function CrashGame() {
 
     // Cálculo para la curva exponencial
     const points = [];
-    const numPoints = 100;
+    const numPoints = 150; // Más puntos para una curva más suave
     
     for (let i = 0; i < numPoints; i++) {
       const t = i / (numPoints - 1);
       const x = startX + t * (endX - startX);
       
-      // Cálculo de la curva que va desde 1 hasta el multiplicador actual
-      const valueAtPoint = 1 + t * (multiplier - 1);
+      // Curva exponencial más natural para el multiplicador
+      const valueAtPoint = Math.pow(Math.E, t * Math.log(multiplier));
+      
       // Transformar valor a coordenada Y (invertida en canvas)
       const normalizedY = (valueAtPoint - 1) / (multiplier - 1 || 1);
       const y = startY - normalizedY * (startY - maxY);
@@ -128,38 +148,108 @@ export function CrashGame() {
       points.push({ x, y });
     }
 
-    // Dibujar la línea
+    // Dibujar sombra para la línea
+    ctx.shadowColor = 'rgba(9, 182, 109, 0.5)';
+    ctx.shadowBlur = 10;
+    
+    // Dibujar la línea con degradado
+    const lineGradient = ctx.createLinearGradient(startX, startY, endX, maxY);
+    lineGradient.addColorStop(0, '#09b66d');
+    lineGradient.addColorStop(1, '#10e88a');
+    
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
-    ctx.strokeStyle = '#09b66d';
+    ctx.strokeStyle = lineGradient;
     ctx.lineWidth = 3;
     
     for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
+      // Utilizar una curva bezier para suavizar la línea
+      if (i < points.length - 1) {
+        const xc = (points[i].x + points[i + 1].x) / 2;
+        const yc = (points[i].y + points[i + 1].y) / 2;
+        ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+      } else {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
     }
     
     ctx.stroke();
+    ctx.shadowBlur = 0; // Restablecer sombra
 
-    // Dibujar el área bajo la curva
+    // Dibujar el área bajo la curva con degradado más atractivo
     ctx.beginPath();
     ctx.moveTo(points[0].x, startY);
-    for (let i = 0; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
+    ctx.lineTo(points[0].x, points[0].y);
+    
+    for (let i = 1; i < points.length; i++) {
+      if (i < points.length - 1) {
+        const xc = (points[i].x + points[i + 1].x) / 2;
+        const yc = (points[i].y + points[i + 1].y) / 2;
+        ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+      } else {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
     }
+    
     ctx.lineTo(points[points.length - 1].x, startY);
     ctx.closePath();
     
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, 'rgba(9, 182, 109, 0.3)');
-    gradient.addColorStop(1, 'rgba(9, 182, 109, 0.05)');
-    ctx.fillStyle = gradient;
+    const areaGradient = ctx.createLinearGradient(0, 0, 0, height);
+    areaGradient.addColorStop(0, 'rgba(9, 182, 109, 0.4)');
+    areaGradient.addColorStop(0.5, 'rgba(9, 182, 109, 0.1)');
+    areaGradient.addColorStop(1, 'rgba(9, 182, 109, 0.02)');
+    ctx.fillStyle = areaGradient;
     ctx.fill();
 
-    // Dibujar el valor actual
-    ctx.font = 'bold 28px Arial';
+    // Marcar el punto actual con un círculo pulsante
+    const currentPoint = points[points.length - 1];
+    
+    // Efecto de resplandor
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(9, 182, 109, 0.3)';
+    ctx.arc(currentPoint.x, currentPoint.y, 10, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Punto principal
+    ctx.beginPath();
+    ctx.fillStyle = '#09b66d';
+    ctx.arc(currentPoint.x, currentPoint.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dibujar el valor actual con estilo mejorado
+    ctx.font = 'bold 42px Arial';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 10;
     ctx.fillText(`${multiplier.toFixed(2)}x`, width / 2, height / 2);
+    
+    // Agregar texto descriptivo
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#8a8f98';
+    ctx.shadowBlur = 0;
+    ctx.fillText(gameStatus === 'waiting' ? 'Esperando apuestas...' : 'Multiplicador Actual', width / 2, height / 2 + 30);
+    
+    // Dibujar marcadores en el eje Y
+    ctx.font = '10px Arial';
+    ctx.fillStyle = '#8a8f98';
+    ctx.textAlign = 'right';
+    
+    const yMarkers = [1, 1.5, 2, 3, 5, 10];
+    for (const markerValue of yMarkers) {
+      if (markerValue <= multiplier) {
+        const normalizedY = (markerValue - 1) / (multiplier - 1 || 1);
+        const y = startY - normalizedY * (startY - maxY);
+        
+        ctx.beginPath();
+        ctx.moveTo(padding - 5, y);
+        ctx.lineTo(padding, y);
+        ctx.stroke();
+        
+        ctx.fillText(`${markerValue}x`, padding - 8, y + 4);
+      }
+    }
   };
 
   // Función para animar el multiplicador
@@ -200,18 +290,35 @@ export function CrashGame() {
 
   // Función para comenzar el juego
   const startGame = () => {
+    // Establecer estado de espera para apuestas
+    setGameStatus('waiting');
+    setCurrentMultiplier(1);
+    setHasCashedOut(false);
+    setIsPlaying(false);
+    setNextGameCountdown(7); // 7 segundos de espera para apuestas
+    
     // Generar un nuevo punto de crash
     const newCrashPoint = generateCrashPoint();
     setCrashPoint(newCrashPoint);
     
-    setGameStatus('playing');
-    setCurrentMultiplier(1);
-    setHasCashedOut(false);
-    setIsPlaying(true);
-    startTimeRef.current = null;
+    // Iniciar cuenta regresiva para apuestas
+    let countdown = 7;
     
-    // Iniciar la animación
-    animationRef.current = requestAnimationFrame(animateMultiplier);
+    const countdownTimer = setInterval(() => {
+      countdown -= 1;
+      setNextGameCountdown(countdown);
+      
+      if (countdown <= 0) {
+        clearInterval(countdownTimer);
+        // Iniciar el juego después de la cuenta regresiva
+        setGameStatus('playing');
+        setIsPlaying(true);
+        startTimeRef.current = null;
+        
+        // Iniciar la animación
+        animationRef.current = requestAnimationFrame(animateMultiplier);
+      }
+    }, 1000);
   };
 
   // Función para cuando el juego crashea
